@@ -235,7 +235,7 @@ async function seed() {
   await db.insert(childDetails).values({ assetId: a.childA, nickname: 'n' })
   a.insB = await mk(g.L, { type: 'insurance', name: `${T} B policy` })
   await db.insert(insuranceDetails).values({
-    assetId: a.insB, insuredType: 'user', insuredUserId: u.B, insuredChildId: a.childA, policyNumber: 'PN-B',
+    currency: 'twd', assetId: a.insB, insuredType: 'user', insuredUserId: u.B, insuredChildId: a.childA, policyNumber: 'PN-B',
   })
 
   // Ledger M for case 6: X (member_a) + Y; X's car, Y's house, crossing records.
@@ -403,7 +403,7 @@ describe.skipIf(!isLocalDb)('#1484 — frozen copies resolve only for members at
       tx.txC = await cashTx(g.L, u.C, a.kL, { fuelLogId: f.flL })
       const [ins] = await db.insert(assets).values({ groupId: g.L, type: 'insurance', name: `${T} C policy` })
         .returning({ id: assets.id })
-      await db.insert(insuranceDetails).values({ assetId: ins.id, insuredType: 'user', insuredUserId: u.C, vehicleId: a.kL, policyNumber: 'PN-C' })
+      await db.insert(insuranceDetails).values({ currency: 'twd', assetId: ins.id, insuredType: 'user', insuredUserId: u.C, vehicleId: a.kL, policyNumber: 'PN-C' })
       g.NC = await leaveAs(u.C)
       const kC = await copyIn(g.NC, `${T} B car`)
       a.kC = kC.id

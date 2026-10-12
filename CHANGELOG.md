@@ -47,6 +47,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：以前分享的 `?lang=ja` 這類連結會直接打開日文／英文／簡中頁，不再顯示繁中。
   技術：`proxy.ts` 對公開語系頁的合法 `lang` 參數做 308 轉址到語系前綴網址，其他 query 保留。
 
+### 技術變更
+
+- **保單幣別欄位改為必填（#1607）**
+  使用者：沒有可見變化。
+  技術：`0092` 補完空值後把 `InsuranceDetails.currency` 設為 NOT NULL；`0085` 之後的寫入端本來就都會帶幣別，prod 空值為 0。
+
 ## [1.7.2] - 2026-10-12
 
 主題：**Android 測試．一條連結就能加入**——封閉測試從「填表、等人工加進名單」改成加入 Google 群組後自己就能安裝；Android App 內多了回饋入口，出遊分享頁與設定也多了邀請測試者的入口。
