@@ -41,6 +41,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+### 使用者可見變化
+
+- **舊的語言連結會打開對應語言（#1675）**
+  使用者：以前分享的 `?lang=ja` 這類連結會直接打開日文／英文／簡中頁，不再顯示繁中。
+  技術：`proxy.ts` 對公開語系頁的合法 `lang` 參數做 308 轉址到語系前綴網址，其他 query 保留。
+
 ### 技術變更
 
 - **保單幣別欄位改為必填（#1607）**

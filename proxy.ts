@@ -9,6 +9,7 @@ import {
 } from './lib/i18n/locales-meta'
 import {
   parseLocaleFromPath,
+  stripLocaleFromPath,
   isPublicLocalizedPath,
   isLocalePrefixedPath,
   isOutingPublicPath,
@@ -119,6 +120,20 @@ export async function proxy(request: NextRequest) {
   // proxy 不動 cookie，沿用既有 cookie-based locale。
   let needsRewrite = false
   if (isPublicLocalizedPath(pathname)) {
+    // #1675: legacy `?lang=<locale>` links (from before URL-prefix i18n) → 308 to
+    // the prefixed URL. Google lists them as alternates of `/`, and visitors with
+    // old links saw zh-TW. Only valid locales and only public localized paths:
+    // failure is silent (old-link visitors keep seeing zh-TW, or a too-broad
+    // rule rewrites dashboard URLs). The target never carries `lang`, so no loop;
+    // it is built from request.nextUrl, so the host never comes from user input.
+    const legacyLang = request.nextUrl.searchParams.get('lang')
+    if (isLocale(legacyLang)) {
+      const target = request.nextUrl.clone()
+      target.pathname = localizedHref(stripLocaleFromPath(pathname), legacyLang)
+      target.searchParams.delete('lang')
+      return NextResponse.redirect(target, 308)
+    }
+
     const effectiveLocale: Locale = urlLocale ?? DEFAULT_LOCALE
 
     request.cookies.set(LOCALE_COOKIE, effectiveLocale)
