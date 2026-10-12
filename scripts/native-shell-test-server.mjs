@@ -28,12 +28,16 @@
 //   /?go=reload&after=3                  location.reload()
 //   /?go=replace:/dashboard&after=3      location.replace('/dashboard')
 //   /?go=replace:/offsite&after=3        (offorigin mode)
+//   /__mode?m=normal&rootgo=reload&rootafter=3   the NEXT `/` served auto-runs the action once (no taps needed)
 // Start the app on `/` (it loads server.url), then use the on-page links or a `go` URL; the server
 // log prints request and close timestamps, which is what the acceptance cases compare against.
 import http from 'node:http'
 
 const port = Number(process.argv[2] || process.env.PORT || 3999)
 let mode = process.env.MODE || 'normal'
+// One-shot auto-navigation for the next `/` served (set via /__mode?rootgo=&rootafter=), so a simulator
+// with no tap tool can still trigger an in-app reload/replace. Cleared after one use, so reload can't loop.
+let rootGo = null
 const offTarget = process.env.OFFORIGIN_TARGET || 'https://example.com/'
 const t0 = Date.now()
 const ts = () => String(Date.now() - t0).padStart(7, ' ')
@@ -76,6 +80,10 @@ const server = http.createServer((req, res) => {
       log(`MODE SWITCH ${mode} -> ${m}`)
       mode = m
     }
+    if (q.get('rootgo')) {
+      rootGo = { go: q.get('rootgo'), after: q.get('rootafter') || '3' }
+      log(`ROOT GO armed: ${rootGo.go} after ${rootGo.after}s (one-shot)`)
+    }
     return sendHtml(res, `mode=${mode}\n`)
   }
   if (path === '/favicon.ico') {
@@ -88,7 +96,17 @@ const server = http.createServer((req, res) => {
   const title = path === '/' ? 'Home' : path
   const delayMatch = /^delay(\d+)$/.exec(mode)
   const fastrootMatch = /^fastroot(\d*)$/.exec(mode)
-  const html = (t = title, extra, head) => page(t, extra, head, q)
+  let pq = q
+  // The Android shell can fetch `/` more than once at launch, so the armed action applies to every `/`
+  // served within 2 s of its first use; the auto-navigation itself fires later (rootafter), outside the window.
+  if (path === '/' && !q.get('go') && rootGo) {
+    if (!rootGo.until) rootGo.until = Date.now() + 2000
+    if (Date.now() <= rootGo.until) {
+      pq = new URLSearchParams({ go: rootGo.go, after: rootGo.after })
+      log(`ROOT GO used: ${rootGo.go}`)
+    } else rootGo = null
+  }
+  const html = (t = title, extra, head) => page(t, extra, head, pq)
   const rootBounce = `<!doctype html><html><head><meta charset="utf-8"></head><body>redirecting<script>location.replace('/dashboard')</script></body></html>`
 
   switch (true) {
