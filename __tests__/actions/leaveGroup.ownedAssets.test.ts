@@ -237,7 +237,7 @@ describe.skipIf(!isLocalDb)('leaveGroup — leaver with owned 愛物 (#1440)', (
     }).returning({ id: assets.id })
     refs.assetIds.push(insurance.id)
     await db.insert(insuranceDetails).values({
-      assetId: insurance.id, insuredType: 'user', insuredUserId: refs.userBId,
+      currency: 'twd', assetId: insurance.id, insuredType: 'user', insuredUserId: refs.userBId,
     })
 
     // An asset that stays with member A (not in movingAssetIds).
