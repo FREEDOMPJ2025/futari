@@ -41,6 +41,8 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+#1675、#1607 已於 2026-10-12 隨 v1.7.2 的部署提前上線。
+
 ### 使用者可見變化
 
 - **App 沒網路或網路卡住時，幾秒內就會看到離線畫面（#1672）**
