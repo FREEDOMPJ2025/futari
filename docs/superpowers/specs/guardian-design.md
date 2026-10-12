@@ -12,7 +12,7 @@ related_issues: ["#220", "#221", "#227", "#236"]
 
 > 把 v0.15.2 內嵌在愛物頁的「守護 tab」碎片整合成完整模組概念，接 beta gate，預備付費層 cut-over。
 > 範圍：`canAccessGuardian()` 單一閘門 + per-group beta toggle + 各前後端 surface 的 guard + GatedView 替代 silent redirect。
-> 不在範圍：實際付費層／訂閱 entitlement（v3.0.0+）；其他守護產品線（健康提醒、保單到期通知等）— 目前 Guardian = 保險。
+> 不在範圍：實際付費層／訂閱 entitlement（v4.0.0+）；其他守護產品線（健康提醒、保單到期通知等）— 目前 Guardian = 保險。
 
 ---
 
@@ -34,7 +34,7 @@ v0.15.2 的 tab 切分驗證了「保險不該跟車房子女平起平坐」這�
 兩個並存的需求：
 
 1. **朋友圈試用要繼續**：v0.15.x 期間幾個朋友已經用保險功能在追自己的儲蓄險，不能因為「將來要收費」就把他們鎖在外面。
-2. **付費層上線要乾淨**：v3.0.0 訂閱層上線時，gate 邏輯應該是 `hasSubscription || isBetaGrandfathered`，不是又補 N 條 `if (asset.type === 'insurance' && ...)` 散在每個 surface。
+2. **付費層上線要乾淨**：v4.0.0 訂閱層上線時，gate 邏輯應該是 `hasSubscription || isBetaGrandfathered`，不是又補 N 條 `if (asset.type === 'insurance' && ...)` 散在每個 surface。
 
 → Per-group beta flag + 單一 helper：今天 `return group.guardianBetaEnabled`；訂閱層上線時改成 `return hasSubscription(group) || group.guardianBetaEnabled`，一檔案搞定。
 
@@ -61,7 +61,7 @@ canAccessGuardian(group: { guardianBetaEnabled: boolean }): boolean
 未來 cut-over：
 
 ```ts
-// v3.0.0+
+// v4.0.0+
 return hasSubscription(group) || group.guardianBetaEnabled
 ```
 
@@ -143,6 +143,6 @@ v0.16.1 #236 把保險從 TypePicker 完全移除，並在守護 tab FAB 開啟 
 
 ## 後續
 
-- **付費層 cut-over（v3.0.0+）**：把 `canAccessGuardian()` 內部改成 `hasSubscription(group) || group.guardianBetaEnabled`，beta-grandfathered 用戶不會掉
+- **付費層 cut-over（v4.0.0+）**：把 `canAccessGuardian()` 內部改成 `hasSubscription(group) || group.guardianBetaEnabled`，beta-grandfathered 用戶不會掉
 - **多 product surface**：守護 module 將來會加保單到期通知 / 健康紀錄 / 諮詢入口等；每個新 surface 加 callsite 時 reach for `canAccessGuardian()`，不要重蹈 v0.15.x 的散落判斷
 - **Beta 期收尾**：當付費層上線且 beta 不再開放新用戶時，`guardian_beta_enabled` 可保留為 grandfather flag（不要 drop column）
