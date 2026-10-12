@@ -41,7 +41,31 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
-_Nothing unreleased yet._
+### 使用者可見變化
+
+- **舊的語言連結會打開對應語言（#1675）**
+  使用者：以前分享的 `?lang=ja` 這類連結會直接打開日文／英文／簡中頁，不再顯示繁中。
+  技術：`proxy.ts` 對公開語系頁的合法 `lang` 參數做 308 轉址到語系前綴網址，其他 query 保留。
+
+### 技術變更
+
+- **保單幣別欄位改為必填（#1607）**
+  使用者：沒有可見變化。
+  技術：`0092` 補完空值後把 `InsuranceDetails.currency` 設為 NOT NULL；`0085` 之後的寫入端本來就都會帶幣別，prod 空值為 0。
+
+## [1.7.2] - 2026-10-12
+
+主題：**Android 測試．一條連結就能加入**——封閉測試從「填表、等人工加進名單」改成加入 Google 群組後自己就能安裝；Android App 內多了回饋入口，出遊分享頁與設定也多了邀請測試者的入口。
+完整 diff：[v1.7.1...v1.7.2](https://github.com/redtear1115/oikos/compare/v1.7.1...v1.7.2)
+
+### 使用者可見變化
+
+- **Android 測試版改成自己加入，App 內多一個回饋入口（#1648）**
+  使用者：Android 訪客按「加入 Android 測試版」會到說明頁，兩步（加入群組、打開 Play 測試頁）就能裝；Android App 的設定多一列「給我們回饋」，連到 Play 商店頁留私人回饋。
+  技術：新增公開頁 `/android-beta`（noindex、不進 sitemap），測試者名單改為 Google 群組、移除 Google 表單；新增事件 `android_beta_step_clicked`、`tester_feedback_clicked`，與 #1553 一起移除。
+- **多兩個邀請 Android 測試者的入口（#1648）**
+  使用者：用 Android 瀏覽器打開出遊分享頁，底部多一行連到測試說明頁；設定多一列「邀請用 Android 的伴侶或朋友來測試」，點了分享說明頁連結（沒有分享面板就複製）。iOS App 內不顯示這一列。
+  技術：新增事件 `android_beta_outing_link_clicked`、`android_beta_share_clicked`，連結不帶出遊分享 token，與 #1553 一起移除。
 
 ## [1.7.1] - 2026-10-09
 
@@ -1780,7 +1804,8 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 - **每頁 `generateMetadata` 接 OG image（#487）**：`public/og-image.png` 從 #282 ship 但未 wire 進 metadata，造成 prod HTML 缺 `og:image` / `twitter:image`；本版 4 個 public page 各加 `openGraph.images` + `twitter.images`，`alt` 用 `t.title` locale-aware，無需新增 i18n key。
 - **`settings.local.json` 列入 gitignore（#478）**：避免本地 hook / 權限設定外洩。
 
-[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.7.1...HEAD
+[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.7.2...HEAD
+[1.7.2]: https://github.com/redtear1115/oikos/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/redtear1115/oikos/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/redtear1115/oikos/compare/v1.6.8...v1.7.0
 [1.6.8]: https://github.com/redtear1115/oikos/compare/v1.6.7...v1.6.8

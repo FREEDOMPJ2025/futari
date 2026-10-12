@@ -112,17 +112,17 @@ async function seed() {
   // Ledger A policy whose insured child is ledger B's child: the cross link.
   ids.insCross = await mk(ids.gA, 'insurance', `${T} A policy cross`)
   await db.insert(insuranceDetails).values({
-    assetId: ids.insCross, insuredType: 'child', insuredChildId: ids.childB, policyNumber: 'PN-X',
+    currency: 'twd', assetId: ids.insCross, insuredType: 'child', insuredChildId: ids.childB, policyNumber: 'PN-X',
   })
   // Positive control: ledger A policy on ledger A's own child.
   ids.insOwn = await mk(ids.gA, 'insurance', `${T} A policy own`)
   await db.insert(insuranceDetails).values({
-    assetId: ids.insOwn, insuredType: 'child', insuredChildId: ids.childA, policyNumber: 'PN-O',
+    currency: 'twd', assetId: ids.insOwn, insuredType: 'child', insuredChildId: ids.childA, policyNumber: 'PN-O',
   })
   // Ledger A policy linked to ledger B's car.
   ids.insVehicleCross = await mk(ids.gA, 'insurance', `${T} A policy on B car`)
   await db.insert(insuranceDetails).values({
-    assetId: ids.insVehicleCross, insuredType: 'user', insuredUserId: ids.A, vehicleId: ids.carB, policyNumber: 'PN-V',
+    currency: 'twd', assetId: ids.insVehicleCross, insuredType: 'user', insuredUserId: ids.A, vehicleId: ids.carB, policyNumber: 'PN-V',
   })
 
   // Ledger A expenses: one on ledger B's car (cross), one on its own car.

@@ -53,7 +53,7 @@ related_issues: []
 | 基本資訊 | `name` / `policy_number` / `company_name` / `insurance_type` | 保單身分 |
 | 期程 | `starts_at` / `ends_at` / `pay_cycle` | 繳費 cadence + 期程；空白允許部分輸入 |
 | 金額 | `sum_insured` / `expected_maturity_amount` / `account_value` | sum_insured = 身故金（非滿期金）；expected_maturity 是 savings 預估滿期金；account_value 是投資型保單帳戶價值 |
-| 幣別 | `currency`（#1600，`currency_code`，可為空） | 上列四個金額欄位（含 `annual_premium`）都是這個幣別的整數單位。每張保單自己一個，新增預設帳本基準幣別；NULL（0085 之前的列、舊版程式寫入）讀作帳本基準幣別。不做匯率換算 |
+| 幣別 | `currency`（#1600，`currency_code`，NOT NULL since 0092 #1607） | 上列四個金額欄位（含 `annual_premium`）都是這個幣別的整數單位。每張保單自己一個，新增預設帳本基準幣別；0085 之前的列已回填為帳本基準幣別（0092 起 DB 不再接受 NULL）。不做匯率換算 |
 | 關係人 | `policy_holder_user_id` / `insured_user_id` / `insured_child_id` | FK 到 Profiles 或 ChildDetails；多被保人不在 MVP scope |
 | PII | `policy_holder_pii` / `insured_pii`（加密欄位） | 身分證、健保卡 — AES-256-GCM in Server Action，DB 只看到 ciphertext |
 | 連結 | `vehicle_id` | 強連到 CarDetails（汽車險） |

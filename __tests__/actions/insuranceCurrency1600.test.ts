@@ -147,11 +147,11 @@ describe('InsuranceDetails.currency (#1600)', () => {
     expect(await currencyOf(a.id)).toBe('usd')
   })
 
-  it('a NULL-currency row (old code / pre-0085) stays NULL on an edit without a currency', async () => {
+  it('the DB rejects a NULL currency (NOT NULL since 0092, #1607)', async () => {
     const id = await make()
-    await db.update(insuranceDetails).set({ currency: null }).where(eq(insuranceDetails.assetId, id))
-    await editInsurance({ id, name: `${T} policy`, kind: 'medical', annualPremium: 5 })
-    expect(await currencyOf(id)).toBeNull()
+    await expect(
+      db.update(insuranceDetails).set({ currency: null as never }).where(eq(insuranceDetails.assetId, id)),
+    ).rejects.toMatchObject({ cause: { code: '23502' } })
   })
 
   it('the page read returns the stored currency', async () => {
