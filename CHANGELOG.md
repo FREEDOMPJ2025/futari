@@ -41,6 +41,13 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+_Nothing unreleased yet._
+
+## [1.7.2] - 2026-10-12
+
+主題：**Android 測試．一條連結就能加入**——封閉測試從「填表、等人工加進名單」改成加入 Google 群組後自己就能安裝；Android App 內多了回饋入口，出遊分享頁與設定也多了邀請測試者的入口。
+完整 diff：[v1.7.1...v1.7.2](https://github.com/redtear1115/oikos/compare/v1.7.1...v1.7.2)
+
 ### 使用者可見變化
 
 - **Android 測試版改成自己加入，App 內多一個回饋入口（#1648）**
@@ -1787,7 +1794,8 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 - **每頁 `generateMetadata` 接 OG image（#487）**：`public/og-image.png` 從 #282 ship 但未 wire 進 metadata，造成 prod HTML 缺 `og:image` / `twitter:image`；本版 4 個 public page 各加 `openGraph.images` + `twitter.images`，`alt` 用 `t.title` locale-aware，無需新增 i18n key。
 - **`settings.local.json` 列入 gitignore（#478）**：避免本地 hook / 權限設定外洩。
 
-[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.7.1...HEAD
+[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.7.2...HEAD
+[1.7.2]: https://github.com/redtear1115/oikos/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/redtear1115/oikos/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/redtear1115/oikos/compare/v1.6.8...v1.7.0
 [1.6.8]: https://github.com/redtear1115/oikos/compare/v1.6.7...v1.6.8
