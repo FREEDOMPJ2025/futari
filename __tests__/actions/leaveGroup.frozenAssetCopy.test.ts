@@ -174,12 +174,12 @@ async function seed() {
   // Insurance moving with the leaver, linked to a staying car and child.
   ids.insB = await mk({ type: 'insurance', name: `${T} B policy` })
   await db.insert(insuranceDetails).values({
-    assetId: ids.insB, insuredType: 'user', insuredUserId: ids.B, insuredChildId: ids.childC, vehicleId: ids.carA, policyNumber: 'PN-B',
+    currency: 'twd', assetId: ids.insB, insuredType: 'user', insuredUserId: ids.B, insuredChildId: ids.childC, vehicleId: ids.carA, policyNumber: 'PN-B',
   })
   // Insurance staying with the stayer, linked to the leaver's car.
   ids.insA = await mk({ type: 'insurance', name: `${T} A policy` })
   await db.insert(insuranceDetails).values({
-    assetId: ids.insA, insuredType: 'user', insuredUserId: ids.A, vehicleId: ids.carB, policyNumber: 'PN-A',
+    currency: 'twd', assetId: ids.insA, insuredType: 'user', insuredUserId: ids.A, vehicleId: ids.carB, policyNumber: 'PN-A',
   })
 
   const fl = async (carId: string, odo: number) => {
@@ -648,7 +648,7 @@ describe.skipIf(!isLocalDb)('leaveGroup — frozen copies for cross-ledger links
     const [x] = await db.insert(assets).values({ groupId: ids.oldGroup, type: 'insurance', name: `${T} cross policy` })
       .returning({ id: assets.id })
     extra.crossIns = x.id
-    await db.insert(insuranceDetails).values({ assetId: x.id, insuredType: 'user', vehicleId: ids.carB })
+    await db.insert(insuranceDetails).values({ currency: 'twd', assetId: x.id, insuredType: 'user', vehicleId: ids.carB })
     expect((await getLinkedInsurancesForVehicle(ids.carB, ids.newGroup)).map((r) => r.id)).not.toContain(x.id)
     expect((await getLinkedInsurancesForVehicle(ids.carB, ids.oldGroup)).map((r) => r.id)).toContain(x.id)
   })

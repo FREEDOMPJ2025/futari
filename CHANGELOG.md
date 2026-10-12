@@ -41,7 +41,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
-_Nothing unreleased yet._
+### 技術變更
+
+- **保單幣別欄位改為必填（#1607）**
+  使用者：沒有可見變化。
+  技術：`0092` 補完空值後把 `InsuranceDetails.currency` 設為 NOT NULL；`0085` 之後的寫入端本來就都會帶幣別，prod 空值為 0。
 
 ## [1.7.2] - 2026-10-12
 

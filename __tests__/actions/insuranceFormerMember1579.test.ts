@@ -85,7 +85,7 @@ beforeAll(async () => {
     .returning({ id: assets.id })
   ids.policy = a.id
   await db.insert(insuranceDetails).values({
-    assetId: a.id, insuredType: 'user', insuredUserId: ids.B, policyHolderUserId: ids.B,
+    currency: 'twd', assetId: a.id, insuredType: 'user', insuredUserId: ids.B, policyHolderUserId: ids.B,
     insuranceType: 'medical', annualPremium: 12000,
   })
 })

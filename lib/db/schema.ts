@@ -325,9 +325,9 @@ export const insuranceDetails = pgTable('InsuranceDetails', {
   // v0.15.2 #166 — current account value for investment-linked savings policies.
   // User-set, statement-based; not derived. null = unset or not applicable.
   accountValue: integer('account_value'),
-  // #1600 — the currency the four amounts above are in. NULL = pre-#1600 row /
-  // old-code insert: read as the ledger's base currency (lib/insuranceCurrency.ts).
-  currency: currencyEnum('currency'),
+  // #1600 — the currency the four amounts above are in. NOT NULL since 0092 (#1607);
+  // readers still tolerate NULL (lib/insuranceCurrency.ts) and read it as the ledger's base currency.
+  currency: currencyEnum('currency').notNull(),
   // v0.15.0 #127 — red-badge threshold for single-year policies (warning stays at 60d).
   // Multi-year / savings policies ignore this at render time.
   reminderDaysBefore: integer('reminder_days_before').notNull().default(30),
