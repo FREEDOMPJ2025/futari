@@ -2063,9 +2063,9 @@ export const ja: Translations = {
     /** Shown while the page is probing for the network (#1672). */
     status: '再接続しています…',
     /** Shown after automatic returns stopped; only the manual button is left. */
-    stalled: 'まだつながりません。通信が安定してから『もう一度ひらく』を押してください',
+    stalled: 'まだつながりません。通信が安定してから「もう一度ひらく」をタップしてください。',
     /** Android shell only, and only when the build flag is on (case 9 of #1672). */
-    offlineBrowsingHint: '次にオンラインになったら『設定 › オフライン閲覧』をオンにすると、通信できないときも最近の記録を見られます',
+    offlineBrowsingHint: '次にオンラインになったら「設定 › オフライン閲覧」をオンにすると、通信できないときも最近の記録を見られます',
   },
 
   termsPage: {
