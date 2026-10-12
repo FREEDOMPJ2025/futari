@@ -5383,9 +5383,9 @@ export const zhTW: Translations = {
     /** Shown while the page is probing for the network (#1672). */
     status: '正在重新連線…',
     /** Shown after automatic returns stopped; only the manual button is left. */
-    stalled: '還是連不上，等網路穩定一點再按『再試一次』',
+    stalled: '還是連不上，等網路穩定一點再按「再試一次」',
     /** Android shell only, and only when the build flag is on (case 9 of #1672). */
-    offlineBrowsingHint: '下次連上網路後，可以到『設定 › 離線瀏覽』打開，沒網路時也能看最近的紀錄',
+    offlineBrowsingHint: '下次連上網路後，可以到「設定 › 離線瀏覽」打開，沒網路時也能看最近的紀錄',
   },
 
   termsPage: {

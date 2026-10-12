@@ -2056,15 +2056,15 @@ export const en: Translations = {
 
   nativeOfflinePage: {
     documentTitle: 'Offline · Futari',
-    title: 'Can’t reach the network',
-    body: 'Once you’re on Wi-Fi or mobile data, this page will take you back to your shared ledger on its own.',
+    title: "Can't connect right now",
+    body: "Once you're on Wi-Fi or mobile data, this page will take you back to your shared ledger on its own.",
     retry: 'Try again',
     /** Shown while the page is probing for the network (#1672). */
     status: 'Reconnecting…',
     /** Shown after automatic returns stopped; only the manual button is left. */
-    stalled: 'Still can’t connect. Wait for a steadier connection, then tap ‘Try again’',
+    stalled: "Still can't connect. When the connection is steadier, tap Try again.",
     /** Android shell only, and only when the build flag is on (case 9 of #1672). */
-    offlineBrowsingHint: 'Next time you’re online, turn on ‘Settings › Offline browsing’ to see your recent records without a connection',
+    offlineBrowsingHint: "Next time you're online, turn on Settings › Offline browsing to see your recent records without a connection",
   },
 
   termsPage: {
