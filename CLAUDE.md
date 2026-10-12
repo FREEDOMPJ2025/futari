@@ -15,7 +15,7 @@ This is **Next.js 16** with breaking changes. APIs, conventions, and file struct
 
 ## 目前狀態
 
-**Latest released: v1.7.1** — 版本歷史見 [CHANGELOG.md](CHANGELOG.md)（1.0.0 起算；v0.x 只在 git tag）
+**Latest released: v1.7.2** — 版本歷史見 [CHANGELOG.md](CHANGELOG.md)（1.0.0 起算；v0.x 只在 git tag）
 
 ## Backlog / 未釋出版本
 
@@ -23,7 +23,6 @@ This is **Next.js 16** with breaking changes. APIs, conventions, and file struct
 
 | 版本 | 主題 |
 |---|---|
-| [v1.7.2](https://github.com/redtear1115/oikos/milestone/88) | Android 測試．一條連結就能加入 |
 | [v1.7.3](https://github.com/redtear1115/oikos/milestone/91) | 離開之後．章節完整、能回看 |
 | [v1.8.0](https://github.com/redtear1115/oikos/milestone/89) | 品牌頁．讓陌生人信任 |
 | [v1.9.0](https://github.com/redtear1115/oikos/milestone/90) | 原生殼．Android 推播與捷徑 |
