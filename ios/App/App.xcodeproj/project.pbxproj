@@ -19,6 +19,7 @@
 		55EEB5CE313D9D2537DB613E /* SentryBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = C589C2922BCCB8E53BEBF251 /* SentryBootstrap.swift */; };
 		EFBB4A181299C3925D08CD98 /* Sentry-Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = B2288611E2022F833C4C3A4E /* Sentry-Dynamic */; };
 		8E4D2B6FAC304D7E9F1B2C3D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3C1A5E9B2F4C6D8E0A1B2C /* main.swift */; };
+		A1B2C3D4E5F60718293A4B5C /* FutariBridgeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5061728394A5B6C /* FutariBridgeViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 		71123C65CB864C92B2F0DAC5 /* SceneDelegate.swift */ = {isa = PBXFileReference; name = "SceneDelegate.swift"; path = "SceneDelegate.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
 		C589C2922BCCB8E53BEBF251 /* SentryBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentryBootstrap.swift; sourceTree = "<group>"; };
 		7D3C1A5E9B2F4C6D8E0A1B2C /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		B1C2D3E4F5061728394A5B6C /* FutariBridgeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FutariBridgeViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +85,7 @@
 				50B271D01FEDC1A000F3C39B /* public */,
 				71123C65CB864C92B2F0DAC5 /* SceneDelegate.swift */,
 				C589C2922BCCB8E53BEBF251 /* SentryBootstrap.swift */,
+				B1C2D3E4F5061728394A5B6C /* FutariBridgeViewController.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -174,6 +177,7 @@
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				E9A8D930A08C48ED828540F9 /* SceneDelegate.swift in Sources */,
 				55EEB5CE313D9D2537DB613E /* SentryBootstrap.swift in Sources */,
+				A1B2C3D4E5F60718293A4B5C /* FutariBridgeViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

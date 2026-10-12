@@ -2590,6 +2590,13 @@ export type Translations = {
     body: string
     /** Label on the link back to the app. */
     retry: string
+    /** Shown while the page probes for the network and returns by itself (#1672). */
+    status: string
+    /** Shown once automatic returns stopped; only the manual button is left. */
+    stalled: string
+    /** Android shell only, behind a build flag that stays off until case 9 of
+     *  #1672 passes (the iOS shell has no service worker). */
+    offlineBrowsingHint: string
   }
 
   termsPage: {
@@ -5370,9 +5377,15 @@ export const zhTW: Translations = {
 
   nativeOfflinePage: {
     documentTitle: '離線中 · Futari',
-    title: '現在沒有網路',
-    body: '連上網路之後，這裡就會回到你們的帳本。',
+    title: '現在連不上網路',
+    body: '連上 Wi-Fi 或行動網路之後，這裡會自己回到你們的帳本。',
     retry: '再試一次',
+    /** Shown while the page is probing for the network (#1672). */
+    status: '正在重新連線…',
+    /** Shown after automatic returns stopped; only the manual button is left. */
+    stalled: '還是連不上，等網路穩定一點再按『再試一次』',
+    /** Android shell only, and only when the build flag is on (case 9 of #1672). */
+    offlineBrowsingHint: '下次連上網路後，可以到『設定 › 離線瀏覽』打開，沒網路時也能看最近的紀錄',
   },
 
   termsPage: {

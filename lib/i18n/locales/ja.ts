@@ -2057,9 +2057,15 @@ export const ja: Translations = {
 
   nativeOfflinePage: {
     documentTitle: 'オフライン · Futari',
-    title: '今はオフラインです',
-    body: 'オンラインに戻れば、ふたりの家計簿はここにあります。',
+    title: 'ネットワークにつながりません',
+    body: 'Wi-Fi やモバイル通信につながると、ここから自動でふたりの家計簿に戻ります。',
     retry: 'もう一度ひらく',
+    /** Shown while the page is probing for the network (#1672). */
+    status: '再接続しています…',
+    /** Shown after automatic returns stopped; only the manual button is left. */
+    stalled: 'まだつながりません。通信が安定してから『もう一度ひらく』を押してください',
+    /** Android shell only, and only when the build flag is on (case 9 of #1672). */
+    offlineBrowsingHint: '次にオンラインになったら『設定 › オフライン閲覧』をオンにすると、通信できないときも最近の記録を見られます',
   },
 
   termsPage: {

@@ -10,6 +10,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import {
+  ANDROID_OFFLINE_HINT_ENABLED,
   OFFLINE_PAGE_FILENAME,
   PROD_SERVER_URL,
   WEB_DIR,
@@ -65,9 +66,9 @@ describe('native offline page — 自我包含', () => {
     expect(html).not.toMatch(/@import/i)
   })
 
-  it('唯一的絕對網址就是重試目的地', () => {
+  it('唯一的絕對網址是 serverUrl 與探測目標 serverUrl + "/"（#1672）', () => {
     const urls = [...html.matchAll(/https?:\/\/[^\s"'<>)]+/g)].map((m) => m[0])
-    expect(new Set(urls)).toEqual(new Set([PROD_SERVER_URL]))
+    expect(new Set(urls)).toEqual(new Set([PROD_SERVER_URL, `${PROD_SERVER_URL}/`]))
   })
 
   it('CAP_SERVER_URL override 也會帶進重試目的地（#990 的 dev 殼）', () => {
@@ -123,7 +124,7 @@ describe('native offline page — 四語', () => {
 
   for (const [locale, copy] of Object.entries(dictionaries)) {
     it(`${locale}：文案有烤進 HTML，且有對應的顯示規則`, () => {
-      for (const text of [copy.title, copy.body, copy.retry]) {
+      for (const text of [copy.title, copy.body, copy.retry, copy.status, copy.stalled]) {
         expect(html).toContain(text)
       }
       expect(html).toContain(`data-l="${locale}"`)
@@ -132,11 +133,82 @@ describe('native offline page — 四語', () => {
     })
 
     it(`${locale}：文案沒有驚嘆號（品牌文案準則）`, () => {
-      for (const text of [copy.title, copy.body, copy.retry]) {
+      for (const text of [
+        copy.title,
+        copy.body,
+        copy.retry,
+        copy.status,
+        copy.stalled,
+        copy.offlineBrowsingHint,
+      ]) {
         expect(text).not.toMatch(/[!！]/)
+        expect(text).not.toMatch(/管理|追蹤|监控|監控|追踪/)
       }
     })
   }
+})
+
+describe('native offline page — Android 離線瀏覽提示（旗標預設關）', () => {
+  it('預設不出貨：HTML 裡沒有任何一語的提示文字', () => {
+    for (const copy of [zhTW, zhCN, en, ja].map((d) => d.nativeOfflinePage)) {
+      expect(html).not.toContain(copy.offlineBrowsingHint)
+    }
+    expect(ANDROID_OFFLINE_HINT_ENABLED).toBe(false)
+    expect(html).not.toContain('class="hint"')
+  })
+
+  it('旗標打開：四語都烤進去，且只在 data-android 分支顯示', () => {
+    const on = renderOfflinePage(PROD_SERVER_URL, { androidOfflineHint: true })
+    for (const copy of [zhTW, zhCN, en, ja].map((d) => d.nativeOfflinePage)) {
+      expect(on).toContain(copy.offlineBrowsingHint)
+    }
+    expect(on).toContain('.hint { display: none; }')
+    expect(on).toContain('html[data-android="1"] .hint { display: block; }')
+    expect(on).toContain('/Android/.test(navigator.userAgent')
+  })
+})
+
+describe('native offline page — 自動返回的硬化（#1672）', () => {
+  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1])
+  const controller = scripts[scripts.length - 1]
+
+  it('controller 在 body 之後，且與語系挑選是不同的 script', () => {
+    expect(scripts).toHaveLength(2)
+    expect(html.indexOf(controller)).toBeGreaterThan(html.indexOf('</main>'))
+  })
+
+  it('從不讀 location.search / hash，也不讀 document.URL 之類的外部輸入', () => {
+    for (const script of scripts) {
+      expect(script).not.toMatch(/location\.(search|hash|href|pathname)/)
+      expect(script).not.toMatch(/document\.(URL|referrer|cookie)/)
+    }
+  })
+
+  it('不寫 innerHTML / outerHTML / insertAdjacentHTML / eval，文字只來自烤好的區塊', () => {
+    for (const script of scripts) {
+      expect(script).not.toMatch(/innerHTML|outerHTML|insertAdjacentHTML|document\.write|eval\(|new Function/)
+    }
+  })
+
+  it('沒有 inline 事件屬性，按鈕用 addEventListener', () => {
+    expect(html).not.toMatch(/\son[a-z]+\s*=/i)
+    expect(controller).toContain("addEventListener('click'")
+  })
+
+  it('離開頁面的目的地只有 serverUrl；探測請求的選項固定', () => {
+    expect(controller).toContain('location.replace(SERVER)')
+    expect(controller.match(/location\.replace\(/g)).toHaveLength(1)
+    expect(controller).toContain('var SERVER = "https://futari.southern-light.dev";')
+    expect(controller).toContain('var PROBE_URL = "https://futari.southern-light.dev/";')
+    expect(controller).toContain(
+      "{ mode: 'no-cors', cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer' }",
+    )
+  })
+
+  it('serverUrl 帶斜線結尾也不會變成 //', () => {
+    const page = renderOfflinePage('http://localhost:3999/')
+    expect(page).toContain('var PROBE_URL = "http://localhost:3999/";')
+  })
 })
 
 describe('native offline page — 依裝置語系挑語言', () => {
@@ -179,5 +251,110 @@ describe('native offline page — 依裝置語系挑語言', () => {
   it('挑中的語系也會換掉 document.title', () => {
     runPicker(['ja-JP'])
     expect(document.title).toBe(ja.nativeOfflinePage.documentTitle)
+  })
+})
+
+describe('native offline page — controller 實際執行（#1672）', () => {
+  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1])
+  const controller = scripts[scripts.length - 1]
+
+  function makeStorage(initial: Record<string, string> = {}) {
+    const data = new Map(Object.entries(initial))
+    return {
+      data,
+      getItem: (k: string) => (data.has(k) ? data.get(k)! : null),
+      setItem: (k: string, v: string) => void data.set(k, v),
+      removeItem: (k: string) => void data.delete(k),
+    }
+  }
+
+  function run(opts: {
+    storage: ReturnType<typeof makeStorage>
+    fetchImpl: (url: string, init: Record<string, unknown>) => Promise<unknown>
+  }) {
+    document.documentElement.setAttribute('data-state', 'checking')
+    document.body.innerHTML = '<a id="retry" href="x"></a>'
+    const replace: string[] = []
+    const fetched: string[] = []
+    new Function('location', 'fetch', 'sessionStorage', controller)(
+      { replace: (u: string) => replace.push(u) },
+      (u: string, init: Record<string, unknown>) => {
+        fetched.push(u)
+        return opts.fetchImpl(u, init)
+      },
+      opts.storage,
+    )
+    return { replace, fetched }
+  }
+
+  it('探測通了：記下 lastAutoReturnAt，然後只 replace 到 serverUrl', async () => {
+    const storage = makeStorage()
+    const { replace, fetched } = run({ storage, fetchImpl: () => Promise.resolve({}) })
+    await new Promise((r) => setTimeout(r, 0))
+    expect(fetched).toEqual([`${PROD_SERVER_URL}/`])
+    expect(replace).toEqual([PROD_SERVER_URL])
+    expect(storage.data.has('futari.lastAutoReturnAt')).toBe(true)
+  })
+
+  it('已經失敗返回 2 次：不探測、不返回，顯示 stalled', async () => {
+    const storage = makeStorage({
+      'futari.failedReturns': '1',
+      'futari.lastAutoReturnAt': String(Date.now() - 1000),
+    })
+    const { replace, fetched } = run({ storage, fetchImpl: () => Promise.resolve({}) })
+    await new Promise((r) => setTimeout(r, 0))
+    expect(fetched).toEqual([])
+    expect(replace).toEqual([])
+    expect(document.documentElement.getAttribute('data-state')).toBe('stalled')
+  })
+
+  it('離開超過 120 秒再進來：歸零，照常返回', async () => {
+    const storage = makeStorage({
+      'futari.failedReturns': '5',
+      'futari.lastAutoReturnAt': String(Date.now() - 200_000),
+    })
+    const { replace } = run({ storage, fetchImpl: () => Promise.resolve({}) })
+    await new Promise((r) => setTimeout(r, 0))
+    expect(replace).toEqual([PROD_SERVER_URL])
+    expect(storage.data.get('futari.failedReturns')).toBe('0')
+  })
+
+  it('沒有網路（fetch 立刻 reject）：不返回，也不寫 lastAutoReturnAt', async () => {
+    const storage = makeStorage()
+    const { replace } = run({ storage, fetchImpl: () => Promise.reject(new TypeError('offline')) })
+    await new Promise((r) => setTimeout(r, 0))
+    expect(replace).toEqual([])
+    expect(storage.data.has('futari.lastAutoReturnAt')).toBe(false)
+  })
+
+  it('手動按「再試一次」：歸零並清掉 lastAutoReturnAt', async () => {
+    const storage = makeStorage({ 'futari.failedReturns': '2', 'futari.lastAutoReturnAt': '1' })
+    run({ storage, fetchImpl: () => new Promise(() => {}) })
+    document.getElementById('retry')!.dispatchEvent(new Event('click'))
+    expect(storage.data.get('futari.failedReturns')).toBe('0')
+    expect(storage.data.has('futari.lastAutoReturnAt')).toBe(false)
+  })
+
+  it('sessionStorage 壞掉：寧可不自動返回', async () => {
+    const broken = {
+      getItem: () => {
+        throw new Error('blocked')
+      },
+      setItem: () => {
+        throw new Error('blocked')
+      },
+      removeItem: () => {},
+    }
+    document.documentElement.setAttribute('data-state', 'checking')
+    document.body.innerHTML = '<a id="retry"></a>'
+    const replace: string[] = []
+    new Function('location', 'fetch', 'sessionStorage', controller)(
+      { replace: (u: string) => replace.push(u) },
+      () => Promise.resolve({}),
+      broken,
+    )
+    await new Promise((r) => setTimeout(r, 0))
+    expect(replace).toEqual([])
+    expect(document.documentElement.getAttribute('data-state')).toBe('stalled')
   })
 })

@@ -37,6 +37,15 @@
 // lang 換掉——不會有先閃一下中文再變日文的狀況。文案來源仍是
 // `lib/i18n/locales/*.ts`，四語同步因此由 `tsc` 的 Translations interface 把關。
 //
+// 自動回到 app（#1672）
+// ----------------------
+// 殼內有載入看門狗（android FutariWebViewClient / ios FutariBridgeViewController）：
+// 網路卡住時約 6 秒就把這頁叫出來。這頁在背景探測網站，通了就自己 `location.replace`
+// 回去。探測通了、真正的頁面卻沒回來（部分中斷、5xx）時不能無限彈跳，所以「失敗的
+// 自動返回」到 2 次就停下來，只留手動按鈕。規則是純函式，見 scripts/native-offline-logic.ts
+// （有單元測試與模擬器）。頁面上的字只來自烤進去的四語區塊，script 只切換
+// `<html data-state>`；從不讀 `location.search` / `hash`，唯一的出口是 serverUrl。
+//
 // 需要 Node ≥ 22.18（原生 TypeScript type stripping）才能直接執行 .ts。
 // `.nvmrc` 是 24，CI 用同一份，所以這裡不額外裝 loader。
 
@@ -52,6 +61,7 @@ import {
   LANTERN_PARTS,
   LANTERN_VIEWBOX,
 } from '../lib/lanternMark.ts'
+import { PAGE_LOGIC_SOURCE } from './native-offline-logic.ts'
 
 /** 必須與 `capacitor.config.ts` 的 `server.errorPath` 一致（測試會比對）。 */
 export const OFFLINE_PAGE_FILENAME = 'offline.html'
@@ -85,6 +95,10 @@ type OfflineLocale = keyof typeof COPY
  *  script 還沒跑（或被擋掉）時 `<html lang>` 的初始值。與 DEFAULT_LOCALE 一致。 */
 const FALLBACK_LOCALE: OfflineLocale = 'zh-TW'
 
+/** Android 專用提示（離線瀏覽）。預設關：只有 #1672 驗收 case 9 證明 Android 殼裡
+ *  離線瀏覽真的會顯示快取頁，才能打開。翻開這個旗標不需要動 i18n（四語的 key 已在）。 */
+export const ANDROID_OFFLINE_HINT_ENABLED = false
+
 const LOCALE_ORDER: readonly OfflineLocale[] = ['zh-TW', 'zh-CN', 'en', 'ja']
 
 function escapeHtml(value: string): string {
@@ -105,7 +119,7 @@ function toJsLiteral(value: unknown): string {
  *  刻意的：切換語言不需要 JS 寫入文字，所以不會有閃動。 */
 function localizedBlock(
   tag: 'h1' | 'p' | 'span',
-  key: 'title' | 'body' | 'retry',
+  key: 'title' | 'body' | 'retry' | 'status' | 'stalled' | 'offlineBrowsingHint',
   indent: string,
 ): string {
   return LOCALE_ORDER.map(
@@ -114,7 +128,14 @@ function localizedBlock(
   ).join(`\n${indent}`)
 }
 
-export function renderOfflinePage(serverUrl: string): string {
+export interface RenderOptions {
+  /** 顯示 Android 專用的離線瀏覽提示；預設取 {@link ANDROID_OFFLINE_HINT_ENABLED}。 */
+  androidOfflineHint?: boolean
+}
+
+export function renderOfflinePage(serverUrl: string, options: RenderOptions = {}): string {
+  const androidHint = options.androidOfflineHint ?? ANDROID_OFFLINE_HINT_ENABLED
+  const probeUrl = `${serverUrl.replace(/\/+$/, '')}/`
   const titles = Object.fromEntries(
     LOCALE_ORDER.map((locale) => [locale, COPY[locale].documentTitle]),
   )
@@ -124,7 +145,7 @@ export function renderOfflinePage(serverUrl: string): string {
   自動產生，請勿手動編輯 — 來源：scripts/build-native-offline-page.ts（#1225）
   文案來源：lib/i18n/locales/*.ts › nativeOfflinePage
 -->
-<html lang="${FALLBACK_LOCALE}">
+<html lang="${FALLBACK_LOCALE}" data-state="checking">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -232,6 +253,15 @@ export function renderOfflinePage(serverUrl: string): string {
   .retry:active { opacity: 0.88; }
   /* 語系切換：只有 <html lang> 對得上的那一份可見。四語都寫死在規則裡，
      沒有 :not() 或屬性前綴比對，避免任何一語漏掉時整頁變空白。 */
+  .st, .hint { display: none; }
+  .st { margin: -16px 0 24px; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+  html[data-state="checking"] .st[data-s="checking"],
+  html[data-state="stalled"] .st[data-s="stalled"] { display: block; }
+  .st p, .hint p { margin: 0; font-size: 14px; }
+  .hint { margin-top: 24px; }
+  html[data-android="1"] .hint { display: block; }
+  /* 停下來之後的狀態文字比平常多一行，不要貼著按鈕。 */
+  html[data-state="stalled"] .st { margin-bottom: 20px; }
   [data-l] { display: none; }
   html[lang="zh-TW"] [data-l="zh-TW"],
   html[lang="zh-CN"] [data-l="zh-CN"],
@@ -245,13 +275,96 @@ export function renderOfflinePage(serverUrl: string): string {
     ${lanternSvg()}
     ${localizedBlock('h1', 'title', '    ')}
     ${localizedBlock('p', 'body', '    ')}
-    <a class="retry" href="${escapeHtml(serverUrl)}">
+    <div class="st" data-s="checking" role="status">
+      ${localizedBlock('p', 'status', '      ')}
+    </div>
+    <div class="st" data-s="stalled" role="status">
+      ${localizedBlock('p', 'stalled', '      ')}
+    </div>
+    <a class="retry" id="retry" href="${escapeHtml(serverUrl)}">
       ${localizedBlock('span', 'retry', '      ')}
-    </a>
+    </a>${
+      androidHint
+        ? `
+    <div class="hint">
+      ${localizedBlock('p', 'offlineBrowsingHint', '      ')}
+    </div>`
+        : ''
+    }
   </main>
+<script>
+${controllerScript(serverUrl, probeUrl)}
+</script>
 </body>
 </html>
 `
+}
+
+/** 自動返回的 controller（ES5）。規則函式來自 PAGE_LOGIC_SOURCE。 */
+function controllerScript(serverUrl: string, probeUrl: string): string {
+  return `(function () {
+${PAGE_LOGIC_SOURCE}
+  var SERVER = ${toJsLiteral(serverUrl)};
+  var PROBE_URL = ${toJsLiteral(probeUrl)};
+  var KEY_FAILED = 'futari.failedReturns';
+  var KEY_LAST = 'futari.lastAutoReturnAt';
+  var doc = document.documentElement;
+  function read(k) {
+    try { var v = sessionStorage.getItem(k); return v === null ? null : Number(v); } catch (e) { return undefined; }
+  }
+  function write(k, v) {
+    try { sessionStorage.setItem(k, String(v)); return true; } catch (e) { return false; }
+  }
+  function clear(k) { try { sessionStorage.removeItem(k); } catch (e) {} }
+  function setState(s) { doc.setAttribute('data-state', s); }
+
+  if (/Android/.test(navigator.userAgent || '')) doc.setAttribute('data-android', '1');
+
+  var retry = document.getElementById('retry');
+  if (retry) {
+    // 手動重試：歸零，這次返回仍由原生看門狗盯著。連結本身照常導向 serverUrl。
+    retry.addEventListener('click', function () { write(KEY_FAILED, 0); clear(KEY_LAST); });
+  }
+
+  var last = read(KEY_LAST);
+  var prev = read(KEY_FAILED);
+  // sessionStorage 不可用就無法記住失敗次數，寧可不自動返回。
+  if (last === undefined || prev === undefined) { setState('stalled'); return; }
+  var failed = nextFailedReturns(prev || 0, last, Date.now());
+  if (!write(KEY_FAILED, failed)) { setState('stalled'); return; }
+  clear(KEY_LAST);
+  if (!canAutoReturn(failed)) { setState('stalled'); return; }
+
+  var attempt = 0, inflight = false, done = false, timer = null;
+  function go() {
+    if (done) return;
+    done = true;
+    if (!write(KEY_LAST, Date.now())) { setState('stalled'); return; }
+    location.replace(SERVER);
+  }
+  function schedule(ms) { clearTimeout(timer); timer = setTimeout(probe, ms); }
+  function probe() {
+    if (done || inflight) return;
+    inflight = true;
+    var finished = false;
+    var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+    function fail() {
+      if (finished) return;
+      finished = true; clearTimeout(to); inflight = false; attempt++;
+      schedule(PROBE_INTERVAL_MS);
+    }
+    var to = setTimeout(function () { if (ctrl) ctrl.abort(); fail(); }, probeAbortMs(attempt));
+    var opts = { mode: 'no-cors', cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer' };
+    if (ctrl) opts.signal = ctrl.signal;
+    fetch(PROBE_URL, opts).then(function () {
+      if (finished) return;
+      finished = true; clearTimeout(to); inflight = false;
+      go();
+    }, fail);
+  }
+  window.addEventListener('online', function () { clearTimeout(timer); probe(); });
+  probe();
+})();`
 }
 
 // 色票同上方 :root（--ink / --accent 的寫死值）。

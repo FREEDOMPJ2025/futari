@@ -2041,9 +2041,15 @@ export const zhCN: Translations = {
 
   nativeOfflinePage: {
     documentTitle: '离线中 · Futari',
-    title: '现在没有网络',
-    body: '连上网络之后，这里就会回到你们的账本。',
+    title: '现在连不上网络',
+    body: '连上 Wi-Fi 或移动网络之后，这里会自己回到你们的账本。',
     retry: '再试一次',
+    /** Shown while the page is probing for the network (#1672). */
+    status: '正在重新连接…',
+    /** Shown after automatic returns stopped; only the manual button is left. */
+    stalled: '还是连不上，等网络稳定一点再按『再试一次』',
+    /** Android shell only, and only when the build flag is on (case 9 of #1672). */
+    offlineBrowsingHint: '下次连上网络后，可以到『设置 › 离线浏览』打开，没网络时也能看最近的记录',
   },
 
   termsPage: {
