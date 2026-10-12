@@ -41,7 +41,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
-_Nothing unreleased yet._
+### 技術變更
+
+- **保單幣別欄位改為必填（#1607）**
+  使用者：沒有可見變化。
+  技術：`0092` 補完空值後把 `InsuranceDetails.currency` 設為 NOT NULL；`0085` 之後的寫入端本來就都會帶幣別，prod 空值為 0。
 
 ## [1.7.2] - 2026-10-12
 
@@ -56,12 +60,6 @@ _Nothing unreleased yet._
 - **多兩個邀請 Android 測試者的入口（#1648）**
   使用者：用 Android 瀏覽器打開出遊分享頁，底部多一行連到測試說明頁；設定多一列「邀請用 Android 的伴侶或朋友來測試」，點了分享說明頁連結（沒有分享面板就複製）。iOS App 內不顯示這一列。
   技術：新增事件 `android_beta_outing_link_clicked`、`android_beta_share_clicked`，連結不帶出遊分享 token，與 #1553 一起移除。
-
-### 技術變更
-
-- **保單幣別欄位改為必填（#1607）**
-  使用者：沒有可見變化。
-  技術：`0092` 補完空值後把 `InsuranceDetails.currency` 設為 NOT NULL；`0085` 之後的寫入端本來就都會帶幣別，prod 空值為 0。
 
 ## [1.7.1] - 2026-10-09
 
