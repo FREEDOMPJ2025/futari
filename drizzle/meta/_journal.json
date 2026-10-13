@@ -652,6 +652,13 @@
       "when": 1784900000000,
       "tag": "0093_review_snapshot_chapter",
       "breakpoints": true
+    },
+    {
+      "idx": 94,
+      "version": "7",
+      "when": 1785000000000,
+      "tag": "0094_deleted_rows_chapter_rls",
+      "breakpoints": true
     }
   ]
 }
