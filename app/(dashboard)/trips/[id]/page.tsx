@@ -1,9 +1,11 @@
-import { notFound } from 'next/navigation'
-import { requireViewerGroupOrRedirect } from '@/lib/auth/viewer'
-import { getTripById } from '@/lib/db/queries/trips'
+import { notFound, redirect } from 'next/navigation'
+import { requireViewerOrRedirect } from '@/lib/auth/viewer'
+import { resolveViewerEpochContext } from '@/lib/db/queries/epoch'
+import { getTripInChapter } from '@/lib/db/queries/trips'
 import { listTripExpenses, countTripExpensesByCurrency } from '@/lib/db/queries/tripExpense'
 import { listRatesForGroup } from '@/lib/db/queries/currencyRates'
 import { parseTripCurrencySnapshot } from '@/lib/trip-currency'
+import { isUuid } from '@/lib/outing/validate'
 import type { CurrencyCode } from '@/lib/currency'
 import type { TripOption } from '@/app/(dashboard)/dashboard/_components/TripSelector'
 import type { RateEntry } from '@/app/(dashboard)/dashboard/_components/AddSheet'
@@ -11,9 +13,21 @@ import { TripDetailClient, type TripDetailRecord } from './_components/TripDetai
 
 export default async function TripDetailPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params
-  const { group } = await requireViewerGroupOrRedirect()
-  const trip = await getTripById(id)
-  if (!trip || trip.groupId !== group.id) notFound()
+  const { user } = await requireViewerOrRedirect()
+
+  // #1614 — a trip is readable only inside the chapter being viewed: the open
+  // chapter, or a pinned one (same rule as the monthly review). The group
+  // follows the pin too, so it matches the layout's chapter identity that
+  // TripDetailClient labels payers with.
+  const context = await resolveViewerEpochContext(user.id)
+  if (!context) redirect('/onboarding')
+  const { group, window: epochWindow } = context
+  if (!epochWindow.epochId || !isUuid(id)) notFound()
+
+  // The chapter check runs before any expense or rate query: a trip of
+  // another chapter is not found, and nothing of it is loaded or serialised.
+  const trip = await getTripInChapter(id, group.id, epochWindow.epochId)
+  if (!trip) notFound()
 
   const [rawExpenses, rawRates, usedCurrencyCounts] = await Promise.all([
     listTripExpenses(trip.id),
