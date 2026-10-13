@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation'
 import { SheetBackdrop } from '@/app/(dashboard)/dashboard/_components/SheetBackdrop'
 import { useFocusTrap } from '@/app/(dashboard)/_components/useFocusTrap'
 import { TextInput } from '@/components/ui/TextInput'
+import { Button } from '@/components/ui/Button'
 import { useTranslations } from '@/lib/i18n/client'
 import { useBaseCurrency } from '@/app/(dashboard)/_components/MemberContext'
 import { currencySymbol } from '@/lib/currency'
 import { leaveGroup, proposeSwap } from '@/actions/membership'
 import { describeMembershipError } from '@/lib/membership-errors'
 import { unwrapAction } from '@/lib/action-errors'
+import { useTransactionsExport } from './useTransactionsExport'
 
 type Step = 1 | 2 | 3 | 4 | 'final' | 'swap-sent'
 
@@ -51,6 +53,10 @@ export function LeaveGroupFlow({
   const [confirmInput, setConfirmInput] = useState('')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
+  // #1611: the export-first hint on card 3 starts the same export as
+  // /settings/trust. While the viewer is still a member it covers this
+  // ledger's chapters — the one being closed included — expenses only.
+  const exportCsv = useTransactionsExport(t.csvExport.failed)
 
   const panelRef = useRef<HTMLDivElement>(null)
   const titleId = useId()
@@ -277,7 +283,18 @@ export function LeaveGroupFlow({
             />
           )}
           {step === 2 && <Card2 memberAName={memberAName} memberBName={memberBName} t={flow.card2} />}
-          {step === 3 && <Card3 intro={flow.card3.intro} title={flow.card3.title.replaceAll('{memberB}', memberBName)} bullets={card3Bullets} />}
+          {step === 3 && (
+            <Card3
+              intro={flow.card3.intro}
+              title={flow.card3.title.replaceAll('{memberB}', memberBName)}
+              bullets={card3Bullets}
+              exportHint={flow.card3.exportHint}
+              exportCta={exportCsv.pending ? t.csvExport.preparing : flow.card3.exportCta}
+              exportPending={exportCsv.pending}
+              exportError={exportCsv.error}
+              onExport={exportCsv.start}
+            />
+          )}
           {step === 4 && (
             <Card4
               viewerIsMemberA={viewerIsMemberA}
@@ -433,10 +450,20 @@ function Card3({
   intro,
   title,
   bullets,
+  exportHint,
+  exportCta,
+  exportPending,
+  exportError,
+  onExport,
 }: {
   intro: string
   title: string
   bullets: string[]
+  exportHint: string
+  exportCta: string
+  exportPending: boolean
+  exportError: string | null
+  onExport: () => void
 }) {
   return (
     <>
@@ -445,6 +472,16 @@ function Card3({
       <ul className="text-sm space-y-2 list-disc pl-5" style={{ color: 'var(--ink-2)' }}>
         {bullets.map((b, i) => <li key={i}>{b}</li>)}
       </ul>
+      {/* #1611 — export first. The records stay in this ledger after a leave;
+          a copy of your own is optional. The copy names expenses only: the
+          export is CashTransactions only until #1460 widens it. */}
+      <p className="text-sm mt-5 mb-3 text-ink-2">{exportHint}</p>
+      <Button variant="secondary" fullWidth onClick={onExport} disabled={exportPending}>
+        {exportCta}
+      </Button>
+      {exportError && (
+        <p className="text-xs mt-2 px-1 text-[var(--debit-text)]" role="alert">{exportError}</p>
+      )}
     </>
   )
 }

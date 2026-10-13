@@ -16,6 +16,12 @@ import { resolve } from 'node:path'
 // row's own ledger (display fields only), re-pointed rules are paused, and
 // frozen copies are read-only and hidden from lists / pickers.
 //
+// Since #1611 records never move: every record (the leaver's too) stays in
+// the old ledger, so copies in the old ledger stand for the moving cars /
+// policies that either person's records point at, and copies in the leaver's
+// new ledger come only from moving rules and policies that point at a staying
+// 愛物.
+//
 // This suite runs one leave over a ledger that has a crossing link in every
 // one of the seven link columns, in both directions, then checks the
 // invariant (0 cross-ledger links in both ledgers), the copies' shape, and
@@ -101,12 +107,13 @@ const ids = {
   // assets (old ledger, before the leave)
   carB: '', carA: '', houseA: '', childC: '', petA: '', plantA: '', petDel: '', tmpl: '', insB: '', insA: '',
   // fuel logs
-  fl1: '', fl2: '', fl3: '', fl4: '',
+  fl1: '', fl2: '', fl3: '', fl4: '', fl5: '',
   // records / rules
   txA_carB: '', txA_carB_deleted: '', txA_plain: '', txB_house: '', txB_carA_fuel: '', txB_mixed: '',
-  txB_tmpl: '', txB_plant: '', txB_petDel: '', txB_carB_fl3: '',
+  txB_tmpl: '', txB_plant: '', txB_petDel: '', txB_carB_fl3: '', txA_carA_fl5: '',
   incB_pet: '', incA_insB: '',
   reA: '', reB: '', reA_plain: '', riA: '', riB: '',
+  reB_tmpl: '', reB_plant: '', reB_petDel: '', riB_pet: '',
   pendExpB: '', pendIncA: '',
 }
 /** copy id by (ledger, source) after the leave */
@@ -188,10 +195,11 @@ async function seed() {
     }).returning({ id: fuelLogs.id })
     return f.id
   }
-  ids.fl1 = await fl(ids.carB, 1000) // stayer's tx → leaver's car (direction A)
-  ids.fl2 = await fl(ids.carA, 2000) // leaver's tx → stayer's car (direction B)
-  ids.fl3 = await fl(ids.carB, 3000) // leaver's tx → leaver's car: no crossing
+  ids.fl1 = await fl(ids.carB, 1000) // stayer's tx → leaver's car (crosses)
+  ids.fl2 = await fl(ids.carA, 2000) // leaver's tx → stayer's car (#1611: stays, no crossing)
+  ids.fl3 = await fl(ids.carB, 3000) // leaver's tx → leaver's car (#1611: the tx stays, so it crosses)
   ids.fl4 = await fl(ids.carA, 4000) // leaver's tx with asset carB but fuel log on carA
+  ids.fl5 = await fl(ids.carB, 5000) // stayer's tx with asset carA but fuel log on carB
 
   const tx = async (paidBy: string, assetId: string | null, extraV: Partial<typeof cashTransactions.$inferInsert> = {}) => {
     const [t] = await db.insert(cashTransactions).values({
@@ -210,6 +218,7 @@ async function seed() {
   ids.txB_plant = await tx(ids.B, ids.plantA)
   ids.txB_petDel = await tx(ids.B, ids.petDel)
   ids.txB_carB_fl3 = await tx(ids.B, ids.carB, { fuelLogId: ids.fl3 })
+  ids.txA_carA_fl5 = await tx(ids.A, ids.carA, { fuelLogId: ids.fl5 })
 
   const [incB] = await db.insert(incomeTransactions).values({
     groupId: g.id, recipientId: ids.B, amount: 500, category: 'other', assetId: ids.petA, occurredAt: '2026-05-01',
@@ -230,6 +239,11 @@ async function seed() {
   ids.reA = await rule(ids.A, ids.carB)
   ids.reB = await rule(ids.B, ids.houseA)
   ids.reA_plain = await rule(ids.A, ids.houseA)
+  // #1611: the leaver's records on these stay in the old ledger next to them;
+  // the leaver's rules on them move, so the new ledger needs copies.
+  ids.reB_tmpl = await rule(ids.B, ids.tmpl)
+  ids.reB_plant = await rule(ids.B, ids.plantA)
+  ids.reB_petDel = await rule(ids.B, ids.petDel)
   const irule = async (recipientId: string, assetId: string, pausedAt: Date | null = null) => {
     const [r] = await db.insert(recurringIncomeRules).values({
       groupId: g.id, recipientId, amount: 2000, category: 'other', assetId,
@@ -239,6 +253,7 @@ async function seed() {
   }
   ids.riA = await irule(ids.A, ids.insB)
   ids.riB = await irule(ids.B, ids.carA, new Date('2026-02-01T00:00:00Z')) // already paused
+  ids.riB_pet = await irule(ids.B, ids.petA)
 
   const [pe] = await db.insert(pendingExpenseOccurrences).values({
     groupId: g.id, ruleId: ids.reB, periodStart: '2026-09-01', proposedAmount: 1000, proposedDate: '2026-09-01',
@@ -280,7 +295,7 @@ describe.skipIf(!isLocalDb)('leaveGroup — frozen copies for cross-ledger links
   beforeAll(async () => {
     await seed()
     before = { tx: {} }
-    for (const k of ['txA_carB', 'txB_house', 'txB_carA_fuel'] as const) before.tx[k] = await cashTx(ids[k])
+    for (const k of ['txA_carB', 'txB_house', 'txB_carA_fuel', 'txB_carB_fl3'] as const) before.tx[k] = await cashTx(ids[k])
 
     mockUserId = ids.B
     const r = unwrapAction(await leaveGroup())
@@ -311,12 +326,12 @@ describe.skipIf(!isLocalDb)('leaveGroup — frozen copies for cross-ledger links
   it('the seeded ledger did have a crossing link in every column (the check is not vacuous)', async () => {
     // What each link pointed at before the leave, resolved against where the
     // assets ended up: every one of these is a crossing the leave had to fix.
-    expect((await asset(ids.carB)).groupId).toBe(ids.newGroup)      // txA_carB, reA, insA.vehicle, fl1
+    expect((await asset(ids.carB)).groupId).toBe(ids.newGroup)      // txA_carB, txB_mixed, txB_carB_fl3, reA, insA.vehicle, fl1, fl3, fl5
     expect((await asset(ids.insB)).groupId).toBe(ids.newGroup)      // incA_insB, riA
-    expect((await asset(ids.carA)).groupId).toBe(ids.oldGroup)      // insB.vehicle, txB_carA_fuel, riB
+    expect((await asset(ids.carA)).groupId).toBe(ids.oldGroup)      // insB.vehicle, riB
     expect((await asset(ids.childC)).groupId).toBe(ids.oldGroup)    // insB.insured_child
-    expect((await asset(ids.houseA)).groupId).toBe(ids.oldGroup)    // txB_house, reB
-    expect((await asset(ids.petA)).groupId).toBe(ids.oldGroup)      // incB_pet
+    expect((await asset(ids.houseA)).groupId).toBe(ids.oldGroup)    // reB
+    expect((await asset(ids.petA)).groupId).toBe(ids.oldGroup)      // riB_pet
   })
 
   // ── the copies ─────────────────────────────────────────────────────────
@@ -346,6 +361,30 @@ describe.skipIf(!isLocalDb)('leaveGroup — frozen copies for cross-ledger links
     }
     // A deleted source stays shown as deleted.
     expect((await asset(copyIn('new', `${T} deleted pet`))).deletedAt).not.toBeNull()
+  })
+
+  it('#1611: new-ledger copies are exactly the staying 愛物 that moving rules / policies point at', async () => {
+    const newRules = [
+      ...(await db.select({ a: recurringExpenseRules.assetId }).from(recurringExpenseRules).where(eq(recurringExpenseRules.groupId, ids.newGroup))),
+      ...(await db.select({ a: recurringIncomeRules.assetId }).from(recurringIncomeRules).where(eq(recurringIncomeRules.groupId, ids.newGroup))),
+    ].map((r) => r.a)
+    const [pol] = await db.select().from(insuranceDetails).where(eq(insuranceDetails.assetId, ids.insB))
+    const referenced = new Set([...newRules, pol.vehicleId, pol.insuredChildId].filter((x): x is string => !!x))
+    const copies = (await db.select().from(assets).where(eq(assets.groupId, ids.newGroup))).filter((a) => a.frozenAt !== null)
+    expect(copies).toHaveLength(7)
+    for (const c of copies) expect(referenced.has(c.id)).toBe(true)
+    // No record of either person was moved into the new ledger.
+    expect(await db.select().from(cashTransactions).where(eq(cashTransactions.groupId, ids.newGroup))).toHaveLength(0)
+    expect(await db.select().from(incomeTransactions).where(eq(incomeTransactions.groupId, ids.newGroup))).toHaveLength(0)
+  })
+
+  it('#1611: the old ledger has a copy of every moving 愛物 that any old-ledger row points at, the leaver\'s records included', async () => {
+    const carCopy = copyIn('old', `${T} B car`)
+    for (const k of ['txA_carB', 'txB_mixed', 'txB_carB_fl3'] as const) {
+      const t = await cashTx(ids[k])
+      expect(t.groupId).toBe(ids.oldGroup)
+      expect(t.assetId).toBe(carCopy)
+    }
   })
 
   it('emits no asset_created (or any) analytics for the copies', () => {
@@ -384,40 +423,55 @@ describe.skipIf(!isLocalDb)('leaveGroup — frozen copies for cross-ledger links
     expect(d.policyNumber).toBe('PN-A')
   })
 
-  // ── direction B: rows moving with the leaver ───────────────────────────
-  it('leaver tx → staying house: moved and re-pointed at the copy (not NULLed)', async () => {
+  // ── the leaver's records stay (#1611) ─────────────────────────────────
+  it('leaver tx → staying house: stays in the old ledger with its link and fields untouched', async () => {
     const t = await cashTx(ids.txB_house)
-    expect(t.groupId).toBe(ids.newGroup)
-    expect(t.assetId).toBe(copyIn('new', `${T} A house`))
+    expect(t.groupId).toBe(ids.oldGroup)
+    expect(t.assetId).toBe(ids.houseA)
     const b = before.tx.txB_house
     for (const k of ['amount', 'description', 'paidBy', 'notes', 'createdAt', 'transactedAt'] as const) expect(t[k]).toEqual(b[k])
   })
 
-  it('leaver tx with fuel log on the staying car: asset and fuel log both re-pointed', async () => {
-    const carCopy = copyIn('new', `${T} A car`)
+  it('leaver tx with fuel log on the staying car: stays, asset and fuel log untouched', async () => {
     const t = await cashTx(ids.txB_carA_fuel)
-    expect(t.assetId).toBe(carCopy)
-    const [f] = await db.select().from(fuelLogs).where(eq(fuelLogs.id, t.fuelLogId!))
-    expect(f.assetId).toBe(carCopy)
-    expect(f.odometer).toBe(2000)
+    expect(t.groupId).toBe(ids.oldGroup)
+    expect(t.assetId).toBe(ids.carA)
+    expect(t.fuelLogId).toBe(ids.fl2)
   })
 
-  it('crossing is decided by the fuel log\'s own car: tx on a moving car with a fuel log on a staying car', async () => {
-    const t = await cashTx(ids.txB_mixed)
-    expect(t.assetId).toBe(ids.carB) // moved with the leaver — no crossing
+  it('leaver tx → leaver\'s moving car with its fuel log: stays, both re-pointed at copies in the old ledger', async () => {
+    const carCopy = copyIn('old', `${T} B car`)
+    const t = await cashTx(ids.txB_carB_fl3)
+    expect(t.groupId).toBe(ids.oldGroup)
+    expect(t.assetId).toBe(carCopy)
+    expect(t.fuelLogId).not.toBe(ids.fl3)
     const [f] = await db.select().from(fuelLogs).where(eq(fuelLogs.id, t.fuelLogId!))
-    expect(f.assetId).toBe(copyIn('new', `${T} A car`)) // same single copy as above
-    expect(f.odometer).toBe(4000)
-    // Untouched: leaver tx → leaver car → fuel log on that car.
-    const same = await cashTx(ids.txB_carB_fl3)
-    expect(same.assetId).toBe(ids.carB)
-    expect(same.fuelLogId).toBe(ids.fl3)
+    expect(f.assetId).toBe(carCopy)
+    expect(f.odometer).toBe(3000)
+    const b = before.tx.txB_carB_fl3
+    for (const k of ['amount', 'description', 'paidBy', 'createdAt', 'transactedAt'] as const) expect(t[k]).toEqual(b[k])
+  })
+
+  it('crossing is decided by the fuel log\'s own car, not the record\'s asset (both directions)', async () => {
+    const carCopy = copyIn('old', `${T} B car`)
+    // Record on the moving car, fuel log on the staying car: only the asset crosses.
+    const mixed = await cashTx(ids.txB_mixed)
+    expect(mixed.groupId).toBe(ids.oldGroup)
+    expect(mixed.assetId).toBe(carCopy)
+    expect(mixed.fuelLogId).toBe(ids.fl4)
+    // Record on the staying car, fuel log on the moving car: only the fuel log crosses.
+    const inverse = await cashTx(ids.txA_carA_fl5)
+    expect(inverse.assetId).toBe(ids.carA)
+    expect(inverse.fuelLogId).not.toBe(ids.fl5)
+    const [f] = await db.select().from(fuelLogs).where(eq(fuelLogs.id, inverse.fuelLogId!))
+    expect(f.assetId).toBe(carCopy) // same single copy as above
+    expect(f.odometer).toBe(5000)
   })
 
   it('only the referenced fuel logs are copied', async () => {
     const copyCars = [copyIn('old', `${T} B car`), copyIn('new', `${T} A car`)]
     const copied = await db.select().from(fuelLogs).where(inArray(fuelLogs.assetId, copyCars))
-    expect(copied.map((f) => f.odometer).sort()).toEqual([1000, 2000, 4000])
+    expect(copied.map((f) => f.odometer).sort()).toEqual([1000, 3000, 5000])
   })
 
   it('moving insurance keeps its vehicle and insured child as copies in the new ledger', async () => {
@@ -427,13 +481,27 @@ describe.skipIf(!isLocalDb)('leaveGroup — frozen copies for cross-ledger links
     expect(d.insuredUserId).toBe(ids.B)
   })
 
-  it('leaver records on item / plant / deleted pet / income → pet are re-pointed', async () => {
-    expect((await cashTx(ids.txB_tmpl)).assetId).toBe(copyIn('new', `${T} item`))
-    expect((await cashTx(ids.txB_plant)).assetId).toBe(copyIn('new', `${T} plant`))
-    expect((await cashTx(ids.txB_petDel)).assetId).toBe(copyIn('new', `${T} deleted pet`))
+  it('leaver records on item / plant / deleted pet / income → pet stay on the originals; the leaver\'s rules on them get copies', async () => {
+    for (const [k, a] of [['txB_tmpl', ids.tmpl], ['txB_plant', ids.plantA], ['txB_petDel', ids.petDel]] as const) {
+      const t = await cashTx(ids[k])
+      expect(t.groupId).toBe(ids.oldGroup)
+      expect(t.assetId).toBe(a)
+    }
     const [inc] = await db.select().from(incomeTransactions).where(eq(incomeTransactions.id, ids.incB_pet))
-    expect(inc.groupId).toBe(ids.newGroup)
-    expect(inc.assetId).toBe(copyIn('new', `${T} pet`))
+    expect(inc.groupId).toBe(ids.oldGroup)
+    expect(inc.assetId).toBe(ids.petA)
+
+    const rule = async (id: string) => (await db.select().from(recurringExpenseRules).where(eq(recurringExpenseRules.id, id)))[0]
+    for (const [k, name] of [['reB_tmpl', `${T} item`], ['reB_plant', `${T} plant`], ['reB_petDel', `${T} deleted pet`]] as const) {
+      const r = await rule(ids[k])
+      expect(r.groupId).toBe(ids.newGroup)
+      expect(r.assetId).toBe(copyIn('new', name))
+      expect(r.pausedAt).not.toBeNull()
+    }
+    const [ri] = await db.select().from(recurringIncomeRules).where(eq(recurringIncomeRules.id, ids.riB_pet))
+    expect(ri.groupId).toBe(ids.newGroup)
+    expect(ri.assetId).toBe(copyIn('new', `${T} pet`))
+    expect(ri.pausedAt).not.toBeNull()
   })
 
   // ── recurring rules ───────────────────────────────────────────────────
@@ -593,7 +661,10 @@ describe.skipIf(!isLocalDb)('leaveGroup — frozen copies for cross-ledger links
       amount: 1200, category: 'housing', paidBy: ids.B, splitType: 'all_mine' as const, description: `${T} rule edited`,
       intervalMonths: 1, dayOfMonth: 1, startsOn: '2026-01-01', endsOn: null,
     }
-    expect(await recurringExpense.updateRule({ ...base, id: ids.reB, assetId: houseCopy })).toEqual({ ok: true, data: { id: ids.reB } })
+    // updateRule also returns the recomputed nextOccurrenceAt; this assertion
+    // predated that and failed on main before #1611 as well.
+    expect(await recurringExpense.updateRule({ ...base, id: ids.reB, assetId: houseCopy }))
+      .toEqual({ ok: true, data: { id: ids.reB, nextOccurrenceAt: expect.any(String) } })
     const [r] = await db.select().from(recurringExpenseRules).where(eq(recurringExpenseRules.id, ids.reB))
     expect(r.amount).toBe(1200)
     expect(r.assetId).toBe(houseCopy)
@@ -606,7 +677,7 @@ describe.skipIf(!isLocalDb)('leaveGroup — frozen copies for cross-ledger links
     expect(await recurringIncome.updateRule({
       id: ids.riA, amount: 2100, category: 'other', recipientId: ids.A,
       intervalMonths: 1, dayOfMonth: 1, startsOn: '2026-01-01', endsOn: null, assetId: insCopy,
-    })).toEqual({ ok: true, data: { id: ids.riA } })
+    })).toEqual({ ok: true, data: { id: ids.riA, nextOccurrenceAt: expect.any(String) } })
   })
 
   it('resumeRule on a frozen-linked rule is refused (expense + income)', async () => {

@@ -1015,10 +1015,12 @@ export const en: Translations = {
             'The balance must be settled to zero before you can leave',
             'Cars, insurance, and houses owned by {memberB} go with them',
             'Children, pets, and plants have no owner field, so they stay in the original ledger',
-            'Income and expenses split by "who paid / who received"',
+            'Income, expenses, settlements and monthly review notes stay whole in this ledger, and can still be looked back on after leaving',
             'Any pending invite links to this ledger become invalid',
             'The original ledger reverts to solo mode, kept by {memberA}',
           ],
+          exportHint: 'Want your own copy of the expenses? You can export them before you leave.',
+          exportCta: 'Export expenses first',
         },
         card4: {
           title: 'Are you sure this is what both of you want?',
@@ -1157,7 +1159,7 @@ export const en: Translations = {
     partnerLeftHeading: '{partner} has left',
     partnerLeftBody: "Everything until now is still here. From this point on, this ledger is just for you.",
     welcomeSoloHeading: 'Welcome back to one person',
-    welcomeSoloBody: 'Your ledger came with you, all of it. Take your time from here.',
+    welcomeSoloBody: 'Earlier records stay in the ledger you shared, and you can look back any time. Take your time from here.',
     // TODO(i18n): native review pending (#1016) — MT-quality draft.
     removedPartnerHeading: 'Back to one person',
     removedPartnerBody: 'Your ledger stays, all of it. Take your time from here.',
@@ -2110,8 +2112,8 @@ export const en: Translations = {
     sectionRetentionTitle: 'Data retention',
     sectionRetentionBody: 'Your account data is retained for as long as your account remains active. Transactions you delete are kept as soft-deleted records for about a year, then cleared automatically. When you request account deletion from the settings page there is a 14-day grace period (calendar days, not business days) during which you can cancel at any time; after that it runs automatically. What happens then depends on whether the ledger is yours alone or shared with a partner:',
     sectionRetentionItems: [
-      'A solo ledger: the whole ledger goes — transactions, settlements, recurring rules, aibutsu and trip records are all removed, along with your profile (name, avatar, email).',
-      "A shared ledger: the ledger stays with your partner. The transactions, settlements, aibutsu records and monthly review notes the two of you wrote together remain in their ledger; we do not remove them on your behalf, because those records are theirs as well. Your sign-in identity is deleted (Google / Apple account link, email, avatar, push devices), and your name appears in their ledger as “a partner who left”.",
+      'A solo ledger: the whole ledger goes — transactions, settlements, recurring rules, aibutsu and trip records are all removed, along with your profile (name, avatar, email). If this ledger was once shared and your partner has since left, the records of your time together are deleted with it, and they can no longer look back at them.',
+      "A shared ledger: the ledger stays with your partner. The transactions, settlements, aibutsu records and monthly review notes the two of you wrote together remain in their ledger; we do not remove them on your behalf, because those records are theirs as well. Your sign-in identity is deleted (Google / Apple account link, email, avatar, push devices), and your name appears in their ledger as “a partner who left”. The same applies to a ledger you left earlier: the records you wrote during that time stay in your partner's ledger.",
       'If you would like the content in a shared ledger removed as well, talk it over with your partner before deleting your account, or write to us first.',
       'Data you delete (including what is removed when you delete your account) can remain in encrypted backups made before the deletion for up to about 60 days, and disappears as those backups are cleared. We do not use backups to bring it back; backups are only used if the whole service has to be restored, and in that case we apply those deletions again.',
     ],

@@ -89,6 +89,7 @@ const {
   houseDetails,
   insuranceDetails,
   fuelLogs,
+  recurringExpenseRules,
 } = await import('@/lib/db/schema')
 const { leaveGroup } = await import('@/actions/membership')
 const { and, eq, inArray, isNotNull } = await import('drizzle-orm')
@@ -111,11 +112,12 @@ interface SeedRefs {
   oldEpochId: string
   assetIds: string[]
   cashTxIds: string[]
+  ruleIds: string[]
   newGroupId?: string
 }
 
 function emptyRefs(userAId: string, userBId: string, oldGroupId: string, oldEpochId: string): SeedRefs {
-  return { userAId, userBId, oldGroupId, oldEpochId, assetIds: [], cashTxIds: [] }
+  return { userAId, userBId, oldGroupId, oldEpochId, assetIds: [], cashTxIds: [], ruleIds: [] }
 }
 
 async function seedDuoGroup(): Promise<SeedRefs> {
@@ -148,6 +150,9 @@ async function seedDuoGroup(): Promise<SeedRefs> {
 async function cleanup(refs: SeedRefs) {
   if (refs.cashTxIds.length) {
     await db.delete(cashTransactions).where(inArray(cashTransactions.id, refs.cashTxIds))
+  }
+  if (refs.ruleIds.length) {
+    await db.delete(recurringExpenseRules).where(inArray(recurringExpenseRules.id, refs.ruleIds))
   }
   // #1442 — frozen copies (and fuel logs copied onto them) leaveGroup created
   // in either ledger. Records pointing at them are gone by now.
@@ -186,7 +191,7 @@ describe.skipIf(!isLocalDb)('leaveGroup — leaver with owned 愛物 (#1440)', (
     }
   })
 
-  it('moves a single owned car (and its linked expense) without 22P02', async () => {
+  it('moves a single owned car without 22P02; its expense stays, on a frozen copy (#1611)', async () => {
     const refs = await seedDuoGroup()
     activeRefs = refs
 
@@ -211,12 +216,18 @@ describe.skipIf(!isLocalDb)('leaveGroup — leaver with owned 愛物 (#1440)', (
     const [movedAsset] = await db.select().from(assets).where(eq(assets.id, car.id)).limit(1)
     expect(movedAsset.groupId).toBe(result.groupId)
 
-    const [movedTx] = await db.select().from(cashTransactions).where(eq(cashTransactions.id, carTx.id)).limit(1)
-    expect(movedTx.groupId).toBe(result.groupId)
-    expect(movedTx.assetId).toBe(car.id)
+    // #1611: the leaver's record stays in the old ledger; the car it pointed
+    // at moved, so it is re-pointed at a frozen copy in the old ledger.
+    const [keptTx] = await db.select().from(cashTransactions).where(eq(cashTransactions.id, carTx.id)).limit(1)
+    expect(keptTx.groupId).toBe(refs.oldGroupId)
+    expect(keptTx.assetId).not.toBe(car.id)
+    const [carCopy] = await db.select().from(assets).where(eq(assets.id, keptTx.assetId!)).limit(1)
+    expect(carCopy.groupId).toBe(refs.oldGroupId)
+    expect(carCopy.frozenAt).not.toBeNull()
+    expect(carCopy.name).toBe('TEST_1440 car')
   })
 
-  it('moves car + house + insurance together, re-pointing a tx at a staying asset to a frozen copy (#1442)', async () => {
+  it('moves car + house + insurance together; records stay, a moving rule on a staying asset gets a frozen copy (#1442, #1611)', async () => {
     const refs = await seedDuoGroup()
     activeRefs = refs
 
@@ -255,10 +266,8 @@ describe.skipIf(!isLocalDb)('leaveGroup — leaver with owned 愛物 (#1440)', (
     }).returning({ id: cashTransactions.id })
     refs.cashTxIds.push(movingTx.id)
 
-    // Leaver-paid tx whose asset_id points at the asset that stays behind —
-    // must not be left dangling on a cross-group reference. Since #1442 it is
-    // re-pointed at a frozen copy of that asset in the leaver's new ledger
-    // (it used to be NULLed, losing the link).
+    // Leaver-paid tx whose asset_id points at the asset that stays behind.
+    // Since #1611 the record stays too, so the link stays as it is.
     const [danglingTx] = await db.insert(cashTransactions).values({
       groupId: refs.oldGroupId, paidBy: refs.userBId, assetId: stayingCar.id,
       amount: 300, splitType: 'all_mine',
@@ -266,6 +275,16 @@ describe.skipIf(!isLocalDb)('leaveGroup — leaver with owned 愛物 (#1440)', (
       transactedAt: new Date('2026-05-01T00:00:00Z'),
     }).returning({ id: cashTransactions.id })
     refs.cashTxIds.push(danglingTx.id)
+
+    // Leaver's recurring rule on the staying car: the rule moves with the
+    // leaver, so it must not be left on a cross-ledger reference. It is
+    // re-pointed at a frozen copy in the leaver's new ledger (#1442).
+    const [movingRule] = await db.insert(recurringExpenseRules).values({
+      groupId: refs.oldGroupId, paidBy: refs.userBId, assetId: stayingCar.id,
+      amount: 300, splitType: 'all_mine', description: 'TEST_1440 parking', category: 'transit',
+      intervalMonths: 1, dayOfMonth: 1, startsOn: '2026-01-01', nextOccurrenceAt: '2026-11-01',
+    }).returning({ id: recurringExpenseRules.id })
+    refs.ruleIds.push(movingRule.id)
 
     mockUserId = refs.userBId
     const result = unwrapAction(await leaveGroup())
@@ -278,14 +297,24 @@ describe.skipIf(!isLocalDb)('leaveGroup — leaver with owned 愛物 (#1440)', (
     const [staying] = await db.select().from(assets).where(eq(assets.id, stayingCar.id)).limit(1)
     expect(staying.groupId).toBe(refs.oldGroupId)
 
-    const [movedTx] = await db.select().from(cashTransactions).where(eq(cashTransactions.id, movingTx.id)).limit(1)
-    expect(movedTx.groupId).toBe(result.groupId)
-    expect(movedTx.assetId).toBe(house.id)
+    // #1611: the leaver's record on the moving house stays in the old
+    // ledger, re-pointed at a frozen copy of the house there.
+    const [keptTx] = await db.select().from(cashTransactions).where(eq(cashTransactions.id, movingTx.id)).limit(1)
+    expect(keptTx.groupId).toBe(refs.oldGroupId)
+    const [houseCopy] = await db.select().from(assets).where(eq(assets.id, keptTx.assetId!)).limit(1)
+    expect(houseCopy.groupId).toBe(refs.oldGroupId)
+    expect(houseCopy.frozenAt).not.toBeNull()
+    expect(houseCopy.name).toBe('TEST_1440 house')
 
-    const [repointedTx] = await db.select().from(cashTransactions).where(eq(cashTransactions.id, danglingTx.id)).limit(1)
-    expect(repointedTx.groupId).toBe(result.groupId)
-    expect(repointedTx.assetId).not.toBe(stayingCar.id)
-    const [copy] = await db.select().from(assets).where(eq(assets.id, repointedTx.assetId!)).limit(1)
+    const [keptDangling] = await db.select().from(cashTransactions).where(eq(cashTransactions.id, danglingTx.id)).limit(1)
+    expect(keptDangling.groupId).toBe(refs.oldGroupId)
+    expect(keptDangling.assetId).toBe(stayingCar.id)
+
+    const [rule] = await db.select().from(recurringExpenseRules).where(eq(recurringExpenseRules.id, movingRule.id)).limit(1)
+    expect(rule.groupId).toBe(result.groupId)
+    expect(rule.assetId).not.toBe(stayingCar.id)
+    expect(rule.pausedAt).not.toBeNull()
+    const [copy] = await db.select().from(assets).where(eq(assets.id, rule.assetId!)).limit(1)
     expect(copy.groupId).toBe(result.groupId)
     expect(copy.frozenAt).not.toBeNull()
     expect(copy.type).toBe('car')

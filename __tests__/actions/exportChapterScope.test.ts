@@ -8,13 +8,14 @@ import { resolve } from 'node:path'
 // One ledger, four people, four chapters:
 //
 //   G:  [A+B] ──B leaves──▶ [A solo] ──C joins──▶ [A+C]
-//   GB: (B's own rows carried over) [B solo] ──D joins──▶ [B+D]
+//   GB: [B solo] ──D joins──▶ [B+D]
 //
-// The leave is the real `leaveGroup` action: it carries B's rows into GB with
-// their original `created_at`, which predates GB's first chapter. Expected:
+// The leave is the real `leaveGroup` action. Since #1611 it moves none of
+// B's records: the A+B chapter stays whole in G, B's rows included. Expected:
 //   - export / suggestions cover exactly the chapters the viewer was in:
-//       A@G  → every G row          C@G  → only the A+C chapter
-//       B@GB → B's carried rows + B+D   D@GB → only the B+D chapter
+//       A@G  → every G row (the whole A+B chapter)   C@G  → only the A+C chapter
+//       B@G  → exactly the A+B chapter               B@GB → B solo + B+D only
+//       D@GB → only the B+D chapter
 //   - import history / count list only the open chapter's batches.
 //
 // Writes whole fixtures, so it only runs against a local throwaway database
@@ -83,6 +84,7 @@ const { leaveGroup } = await import('@/actions/membership')
 const { getImportHistory, countImportBatches } = await import('@/actions/import')
 const { getDescriptionSuggestions } = await import('@/actions/transaction')
 const { listAllActiveCashTransactionsForExport } = await import('@/lib/db/queries/transactions')
+const { viewerChaptersClause } = await import('@/lib/db/queries/_predicates')
 const { and, eq, inArray, isNull } = await import('drizzle-orm')
 const { unwrapAction } = await import('@/lib/action-errors')
 
@@ -150,7 +152,7 @@ describe.skipIf(!isLocalDb)('chapter scope: export, suggestions, import history'
     await addTx(ids.G, ids.B, `${tag} B in AB`, new Date(t0.getTime() + D))
     batchIds.ab = await addBatch(ids.G, ids.A, `${tag}_ab.csv`, new Date(t0.getTime() + D))
 
-    // B leaves (real action): B's row moves to a new group GB.
+    // B leaves (real action). Since #1611 B's row stays in G; GB starts empty.
     const left = unwrapAction(await as(ids.B, () => leaveGroup()))
     ids.GB = left.groupId
     const [leaveEpoch] = await db.select({ startedAt: groupEpochs.startedAt }).from(groupEpochs)
@@ -166,6 +168,9 @@ describe.skipIf(!isLocalDb)('chapter scope: export, suggestions, import history'
     await addTx(ids.G, ids.C, `${tag} C in AC`, new Date(J + H))
     await addTx(ids.G, ids.A, `${tag} A in AC`, new Date(J + 2 * H))
     batchIds.ac = await addBatch(ids.G, ids.C, `${tag}_ac.csv`, new Date(J + H))
+
+    // B's own solo chapter in GB.
+    await addTx(ids.GB, ids.B, `${tag} B solo`, new Date(L + H))
 
     // D joins GB → chapter B+D.
     const K = L + 3 * H
@@ -184,13 +189,19 @@ describe.skipIf(!isLocalDb)('chapter scope: export, suggestions, import history'
     await db.delete(profiles).where(inArray(profiles.id, [ids.A, ids.B, ids.C, ids.D]))
   })
 
-  it('fixture: the leave carried B\'s row into GB, older than GB\'s first chapter', async () => {
-    const [moved] = await db.select({ groupId: cashTransactions.groupId, createdAt: cashTransactions.createdAt })
+  it('fixture: the leave kept B\'s row in G, inside the closed A+B chapter (#1611)', async () => {
+    const [kept] = await db.select({ groupId: cashTransactions.groupId, createdAt: cashTransactions.createdAt })
       .from(cashTransactions).where(eq(cashTransactions.description, `${tag} B in AB`))
-    expect(moved.groupId).toBe(ids.GB)
-    const [first] = await db.select({ startedAt: groupEpochs.startedAt }).from(groupEpochs)
-      .where(eq(groupEpochs.groupId, ids.GB)).orderBy(groupEpochs.startedAt).limit(1)
-    expect(moved.createdAt.getTime()).toBeLessThan(first.startedAt.getTime())
+    expect(kept.groupId).toBe(ids.G)
+    const [ab] = await db.select().from(groupEpochs)
+      .where(and(eq(groupEpochs.groupId, ids.G), eq(groupEpochs.memberBId, ids.B)))
+    expect(ab.endedAt).not.toBeNull()
+    expect(kept.createdAt.getTime()).toBeGreaterThanOrEqual(ab.startedAt.getTime())
+    expect(kept.createdAt.getTime()).toBeLessThan(ab.endedAt!.getTime())
+    // Nothing of G was carried into GB.
+    const gb = await db.select({ d: cashTransactions.description }).from(cashTransactions)
+      .where(eq(cashTransactions.groupId, ids.GB))
+    expect(gb.map((r) => r.d).sort()).toEqual([`${tag} B solo`, `${tag} D in BD`])
   })
 
   describe('export', () => {
@@ -198,22 +209,32 @@ describe.skipIf(!isLocalDb)('chapter scope: export, suggestions, import history'
       expect(await exportedDescriptions(ids.G, ids.C)).toEqual([`${tag} A in AC`, `${tag} C in AC`])
     })
 
-    it('a member of every chapter gets every row of the group', async () => {
+    it('a member of every chapter gets every row of the group, the whole A+B chapter included', async () => {
       expect(await exportedDescriptions(ids.G, ids.A)).toEqual(
-        [`${tag} A in AB`, `${tag} A in AC`, `${tag} A solo`, `${tag} C in AC`],
+        [`${tag} A in AB`, `${tag} A in AC`, `${tag} A solo`, `${tag} B in AB`, `${tag} C in AC`],
       )
     })
 
-    it('the leaver keeps their own carried rows in the new group', async () => {
-      expect(await exportedDescriptions(ids.GB, ids.B)).toEqual([`${tag} B in AB`, `${tag} D in BD`])
+    it('the leaver\'s export from the new ledger contains none of the A+B chapter\'s rows', async () => {
+      expect(await exportedDescriptions(ids.GB, ids.B)).toEqual([`${tag} B solo`, `${tag} D in BD`])
     })
 
-    it('a partner who joins the leaver\'s new group does not get the carried rows', async () => {
+    it('a partner who joins the leaver\'s new group gets only their own chapter', async () => {
       expect(await exportedDescriptions(ids.GB, ids.D)).toEqual([`${tag} D in BD`])
     })
 
-    it('a former member gets only the chapter they were in', async () => {
-      expect(await exportedDescriptions(ids.G, ids.B)).toEqual([`${tag} A in AB`])
+    it('a former member gets exactly the chapter they were in, both people\'s rows', async () => {
+      expect(await exportedDescriptions(ids.G, ids.B)).toEqual([`${tag} A in AB`, `${tag} B in AB`])
+    })
+
+    it('viewerChaptersClause(G, B) matches exactly the A+B chapter\'s rows', async () => {
+      const rows = await db.select({ d: cashTransactions.description }).from(cashTransactions)
+        .where(and(
+          eq(cashTransactions.groupId, ids.G),
+          viewerChaptersClause('"CashTransactions"."created_at"', ids.G, ids.B),
+        ))
+      expect(rows.map((r) => r.d).filter((d) => d.startsWith(tag)).sort())
+        .toEqual([`${tag} A in AB`, `${tag} B in AB`])
     })
 
     it('someone who was never in the group gets nothing', async () => {
@@ -229,9 +250,9 @@ describe.skipIf(!isLocalDb)('chapter scope: export, suggestions, import history'
       expect(mine(list)).toEqual([`${tag} A in AC`, `${tag} C in AC`])
     })
 
-    it('the leaver is offered their carried descriptions; the new partner is not', async () => {
+    it('the leaver is offered only the new ledger\'s chapters; the new partner only theirs', async () => {
       expect(mine(unwrapAction(await as(ids.B, () => getDescriptionSuggestions()))))
-        .toEqual([`${tag} B in AB`, `${tag} D in BD`])
+        .toEqual([`${tag} B solo`, `${tag} D in BD`])
       expect(mine(unwrapAction(await as(ids.D, () => getDescriptionSuggestions()))))
         .toEqual([`${tag} D in BD`])
     })

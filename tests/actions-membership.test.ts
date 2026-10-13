@@ -24,6 +24,7 @@ import {
   removePartner,
 } from '@/actions/membership'
 import { LOCALE_COOKIE, SUPPORTED_LOCALES, dictionaries } from '@/lib/i18n/t'
+import { cashTransactions, incomeTransactions, settlements, monthlyReviewMessages } from '@/lib/db/schema'
 
 const VIEWER_A = { id: 'user-a', email: 'a@example.com' }
 const VIEWER_B = { id: 'user-b', email: 'b@example.com' }
@@ -215,10 +216,13 @@ describe('leaveGroup', () => {
   // with their links untouched, and every link left crossing into the other
   // ledger is re-pointed at a frozen copy afterwards (freezeCrossLedgerLinks;
   // real-DB coverage in __tests__/actions/leaveGroup.frozenAssetCopy.test.ts).
+  // #1611: only live items move (the two rule tables and their unresolved
+  // occurrences); the four record tables are never re-grouped, and resolved
+  // occurrences of the leaver's rules are deleted, not moved.
   // The mocked db doesn't parse SQL, so assert on the generated query via the
   // real PgDialect: no moving UPDATE writes asset_id, the moving-asset ids are
   // read under the lock, and no JS array is ever bound as one param (#1440).
-  it('moves rows without NULLing asset links; cross-ledger links go to the frozen-copy step (#1442)', async () => {
+  it('moves only rules, never records; cross-ledger links go to the frozen-copy step (#1442, #1611)', async () => {
     setMockUser(VIEWER_B)
     queueDbResult([duoGroup()])
     queueDbResult([{ memberA: 'user-a', memberB: 'user-b' }])
@@ -238,9 +242,31 @@ describe('leaveGroup', () => {
 
     const dialect = new PgDialect()
     const queries = (mockDb.execute.mock.calls as unknown as [SQL][]).map(([arg]) => dialect.sqlToQuery(arg))
-    const moves = queries.filter((q) => /UPDATE "(CashTransactions|IncomeTransactions|RecurringExpenseRules|RecurringIncomeRules)"\s+SET group_id/.test(q.sql))
-    expect(moves).toHaveLength(4)
+    const moves = queries.filter((q) => /UPDATE "(RecurringExpenseRules|RecurringIncomeRules)"\s+SET group_id/.test(q.sql))
+    expect(moves).toHaveLength(2)
     for (const q of moves) expect(q.sql).not.toContain('asset_id')
+
+    // #1611: no SET group_id on any of the four record tables, raw SQL or builder.
+    for (const q of queries) {
+      expect(q.sql).not.toMatch(/UPDATE "(CashTransactions|IncomeTransactions|Settlements|MonthlyReviewMessages)"/)
+    }
+    const updatedTables = (mockDb.update.mock.calls as unknown as [unknown][]).map(([table]) => table)
+    for (const table of [cashTransactions, incomeTransactions, settlements, monthlyReviewMessages]) {
+      expect(updatedTables).not.toContain(table)
+    }
+
+    // Occurrences of the leaver's rules: resolved ones deleted, the rest moved.
+    for (const tbl of ['PendingExpenseOccurrences', 'PendingIncomeOccurrences']) {
+      const del = queries.filter((q) => q.sql.includes(`DELETE FROM "${tbl}"`))
+      expect(del, tbl).toHaveLength(1)
+      expect(del[0].sql).toContain('resolved_tx_id IS NOT NULL')
+      expect(del[0].params).toEqual(expect.arrayContaining(['grp-1', 'grp-new']))
+      const mv = queries.filter((q) => q.sql.includes(`UPDATE "${tbl}"`))
+      expect(mv, tbl).toHaveLength(1)
+      expect(mv[0].sql).toContain('resolved_tx_id IS NULL')
+      // Deleted before the move, so the move cannot carry a resolved one.
+      expect(queries.indexOf(del[0])).toBeLessThan(queries.indexOf(mv[0]))
+    }
 
     const freeze = queries.find((q) => q.sql.includes('WITH g(row_group, other_group)'))
     if (!freeze) throw new Error('frozen-copy pair query not found among mockDb.execute calls')

@@ -14,6 +14,10 @@ import { resolve } from 'node:path'
 // whole transaction. The fix short-circuits the CASE to `sql\`NULL\`` when
 // the array is empty.
 //
+// Since #1611 the leaver's records (cash, income, settlements) stay in the
+// old ledger; only the rules still move, which is what the statement path
+// exercises now.
+//
 // This suite touches the real dev DB because mocked-DB tests in `tests/`
 // cannot exercise the SQL syntax path — the bug only surfaces when Postgres
 // actually parses the query.
@@ -256,20 +260,23 @@ describe('leaveGroup — leaver with no owned 愛物 (#139)', () => {
     expect(oldGroup.memberB).toBeNull()
     expect(oldGroup.pendingSwapProposedBy).toBeNull()
 
-    // ── Assert: leaver's records moved to new group with asset_id = NULL ──
-    const [movedCashTx] = await db.select().from(cashTransactions)
+    // ── Assert (#1611): the leaver's records stay in the old ledger, in the
+    // duo chapter the leave closed. Only live items (rules) move. ──
+    const [keptCashTx] = await db.select().from(cashTransactions)
       .where(eq(cashTransactions.id, cashTx.id)).limit(1)
-    expect(movedCashTx.groupId).toBe(result.groupId)
-    expect(movedCashTx.assetId).toBeNull()
+    expect(keptCashTx.groupId).toBe(refs.oldGroupId)
+    expect(keptCashTx.paidBy).toBe(refs.userBId)
+    expect(keptCashTx.assetId).toBeNull()
 
-    const [movedIncomeTx] = await db.select().from(incomeTransactions)
+    const [keptIncomeTx] = await db.select().from(incomeTransactions)
       .where(eq(incomeTransactions.id, incomeTx.id)).limit(1)
-    expect(movedIncomeTx.groupId).toBe(result.groupId)
-    expect(movedIncomeTx.assetId).toBeNull()
+    expect(keptIncomeTx.groupId).toBe(refs.oldGroupId)
+    expect(keptIncomeTx.recipientId).toBe(refs.userBId)
+    expect(keptIncomeTx.assetId).toBeNull()
 
-    const [movedSettlement] = await db.select().from(settlements)
+    const [keptSettlement] = await db.select().from(settlements)
       .where(eq(settlements.id, settlement.id)).limit(1)
-    expect(movedSettlement.groupId).toBe(result.groupId)
+    expect(keptSettlement.groupId).toBe(refs.oldGroupId)
 
     const [movedExpenseRule] = await db.select().from(recurringExpenseRules)
       .where(eq(recurringExpenseRules.id, expenseRule.id)).limit(1)

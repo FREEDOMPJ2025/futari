@@ -1374,6 +1374,11 @@ export type Translations = {
           title: string
           intro: string
           bullets: string[]
+          /** #1611 export-first hint. Expenses only: the export reads
+           *  CashTransactions only until #1460; never imply income,
+           *  settlements or messages can be exported. */
+          exportHint: string
+          exportCta: string
         }
         card4: {
           title: string
@@ -4345,10 +4350,12 @@ export const zhTW: Translations = {
             '帳目要先結清為 0，才能離開',
             '{memberB} 名下的車、保單、房子會跟著走',
             '孩子、寵物、植物沒有歸屬欄位，會留在原帳本',
-            '收支記錄依「誰付的／誰收的」分配',
+            '收支、結算和月回顧留言會完整留在這本帳本，離開後仍能回頭查看',
             '尚未接受的邀請連結會失效',
             '原帳本變回單人狀態，由 {memberA} 繼續使用',
           ],
+          exportHint: '想自己留一份支出紀錄，離開前可以先匯出。',
+          exportCta: '先匯出支出紀錄',
         },
         card4: {
           title: '確定這些都是你跟對方一起想要的嗎？',
@@ -4486,7 +4493,7 @@ export const zhTW: Translations = {
     partnerLeftHeading: '{partner} 已離開',
     partnerLeftBody: '到目前為止的記錄都還在。從這裡開始，是你一個人的時光。',
     welcomeSoloHeading: '歡迎回到一個人',
-    welcomeSoloBody: '帳本完整地跟著你過來。從今天起，可以慢慢來。',
+    welcomeSoloBody: '先前的紀錄留在原本的帳本，隨時可以回頭看。從今天起，可以慢慢來。',
     removedPartnerHeading: '回到一個人',
     removedPartnerBody: '帳本完整地留著。從今天起，可以慢慢來。',
     dismissAria: '關閉',
@@ -5431,8 +5438,8 @@ export const zhTW: Translations = {
     sectionRetentionTitle: '資料保留期限',
     sectionRetentionBody: '您的帳號資料在帳號存續期間持續保存。您刪除的交易紀錄會保留軟刪除標記約 1 年，之後由系統自動清除。在設定頁提出刪除帳號後，有 14 天的緩衝期（日曆天，不是工作天），期間隨時可以取消；期滿由系統自動執行。執行時會發生什麼，取決於這本帳本是您一個人的，還是和伴侶共用的：',
     sectionRetentionItems: [
-      '一個人的帳本：整本一起刪除——交易、結算、定期收支規則、愛物與旅行紀錄都會移除，您的個人資料（姓名、頭像、Email）也一併刪除。',
-      '兩人共用的帳本：帳本會留給對方。你們一起記下的交易、結算、愛物紀錄與月回顧留言會留在對方的帳本裡，我們不會單方面替您刪掉——那些紀錄同時也是對方的。您的登入身分會刪除（Google／Apple 帳號連結、Email、頭像、推播裝置），您的名字在對方的帳本裡會顯示為「已離開的夥伴」。',
+      '一個人的帳本：整本一起刪除——交易、結算、定期收支規則、愛物與旅行紀錄都會移除，您的個人資料（姓名、頭像、Email）也一併刪除。如果這本帳本曾經兩人共用、對方已經離開，你們那段時光的紀錄也會一起刪除，對方之後無法再回頭查看。',
+      '兩人共用的帳本：帳本會留給對方。你們一起記下的交易、結算、愛物紀錄與月回顧留言會留在對方的帳本裡，我們不會單方面替您刪掉——那些紀錄同時也是對方的。您的登入身分會刪除（Google／Apple 帳號連結、Email、頭像、推播裝置），您的名字在對方的帳本裡會顯示為「已離開的夥伴」。你先前離開過的帳本也一樣：你在那段時光記下的紀錄會留在對方的帳本。',
       '如果您希望共用帳本裡的內容也一併移除，請在刪除帳號前與伴侶談過，或先寫信告訴我們。',
       '已刪除的資料（包括刪除帳號時移除的內容），在刪除前就做好的加密備份裡最多還會留存約 60 天，之後隨舊備份清除而消失。這段期間我們不會用備份把它們找回來；只有在整個服務需要從備份還原時才會用到備份，而那時我們會重新套用這些刪除。',
     ],

@@ -31,6 +31,13 @@ import { resolve } from 'node:path'
 // monthlyStatsByAsset, R4 getFuelLogById, R6 the three insured-child joins,
 // and the reveal actions (frozen excluded).
 //
+// Since #1611 a leave moves no records, only live items (rules, owned cars /
+// policies / houses). Copies in a leaver's new ledger therefore come from
+// moving rules and policies; the R3 / R4 checks there need a record (and a
+// fuel log) on the copy, which the fixture inserts directly — the shape a
+// pre-#1611 leave left behind (the leaver's records carried over on a copy),
+// so the visibility rule is still exercised on every read path.
+//
 // Local throwaway database only; refuses to run against anything that is not
 // localhost. Start one with:
 //   docker run -d --name pg-1484 -e POSTGRES_PASSWORD=pg -p 127.0.0.1:55484:5432 postgres:17
@@ -115,6 +122,7 @@ const a = {
 }
 const f = { fl1: '', flL: '', flC: '' }
 const tx = { txA_carB: '', txB_house: '', txC: '', txB2: '', txY_carX: '', txX_houseY: '' }
+const rule = { rB_house: '', rB2: '', rX_houseY: '' }
 const frozenAt: Record<string, Date> = {}
 
 async function nowText(): Promise<string> {
@@ -175,6 +183,15 @@ async function cashTx(groupId: string, paidBy: string, assetId: string | null, e
   return t.id
 }
 
+/** A recurring expense rule paid by `paidBy`, linked to `assetId` (a live item that moves with its payer). */
+async function expenseRule(groupId: string, paidBy: string, assetId: string) {
+  const [r] = await db.insert(recurringExpenseRules).values({
+    groupId, paidBy, assetId, amount: 1000, splitType: 'all_mine', description: `${T} rule`, category: 'housing',
+    intervalMonths: 1, dayOfMonth: 1, startsOn: '2026-01-01', nextOccurrenceAt: '2026-11-01',
+  }).returning({ id: recurringExpenseRules.id })
+  return r.id
+}
+
 async function statName(groupId: string, assetId: string, viewerId: string) {
   const rows = await monthlyStatsByAsset(groupId, undefined, everything, undefined, allTime, viewerId)
   const row = rows.find((r) => r.key === assetId)
@@ -226,10 +243,12 @@ async function seed() {
   }).returning({ id: fuelLogs.id })
   f.fl1 = fl.id
   tx.txA_carB = await cashTx(g.L, u.A, a.carB, { fuelLogId: f.fl1 })
-  // A's house (stays) used by B's record → copy in NB.
+  // A's house (stays) used by B's record (#1611: stays with it, no copy) and
+  // by B's rule (moves with B) → copy in NB.
   a.houseA = await mk(g.L, { type: 'house', name: `${T} A house` })
   await db.insert(houseDetails).values({ assetId: a.houseA, owner: u.A })
   tx.txB_house = await cashTx(g.L, u.B, a.houseA)
+  rule.rB_house = await expenseRule(g.L, u.B, a.houseA)
   // A child (stays) insured by B's policy (moves) → insured-child copy in NB.
   a.childA = await mk(g.L, { type: 'child', name: `${T} child` })
   await db.insert(childDetails).values({ assetId: a.childA, nickname: 'n' })
@@ -247,6 +266,7 @@ async function seed() {
   await db.insert(houseDetails).values({ assetId: a.houseY, owner: u.Y })
   tx.txY_carX = await cashTx(g.M, u.Y, a.carX)
   tx.txX_houseY = await cashTx(g.M, u.X, a.houseY)
+  rule.rX_houseY = await expenseRule(g.M, u.X, a.houseY)
 }
 
 async function cleanup() {
@@ -283,6 +303,16 @@ describe.skipIf(!isLocalDb)('#1484 — frozen copies resolve only for members at
     frozenAt.L = kL.frozenAt!
     a.kHouseNB = (await copyIn(g.NB, `${T} A house`)).id
     a.kChildNB = (await copyIn(g.NB, `${T} child`)).id
+    // #1611: B's record stayed in L on the original house; B's rule moved and
+    // points at the copy. A record in NB on the copy (pre-#1611 shape) gives
+    // R3 a row to resolve.
+    const [keptB] = await db.select().from(cashTransactions).where(eq(cashTransactions.id, tx.txB_house))
+    expect(keptB.groupId).toBe(g.L)
+    expect(keptB.assetId).toBe(a.houseA)
+    const [movedRule] = await db.select().from(recurringExpenseRules).where(eq(recurringExpenseRules.id, rule.rB_house))
+    expect(movedRule.groupId).toBe(g.NB)
+    expect(movedRule.assetId).toBe(a.kHouseNB)
+    await cashTx(g.NB, u.B, a.kHouseNB)
     const [t] = await db.select().from(cashTransactions).where(eq(cashTransactions.id, tx.txA_carB))
     expect(t.assetId).toBe(a.kL)
     f.flL = t.fuelLogId!
@@ -408,10 +438,18 @@ describe.skipIf(!isLocalDb)('#1484 — frozen copies resolve only for members at
       const kC = await copyIn(g.NC, `${T} B car`)
       a.kC = kC.id
       frozenAt.C = kC.frozenAt!
+      // #1611: C's record stays in L, still on the copy and its fuel-log copy;
+      // the copy-of-copy in NC comes from C's moving policy.
       const [t] = await db.select().from(cashTransactions).where(eq(cashTransactions.id, tx.txC))
-      expect(t.groupId).toBe(g.NC)
-      expect(t.assetId).toBe(a.kC)
-      f.flC = t.fuelLogId!
+      expect(t.groupId).toBe(g.L)
+      expect(t.assetId).toBe(a.kL)
+      expect(t.fuelLogId).toBe(f.flL)
+      // A record and fuel log in NC on the copy-of-copy (pre-#1611 shape) for R3 / R4.
+      const [flC] = await db.insert(fuelLogs).values({
+        assetId: a.kC, liters: '30.00', fuelType: '95', odometer: 1000, station: `${T} st`, loggedAt: new Date('2026-05-01T00:00:00Z'),
+      }).returning({ id: fuelLogs.id })
+      f.flC = flC.id
+      await cashTx(g.NC, u.C, a.kC, { fuelLogId: f.flC })
     })
 
     it('the copy in C\'s new ledger keeps the source\'s frozen_at (not C\'s boundary)', async () => {
@@ -449,9 +487,14 @@ describe.skipIf(!isLocalDb)('#1484 — frozen copies resolve only for members at
   it('(4) B rejoins L, re-links the copy, leaves again → B\'s new copy resolves for B', async () => {
     await join(g.L, u.B)
     tx.txB2 = await cashTx(g.L, u.B, a.kL)
+    // As an edit would leave it: B's rule on the copy (rules move, records stay).
+    rule.rB2 = await expenseRule(g.L, u.B, a.kL)
     g.NB2 = await leaveAs(u.B)
     const k = await copyIn(g.NB2, `${T} B car`)
     a.kNB2 = k.id
+    expect((await db.select().from(cashTransactions).where(eq(cashTransactions.id, tx.txB2)))[0].groupId).toBe(g.L)
+    expect((await db.select().from(recurringExpenseRules).where(eq(recurringExpenseRules.id, rule.rB2)))[0].assetId).toBe(a.kNB2)
+    await cashTx(g.NB2, u.B, a.kNB2)
     const [nb2First] = await db.select().from(groupEpochs).where(eq(groupEpochs.groupId, g.NB2)).limit(1)
     expect(k.frozenAt!.getTime()).toBe(nb2First.startedAt.getTime())
     expect(k.frozenAt!.getTime()).toBeGreaterThan(frozenAt.L.getTime())
