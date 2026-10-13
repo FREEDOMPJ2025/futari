@@ -7,7 +7,8 @@
 // stopping after `through` (e.g. '0079'). `dropStandInDb` removes it.
 //
 // What is modelled, and why each piece matters (#1518):
-//   - roles anon / authenticated / service_role, auth.users, auth.uid() that
+//   - roles anon / authenticated / service_role, auth.users, auth.identities
+//     (0081 / 0082 grant on it and build a view over it), auth.uid() that
 //     reads `request.jwt.claims` the way Supabase's does, cron.schedule /
 //     cron.unschedule, public.rls_auto_enable(), the supabase_realtime
 //     publication — the objects migrations reference.
