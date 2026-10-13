@@ -930,7 +930,7 @@ export const zhCN: Translations = {
     sectionApp: '应用',
     offlineBrowsing: '离线浏览',
     offlineHintOff: '在无网络时看不到历史记录。开启后，最近浏览过的页面会存在这台设备上。',
-    offlineHintOn: '无网络时可查看最近一次连接时的记录。数据只存在这台设备，登出时会自动清除。',
+    offlineHintOn: '无网络时可查看最近一次连接时的记录。数据只存在这台设备；登出时会一并关闭并清除，重新登录后需要再开启一次。',
     offlineToggling: '处理中…',
     offlineToggleError: '无法切换，请稍后再试',
     offlineUnsupported: '当前的浏览器不支持离线浏览',

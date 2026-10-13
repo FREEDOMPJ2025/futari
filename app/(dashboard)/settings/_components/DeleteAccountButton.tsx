@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { requestAccountDeletion } from '@/actions/account'
 import { ConfirmModal } from '@/app/(dashboard)/_components/ConfirmModal'
-import { clearDynamicCache } from '@/lib/offline/swControl'
+import { beginOfflineOff, createSequence, finishOfflineOff } from '@/lib/offline/swControl'
 import { useTranslations } from '@/lib/i18n/client'
 
 /**
@@ -21,8 +21,14 @@ export function DeleteAccountButton() {
   async function handleConfirm() {
     setConfirming(false)
     setPending(true)
-    await clearDynamicCache().catch(() => {})
+    // #1673 — same full off as logout: marker, pref off, unregister first
+    // (preempting the offline queue), then the action, then the clears. The
+    // clears and the navigation run even when the deletion fails ({ok:false}
+    // or a throw).
+    const offSeq = createSequence()
+    await beginOfflineOff({ reason: 'account-deletion', seq: offSeq })
     await requestAccountDeletion().catch(() => {})
+    await finishOfflineOff({ seq: offSeq })
     window.location.replace('/')
   }
 

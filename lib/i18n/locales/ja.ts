@@ -940,7 +940,7 @@ export const ja: Translations = {
     sectionApp: 'アプリ',
     offlineBrowsing: 'オフライン閲覧',
     offlineHintOff: 'オフライン時には履歴を表示できません。オンにすると、最近閲覧したページがこの端末に保存されます。',
-    offlineHintOn: 'オフライン時に最後の接続時の記録を閲覧できます。データはこの端末にのみ保存され、ログアウト時に削除されます。',
+    offlineHintOn: 'オフライン時に最後の接続時の記録を閲覧できます。データはこの端末にのみ保存されます。ログアウトするとオフになって削除されるため、再ログイン後にもう一度オンにしてください。',
     offlineToggling: '処理中…',
     offlineToggleError: '切り替えできませんでした。少し時間をおいて再度お試しください。',
     offlineUnsupported: 'このブラウザはオフライン閲覧に対応していません',

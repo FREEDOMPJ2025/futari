@@ -939,7 +939,7 @@ export const en: Translations = {
     sectionApp: 'App',
     offlineBrowsing: 'Offline browsing',
     offlineHintOff: "When offline, history isn't available. Turn this on to keep recently-viewed pages on this device.",
-    offlineHintOn: 'When offline, you can view records from your last connection. Data lives on this device only and is cleared on sign-out.',
+    offlineHintOn: 'When offline, you can view records from your last connection. Data lives on this device only. Signing out turns this off and clears it, so turn it on again after you sign back in.',
     offlineToggling: 'Working…',
     offlineToggleError: "Couldn't switch. Try again in a moment.",
     offlineUnsupported: 'This browser does not support offline browsing.',
