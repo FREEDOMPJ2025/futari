@@ -60,6 +60,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：沒有可見變化。
   技術：`0092` 補完空值後把 `InsuranceDetails.currency` 設為 NOT NULL；`0085` 之後的寫入端本來就都會帶幣別，prod 空值為 0。
 
+### Security
+
+- **前一段章節的旅行，只有在看那段章節時才打得開（#1614）**
+  使用者：之後才加入的伴侶用網址也打不開前一段章節的旅行；自己要看舊旅行，先在「過去的時光」進入那段章節，旅行列表也跟著顯示那段的旅行。
+  技術：`/trips`、`/trips/[id]` 改走 `resolveViewerEpochContext`，以 `getTripInChapter`（id＋group＋epoch）讀旅行，查不到就 404，且在讀任何支出前就擋下。
+
 ## [1.7.2] - 2026-10-12
 
 主題：**Android 測試．一條連結就能加入**——封閉測試從「填表、等人工加進名單」改成加入 Google 群組後自己就能安裝；Android App 內多了回饋入口，出遊分享頁與設定也多了邀請測試者的入口。
