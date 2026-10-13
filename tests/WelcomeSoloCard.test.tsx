@@ -19,7 +19,8 @@ describe('WelcomeSoloCard', () => {
     window.localStorage.setItem('futari_just_left_epoch-new', '1')
     wrap(<WelcomeSoloCard epochId="epoch-new" />)
     expect(screen.getByText('歡迎回到一個人')).toBeTruthy()
-    expect(screen.getByText(/帳本完整地跟著你過來/)).toBeTruthy()
+    // #1611: records stay in the shared ledger; nothing "came with you".
+    expect(screen.getByText(/先前的紀錄留在原本的帳本/)).toBeTruthy()
   })
 
   it('hides + clears the just-left flag and records dismissal on ✕', () => {

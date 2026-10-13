@@ -34,17 +34,22 @@ type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0]
  * balance would read 0 no matter how much history it carries in. `created_at`
  * is what actually answers "was this recorded during the current chapter."
  *
- * Without this, `leaveGroup` moving the stayer-side legs of settled
- * transactions to the leaver's new group (while the payer-side legs of the
- * *other* member's settlement stay behind) leaves the stayer's group with a
- * structurally non-zero sum over ALL history. That residue used to be masked
- * by the solo short-circuit below; a new partner accepting the invite
- * inherits it as soon as this formula next runs. The moved/left-behind rows'
- * `created_at` predates the leave, and `current_epoch_started_at` is bumped
- * forward at both leave and accept (same DB transaction, see
+ * Without this, a chapter that closed with a non-zero balance leaves the
+ * group with a structurally non-zero sum over ALL history: `removePartner`
+ * and account deletion close a duo chapter whatever its balance (by design —
+ * a closed chapter's balance is history, not a live debt). That residue is
+ * masked by the solo short-circuit below; a new partner accepting the invite
+ * would inherit it as soon as this formula next runs. The closed chapter's
+ * rows have `created_at` before the boundary, and `current_epoch_started_at`
+ * is bumped forward at every chapter change (same DB transaction, see
  * actions/membership.ts + actions/invite.ts) — so `created_at` excludes the
  * residue exactly as `transacted_at` would have, without the CSV / backdating
  * regression.
+ *
+ * (Until #1611 `leaveGroup` was a source too: it moved the leaver's records
+ * out, leaving half of each settled pair behind. A leave now keeps every
+ * record in the closed chapter and still requires a settled 0, so it adds no
+ * residue; the epoch scoping stays for the paths above.)
  */
 export async function recalcGroupBalance(
   groupId: string,

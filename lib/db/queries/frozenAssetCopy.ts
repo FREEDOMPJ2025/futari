@@ -6,9 +6,15 @@ import { frozenCopyVisibleClause } from './_predicates'
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0]
 
 /**
- * #1442 — after leaveGroup has split one ledger into two, re-point every row
- * that references a 愛物 now living in the *other* ledger at a frozen copy of
- * that 愛物 created in the row's own ledger.
+ * #1442 — after leaveGroup has moved the leaver's live items into a new
+ * ledger, re-point every row that references a 愛物 now living in the *other*
+ * ledger at a frozen copy of that 愛物 created in the row's own ledger.
+ *
+ * Since #1611 records never move, so in practice the copies are: in the old
+ * ledger, the leaver's moving cars / policies (and fuel logs) that either
+ * person's records, the stayer's rules or staying policies point at; in the
+ * new ledger, staying 愛物 that a moving rule or moving policy points at. The
+ * check stays symmetric (both directions) regardless.
  *
  * Covers the seven link columns: CashTransactions.asset_id,
  * CashTransactions.fuel_log_id (by the FuelLog's own car), IncomeTransactions
@@ -50,7 +56,7 @@ type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0]
  *
  * Emits no analytics event: a copy is not a user-created 愛物.
  *
- * Must run inside the leaveGroup transaction, after the assets and rows have
+ * Must run inside the leaveGroup transaction, after the assets and rules have
  * moved, under the epoch-close lock.
  */
 export async function freezeCrossLedgerLinks(

@@ -10,10 +10,8 @@ import {
   houseDetails,
   insuranceDetails,
   invoiceCredentials,
-  monthlyReviewMessages,
   oikosGroups,
   pushTokens,
-  settlements,
 } from '@/lib/db/schema'
 import { recalcGroupBalance, getGroupBalance } from '@/lib/db/queries/balance'
 import { hasActiveTrip } from '@/lib/db/queries/trips'
@@ -187,23 +185,45 @@ export const confirmSwap = action(async (): Promise<{ ok: true }> => {
  *   - Group must have both members (memberB IS NOT NULL)
  *   - GroupBalance.balance MUST be 0 (settle first via a final Settlement)
  *
- * Partition rules:
- *   - CashTransactions / Settlements: by paid_by
- *   - IncomeTransactions: by recipient_id
+ * What stays and what moves (#1611 — a chapter belongs to the relationship,
+ * not to either person; records stay whole, live items go with their owner):
+ *   - Records STAY in the original ledger, in the duo chapter this call
+ *     closes: CashTransactions, IncomeTransactions, Settlements and
+ *     MonthlyReviewMessages, whoever paid / received / wrote them. Before
+ *     #1611 the leaver's half moved out (by paid_by / recipient_id /
+ *     member_id) and the stayer's past chapter silently lost it. Both people
+ *     read that chapter afterwards (the leaver through 過去的時光, #1612).
  *   - RecurringExpenseRules: by paid_by (split_type → all_mine, split_ratio_a → NULL)
  *   - RecurringIncomeRules: by recipient_id
- *   - Pending occurrences: cascade with their rules
+ *   - Pending occurrences of the leaver's rules: unprocessed and skipped ones
+ *     move with their rules. RESOLVED ones (resolved_tx_id set) are deleted:
+ *     their transaction stays in the old ledger, so moving them would leave a
+ *     cross-ledger resolved_tx_id (no ON DELETE; the stayer's later account
+ *     deletion then fails in _delete_group_cascade, the #1377 symptom), and
+ *     keeping them behind would break 0077's invariant that a pending moves
+ *     with its rule — card 3 of compute_monthly_review_snapshot joins
+ *     `r.id = p.rule_id` with no ledger filter (0089), so the leaver's later
+ *     rule edits would reach the stayer's review, and rule_id's ON DELETE
+ *     CASCADE would remove them with the leaver's account. They are audit
+ *     pointers only: stored snapshots are write-once, and the leave month's
+ *     card 3 no longer lists the leaver's confirmed events (it did not
+ *     before #1611 either — they moved away with the rules).
  *   - Assets: House by owner, Car by primary_user_id, Insurance by insured_user_id
  *     (Child / Pet / Plant have no owner field → stay in original group)
  *   - FuelLogs: follow car via asset_id (no group_id column)
- *   - InvoiceCredentials: by user_id; Snapshots / Runs stay (group records)
- *   - MonthlyReviewMessages: by member_id; Snapshots stay (group analytics)
+ *   - InvoiceCredentials: by user_id (live ones); Snapshots / Runs stay
+ *   - Push tokens: by user_id
+ *   - MonthlyReviewSnapshots stay (group analytics)
  *   - Any row left referencing a 愛物 in the other ledger (either direction:
- *     asset_id on records / rules, fuel_log_id by the fuel log's car,
- *     insurance vehicle / insured child): re-pointed at a frozen copy in the
- *     row's own ledger; such rules are paused (#1442, freezeCrossLedgerLinks)
+ *     the stayer's AND the leaver's records on a moving car / policy,
+ *     a moving rule or policy on a staying 愛物): re-pointed at a frozen
+ *     copy in the row's own ledger; such rules are paused (#1442,
+ *     freezeCrossLedgerLinks)
  *   - GroupInvites with no acceptedAt: revoke
  *   - current_epoch_started_at: bumped on both groups (new chapters)
+ *
+ * No row of either ledger references a row of the other afterwards. Records
+ * keep their trip_id / import_batch_id because they no longer move.
  *
  * Irreversible.
  *
@@ -336,30 +356,10 @@ export const leaveGroup = action(async (): Promise<{ groupId: string; epochId: s
         .where(inArray(assets.id, movingAssetIds))
     }
 
-    // 3. Move CashTransactions where paid_by = leaver. asset_id / fuel_log_id
-    // are left as they are here; step 9a re-points any that now cross into
-    // the other ledger at a frozen copy (#1442).
-    await tx.execute(sql`
-      UPDATE "CashTransactions"
-      SET group_id = ${newGroup.id}
-      WHERE group_id = ${oldGroupId} AND paid_by = ${leaver}
-    `)
-
-    // 4. Move IncomeTransactions where recipient_id = leaver
-    await tx.execute(sql`
-      UPDATE "IncomeTransactions"
-      SET group_id = ${newGroup.id}
-      WHERE group_id = ${oldGroupId} AND recipient_id = ${leaver}
-    `)
-
-    // 5. Move Settlements where paid_by = leaver. Settlements have no asset_id.
-    await tx
-      .update(settlements)
-      .set({ groupId: newGroup.id })
-      .where(and(
-        eq(settlements.groupId, oldGroupId),
-        eq(settlements.paidBy, leaver),
-      ))
+    // 3–5. (#1611) CashTransactions, IncomeTransactions and Settlements stay
+    // where they are, in the duo chapter closed below — the leaver's too. A
+    // stayer's or leaver's record on a car / policy that just moved is
+    // re-pointed at a frozen copy in this ledger by step 9a (#1442).
 
     // 6. Move RecurringExpenseRules where paid_by = leaver, converting
     // split_type → 'all_mine' and clearing split_ratio_a (solo semantics).
@@ -371,10 +371,21 @@ export const leaveGroup = action(async (): Promise<{ groupId: string; epochId: s
       WHERE group_id = ${oldGroupId} AND paid_by = ${leaver}
     `)
 
-    // 7. Move PendingExpenseOccurrences for the leaver's rules. Rules now
-    // live in newGroupId; their group_id was just updated, so pending rows
-    // referencing those rules must follow. Use a subquery: occurrences
-    // whose rule_id now belongs to newGroup.
+    // 7. The leaver's rules' PendingExpenseOccurrences. Rules now live in
+    // newGroupId (step 6), so occurrences referencing them are found by a
+    // subquery on the rule's new group_id.
+    //   7a. Resolved occurrences are deleted (#1611): their transaction stays
+    //       in the old ledger, so neither moving nor keeping them is safe —
+    //       see "Pending occurrences" in the docstring above.
+    //   7b. Unprocessed and skipped occurrences move with their rule.
+    await tx.execute(sql`
+      DELETE FROM "PendingExpenseOccurrences"
+      WHERE group_id = ${oldGroupId}
+        AND resolved_tx_id IS NOT NULL
+        AND rule_id IN (
+          SELECT id FROM "RecurringExpenseRules" WHERE group_id = ${newGroup.id}
+        )
+    `)
     await tx.execute(sql`
       UPDATE "PendingExpenseOccurrences"
       SET group_id = ${newGroup.id},
@@ -382,6 +393,7 @@ export const leaveGroup = action(async (): Promise<{ groupId: string; epochId: s
           proposed_split_type = 'all_mine',
           proposed_split_ratio_a = NULL
       WHERE group_id = ${oldGroupId}
+        AND resolved_tx_id IS NULL
         AND rule_id IN (
           SELECT id FROM "RecurringExpenseRules" WHERE group_id = ${newGroup.id}
         )
@@ -394,11 +406,21 @@ export const leaveGroup = action(async (): Promise<{ groupId: string; epochId: s
       WHERE group_id = ${oldGroupId} AND recipient_id = ${leaver}
     `)
 
-    // 9. Move PendingIncomeOccurrences for leaver's rules
+    // 9. The leaver's rules' PendingIncomeOccurrences: resolved ones are
+    // deleted, the rest move with their rule (same reasoning as step 7).
+    await tx.execute(sql`
+      DELETE FROM "PendingIncomeOccurrences"
+      WHERE group_id = ${oldGroupId}
+        AND resolved_tx_id IS NOT NULL
+        AND rule_id IN (
+          SELECT id FROM "RecurringIncomeRules" WHERE group_id = ${newGroup.id}
+        )
+    `)
     await tx.execute(sql`
       UPDATE "PendingIncomeOccurrences"
       SET group_id = ${newGroup.id}
       WHERE group_id = ${oldGroupId}
+        AND resolved_tx_id IS NULL
         AND rule_id IN (
           SELECT id FROM "RecurringIncomeRules" WHERE group_id = ${newGroup.id}
         )
@@ -406,8 +428,10 @@ export const leaveGroup = action(async (): Promise<{ groupId: string; epochId: s
 
     // 9a. #1442 — both directions: any row (record, rule, insurance link,
     // fuel log link) left pointing at a 愛物 in the other ledger is re-pointed
-    // at a frozen copy in its own ledger; re-pointed rules are paused. Replaces
-    // the old NULLing of asset_id on moving rows, which lost the link.
+    // at a frozen copy in its own ledger; re-pointed rules are paused. Since
+    // records stay (#1611), copies in the old ledger stand for moving cars /
+    // policies that either person's records point at, and copies in the new
+    // ledger only for staying 愛物 that a moving rule or policy points at.
     await freezeCrossLedgerLinks(tx, oldGroupId, newGroup.id, boundary, leaver)
 
     // 10. Move the leaver's live InvoiceCredentials. Snapshots and Runs stay
@@ -434,14 +458,8 @@ export const leaveGroup = action(async (): Promise<{ groupId: string; epochId: s
       .set({ groupId: newGroup.id })
       .where(and(eq(pushTokens.groupId, oldGroupId), eq(pushTokens.userId, leaver)))
 
-    // 11. Move MonthlyReviewMessages where member_id = leaver
-    await tx
-      .update(monthlyReviewMessages)
-      .set({ groupId: newGroup.id })
-      .where(and(
-        eq(monthlyReviewMessages.groupId, oldGroupId),
-        eq(monthlyReviewMessages.memberId, leaver),
-      ))
+    // 11. (#1611) MonthlyReviewMessages stay with the chapter they were
+    // written in, the leaver's too.
 
     // 12. Revoke any unaccepted GroupInvites on the old group
     await tx
@@ -523,10 +541,11 @@ export const leaveGroup = action(async (): Promise<{ groupId: string; epochId: s
  * removal forever).
  *
  * Removed member's data is intentionally left in place, in the epoch this
- * call closes: unlike `leaveGroup` (a self-service action where the leaver
- * takes their own rows to a new group they create for themselves), removal
- * is done *to* someone. Spinning up a group in their name without consent
- * isn't ours to do on their behalf. Their historical rows stay as read-only
+ * call closes — records as in `leaveGroup` since #1611, and here their live
+ * items too: `leaveGroup` is a self-service action where the leaver takes
+ * their live items (owned 愛物, rules) to a new group they create for
+ * themselves, whereas removal is done *to* someone. Spinning up a group in
+ * their name without consent isn't ours to do on their behalf. Their historical rows stay as read-only
  * history for the remaining member — untouched by balance (epoch-scoped
  * since #1030) or by anything else, since the epoch that contains them is
  * now closed.

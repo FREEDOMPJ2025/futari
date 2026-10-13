@@ -41,7 +41,14 @@ related_issues: ["#923", "#848", "#1604", "#1618"]
 
 **不採用**的替代方案：
 
-- *沿用 `leaveGroup` 拆分後刪掉刪除者那份* — 重用既有邏輯、代碼少，但另一半只剩自己的交易，共享歷史被掏空。與哲學衝突。
+- *沿用 `leaveGroup` 拆分後刪掉刪除者那份* — 重用既有邏輯、代碼少，但另一半只剩自己的交易，共享歷史被掏空。與哲學衝突。（自 #1611 起 `leaveGroup` 本身也不再拆分紀錄，見下。）
+
+**自願離開之後的刪除（#1611，2026-10-13 擁有者接受）**：自願離開不再搬走紀錄，兩人的共同章節完整留在留下那一方的帳本。因此：
+
+- 留下的人之後在單人狀態刪除帳號，整本帳本（含那段共同章節）會一起刪除，離開的人之後也無法再回看。
+- 離開的人之後刪除帳號，只刪他的新帳本；他在共同章節記下的紀錄留在對方帳本，名字顯示為「已離開的夥伴」。
+- 隱私權政策 `sectionRetentionItems` 的第 1、2 項各補一句說明（文案 #1688）。
+- 失效的樣子：若離開時把離開者的已確認定期卡片（`resolved_tx_id`）跟著規則搬走，而交易留在原帳本，留下那一方的刪除會在 `_delete_group_cascade` 撞外鍵，每天一筆 WARNING、帳號永遠刪不掉（#1377 的症狀）。`leaveGroup` 因此在離開時刪掉那些已確認卡片。
 - *整個 group 一起刪* — 對另一半最傷，全部資料消失。
 
 ### 為什麼用既有 privacy 頁當 Google 的 web 刪除 URL
@@ -100,5 +107,5 @@ Google 另要求一個免登入、可達的 web 頁描述刪除途徑。現有 `
 ## 概念連結
 
 - 身分 / auth：[native-auth](native-auth-design.md)（`Profiles` mirror `auth.users`、刪 auth user 的服務端權限）。
-- 既有的「一方離開、資料分割 + epoch 換章」語意：`actions/membership.ts#leaveGroup`（搬移式）與 `#confirmSwap`（A/B 翻轉 + balance recalc）——本 feature 的匿名化處理借用其 epoch / ratio / balance 規則，但**不搬移**資料。
+- 既有的「一方離開、epoch 換章」語意：`actions/membership.ts#leaveGroup`（自 #1611 起只搬會動的東西——名下的愛物、定期規則與未處理的卡片、發票載具、推播裝置；紀錄留在原帳本）與 `#confirmSwap`（A/B 翻轉 + balance recalc）——本 feature 的匿名化處理借用其 epoch / ratio / balance 規則，同樣**不搬移**紀錄。
 - 上架脈絡：[app-store-submission-runbook](../../app-store-submission-runbook.md)（本 feature 是 iOS + Android 送審的 blocker B1）。

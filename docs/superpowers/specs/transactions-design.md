@@ -40,7 +40,7 @@ Atomic invariant：上述兩步 + balance 重算必須同 DB transaction；任�
 
 ### Description autocomplete（v0.14.2）
 
-AddSheet 描述欄位輸入時，從目前 household 的歷史 CashTransaction 描述抓前綴（case-insensitive，最多 5 條）做 inline suggestion；soft-deleted 排除、空字串不顯示。來源只取 viewer 待過的章節（v1.6.3，#1290）——與 CSV 匯出同一條規則（`viewerChaptersClause`，見 [csv-export](csv-export-design.md)「範圍：viewer 待過的章節」）：後來加入的伴侶不會看到自己加入之前那些章節的描述；離開帳本的人帶進新帳本的紀錄，描述仍會出現給他自己。實作落地點：`app/(dashboard)/dashboard/_components/DescriptionAutocomplete.tsx` + `actions/transaction.ts › getDescriptionSuggestions()`（server action，不在 query 層）。
+AddSheet 描述欄位輸入時，從目前 household 的歷史 CashTransaction 描述抓前綴（case-insensitive，最多 5 條）做 inline suggestion；soft-deleted 排除、空字串不顯示。來源只取 viewer 待過的章節（v1.6.3，#1290）——與 CSV 匯出同一條規則（`viewerChaptersClause`，見 [csv-export](csv-export-design.md)「範圍：viewer 待過的章節」）：後來加入的伴侶不會看到自己加入之前那些章節的描述；離開帳本不再把紀錄帶進新帳本（#1611），所以離開者在新帳本只會看到新帳本章節的描述。實作落地點：`app/(dashboard)/dashboard/_components/DescriptionAutocomplete.tsx` + `actions/transaction.ts › getDescriptionSuggestions()`（server action，不在 query 層）。
 
 ### Weighted split（v0.14.1）
 

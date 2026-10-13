@@ -22,6 +22,10 @@ vi.mock('@/actions/membership', () => ({
 import { LeaveGroupFlow } from '@/app/(dashboard)/settings/_components/LeaveGroupFlow'
 import { MemberProvider, type MemberContextValue } from '@/app/(dashboard)/_components/MemberContext'
 import type { CurrencyCode } from '@/lib/currency'
+import { zhTW } from '@/lib/i18n/locales/zh-TW'
+import { zhCN } from '@/lib/i18n/locales/zh-CN'
+import { en } from '@/lib/i18n/locales/en'
+import { ja } from '@/lib/i18n/locales/ja'
 
 const member = (baseCurrency: CurrencyCode): MemberContextValue => ({
   group: { id: 'g1', name: 'G', baseCurrency },
@@ -265,4 +269,106 @@ describe('LeaveGroupFlow — member_a path (must swap first)', () => {
 
     await waitFor(() => expect(screen.getByRole('alert').textContent).toMatch(/已經有一個身份互換提議了/))
   })
+})
+
+// ─── #1611 — export first, on card 3 ─────────────────────────────────────────
+//
+// After a leave the records stay in this ledger, so card 3 offers a copy of
+// one's own before leaving. It must start the SAME export as /settings/trust
+// (GET /api/export/transactions — no new route, no new scope), and its copy
+// must say expenses only: the export reads CashTransactions only until #1460.
+describe('LeaveGroupFlow — card 3 export-first hint (#1611)', () => {
+  const toCard3 = () => {
+    fireEvent.click(screen.getByText('下一步'))
+    fireEvent.click(screen.getByText('下一步'))
+  }
+
+  for (const viewerIsMemberA of [false, true]) {
+    it(`renders the hint and button on card 3 (viewerIsMemberA=${viewerIsMemberA})`, () => {
+      wrap(
+        <LeaveGroupFlow open onClose={() => {}} viewerIsMemberA={viewerIsMemberA}
+          viewerName="小明" partnerName="小華" groupBalance={0} />,
+      )
+      expect(screen.queryByText('先匯出支出紀錄')).toBeNull() // not before card 3
+      toCard3()
+      expect(screen.getByText('想自己留一份支出紀錄，離開前可以先匯出。')).toBeTruthy()
+      expect(screen.getByRole('button', { name: '先匯出支出紀錄' })).toBeTruthy()
+      expect(screen.getByText('收支、結算和月回顧留言會完整留在這本帳本，離開後仍能回頭查看')).toBeTruthy()
+      expect(screen.queryByText(/誰付的／誰收的/)).toBeNull()
+    })
+  }
+
+  it('the button starts the existing export (GET /api/export/transactions) and never a membership action', async () => {
+    const fetchMock = vi.fn(async () => new Response('a,b\n', {
+      status: 200,
+      headers: { 'Content-Disposition': 'attachment; filename="futari-transactions-2026-10-13.csv"' },
+    }))
+    const createObjectURL = vi.fn(() => 'blob:x')
+    const revokeObjectURL = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    const urlStatics = URL as unknown as { createObjectURL: unknown; revokeObjectURL: unknown }
+    const saved = { create: urlStatics.createObjectURL, revoke: urlStatics.revokeObjectURL }
+    urlStatics.createObjectURL = createObjectURL
+    urlStatics.revokeObjectURL = revokeObjectURL
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    try {
+      wrap(
+        <LeaveGroupFlow open onClose={() => {}} viewerIsMemberA={false}
+          viewerName="小明" partnerName="小華" groupBalance={0} />,
+      )
+      toCard3()
+      fireEvent.click(screen.getByRole('button', { name: '先匯出支出紀錄' }))
+      await waitFor(() => expect(click).toHaveBeenCalledTimes(1))
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+      expect(fetchMock).toHaveBeenCalledWith('/api/export/transactions', { credentials: 'same-origin' })
+      expect(createObjectURL).toHaveBeenCalledTimes(1)
+      expect(leaveGroup).not.toHaveBeenCalled()
+      expect(proposeSwap).not.toHaveBeenCalled()
+      // Still on card 3: exporting does not advance or close the flow.
+      expect(screen.getByRole('button', { name: '先匯出支出紀錄' })).toBeTruthy()
+    } finally {
+      click.mockRestore()
+      urlStatics.createObjectURL = saved.create
+      urlStatics.revokeObjectURL = saved.revoke
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it('a failed export shows the existing export error and stays on card 3', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 500 })))
+    try {
+      wrap(
+        <LeaveGroupFlow open onClose={() => {}} viewerIsMemberA={false}
+          viewerName="小明" partnerName="小華" groupBalance={0} />,
+      )
+      toCard3()
+      fireEvent.click(screen.getByRole('button', { name: '先匯出支出紀錄' }))
+      await waitFor(() => expect(screen.getByRole('alert').textContent).toBe(zhTW.csvExport.failed))
+      expect(leaveGroup).not.toHaveBeenCalled()
+      expect(screen.getByRole('button', { name: '先匯出支出紀錄' })).toBeTruthy()
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+})
+
+describe('#1611 copy: the export-first strings name expenses only, in every locale', () => {
+  // What each locale must say (its word for expenses) and must not imply can
+  // be exported (income, settlements, messages, "all records").
+  const rules = {
+    'zh-TW': { must: /支出/, mustNot: /收入|收支|結算|留言|所有|全部|整批/ },
+    'zh-CN': { must: /支出/, mustNot: /收入|收支|结算|留言|所有|全部|整批/ },
+    en: { must: /expense/i, mustNot: /income|settlement|note|message|\ball\b|everything|records/i },
+    ja: { must: /支出/, mustNot: /収入|精算|メッセージ|すべて|全部/ },
+  } as const
+  for (const [locale, dict] of Object.entries({ 'zh-TW': zhTW, 'zh-CN': zhCN, en, ja })) {
+    it(locale, () => {
+      const c = dict.settings.dangerZone.flow.card3
+      for (const s of [c.exportHint, c.exportCta]) {
+        expect(s).toMatch(rules[locale as keyof typeof rules].must)
+        expect(s).not.toMatch(rules[locale as keyof typeof rules].mustNot)
+        expect(s).not.toMatch(/[!！]/)
+      }
+    })
+  }
 })

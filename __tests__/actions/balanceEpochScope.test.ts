@@ -13,7 +13,12 @@ import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 //
 //   F1 (settled) — A pays 1000 'half' → B settles 500 → B leaves → C joins →
 //   any write recalcs the cache over full history and produces +500 instead
-//   of 0.
+//   of 0. Since #1611 a leave moves no records, so a leave can no longer
+//   leave residue behind (it requires a settled 0 and keeps both legs); F1 is
+//   now built the way a non-zero closed chapter still arises: A pays 1000
+//   'half' → A removes B (removePartner closes the chapter at +500, by
+//   design) → C joins → any write must give 0, not +500. Account deletion
+//   closes non-zero chapters the same way.
 //
 //   F2 (pending) — same setup but the residue is a lone `status='pending'`
 //   CashTransactions row. getGroupPendingBalanceDelta is computed live at
@@ -85,12 +90,12 @@ const {
   cashTransactions,
   settlements,
 } = await import('@/lib/db/schema')
-const { leaveGroup } = await import('@/actions/membership')
+const { leaveGroup, removePartner } = await import('@/actions/membership')
 const { createInvite, acceptInvite } = await import('@/actions/invite')
 const { hashToken } = await import('@/lib/invite')
 const { createTransaction } = await import('@/actions/transaction')
 const { createSettlement } = await import('@/actions/settlement')
-const { getGroupBalance, getGroupPendingBalanceDelta } = await import('@/lib/db/queries/balance')
+const { getGroupBalance, getGroupPendingBalanceDelta, recalcGroupBalance } = await import('@/lib/db/queries/balance')
 const { eq, inArray } = await import('drizzle-orm')
 const { unwrapAction } = await import('@/lib/action-errors')
 
@@ -221,11 +226,11 @@ describe('balance epoch scoping (#1030)', () => {
     }
   })
 
-  it('F1 — settled residue after leave+rejoin does not land on the new partner', async () => {
+  it('F1 — a non-zero closed chapter (removePartner) does not land on the new partner', async () => {
     refs = await seedDuoGroup()
-    const { userAId, userBId, userCId, oldGroupId } = refs
+    const { userAId, userCId, oldGroupId } = refs
 
-    // A pays 1000 'half' → +500 owed to A. B settles 500 → balance back to 0.
+    // A pays 1000 'half' → +500 owed to A, never settled.
     mockUserId = userAId
     const tx1 = unwrapAction(await createTransaction({
       amount: 1000,
@@ -236,26 +241,14 @@ describe('balance epoch scoping (#1030)', () => {
       transactedAt: '2026-01-11',
     }))
     refs.txIds.push(tx1.id)
+    expect(await getGroupBalance(oldGroupId)).toBe(500)
 
-    mockUserId = userBId
-    unwrapAction(await createSettlement({
-      amount: 500,
-      payerId: userBId,
-      settledAt: '2026-01-12',
-    }))
-
-    expect(await getGroupBalance(oldGroupId)).toBe(0)
-
-    // B leaves. leaveGroup requires balance === 0 (just verified) and moves
-    // B's settlement (paid_by = B) to B's new solo group, leaving A's +500
-    // 'half' leg behind on oldGroupId with nothing to net it against — the
-    // exact mechanism from the issue.
-    mockUserId = userBId
-    const { groupId: newGroupIdForB } = unwrapAction(await leaveGroup())
-    refs.newGroupIdForB = newGroupIdForB
+    // A removes B. removePartner deliberately does not require a settled 0
+    // (a closed chapter's balance is history, not a live debt), so the
+    // chapter closes with A's +500 'half' leg in it.
+    unwrapAction(await removePartner())
 
     // C joins the now-solo oldGroupId via invite.
-    mockUserId = userAId
     const inviteUrl = unwrapAction(await createInvite())
     const token = new URL(inviteUrl).pathname.split('/').pop()!
     refs.inviteToken = token
@@ -275,8 +268,52 @@ describe('balance epoch scoping (#1030)', () => {
     }))
     refs.txIds.push(tx2.id)
 
-    // Bug (pre-fix): balance would be +500 — A's leftover 'half' leg from
-    // the prior chapter, inherited by C. Fixed: epoch scoping excludes it.
+    // Without epoch scoping this would be +500 — the closed chapter's leg,
+    // inherited by C. Epoch scoping excludes it.
+    expect(await getGroupBalance(oldGroupId)).toBe(0)
+    expect(await getGroupPendingBalanceDelta(oldGroupId)).toBe(0)
+  }, 20000)
+
+  it('#1611 — after a leave the closed chapter stays whole, and both people\'s balances are 0', async () => {
+    refs = await seedDuoGroup()
+    const { userAId, userBId, oldGroupId } = refs
+
+    mockUserId = userAId
+    const tx1 = unwrapAction(await createTransaction({
+      amount: 1000, description: 'TEST split', category: 'other', splitType: 'half',
+      payerId: userAId, transactedAt: '2026-01-11',
+    }))
+    refs.txIds.push(tx1.id)
+    mockUserId = userBId
+    unwrapAction(await createSettlement({ amount: 500, payerId: userBId, settledAt: '2026-01-12' }))
+    expect(await getGroupBalance(oldGroupId)).toBe(0)
+
+    mockUserId = userBId
+    const { groupId: newGroupIdForB } = unwrapAction(await leaveGroup())
+    refs.newGroupIdForB = newGroupIdForB
+
+    // Both legs stayed in the closed chapter of the old ledger.
+    const [kept] = await db.select().from(settlements).where(eq(settlements.groupId, oldGroupId))
+    expect(kept.paidBy).toBe(userBId)
+    expect(await db.select().from(settlements).where(eq(settlements.groupId, newGroupIdForB))).toHaveLength(0)
+
+    // Recomputed from the rows, not read from the cache the leave wrote.
+    await recalcGroupBalance(oldGroupId)
+    await recalcGroupBalance(newGroupIdForB)
+    expect(await getGroupBalance(oldGroupId)).toBe(0)
+    expect(await getGroupBalance(newGroupIdForB)).toBe(0)
+    expect(await getGroupPendingBalanceDelta(oldGroupId)).toBe(0)
+    expect(await getGroupPendingBalanceDelta(newGroupIdForB)).toBe(0)
+
+    // The old ledger becomes a duo again: the formula now runs (no solo
+    // short-circuit) over a ledger whose closed chapter holds both legs.
+    mockUserId = userAId
+    const inviteUrl = unwrapAction(await createInvite())
+    const token = new URL(inviteUrl).pathname.split('/').pop()!
+    refs.inviteToken = token
+    mockUserId = refs.userCId
+    unwrapAction(await acceptInvite(token))
+    await recalcGroupBalance(oldGroupId)
     expect(await getGroupBalance(oldGroupId)).toBe(0)
   }, 20000)
 
