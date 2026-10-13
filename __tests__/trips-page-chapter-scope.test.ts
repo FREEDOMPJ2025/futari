@@ -315,7 +315,15 @@ describe('/trips/[id] — chapter scope (#1614)', () => {
     // and serves nothing, which is still closed.
     as(C, 'garbage')
     await expectRefusedWithoutData(w.t1, /Failed query/)
-    as(X, w.e1) // the ex: named on E1 but no longer in G → no pin, no group of their own
+    // #1612 — the ex, named on the CLOSED chapter E1 but no longer in G, gets
+    // that chapter read-only (former-member look-back): T1 opens, without the
+    // ledger's live rates; any other chapter's trip is still not found.
+    as(X, w.e1)
+    expect((await openTrip(w.t1)).trip.id).toBe(w.t1)
+    expect(rateQueries.listRatesForGroup).not.toHaveBeenCalled()
+    await expectNotFoundWithoutData(w.t2)
+    await expectNotFoundWithoutData(w.t0)
+    as(X) // unpinned, with no group of their own
     await expectRefusedWithoutData(w.t1, 'NEXT_REDIRECT /onboarding')
     // Fallback really is the open chapter: T2 opens under the same hostile pin.
     as(C, w.e1)

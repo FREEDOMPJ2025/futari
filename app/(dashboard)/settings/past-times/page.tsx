@@ -19,9 +19,8 @@ export default async function PastTimesPage() {
   const { user } = await requireViewerOrRedirect()
 
   const [epochs, pinnedId, locale, t] = await Promise.all([
-    // Only chapters on ledgers the viewer is still a member of (#1603), so
-    // every row opens when tapped. A former member's chapters on the ledger
-    // they left come back with #1612.
+    // Exactly the chapters a pin can open (#1603 / #1612): ledgers the viewer
+    // is still in, plus closed chapters of a ledger they left (read-only).
     listEpochsForViewer(user.id),
     getPinnedEpochId().then(unwrapAction),
     getLocale(),
@@ -45,6 +44,7 @@ export default async function PastTimesPage() {
         locale={locale}
         t={t.pastTimes}
         backLabel={t.pastTimes.back}
+        neutralPartnerLabel={t.common.partner}
       />
       <BottomNavSkeleton hideFab />
     </div>

@@ -61,6 +61,16 @@ export interface MemberContextValue {
    *  Server actions also reject writes — UI hide is the primary defence,
    *  server reject is the safety net. */
   isPast: boolean
+  /**
+   * #1612 — the viewer left (or was removed from) the ledger whose closed
+   * chapter they are looking back at. Implies `isPast`. In this mode the
+   * layout builds the context from the viewer's own profile and the chapter
+   * row only: `partner` is null, `group.name` is the neutral ledger label,
+   * guardian is off, and every tab or entry that does not follow the pin
+   * (settings, trips, outings, the avatar menu, recurring) is hidden — those
+   * act on the viewer's OWN ledger, not the chapter on screen. Absent = false.
+   */
+  isFormerMember?: boolean
   /** #220 — Guardian module visibility. True when the viewer's group has
    *  opted into the Guardian (守護) beta (or — eventually — has a paid
    *  subscription). Drives nav-tab rendering on /assets and similar gates;
@@ -79,6 +89,12 @@ export function useMember(): MemberContextValue {
   const ctx = useContext(MemberContext)
   if (!ctx) throw new Error('useMember must be inside <MemberContext.Provider>')
   return ctx
+}
+
+/** #1612 — true in a former member's look-back. Safe outside the provider
+ *  (shared chrome such as BottomNav renders in tests without one): false. */
+export function useIsFormerMember(): boolean {
+  return useContext(MemberContext)?.isFormerMember ?? false
 }
 
 /**

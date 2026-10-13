@@ -98,6 +98,8 @@ vi.mock('next/navigation', () => ({
   redirect: (to: string) => { throw new Error(`NEXT_REDIRECT ${to}`) },
 }))
 vi.mock('@/lib/supabase/server', () => ({ getCurrentUser: async () => ({ id: viewer }) }))
+// #1612 — a closed chapter's neutral label comes from the dictionary.
+vi.mock('@/lib/i18n/t', () => ({ getTranslations: async () => zhTW }))
 vi.mock('@/lib/db/queries/epoch', () => ({
   getEpochMembers: async (id: string) => EPOCH_MEMBERS[id] ?? null,
   resolveViewerEpochContext: async () => ({ group: GROUP, window }),

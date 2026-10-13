@@ -33,7 +33,7 @@ export function PastChapterBar() {
   const t = useTranslations()
   const locale = useLocale()
   const router = useRouter()
-  const { isPast, epochStartedAt, epochEndedAt } = useMember()
+  const { isPast, isFormerMember, epochStartedAt, epochEndedAt } = useMember()
   const [pending, startTransition] = useTransition()
 
   if (!isPast) return null
@@ -46,7 +46,12 @@ export function PastChapterBar() {
     startTransition(async () => {
       try {
         unwrapAction(await exitPastEpoch())
-        router.refresh()
+        // #1612 — a former member's current page belongs to the ledger they
+        // left (an asset or trip of it 404s once unpinned). Go home instead:
+        // their own ledger, or /onboarding when they have none (the layout
+        // redirects a viewer with no ledger and no pin there).
+        if (isFormerMember) router.replace('/dashboard')
+        else router.refresh()
       } catch {
         // action can throw on network failure; pending state clears automatically
       }

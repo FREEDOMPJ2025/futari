@@ -169,14 +169,24 @@ export async function listAssetsForGroup(
 /**
  * Asset options for the records FilterSheet's 愛物 multi-select: live assets
  * of the group, oldest first. Frozen copies (#1442) are not offered.
+ *
+ * `createdBefore`: same cut-off as `listAssetsForGroup` (#1612) — a former
+ * member looking back at a chapter of a ledger they left is not offered the
+ * assets created after it closed.
  */
 export async function listFilterAssetsForGroup(
   groupId: string,
+  createdBefore: Date | null = null,
 ): Promise<{ id: string; name: string; type: AssetType }[]> {
   return db
     .select({ id: assets.id, name: assets.name, type: assets.type })
     .from(assets)
-    .where(and(eq(assets.groupId, groupId), isNull(assets.deletedAt), isNull(assets.frozenAt)))
+    .where(and(
+      eq(assets.groupId, groupId),
+      isNull(assets.deletedAt),
+      isNull(assets.frozenAt),
+      createdBefore ? lt(assets.createdAt, createdBefore) : undefined,
+    ))
     .orderBy(assets.createdAt)
 }
 
@@ -186,11 +196,15 @@ export async function listFilterAssetsForGroup(
  * stats, and the chip matches that. Group-scoped. A frozen copy (#1442)
  * resolves only for members of the ledger at freeze time (#1484); anyone
  * else gets null, as for another ledger's asset.
+ *
+ * `createdBefore`: same cut-off as `listAssetsForGroup` (#1612) — an asset
+ * created after a former member's chapter closed has no name for them.
  */
 export async function getDrillAssetName(
   assetId: string,
   groupId: string,
   viewerId: string,
+  createdBefore: Date | null = null,
 ): Promise<string | null> {
   const [a] = await db
     .select({ name: assets.name })
@@ -199,6 +213,7 @@ export async function getDrillAssetName(
       eq(assets.id, assetId),
       eq(assets.groupId, groupId),
       frozenCopyVisibleClause('Assets', viewerId),
+      createdBefore ? lt(assets.createdAt, createdBefore) : undefined,
     ))
     .limit(1)
   return a?.name ?? null

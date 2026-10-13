@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { requireViewerOrRedirect } from '@/lib/auth/viewer'
-import { resolveViewerEpochContext } from '@/lib/db/queries/epoch'
+import { getEpochMembers, resolveViewerEpochContext } from '@/lib/db/queries/epoch'
 import { getTripInChapter } from '@/lib/db/queries/trips'
 import { listTripExpenses, countTripExpensesByCurrency } from '@/lib/db/queries/tripExpense'
 import { listRatesForGroup } from '@/lib/db/queries/currencyRates'
@@ -29,9 +29,16 @@ export default async function TripDetailPage(props: { params: Promise<{ id: stri
   const trip = await getTripInChapter(id, group.id, epochWindow.epochId)
   if (!trip) notFound()
 
+  // #1612 — a former member looking back at a chapter of a ledger they left:
+  // no live ledger state (rates, default ratio), and the A/B frame is the
+  // chapter row's, not the group row's today (getEpochMembers' caller
+  // contract holds: the epoch id came from resolveViewerEpochContext).
+  const formerChapter = context.isFormerMemberView ? await getEpochMembers(epochWindow.epochId) : null
+  const frameMemberA = context.isFormerMemberView ? (formerChapter?.memberAId ?? null) : group.memberA
+
   const [rawExpenses, rawRates, usedCurrencyCounts] = await Promise.all([
     listTripExpenses(trip.id),
-    listRatesForGroup(group.id),
+    context.isFormerMemberView ? Promise.resolve([]) : listRatesForGroup(group.id),
     countTripExpensesByCurrency(trip.id),
   ])
 
@@ -46,7 +53,7 @@ export default async function TripDetailPage(props: { params: Promise<{ id: stri
   const records: TripDetailRecord[] = rawExpenses.map((r) => {
     const splitRatioA = r.splitRatio == null
       ? null
-      : r.paidBy === group.memberA
+      : r.paidBy === frameMemberA
         ? r.splitRatio
         : 100 - r.splitRatio
     return {
@@ -95,7 +102,7 @@ export default async function TripDetailPage(props: { params: Promise<{ id: stri
       }}
       records={records}
       baseCurrency={group.baseCurrency}
-      groupDefaultRatioA={group.defaultSplitRatioA ?? null}
+      groupDefaultRatioA={context.isFormerMemberView ? null : (group.defaultSplitRatioA ?? null)}
       activeTrips={activeTrips}
       rates={rates}
     />

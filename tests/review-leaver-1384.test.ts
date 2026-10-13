@@ -9,12 +9,10 @@ import type { ReactElement } from 'react'
 //   chapter 2  A + C   2026-06-15 → open,                epoch e2
 //   group row today: member_a A, member_b C
 //
-// #1603 — the resolver no longer hands B this context: a pin into a ledger
-// the viewer is no longer a member of falls through to their own group
-// (tests/queries-epoch.test.ts › former members). The resolver is mocked
-// here, so these cases test the page's own chapter-membership logic, which
-// stays because #1612 (read-only look-back for former members) reuses it.
-// Until #1612 the B cases below are unreachable in production.
+// #1612 — the resolver hands B this context again (a closed chapter of a
+// ledger they left: the former-member look-back, tests/queries-epoch.test.ts
+// › former members). The resolver is mocked here, so these cases test the
+// page's own chapter-membership logic.
 
 const TPE = (y: number, m: number, d: number) => new Date(Date.UTC(y, m - 1, d) - 8 * 60 * 60 * 1000)
 const CH1 = { startedAt: TPE(2026, 3, 1), endedAt: TPE(2026, 6, 15), epochId: 'e1', isPast: true }
@@ -46,6 +44,10 @@ vi.mock('next/navigation', () => ({
   redirect: (to: string) => { throw new Error(`NEXT_REDIRECT ${to}`) },
 }))
 vi.mock('@/lib/supabase/server', () => ({ getCurrentUser: async () => ({ id: viewer }) }))
+// #1612 — a closed chapter's neutral label comes from the dictionary.
+vi.mock('@/lib/i18n/t', async () => ({
+  getTranslations: async () => (await import('@/lib/i18n/locales/zh-TW')).zhTW,
+}))
 vi.mock('@/lib/db/queries/epoch', () => ({
   getEpochMembers: async (id: string) => EPOCH_MEMBERS[id] ?? null,
   resolveViewerEpochContext: async () => ({ group: GROUP, window }),
@@ -115,6 +117,17 @@ describe('B (left) viewing chapter 1 through the past-times pin', () => {
     expect(p.readOnly).toBe(true)
     expect(p.quiz).toBeNull()
     expect(quizLoader).not.toHaveBeenCalled()
+  })
+
+  // #1612 — read-only reads only the viewer's own profile (A's live name and
+  // photo are never loaded) and no next-month (editor) messages.
+  it("reads only B's own profile and serializes no editor-month message", async () => {
+    const p = await open('2026-04')
+    expect(requestedIds).toEqual(['user-b'])
+    expect(p.ownEditorMessage).toBeNull()
+    expect(p.partnerEditorMessage).toBeNull()
+    expect(p.partner).toEqual({ id: 'user-a', displayName: 'A at close', avatarUrl: null })
+    expect(JSON.stringify(p)).not.toContain('a-now.jpg')
   })
 
   it('the chapter guard still applies: a chapter-2 month is 404', async () => {
