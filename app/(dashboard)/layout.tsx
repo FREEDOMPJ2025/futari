@@ -76,9 +76,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // on a different group, see #141), the group + window follow the pin.
   const context = await resolveViewerEpochContext(user.id)
   if (!context) redirect('/onboarding')
-  const { group, window: epochWindow } = context
+  const { group, window: epochWindow, isFormerMemberView } = context
 
-  const memberIds = [group.memberA, group.memberB].filter((x): x is string => !!x)
+  // #1612 — a former member looking back at a closed chapter of the ledger
+  // they left: `group` is that ledger, and its current members are other
+  // people. Read the viewer's own profile only; the chapter's other person
+  // comes from the chapter row (getEpochMembers, frozen name, no avatar).
+  // Failure this prevents: nothing errors; the leaver's payload carries the
+  // stayer's current name and photo, and the new partner's.
+  const memberIds = isFormerMemberView
+    ? [user.id]
+    : [group.memberA, group.memberB].filter((x): x is string => !!x)
   // #1546 — only the viewer's own live solo ledger can hold a link they may
   // revoke (revokeOpenInvites acts on the active group). A pinned past
   // chapter or a duo skips the query.
@@ -100,22 +108,44 @@ export default async function DashboardLayout({ children }: { children: React.Re
   ])
 
   const viewerProfile = profilesRows.find(p => p.id === user.id)
-  // Not among the group's current members → 404, never /sign-in (#1603). The
-  // viewer IS signed in, so /sign-in sends them straight back to /dashboard
-  // and they loop with no way out. resolveViewerEpochContext only returns
-  // groups the viewer is in today, so this should be unreachable; it stays
-  // as the layout's own guard, and must not be able to loop if it fires.
+  // No profile row for the viewer → 404, never /sign-in (#1603). The viewer
+  // IS signed in, so /sign-in sends them straight back to /dashboard and they
+  // loop with no way out. resolveViewerEpochContext only returns groups the
+  // viewer is in today, or (#1612) a closed chapter they are named on, whose
+  // view reads only the viewer's own profile; so this should be unreachable.
+  // It stays as the layout's own guard, and must not be able to loop.
   if (!viewerProfile) notFound()
 
   const deletionRequestedAt = viewerProfile.deletionRequestedAt ?? null
 
-  const partnerId = group.memberA === user.id ? group.memberB : group.memberA
+  // #1612 — never today's members of a ledger the viewer left.
+  const partnerId = isFormerMemberView ? null : (group.memberA === user.id ? group.memberB : group.memberA)
   const partnerProfile = partnerId ? profilesRows.find(p => p.id === partnerId) : undefined
 
-  const viewerIsA = group.memberA === user.id
+  // #1612 — a former member's A/B side and solo-ness come from the chapter
+  // row, never from the group row today (which names the stayer and whoever
+  // joined after). Known limit: a member_a/member_b swap made AFTER the leave
+  // flips stored split ratios on every row, closed chapters included, so the
+  // leaver's ratio display reads in the pre-swap frame; the live row is not
+  // consulted because it would reveal who is in the ledger today.
+  const viewerIsA = isFormerMemberView
+    ? chapterMembers?.memberAId === user.id
+    : group.memberA === user.id
+  const chapterIdentity = epochWindow.isPast
+    ? buildChapterIdentity(chapterMembers, user.id, t.common.partner)
+    : null
 
   const value: MemberContextValue = {
-    group: { id: group.id, name: group.name, baseCurrency: parseCurrencyCode(group.baseCurrency) ?? 'twd' },
+    group: {
+      id: group.id,
+      // #1612 — the ledger's name today is the stayer's; a former member sees
+      // the neutral ledger label instead.
+      name: isFormerMemberView ? t.postLeave.newLedgerName : group.name,
+      // The chapter's amounts are stored in the ledger's base currency. There
+      // is no per-chapter currency column, so this is the one live field a
+      // former-member view keeps: amounts cannot be formatted without it.
+      baseCurrency: parseCurrencyCode(group.baseCurrency) ?? 'twd',
+    },
     viewer: {
       id: viewerProfile.id,
       displayName: viewerProfile.displayName,
@@ -133,27 +163,66 @@ export default async function DashboardLayout({ children }: { children: React.Re
       who: 'T',
     } : null,
     viewerIsA,
-    isSolo: !partnerProfile,
+    // #1612 — a former member: whether THAT chapter was solo, not today's row.
+    isSolo: isFormerMemberView ? (chapterIdentity?.isSolo ?? true) : !partnerProfile,
     isPast: epochWindow.isPast,
+    isFormerMember: isFormerMemberView,
     // #1604 — a past chapter is labelled with ITS partner (name + initial, no
     // avatar), never today's. `partner` / `isSolo` above keep their live
-    // meaning; `viewerIsA` stays on the current group row (see MemberContext).
-    chapter: epochWindow.isPast
-      ? buildChapterIdentity(chapterMembers, user.id, t.common.partner)
-      : null,
-    canAccessGuardian: canAccessGuardian(group),
+    // meaning; `viewerIsA` stays on the current group row (see MemberContext)
+    // except in a former-member view (#1612, above).
+    chapter: chapterIdentity,
+    // #1612 — the guardian flag is the ledger's live setting: off for a
+    // former member.
+    canAccessGuardian: isFormerMemberView ? false : canAccessGuardian(group),
     epochStartedAt: epochWindow.startedAt.toISOString(),
     epochEndedAt: epochWindow.endedAt ? epochWindow.endedAt.toISOString() : null,
   }
 
   const avatarMenuData: AvatarMenuData = {
     viewerEmail: user.email ?? '',
-    groupDefaultRatioA: group.defaultSplitRatioA ?? null,
-    guardianBetaEnabled: group.guardianBetaEnabled,
+    // #1612 — the ledger's live settings are not a former member's to see.
+    groupDefaultRatioA: isFormerMemberView ? null : (group.defaultSplitRatioA ?? null),
+    guardianBetaEnabled: isFormerMemberView ? false : group.guardianBetaEnabled,
     currentLocale: locale,
     avatarHidden: viewerProfile.avatarHidden,
     hasOpenInvite: openInvite,
   }
+
+  const shell = (
+    <>
+      {/* #1605 — the ACTIVE ledger, never a pinned past chapter's. #1617 —
+          not pinned to a past chapter, `group` already IS the active
+          ledger (the resolver fell through to getActiveGroupForUser), so
+          only a past pin pays for the extra lookup. */}
+      {await (epochWindow.isPast ? getActiveGroupForUser(user.id) : Promise.resolve(group)).then((g) => g && <PushTokenRegistrar userId={user.id} groupId={g.id} />)}
+      <OfflineLifecycle />
+      <ReconnectRefresh />
+      <PartnerActivityToast />
+      <AvatarMenuProvider data={avatarMenuData} disabled={isFormerMemberView}>
+        <div className="relative max-w-md mx-auto min-h-dvh font-noto-tc" style={{ background: 'var(--bg)' }}>
+          {/* Every band that pins to the top of the viewport goes in here,
+              in priority order, so they stack instead of colliding (#1037).
+              A page's own sticky header stays in `{children}` and pins at
+              `top: var(--top-stack-h)` — see ShellTopStack for why it is
+              the height that travels and not the element. */}
+          <ShellTopStack>
+            <ShellUpdateNotice />
+            {deletionRequestedAt && (
+              <AccountDeletionBanner requestedAt={new Date(deletionRequestedAt).toISOString()} />
+            )}
+            <PastChapterBar />
+          </ShellTopStack>
+          {/* Shortcut / `#add=` quick add (#1488): owns the shell URL
+              listener and hands Dashboard a prefill in memory. Inside the
+              dashboard group so it unmounts on sign-out. */}
+          <ToastProvider>
+            <QuickAddProvider>{children}</QuickAddProvider>
+          </ToastProvider>
+        </div>
+      </AvatarMenuProvider>
+    </>
+  )
 
   return (
     <TranslationsProvider value={t} locale={locale}>
@@ -170,38 +239,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </>
         )}
         <ViewerProvider value={value}>
-          <RealtimeProvider groupId={group.id}>
-            {/* #1605 — the ACTIVE ledger, never a pinned past chapter's. #1617 —
-                not pinned to a past chapter, `group` already IS the active
-                ledger (the resolver fell through to getActiveGroupForUser), so
-                only a past pin pays for the extra lookup. */}
-            {await (epochWindow.isPast ? getActiveGroupForUser(user.id) : Promise.resolve(group)).then((g) => g && <PushTokenRegistrar userId={user.id} groupId={g.id} />)}
-            <OfflineLifecycle />
-            <ReconnectRefresh />
-            <PartnerActivityToast />
-            <AvatarMenuProvider data={avatarMenuData}>
-              <div className="relative max-w-md mx-auto min-h-dvh font-noto-tc" style={{ background: 'var(--bg)' }}>
-                {/* Every band that pins to the top of the viewport goes in here,
-                    in priority order, so they stack instead of colliding (#1037).
-                    A page's own sticky header stays in `{children}` and pins at
-                    `top: var(--top-stack-h)` — see ShellTopStack for why it is
-                    the height that travels and not the element. */}
-                <ShellTopStack>
-                  <ShellUpdateNotice />
-                  {deletionRequestedAt && (
-                    <AccountDeletionBanner requestedAt={new Date(deletionRequestedAt).toISOString()} />
-                  )}
-                  <PastChapterBar />
-                </ShellTopStack>
-                {/* Shortcut / `#add=` quick add (#1488): owns the shell URL
-                    listener and hands Dashboard a prefill in memory. Inside the
-                    dashboard group so it unmounts on sign-out. */}
-                <ToastProvider>
-                  <QuickAddProvider>{children}</QuickAddProvider>
-                </ToastProvider>
-              </div>
-            </AvatarMenuProvider>
-          </RealtimeProvider>
+          {/* #1612 — no Realtime channel on a ledger the viewer left: the
+              chapter on screen is closed, and the channel would carry the
+              stayer's present (RLS gives a non-member no frames anyway). */}
+          {isFormerMemberView
+            ? shell
+            : <RealtimeProvider groupId={group.id}>{shell}</RealtimeProvider>}
         </ViewerProvider>
       </TodayProvider>
     </TranslationsProvider>

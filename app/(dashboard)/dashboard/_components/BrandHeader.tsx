@@ -31,7 +31,7 @@ function PlaneIcon({ size = 14, color = 'currentColor' }: { size?: number; color
 }
 
 export function BrandHeader({ showTripButton, onTripClick }: BrandHeaderProps = {}) {
-  const { group, viewer, viewerIsA } = useMember()
+  const { group, viewer, viewerIsA, isFormerMember } = useMember()
   // #1604 — in a past chapter: that chapter's partner, initial only (avatarUrl
   // is null), or nobody if the chapter was solo. Never today's partner.
   const { partner } = useViewedPartner()
@@ -58,7 +58,9 @@ export function BrandHeader({ showTripButton, onTripClick }: BrandHeaderProps = 
       </div>
       {/* relative: anchor for BrandHeaderHint absolute callouts */}
       <div className="relative flex items-center gap-2 shrink-0">
-        {showTripButton && (
+        {/* #1612 — a former member's look-back offers no trip or settings
+            entry: both act on the viewer's own ledger, not this chapter. */}
+        {showTripButton && !isFormerMember && (
           <button
             type="button"
             onClick={onTripClick}
@@ -72,20 +74,31 @@ export function BrandHeader({ showTripButton, onTripClick }: BrandHeaderProps = 
             <PlaneIcon size={14} color="var(--ink-2)" />
           </button>
         )}
-        <button
-          type="button"
-          onClick={open}
-          aria-label={t.settings.quickAccessRow}
-          className="flex bg-transparent border-0 p-1 -mr-1 cursor-pointer rounded-full"
-        >
-          <Avatar memberRole={viewerRole} initial={viewer.initial} src={viewer.avatarUrl} size={26} />
-          {partner && (
-            <div className="-ml-2">
-              <Avatar memberRole={partnerRole} initial={partner.initial} src={partner.avatarUrl} size={26} ring />
-            </div>
-          )}
-        </button>
-        <BrandHeaderHint showTripButton={!!showTripButton} />
+        {isFormerMember ? (
+          <div className="flex p-1 -mr-1">
+            <Avatar memberRole={viewerRole} initial={viewer.initial} src={viewer.avatarUrl} size={26} />
+            {partner && (
+              <div className="-ml-2">
+                <Avatar memberRole={partnerRole} initial={partner.initial} src={partner.avatarUrl} size={26} ring />
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={open}
+            aria-label={t.settings.quickAccessRow}
+            className="flex bg-transparent border-0 p-1 -mr-1 cursor-pointer rounded-full"
+          >
+            <Avatar memberRole={viewerRole} initial={viewer.initial} src={viewer.avatarUrl} size={26} />
+            {partner && (
+              <div className="-ml-2">
+                <Avatar memberRole={partnerRole} initial={partner.initial} src={partner.avatarUrl} size={26} ring />
+              </div>
+            )}
+          </button>
+        )}
+        {!isFormerMember && <BrandHeaderHint showTripButton={!!showTripButton} />}
       </div>
     </div>
   )

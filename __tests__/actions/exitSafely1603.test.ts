@@ -6,13 +6,17 @@ import { resolve } from 'node:path'
 // ─── #1603: a former member's stale pin no longer locks them out — dev DB ───
 //
 // The pin rule (resolveViewerEpochContext) and the past-times list
-// (listEpochsForViewer) against real SQL. A pin counts only if the viewer is
-// named on the chapter AND is still member_a / member_b of its group; the
-// list shows only chapters that pass that rule.
+// (listEpochsForViewer) against real SQL. A pin counts if the viewer is named
+// on the chapter, its group exists, and the viewer is still member_a /
+// member_b of it OR the chapter is closed (#1612: a former member's
+// read-only look-back, flagged `isFormerMemberView`); the list shows exactly
+// the chapters that pass that rule.
 //
-// Failure this guards: a leaver's pin was accepted, the dashboard layout found
-// them missing from the group's members and redirected to /sign-in, which sent
-// a signed-in user straight back to /dashboard — a loop with no way out.
+// Failure #1603 guarded: a leaver's pin was accepted, the dashboard layout
+// found them missing from the group's members and redirected to /sign-in,
+// which sent a signed-in user straight back to /dashboard — a loop with no way
+// out. Since #1612 the layout renders the former member's view from their own
+// profile and the chapter row (__tests__/former-member-lookback-1612.test.ts).
 // Integration test: excluded from CI with the rest of __tests__/actions/**.
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -96,24 +100,35 @@ async function seedLeave() {
 }
 
 describe('pin acceptance (#1603)', () => {
-  it('a leaver pinned to the ledger they left resolves to their own active group', async () => {
+  it('#1612 — a leaver pinned to a closed chapter of the ledger they left gets that chapter, read-only', async () => {
     const s = await seedLeave()
     pin = s.x.epochIds[1]
     const ctx = await resolveViewerEpochContext(s.b)
-    expect(ctx).not.toBeNull()
-    expect(ctx!.group.id).toBe(s.y.groupId)
-    expect(ctx!.window).toMatchObject({ epochId: s.y.epochIds[0], isPast: false })
-    // Never the left ledger, whose row today names the next partner.
-    expect([ctx!.group.memberA, ctx!.group.memberB]).toContain(s.b)
+    expect(ctx!.group.id).toBe(s.x.groupId)
+    expect(ctx!.window).toMatchObject({ epochId: s.x.epochIds[1], isPast: true })
+    expect(ctx!.isFormerMemberView).toBe(true)
   })
 
-  it('a removed person with no group resolves to null (→ /onboarding)', async () => {
+  it("a leaver pinned to the left ledger's OPEN chapter (not theirs) resolves to their own ledger", async () => {
+    const s = await seedLeave()
+    pin = s.x.epochIds[2]
+    const ctx = await resolveViewerEpochContext(s.b)
+    expect(ctx!.group.id).toBe(s.y.groupId)
+    expect(ctx!.window).toMatchObject({ epochId: s.y.epochIds[0], isPast: false })
+    expect(ctx!.isFormerMemberView).toBe(false)
+  })
+
+  it('#1612 — a removed person with no group gets the closed chapter; unpinned → null (/onboarding)', async () => {
     const [stayer, removed] = await seedProfiles(2)
     const z = await seedGroup(stayer, null, [
       { a: stayer, b: removed, from: '2025-01-01', to: '2025-06-01' },
       { a: stayer, b: null, from: '2025-06-01', to: null },
     ])
     pin = z.epochIds[0]
+    const ctx = await resolveViewerEpochContext(removed)
+    expect(ctx!.group.id).toBe(z.groupId)
+    expect(ctx!.isFormerMemberView).toBe(true)
+    pin = z.epochIds[1] // the stayer's solo chapter: not theirs
     expect(await resolveViewerEpochContext(removed)).toBeNull()
   })
 
@@ -143,11 +158,11 @@ describe('pin acceptance (#1603)', () => {
 })
 
 describe('past-times list (#1603)', () => {
-  it("a leaver sees their new solo ledger's chapter and none of the left ledger's — not even the solo chapter 0 they started there", async () => {
+  it("#1612 — a leaver sees their new ledger's chapter plus the closed chapters they lived on the left ledger, never its open one", async () => {
     const s = await seedLeave()
     const ids = (await listEpochsForViewer(s.b)).map((r) => r.id)
-    expect(ids).toEqual([s.y.epochIds[0]])
-    for (const left of s.x.epochIds) expect(ids).not.toContain(left)
+    expect(ids).toEqual([s.y.epochIds[0], s.x.epochIds[1], s.x.epochIds[0]])
+    expect(ids).not.toContain(s.x.epochIds[2])
   })
 
   it("the stayer's list is unchanged: every chapter of X they lived, newest first", async () => {

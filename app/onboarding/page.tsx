@@ -8,7 +8,9 @@ import { db } from '@/lib/db/client'
 import { oikosGroups } from '@/lib/db/schema'
 import { eq, or } from 'drizzle-orm'
 import { getTranslations } from '@/lib/i18n/t'
+import { hasClosedChapterForViewer } from '@/lib/db/queries/epoch'
 import PhilosophyCards from './PhilosophyCards'
+import { PastTimesEntryLink } from './PastTimesEntryLink'
 
 // Auth-walled, transient flow — keep crawlers out (#391). robots.ts also
 // disallows /onboarding so the signal is consistent even if redirects misfire.
@@ -30,6 +32,16 @@ export default async function OnboardingPage() {
 
   // Outside the (dashboard) layout, so there is no TranslationsProvider here —
   // hand the cards their copy directly, the same way /setup does (#1163).
-  const t = await getTranslations()
-  return <PhilosophyCards copy={t.onboarding} />
+  const [t, hasPastChapter] = await Promise.all([
+    getTranslations(),
+    // #1612 — a removed partner with no ledger can still look back at the
+    // chapters they were in.
+    hasClosedChapterForViewer(user.id),
+  ])
+  return (
+    <>
+      {hasPastChapter && <PastTimesEntryLink label={t.pastTimes.title} corner="left" />}
+      <PhilosophyCards copy={t.onboarding} />
+    </>
+  )
 }

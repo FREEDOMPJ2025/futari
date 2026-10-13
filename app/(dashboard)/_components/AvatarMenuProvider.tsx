@@ -41,17 +41,23 @@ export function useAvatarMenu(): AvatarMenuApi {
 
 interface Props {
   data: AvatarMenuData
+  /**
+   * #1612 — a former member looking back at a ledger they left: the sheet's
+   * settings (ledger name, ratio, currency, guardian) act on the viewer's own
+   * ledger, not the chapter on screen, so the menu does not open at all.
+   */
+  disabled?: boolean
   children: React.ReactNode
 }
 
-export function AvatarMenuProvider({ data, children }: Props) {
+export function AvatarMenuProvider({ data, disabled = false, children }: Props) {
   const [isOpen, setOpen] = useState(false)
-  const open = useCallback(() => setOpen(true), [])
+  const open = useCallback(() => { if (!disabled) setOpen(true) }, [disabled])
   const close = useCallback(() => setOpen(false), [])
   return (
     <AvatarMenuContext.Provider value={{ open, close, isOpen }}>
       {children}
-      <AvatarMenuSheet open={isOpen} onClose={close} data={data} />
+      {!disabled && <AvatarMenuSheet open={isOpen} onClose={close} data={data} />}
     </AvatarMenuContext.Provider>
   )
 }

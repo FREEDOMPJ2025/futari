@@ -4,6 +4,7 @@ import { getDrillAssetName, listFilterAssetsForGroup } from '@/lib/db/queries/as
 import { listFeedAllPaged, listFeedAllMonthSummaries, getGroupCreationMonthKey } from '@/lib/db/queries/transactions'
 import { resolveTxnFilter, resolveIncomeFilter } from '@/lib/resolveTxnFilter'
 import { resolveViewedPair, resolveViewerEpochContext } from '@/lib/db/queries/epoch'
+import { nonMemberPinCutoff } from '@/lib/pinnedChapterScope'
 import { RecordsList } from './_components/RecordsList'
 import { MonthlyStatsSection } from './_components/MonthlyStatsSection'
 import { currentMonthKey, monthKeyOf } from '@/lib/monthKey'
@@ -98,9 +99,15 @@ export default async function RecordsPage({
   // use a sentinel name so the chip / RecordsList prop type stays simple.
   // A frozen copy (#1442) resolves only for members of the ledger at freeze
   // time (#1484); anyone else gets no name, as for another ledger's asset.
+  //
+  // #1612 — a former member looking back at a chapter of a ledger they left
+  // gets the /assets cut-off here too (lib/pinnedChapterScope.ts): an asset
+  // created after the chapter closed is neither offered in the filter nor
+  // named on the drill chip. null → no cut-off (everyone else).
+  const assetCutoff = nonMemberPinCutoff(context, user.id)
   let drillAssetName: string | null = null
   if (drill?.kind === 'asset' && drill.assetId !== null) {
-    drillAssetName = await getDrillAssetName(drill.assetId, group.id, user.id)
+    drillAssetName = await getDrillAssetName(drill.assetId, group.id, user.id, assetCutoff)
   }
 
   // Asset list for the FilterSheet's 愛物 multi-select. Active assets only —
@@ -108,7 +115,7 @@ export default async function RecordsPage({
   // selections that reference a deleted asset still survive via the
   // `__none__`-style sentinel handling on the server, but the UI doesn't
   // surface them). Frozen copies (#1442) are not offered either.
-  const filterAssets = await listFilterAssetsForGroup(group.id)
+  const filterAssets = await listFilterAssetsForGroup(group.id, assetCutoff)
 
   // Feed rows + per-month summaries in parallel, both scoped identically
   // (same filter/drill/date-range/epoch) so the feed's month headers agree

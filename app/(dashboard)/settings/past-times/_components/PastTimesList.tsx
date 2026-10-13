@@ -27,6 +27,12 @@ interface Props {
   locale: string
   t: Translations['pastTimes']
   backLabel: string
+  /** #1612 — shown for a chapter's other person when the chapter recorded no
+   *  name for them (「對方」). Never a live name. */
+  neutralPartnerLabel: string
+  /** #1612 — where the back button goes when there is no dashboard to go
+   *  back to (the standalone list under /onboarding). Default: history back. */
+  backHref?: string
 }
 
 export function PastTimesList({
@@ -36,6 +42,8 @@ export function PastTimesList({
   locale,
   t,
   backLabel,
+  neutralPartnerLabel,
+  backHref,
 }: Props) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -59,17 +67,23 @@ export function PastTimesList({
   // Resolve "the partner during this chapter" from the viewer's POV. The chapter
   // could be solo (one of memberAId/memberBId is null) or duo. Whichever side
   // isn't the viewer becomes the "partner" label.
+  // #1612 — a duo chapter whose row recorded no name for the other person
+  // shows the neutral label, not 「一個人」: the chapter was not solo.
   const partnerName = (e: EpochListEntry): string | null => {
-    if (e.memberAId === viewerId) return e.memberBName
-    if (e.memberBId === viewerId) return e.memberAName
-    // Viewer wasn't part of this chapter (shouldn't happen with current schema —
-    // viewer must be on the group to read its epochs — but guard regardless).
-    return e.memberBName ?? e.memberAName
+    if (e.memberAId === viewerId) return e.memberBId ? (e.memberBName ?? neutralPartnerLabel) : null
+    if (e.memberBId === viewerId) return e.memberAName ?? neutralPartnerLabel
+    // Viewer wasn't part of this chapter (shouldn't happen: listEpochsForViewer
+    // only lists chapters the viewer is named on — but guard regardless).
+    return null
   }
 
   return (
     <>
-      <SubpageHeader title={t.title} backLabel={backLabel} />
+      <SubpageHeader
+        title={t.title}
+        backLabel={backLabel}
+        onBack={backHref ? () => router.push(backHref) : undefined}
+      />
 
       <div className="px-5 pt-6 pb-3">
         <p className="text-sm" style={{ color: 'var(--ink-3)' }}>{t.intro}</p>

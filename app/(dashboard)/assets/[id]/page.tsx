@@ -24,6 +24,7 @@ import { listIncomeRulesForAssetForViewer } from '@/lib/db/queries/recurringView
 import { SAVINGS_RETURN_CATEGORIES } from '@/lib/incomeCategories'
 import { HouseDetailClient } from './_components/HouseDetailClient'
 import { TemplateAssetDetailClient } from './_components/TemplateAssetDetailClient'
+import { FormerChapterAssetDetail } from './_components/FormerChapterAssetDetail'
 import { getChildDetails, getPetDetails, getPlantDetails, getHouseDetails, getLinkedInsurancesForVehicle } from '@/lib/db/queries/aibutsu'
 import { getInsuranceDetailsForViewer, loadMemberLinkScope } from '@/lib/db/queries/insuranceView'
 import { resolveCarPrimaryUser } from '@/lib/carMemberLink'
@@ -132,13 +133,57 @@ export default async function AssetDetailPage({ params }: { params: Promise<{ id
   // A viewer on a closed chapter of a group they are no longer in only reaches
   // assets (and rules) created before that chapter closed; anything newer is
   // not found, by URL too. null → no cut-off (current members, open chapter).
-  // Known limit: an older asset still shows its current field values — see
-  // lib/pinnedChapterScope.ts.
+  // An older asset shows none of its current field values (#1612, below).
   const createdBefore = nonMemberPinCutoff(context, user.id)
 
   const asset = await getAssetById(id, group.id, user.id, createdBefore)
   // #1442 — a frozen copy has no detail view yet (polish pass); not found.
   if (!asset || asset.deletedAt || asset.frozenAt) notFound()
+
+  // #1612 — a former member's look-back: the asset's name and the chapter's
+  // money only (owner decision 2026-10-13), the same for every type. No
+  // current field values, notes, policy members, PII placeholders, sibling
+  // rail or linked insurances; no guardian gate either, because that gate is
+  // the ledger's live setting and the policy's premiums are chapter money.
+  if (context.isFormerMemberView) {
+    const isPolicy = asset.type === 'insurance'
+    const [summary, txnRows, fuelLogs, returnRows] = await Promise.all([
+      getAssetSummary(asset.id, group.id, epochWindow),
+      listTransactionsPagedForAsset(asset.id, group.id, null, PAGE_SIZE, epochWindow),
+      asset.type === 'car' ? listFuelLogsWithPrev(asset.id, epochWindow) : Promise.resolve([]),
+      isPolicy
+        ? listInsuranceReturnsPaged(asset.id, group.id, SAVINGS_RETURN_CATEGORIES, null, PAGE_SIZE, epochWindow)
+        : Promise.resolve(null),
+    ])
+    return (
+      <FormerChapterAssetDetail
+        assetId={asset.id}
+        name={asset.name}
+        chapterTotal={summary.totalAmount}
+        initialTxns={serializeTxns(txnRows)}
+        fuelLogs={fuelLogs.map((f) => ({
+          id: f.id,
+          liters: f.liters,
+          odometer: f.odometer,
+          station: f.station,
+          loggedAt: f.loggedAt.toISOString(),
+          prevOdometer: f.prevOdometer,
+        }))}
+        initialReturns={returnRows === null ? null : returnRows.map((r) => ({
+          id: r.id,
+          amount: r.amount,
+          category: r.category,
+          source: r.source,
+          recipientId: r.recipientId,
+          assetId: r.assetId,
+          occurredAt: r.occurredAt,
+          createdAt: r.createdAt.toISOString(),
+          kind: 'income' as const,
+        }))}
+        pageSize={PAGE_SIZE}
+      />
+    )
+  }
 
   // #221/#227 — Guardian beta gate. Insurance asset detail pages live behind
   // the Guardian module; when beta is off, direct URL access (bookmark /
