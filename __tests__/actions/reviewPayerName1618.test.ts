@@ -16,13 +16,19 @@ import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 //   chapter 1  A + B   2026-03-01 → 2026-06-15 (Taipei), closed
 //   chapter 2  A + C   2026-06-15 → open
 //   B left the group, but B's rows stay in it — including a FUTURE-DATED July
-//   row that is the largest expense of a month inside A+C's chapter.
+//   row, created while A+B were together, that would be the largest expense of
+//   a month inside A+C's chapter. Since 0093 (#1621) the snapshot counts only
+//   rows CREATED inside the month's chapter, so every row here carries an
+//   explicit created_at in its own chapter, and July's stored card 2 is C's.
+//   The name guard for an out-of-chapter payer is still exercised through a
+//   snapshot stored the way 0089 computed it (legacyJuly): stored snapshots
+//   are write-once, so such rows can exist from before 0093.
 //
 // Snapshots are computed by the real function (admin connection: EXECUTE is
 // postgres / service_role only); the page runs for real against `db`.
 // Failure this guards: nothing errors; C reads B's name on card 2 of C's own
 // month, or a deleted account's real name stays on the partner's old months.
-// Needs 0089 applied (.env.local → oikos-dev). Excluded from CI with the rest
+// Needs 0093 applied (.env.local → oikos-dev). Excluded from CI with the rest
 // of __tests__/actions/**.
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -76,6 +82,10 @@ beforeAll(async () => {
     SELECT EXISTS (SELECT 1 FROM information_schema.columns
       WHERE table_name = 'MonthlyReviewSnapshots' AND column_name = 'largest_expense_paid_by') AS ok`
   if (!ok) throw new Error('0089 is not applied on this database (largest_expense_paid_by missing).')
+  const [{ scoped }] = await admin<{ scoped: boolean }[]>`
+    SELECT position('"GroupEpochs"' in prosrc) > 0 AS scoped
+      FROM pg_proc WHERE oid = 'public.compute_monthly_review_snapshot(uuid, integer, integer)'::regprocedure`
+  if (!scoped) throw new Error('0093 is not applied on this database (snapshot not chapter-scoped).')
 })
 afterAll(async () => { await admin.end() })
 
@@ -127,17 +137,21 @@ async function seed() {
   }).returning({ id: groupEpochs.id })
   await db.insert(groupEpochs).values({ groupId: g.id, startedAt: handover, memberAId: a, memberBId: c })
 
-  const tx = (paidBy: string, amount: number, at: Date, description: string) => ({
-    groupId: g.id, paidBy, amount, splitType: 'half' as const, description, category: 'dining', transactedAt: at,
+  // createdAt decides the chapter (#1621); set it explicitly per chapter.
+  const tx = (paidBy: string, amount: number, at: Date, createdAt: Date, description: string) => ({
+    groupId: g.id, paidBy, amount, splitType: 'half' as const, description, category: 'dining',
+    transactedAt: at, createdAt,
   })
+  const DURING_AB = TPE(2026, 6, 1)
+  const DURING_AC = TPE(2026, 6, 20)
   await db.insert(cashTransactions).values([
-    tx(b, 900, NOON(2026, 4, 10), 'TEST_1618 apr B'),
-    tx(a, 100, NOON(2026, 4, 11), 'TEST_1618 apr A'),
-    tx(a, 800, NOON(2026, 5, 10), 'TEST_1618 may A'),
-    // B's future-dated row, inside A+C's chapter, the largest of July.
-    tx(b, 5000, NOON(2026, 7, 20), 'TEST_1618 jul B'),
-    tx(c, 300, NOON(2026, 7, 10), 'TEST_1618 jul C'),
-    tx(c, 700, NOON(2026, 8, 10), 'TEST_1618 aug C'),
+    tx(b, 900, NOON(2026, 4, 10), DURING_AB, 'TEST_1618 apr B'),
+    tx(a, 100, NOON(2026, 4, 11), DURING_AB, 'TEST_1618 apr A'),
+    tx(a, 800, NOON(2026, 5, 10), DURING_AB, 'TEST_1618 may A'),
+    // B's future-dated row, created during A+B and dated into A+C's July.
+    tx(b, 5000, NOON(2026, 7, 20), DURING_AB, 'TEST_1618 jul B'),
+    tx(c, 300, NOON(2026, 7, 10), DURING_AC, 'TEST_1618 jul C'),
+    tx(c, 700, NOON(2026, 8, 10), DURING_AC, 'TEST_1618 aug C'),
   ])
   for (const month of [4, 5, 7, 8]) {
     await admin`SELECT public.compute_monthly_review_snapshot(${g.id}, 2026, ${month})`
@@ -146,6 +160,19 @@ async function seed() {
   await rename(a, 'TEST_1618 A later')
   await rename(b, 'TEST_1618 B later')
   return { a, b, c, groupId: g.id, e1: e1.id }
+}
+
+/**
+ * July's snapshot as 0089 stored it (before #1621): B's future-dated row as
+ * card 2, with B's payer id. Snapshots are write-once, so rows like this can
+ * outlive 0093; the page must still never show B's name or id for them.
+ */
+async function legacyJuly(groupId: string, b: string) {
+  await admin`
+    UPDATE "MonthlyReviewSnapshots"
+       SET largest_expense_amount = 5000, largest_expense_description = 'TEST_1618 jul B',
+           largest_expense_category = 'dining', largest_expense_paid_by = ${b}
+     WHERE group_id = ${groupId} AND year = 2026 AND month = 7`
 }
 
 type Props = {
@@ -210,8 +237,24 @@ describe('card 2 payer on /review/[month] (#1618) — dev DB', () => {
     expect(p.payerName).toBe('TEST_1618 C')
   })
 
-  it("cross-chapter: B's future-dated row is July's largest; C sees no name", async () => {
+  it("cross-chapter (#1621): B's future-dated row is not in July at all — not its amount, description or payer", async () => {
     const s = await seed()
+    const stored = await loadMonthlyReviewSnapshot(s.groupId, 2026, 7)
+    expect({
+      amount: stored?.largestExpenseAmount, description: stored?.largestExpenseDescription, payer: stored?.largestExpensePaidBy,
+    }).toEqual({ amount: 300, description: 'TEST_1618 jul C', payer: s.c })
+    const p = await open(s.c, '2026-07')
+    expect(p.snapshot?.largestExpenseAmount).toBe(300)
+    expect(p.snapshot?.largestExpenseDescription).toBe('TEST_1618 jul C')
+    expect(p.payerName).toBe('TEST_1618 C')
+    const props = JSON.stringify(p)
+    expect(props).not.toContain('TEST_1618 jul B')
+    expect(Object.values(p.snapshot!)).not.toContain(5000)
+  })
+
+  it("cross-chapter, stored before 0093: B's row is July's largest; C sees no name", async () => {
+    const s = await seed()
+    await legacyJuly(s.groupId, s.b)
     // Control: the stored payer really is B.
     expect((await loadMonthlyReviewSnapshot(s.groupId, 2026, 7))?.largestExpensePaidBy).toBe(s.b)
     const p = await open(s.c, '2026-07')
@@ -221,6 +264,7 @@ describe('card 2 payer on /review/[month] (#1618) — dev DB', () => {
 
   it("payload (a): B's uuid is nowhere in the serialized props on the cross-chapter fixture", async () => {
     const s = await seed()
+    await legacyJuly(s.groupId, s.b) // the stored row holds B's id
     const p = await open(s.c, '2026-07')
     const payload = await encodeProduction(JSON.parse(JSON.stringify(p)))
     expect(payload).toContain(s.c) // control: ids do appear (the viewer's own)
@@ -230,6 +274,7 @@ describe('card 2 payer on /review/[month] (#1618) — dev DB', () => {
 
   it('payload (b): the snapshot prop carries no payer id key', async () => {
     const s = await seed()
+    await legacyJuly(s.groupId, s.b) // July holds an out-of-chapter id
     for (const [viewer, month, pin] of [[s.c, '2026-07', null], [s.a, '2026-04', s.e1], [s.c, '2026-08', null]] as const) {
       const p = await open(viewer, month, pin)
       expect(p.snapshot).not.toBeNull()
@@ -238,6 +283,24 @@ describe('card 2 payer on /review/[month] (#1618) — dev DB', () => {
       expect(keys.filter((k) => /paidBy|payerId/i.test(k))).toEqual([])
       for (const id of [s.a, s.b, s.c]) expect(Object.values(p.snapshot!)).not.toContain(id)
     }
+  })
+
+  it('cron context (#1621): service_role without a JWT computes the chapter-scoped snapshot', async () => {
+    const s = await seed()
+    // In a transaction that is rolled back: nothing this computes stays.
+    const seen = await admin.begin(async (tx) => {
+      await tx`SET LOCAL ROLE service_role`
+      const [ctx] = await tx<{ role: string; claims: string | null }[]>`
+        SELECT current_user::text AS role, nullif(current_setting('request.jwt.claims', true), '') AS claims`
+      await tx`DELETE FROM "MonthlyReviewSnapshots" WHERE group_id = ${s.groupId} AND year = 2026 AND month = 7`
+      await tx`SELECT public.compute_monthly_review_snapshot(${s.groupId}, 2026, 7)`
+      const [row] = await tx<{ amount: number | null; total: number | null }[]>`
+        SELECT largest_expense_amount AS amount, top_category_total AS total
+          FROM "MonthlyReviewSnapshots" WHERE group_id = ${s.groupId} AND year = 2026 AND month = 7`
+      throw Object.assign(new Error('rollback'), { seen: { ...ctx, ...row } })
+    }).catch((e: { seen?: unknown }) => { if (!e.seen) throw e; return e.seen })
+    // July inside A+C: C's 300 only (B's A+B-era 5000 is not counted).
+    expect(seen).toEqual({ role: 'service_role', claims: null, amount: 300, total: 300 })
   })
 
   it("after B's account is deleted (process_account_deletions), A's old month shows 「已離開的夥伴」", async () => {

@@ -80,6 +80,8 @@ CashTransactions.importBatchId / IncomeTransactions.importBatchId → ImportBatc
   | 這筆屬於哪個章節？ | `created_at` | `epochClause` |
   | 那個月花了／收了多少？ | CashTransactions `transacted_at`／Settlements `settled_at`／IncomeTransactions `occurred_at` | `dateRangeClause` / `dateColumnClause`、`compute_monthly_review_snapshot`（`drizzle/0061_*.sql`） |
 
+  兩者同時用到的地方：月回顧快照（`compute_monthly_review_snapshot`，`drizzle/0093_*.sql`，#1621）用 `transacted_at`／`occurred_at` 選月份，再用 `created_at` 只留整個月所在章節的紀錄（與 `epochClause` 同一條嚴格規則）；跨兩個章節的月份沒有所屬章節，不過濾，回顧頁也不顯示（`isMonthInChapter`）。
+
   `transactedAt` **沒有**「必須落在當前 epoch」的約束（`lib/validators.ts` 只驗格式）：手動 backdating、CSV 匯入（`actions/import.ts:232` 用來源檔日期）、定期支出確認（`actions/recurringExpense.ts` 用 `proposedDate`）都會在當前 epoch 寫入 `transacted_at` 很舊的 row。
 - **拿 `transacted_at` 當 epoch 邊界的失效長這樣**：feed 照常顯示那些 row、balance 把它們整批漏掉（剛匯入的帳本 balance 讀 0），**全程沒有任何錯誤訊息**。#1030 第一輪就是照舊版文件這樣寫而被 verifier 判 REFUTED。理由全文見 `lib/db/queries/balance.ts` 開頭 docstring。
 
