@@ -126,6 +126,7 @@ related_issues: ["#44", "#1618"]
 ### `MonthlyReviewSnapshots`
 
 - `group_id` / `year` / `month` + UNIQUE — 一個帳本 / 一個月恰一筆
+- 算哪些紀錄（#1621，migration 0093）：整個月落在同一章節時，四張卡都只算在該章節**建立**（`created_at`）的紀錄；月份用 `transacted_at`／`occurred_at` 選。跨兩個章節的月份不過濾，但回顧頁本來就不顯示（`isMonthInChapter`）。快照只寫一次，0093 之前算好的不重算。失效的樣子：沒有任何錯誤；新伴侶在自己章節的某個月看到前伴侶記在未來日期的金額與描述。
 - `top_category` + `top_category_total` — 卡片 1 凍結結果
 - `largest_expense_*`（amount / description / category / paid_by）— 卡片 2 凍結。付款人存 **id**，不存名字（#1618，migration 0089）：
   - 原本的 `paid_by_name` 把付款人當時的名字凍成字串，刪除帳號後真名仍留著，而且前伴侶記在未來日期的紀錄若是下一段章節某月的最大一筆，新伴侶會看到前伴侶的名字。0089 起這欄一律 NULL（欄位之後再清理，目前沒有對應的 issue）。

@@ -217,7 +217,11 @@ const SQL_IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/
  * (drizzle/0077) stores asset names without ids. In-app review is chapter-
  * gated (review/[month]/page.tsx), so a later partner only reaches a stored
  * name through a duo-chapter record dated (`transacted_at`) into a month
- * wholly inside their own chapter.
+ * wholly inside their own chapter. Since 0093 (#1621) the snapshot of such a
+ * month counts only rows created inside that chapter, so that path is closed
+ * for snapshots computed from then on; snapshots are write-once, and one
+ * stored before 0093 can still carry such a name (prod count 2026-10-13: 0
+ * snapshots with an out-of-chapter row).
  */
 export function frozenCopyVisibleClause(assetAlias: string, viewerId: string): SQL {
   if (!SQL_IDENTIFIER.test(assetAlias)) throw new Error('frozenCopyVisibleClause: invalid alias')

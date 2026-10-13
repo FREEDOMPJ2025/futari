@@ -65,6 +65,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - **前一段章節的旅行，只有在看那段章節時才打得開（#1614）**
   使用者：之後才加入的伴侶用網址也打不開前一段章節的旅行；自己要看舊旅行，先在「過去的時光」進入那段章節，旅行列表也跟著顯示那段的旅行。
   技術：`/trips`、`/trips/[id]` 改走 `resolveViewerEpochContext`，以 `getTripInChapter`（id＋group＋epoch）讀旅行，查不到就 404，且在讀任何支出前就擋下。
+- **月回顧只算這段章節記下的紀錄（#1621）**
+  使用者：前伴侶記在未來日期的支出，不會再出現在之後那段章節月回顧的任何一張卡片（金額、描述、分類、定期項目、愛物花費）。
+  技術：`0093` 讓 `compute_monthly_review_snapshot` 找出整個月所在的章節，四張卡只算該章節 `created_at` 內的紀錄；已存的快照不重算（prod 盤點 0 筆受影響）。
 
 ## [1.7.2] - 2026-10-12
 
