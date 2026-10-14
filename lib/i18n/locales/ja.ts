@@ -1020,7 +1020,7 @@ export const ja: Translations = {
             'まだ受け入れていない招待リンクは無効になります',
             '元の家計簿はソロモードに戻り、{memberA} がそのまま使い続けます',
           ],
-          exportHint: '離れたあとも「データの安心」ページから、この時間の支出・収入・精算を書き出せます。手元に残したいときは、いま書き出すこともできます。',
+          exportHint: '離れたあとも「データの安心」ページから、この章の支出・収入・精算を書き出せます。手元に残したいときは、いま書き出すこともできます。',
           exportCta: '先に支出・収入・精算を書き出す',
         },
         card4: {
@@ -1216,7 +1216,7 @@ export const ja: Translations = {
     failed: '書き出しに失敗しました。もう一度お試しください。',
     filenamePrefix: 'futari-transactions',
     columns: {
-      type: '種類',
+      type: '種別',
       date: '日付',
       description: '内容',
       amount: '金額',
@@ -1230,7 +1230,7 @@ export const ja: Translations = {
       theirShare: '相手の負担',
       status: '状態',
       notes: 'メモ',
-      chapter: '期間',
+      chapter: '章',
     },
     types: {
       expense: '支出',
@@ -1395,7 +1395,7 @@ export const ja: Translations = {
     },
     portability: {
       heading: '支出・収入・精算は、いつでも持ち出せます',
-      body: 'お二人を縛りつけることはありません。参加していたそれぞれの時間の支出・収入・精算を CSV で書き出せます。家計簿を離れたあとも同じです。',
+      body: 'お二人を縛りつけることはありません。参加していたそれぞれの章の支出・収入・精算を CSV で書き出せます。家計簿を離れたあとも同じです。',
     },
     backup: {
       heading: '一つひとつ、ちゃんと残ります',
