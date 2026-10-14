@@ -5,7 +5,7 @@ import { profiles } from '@/lib/db/schema'
 import { inArray, sql } from 'drizzle-orm'
 import {
   loadMonthlyReviewSnapshot,
-  loadMonthlyReviewMessages,
+  loadChapterReviewMessages,
 } from '@/lib/db/queries/monthlyReview'
 import {
   loadPartnerQuizSessionByGroup,
@@ -119,21 +119,24 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
 
   const editorMonth = nextMonth(reviewedMonth)
 
-  const [snapshot, allPastMessages, allEditorMessages, quizSession] = await Promise.all([
+  // #1684 #1685 — messages are group-scoped rows that outlive a leave
+  // (#1611). Only the viewed chapter's two people's, written while it was
+  // open, belong here: the window keeps the stayer's words to a previous
+  // partner off a new partner's page (the month can lie wholly inside the new
+  // chapter while the message to it was written in the old one).
+  const chapterScope = { memberIds, window: context.window }
+  const [snapshot, pastMessages, editorMessages, quizSession] = await Promise.all([
     loadMonthlyReviewSnapshot(group.id, reviewedMonth.year, reviewedMonth.month),
-    loadMonthlyReviewMessages(group.id, reviewedMonth.year, reviewedMonth.month),
+    loadChapterReviewMessages(group.id, reviewedMonth, chapterScope),
     // #1612 — read-only has no next-month editor, so the next month's
     // messages are neither read nor sent. They were written in that month,
     // which may lie after the chapter closed (the stayer's, or a new
     // partner's, words to each other).
     readOnly
-      ? Promise.resolve([] as Awaited<ReturnType<typeof loadMonthlyReviewMessages>>)
-      : loadMonthlyReviewMessages(group.id, editorMonth.year, editorMonth.month),
+      ? Promise.resolve([] as Awaited<ReturnType<typeof loadChapterReviewMessages>>)
+      : loadChapterReviewMessages(group.id, editorMonth, chapterScope),
     isSolo || readOnly ? Promise.resolve(null) : loadPartnerQuizSessionByGroup(group.id),
   ])
-  // Messages are group-scoped rows; only the chapter's two people's belong here.
-  const pastMessages = allPastMessages.filter((m) => memberIds.includes(m.memberId))
-  const editorMessages = allEditorMessages.filter((m) => memberIds.includes(m.memberId))
 
   // Quiz state — only resolved for dyad groups. Spec: solo mode 不渲染整段
   // quiz；surface 條件「第一次有 MonthlyReviewSnapshot row 後」由 snapshot 存在判定。

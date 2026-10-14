@@ -96,7 +96,7 @@ vi.mock('@/lib/db/queries/currencyRates', async (importOriginal) => {
 
 vi.mock('@/lib/db/queries/monthlyReview', async (importOriginal) => {
   const real = await importOriginal<typeof import('@/lib/db/queries/monthlyReview')>()
-  return { ...real, loadMonthlyReviewMessages: vi.fn(real.loadMonthlyReviewMessages) }
+  return { ...real, loadChapterReviewMessages: vi.fn(real.loadChapterReviewMessages) }
 })
 
 const { db } = await import('@/lib/db/client')
@@ -292,7 +292,7 @@ beforeEach(() => {
   cookieStore.clear()
   viewerId = ''
   vi.mocked(rateQueries.listRatesForGroup).mockClear()
-  vi.mocked(reviewQueries.loadMonthlyReviewMessages).mockClear()
+  vi.mocked(reviewQueries.loadChapterReviewMessages).mockClear()
 })
 
 function as(user: string, pin?: string) {
@@ -590,7 +590,7 @@ describe('#1612 — 5. nothing of the present is served', () => {
     as(B, w.e1)
     const el = await DashboardPage() as ReactElement
     expect(rateQueries.listRatesForGroup).not.toHaveBeenCalled()
-    expect(reviewQueries.loadMonthlyReviewMessages).not.toHaveBeenCalled()
+    expect(reviewQueries.loadChapterReviewMessages).not.toHaveBeenCalled()
     expectNoLiveState(await payloadOf(el))
   })
 
@@ -599,7 +599,15 @@ describe('#1612 — 5. nothing of the present is served', () => {
     const el = await MonthlyReviewPage({ params: Promise.resolve({ month: '2026-04' }) }) as ReactElement<{
       pastMessages: { body: string }[]; ownEditorMessage: unknown; partnerEditorMessage: unknown
     }>
-    expect(vi.mocked(reviewQueries.loadMonthlyReviewMessages).mock.calls.map((c) => c.slice(1))).toEqual([[2026, 4]])
+    // #1685 — the closed chapter is queried as itself: E1's window and E1's
+    // two people, never the open window or whoever is in the ledger today.
+    const calls = vi.mocked(reviewQueries.loadChapterReviewMessages).mock.calls
+    expect(calls.map((c) => [c[0], c[1]])).toEqual([[w.g, { year: 2026, month: 4 }]])
+    const scope = calls[0][2]
+    expect([...scope.memberIds].sort()).toEqual([A, B].sort())
+    expect(scope.window).toMatchObject({
+      epochId: w.e1, startedAt: d('2026-03-01'), endedAt: d('2026-05-01'), isPast: true,
+    })
     expect(el.props.pastMessages.map((m) => m.body)).toEqual(['TEST_1612_MSG_E1_A'])
     expect(el.props.ownEditorMessage).toBeNull()
     expect(el.props.partnerEditorMessage).toBeNull()

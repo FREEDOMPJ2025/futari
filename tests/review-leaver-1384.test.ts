@@ -62,12 +62,17 @@ vi.mock('@/lib/db/client', () => ({
 }))
 vi.mock('@/lib/db/queries/monthlyReview', () => ({
   loadMonthlyReviewSnapshot: async () => ({ computedAt: new Date() }),
-  // Group-scoped rows: B's and A's from chapter 1, plus a C row that must not show in chapter 1.
-  loadMonthlyReviewMessages: async () => [
+  // Group-scoped rows: B's and A's from chapter 1, plus a C row that must not
+  // show in chapter 1. The member filter lives in the loader now (#1685; its
+  // SQL is exercised against Postgres in
+  // __tests__/review-messages-chapter-1684-1685.test.ts); this stand-in applies
+  // the same rule to the memberIds the page passes, so the assertions below
+  // check that the page names the viewed chapter's two people.
+  loadChapterReviewMessages: async (_g: string, _ym: unknown, scope: { memberIds: string[] }) => [
     { id: 'm-a', memberId: 'user-a', body: 'from A', lockedAt: new Date() },
     { id: 'm-b', memberId: 'user-b', body: 'from B', lockedAt: new Date() },
     { id: 'm-c', memberId: 'user-c', body: 'from C', lockedAt: new Date() },
-  ],
+  ].filter((m) => scope.memberIds.includes(m.memberId)),
 }))
 vi.mock('@/lib/db/queries/partnerQuiz', () => ({
   loadPartnerQuizSessionByGroup: quizLoader,

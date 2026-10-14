@@ -22,7 +22,7 @@ import { parseCurrencyCode } from '@/lib/currency'
 import {
   loadMonthlyReviewSnapshot,
   listMonthlyReviewMonths,
-  loadMonthlyReviewMessages,
+  loadChapterReviewMessages,
 } from '@/lib/db/queries/monthlyReview'
 import {
   currentYearMonthInTaipei,
@@ -109,6 +109,11 @@ export default async function DashboardPage() {
     ? formerChapter?.memberAId === user.id
     : group.memberA === user.id
 
+  // The open chapter's two people: outside a past view the group row is the
+  // open chapter's pair (resolveViewedPair reads it the same way).
+  const openChapterMemberIds = [group.memberA, group.memberB].filter((x): x is string => !!x)
+  const chapterPartnerId = group.memberA === user.id ? group.memberB : group.memberA
+
   // Fast path — what hero/banner/post-leave needs to paint immediately. All of
   // these only depend on (group, epochWindow, dates) so they fan out as one
   // Promise.all instead of two sequential awaits. The latest income (limit 1)
@@ -153,9 +158,13 @@ export default async function DashboardPage() {
     // #1612 — the banner quotes this month's messages, written in today's
     // chapter (not the pinned one), and its dismiss writes to the viewer's
     // own ledger. A past view shows no banner, so it reads no message.
+    // #1684 — only the open chapter's two people's, written since it opened:
+    // a row a former partner wrote ahead for a far-future month stays in the
+    // ledger (#1611) and must never be quoted to whoever is here when that
+    // month comes.
     epochWindow.isPast
-      ? Promise.resolve([] as Awaited<ReturnType<typeof loadMonthlyReviewMessages>>)
-      : loadMonthlyReviewMessages(group.id, todayYM.year, todayYM.month),
+      ? Promise.resolve([] as Awaited<ReturnType<typeof loadChapterReviewMessages>>)
+      : loadChapterReviewMessages(group.id, todayYM, { memberIds: openChapterMemberIds, window: epochWindow }),
     shouldCheckPriorLeaver ? getLatestPriorClosedEpoch(group.id) : Promise.resolve(null),
     epochWindow.epochId
       ? listActiveTrips(group.id, epochWindow.epochId)
@@ -250,9 +259,11 @@ export default async function DashboardPage() {
       : reviewSnapshot.bannerDismissedByMemberBAt
 
     if (!dismissedAt) {
-      const partnerMsg = isSolo
+      // #1684 — the partner is the open chapter's other person, by id; never
+      // "anyone who is not the viewer".
+      const partnerMsg = isSolo || !chapterPartnerId
         ? null
-        : currentMonthMessages.find((m) => m.memberId !== user.id)
+        : currentMonthMessages.find((m) => m.memberId === chapterPartnerId)
       const ownMsg = currentMonthMessages.find((m) => m.memberId === user.id)
       const preferred = partnerMsg ?? ownMsg ?? null
       bannerProps = {

@@ -1,7 +1,9 @@
 import { db } from '@/lib/db/client'
 import { monthlyReviewMessages, monthlyReviewSnapshots } from '@/lib/db/schema'
-import { and, asc, desc, eq } from 'drizzle-orm'
-import { isMonthInChapter } from '@/lib/monthlyReview'
+import { and, asc, desc, eq, inArray } from 'drizzle-orm'
+import { isMonthInChapter, type YearMonth } from '@/lib/monthlyReview'
+import { epochClause } from './_predicates'
+import type { EpochWindow } from './epoch'
 
 export interface RecurringEvent {
   name: string
@@ -98,11 +100,32 @@ export async function loadMonthlyReviewSnapshot(
   return row ? rehydrate(row) : null
 }
 
-export async function loadMonthlyReviewMessages(
+/**
+ * The messages given to month `ym` that belong to one chapter (#1684, #1685):
+ * written by one of that chapter's two people (`memberIds`, from its epoch
+ * row) while it was open (`created_at` inside `window`).
+ *
+ * Messages are group-scoped rows and leave/remove keep them in the ledger
+ * (#1611), so a group-wide read for a month serves words written to a
+ * previous partner to the next one, and a row with a forged future month to
+ * whoever is in the ledger when that month comes. The window is what stops
+ * both: the stayer is a member of the next chapter too, so the member filter
+ * alone would still pass their words to the old partner. The member filter is
+ * the second fence — only the two people the chapter row names, never anyone
+ * else whose row happens to fall inside the window.
+ *
+ * What it looks like when this regresses: nothing errors. A new partner's
+ * /review page or home banner quietly quotes a message that was written to
+ * someone else.
+ *
+ * Fails closed: no member ids → no rows.
+ */
+export async function loadChapterReviewMessages(
   groupId: string,
-  year: number,
-  month: number,
+  ym: YearMonth,
+  chapter: { memberIds: string[]; window: EpochWindow },
 ): Promise<MonthlyReviewMessageRow[]> {
+  if (chapter.memberIds.length === 0) return []
   return db
     .select({
       id: monthlyReviewMessages.id,
@@ -117,8 +140,10 @@ export async function loadMonthlyReviewMessages(
     .from(monthlyReviewMessages)
     .where(and(
       eq(monthlyReviewMessages.groupId, groupId),
-      eq(monthlyReviewMessages.year, year),
-      eq(monthlyReviewMessages.month, month),
+      eq(monthlyReviewMessages.year, ym.year),
+      eq(monthlyReviewMessages.month, ym.month),
+      inArray(monthlyReviewMessages.memberId, chapter.memberIds),
+      epochClause(monthlyReviewMessages.createdAt, chapter.window),
     ))
     .orderBy(asc(monthlyReviewMessages.createdAt))
 }
