@@ -105,20 +105,45 @@ describe('resolveActor precedence (rev 2)', () => {
     expect(await resolveActor(tx, outingRow() as never, { userId: ME, claimToken: generateToken() }, { lockGroup: false })).toBeNull()
   })
 
-  it('member of the outing\'s group → member (not pinned)', async () => {
+  it('member of the outing\'s group, named on its chapter → member (not pinned)', async () => {
     queueDbResult([{ memberA: ME, memberB: PARTNER }])
     queueDbResult([{ id: SLOT, deactivatedAt: null }])
+    queueDbResult([{ a: ME, b: PARTNER }]) // the outing's chapter row
     const actor = await resolveActor(tx, outingRow() as never, { userId: ME, claimToken: null }, { lockGroup: false })
-    expect(actor).toEqual({ kind: 'member', userId: ME, participantId: SLOT, pinnedPast: false })
+    expect(actor).toEqual({ kind: 'member', userId: ME, participantId: SLOT, pinnedPast: false, pinnedEpochId: null })
   })
 
-  it('member pinned to an ended chapter of this group → pinnedPast', async () => {
+  it('member pinned to an ended chapter of this group → pinnedPast, with that chapter\'s id', async () => {
     jar.set(PAST_EPOCH_COOKIE, PAST)
     queueDbResult([{ memberA: ME, memberB: PARTNER }])
     queueDbResult([])
+    queueDbResult([{ a: ME, b: PARTNER }])
     queueDbResult([{ groupId: GROUP, endedAt: new Date(), a: ME, b: PARTNER }])
     const actor = await resolveActor(tx, outingRow() as never, { userId: ME, claimToken: null }, { lockGroup: false })
-    expect(actor).toMatchObject({ kind: 'member', pinnedPast: true })
+    expect(actor).toMatchObject({ kind: 'member', pinnedPast: true, pinnedEpochId: PAST })
+  })
+
+  it('#1682: a ledger member NOT named on the outing\'s chapter is not a member — nobody without a slot', async () => {
+    queueDbResult([{ memberA: ME, memberB: PARTNER }]) // today's group row names ME
+    queueDbResult([]) // no own slot
+    queueDbResult([{ a: OTHER, b: PARTNER }]) // the chapter was OTHER + PARTNER
+    expect(await resolveActor(tx, outingRow() as never, { userId: ME, claimToken: null }, { lockGroup: false })).toBeNull()
+  })
+
+  it('#1682: …and with a bound slot of their own, a session participant (never a member)', async () => {
+    queueDbResult([{ memberA: ME, memberB: PARTNER }])
+    queueDbResult([{ id: SLOT, deactivatedAt: null }])
+    queueDbResult([{ a: OTHER, b: PARTNER }])
+    const actor = await resolveActor(tx, outingRow() as never, { userId: ME, claimToken: null }, { lockGroup: false })
+    expect(actor).toEqual({ kind: 'participant', via: 'session', userId: ME, participantId: SLOT })
+  })
+
+  it('#1682: named on the chapter but no longer on the group row is not a member either', async () => {
+    queueDbResult([{ memberA: PARTNER, memberB: OTHER }]) // ME left
+    queueDbResult([{ id: SLOT, deactivatedAt: null }])
+    const actor = await resolveActor(tx, outingRow() as never, { userId: ME, claimToken: null }, { lockGroup: false })
+    expect(actor).toEqual({ kind: 'participant', via: 'session', userId: ME, participantId: SLOT })
+    expect(mockDb.select).toHaveBeenCalledTimes(2) // the chapter row is read only for a ledger member
   })
 
   it('member of another group with no slot and no cookie → nobody', async () => {
@@ -154,6 +179,7 @@ describe('lock helpers refuse with codes', () => {
     queueDbResult([outingRow()])
     queueDbResult([{ memberA: ME, memberB: PARTNER }])
     queueDbResult([])
+    queueDbResult([{ a: ME, b: PARTNER }])
     queueDbResult([{ groupId: GROUP, endedAt: new Date(), a: ME, b: PARTNER }])
     expect(await codeOf(lockForContentWrite(tx, OUTING, { userId: ME, claimToken: null }))).toBe('outing_viewing_past_chapter')
   })
@@ -184,6 +210,41 @@ describe('lock helpers refuse with codes', () => {
     queueDbResult([outingRow()])
     queueDbResult([{ id: SLOT, profileId: null }])
     expect(await codeOf(lockForAdmin(tx, OUTING, { userId: null, claimToken: generateToken() }))).toBe('outing_admin_only')
+  })
+
+  // #1682 — the chapter rules of lockForAdmin.
+  const member = (pinned?: string) => {
+    if (pinned) jar.set(PAST_EPOCH_COOKIE, pinned)
+    queueDbResult([outingRow()])
+    queueDbResult([{ memberA: ME, memberB: PARTNER }])
+    queueDbResult([])
+    queueDbResult([{ a: ME, b: PARTNER }])
+    if (pinned) queueDbResult([{ groupId: GROUP, endedAt: new Date(), a: ME, b: PARTNER }])
+  }
+  const me = { userId: ME, claimToken: null }
+
+  it('admin path on a closed-chapter outing → outing_epoch_closed', async () => {
+    member()
+    queueDbResult([{ id: PAST }]) // the open chapter is another one
+    expect(await codeOf(lockForAdmin(tx, OUTING, me))).toBe('outing_epoch_closed')
+  })
+
+  it('admin path pinned to the outing\'s own chapter is still outing_viewing_past_chapter', async () => {
+    member(EPOCH)
+    expect(await codeOf(lockForAdmin(tx, OUTING, me))).toBe('outing_viewing_past_chapter')
+  })
+
+  it('end mode: unpinned, or pinned to exactly the outing\'s chapter, passes without a chapter check', async () => {
+    member()
+    await expect(lockForAdmin(tx, OUTING, me, 'update', 'no key update', 'end')).resolves.toMatchObject({ actor: { kind: 'member' } })
+    resetDbMocks()
+    member(EPOCH)
+    await expect(lockForAdmin(tx, OUTING, me, 'update', 'no key update', 'end')).resolves.toMatchObject({ actor: { pinnedEpochId: EPOCH } })
+  })
+
+  it('end mode pinned to a different past chapter → outing_viewing_past_chapter', async () => {
+    member(PAST)
+    expect(await codeOf(lockForAdmin(tx, OUTING, me, 'update', 'no key update', 'end'))).toBe('outing_viewing_past_chapter')
   })
 })
 
@@ -266,6 +327,7 @@ describe('joinOuting', () => {
     queueDbResult([{ id: EPOCH }])
     queueDbResult([{ memberA: ME, memberB: PARTNER }])
     queueDbResult([{ id: SLOT, deactivatedAt: null }])
+    queueDbResult([{ a: ME, b: PARTNER }]) // the outing's chapter row
     expect(await joinOuting({ shareToken: share, participantId: SLOT })).toEqual({ ok: false, code: 'outing_already_joined' })
   })
 
@@ -325,6 +387,8 @@ describe('releaseOutingSlot', () => {
     queueDbResult([outingRow()])
     queueDbResult([{ memberA: ME, memberB: PARTNER }])
     queueDbResult([])
+    queueDbResult([{ a: ME, b: PARTNER }]) // the outing's chapter row
+    queueDbResult([{ id: EPOCH }]) // still the open chapter (#1682)
   }
   it('refuses a slot bound to an account', async () => {
     asMember()

@@ -1,6 +1,7 @@
-import { notFound } from 'next/navigation'
-import { requireViewerGroupOrRedirect } from '@/lib/auth/viewer'
-import { getOutingDetail } from '@/lib/db/queries/outing'
+import { notFound, redirect } from 'next/navigation'
+import { requireViewerOrRedirect } from '@/lib/auth/viewer'
+import { resolveViewedPair, resolveViewerEpochContext } from '@/lib/db/queries/epoch'
+import { getOutingInChapter, loadOutingDetailRows } from '@/lib/db/queries/outing'
 import { buildOutingView } from '@/lib/outing/view'
 import { isUuid } from '@/lib/outing/validate'
 import { foldPreviewFor, memberPidsOf } from '@/lib/outing/foldback'
@@ -13,13 +14,28 @@ export default async function OutingDetailPage(props: { params: Promise<{ id: st
   const { id } = await props.params
   // A malformed id would fail the uuid cast in Postgres and 500; it is simply not an outing.
   if (!isUuid(id)) notFound()
-  const { group } = await requireViewerGroupOrRedirect()
-  const detail = await getOutingDetail(id)
-  if (!detail || detail.outing.groupId !== group.id) notFound()
+  const { user } = await requireViewerOrRedirect()
+
+  // #1682 — an outing is readable only inside the chapter being viewed: the
+  // open chapter, or a pinned one (same rule as trips, #1614). The chapter
+  // check is the first outing query; a different chapter's outing is not
+  // found, and none of its participants, expenses or settlements is loaded.
+  const context = await resolveViewerEpochContext(user.id)
+  if (!context) redirect('/onboarding')
+  const { group, window: epochWindow } = context
+  if (!epochWindow.epochId) notFound()
+  const outing = await getOutingInChapter(id, group.id, epochWindow.epochId)
+  if (!outing) notFound()
+  const detail = { outing, ...(await loadOutingDetailRows(outing.id)) }
+
+  // The chapter's two people frame "member" vs friend: a past chapter's from
+  // its GroupEpochs row (getEpochMembers via resolveViewedPair), never today's
+  // group row, which after a leave names the stayer and the next partner.
+  const pair = await resolveViewedPair(context, user.id)
 
   // Same null-guarded resolver the end action uses: a solo group's missing
   // member must not resolve to an unbound friend.
-  const { a: memberAParticipantId, b: memberBParticipantId } = memberPidsOf(detail.participants, group.memberA, group.memberB)
+  const { a: memberAParticipantId, b: memberBParticipantId } = memberPidsOf(detail.participants, pair.memberA, pair.memberB)
 
   const view = buildOutingView({
     participants: detail.participants.map((p) => ({ id: p.id, displayName: p.displayName, profileId: p.profileId })),
@@ -55,7 +71,7 @@ export default async function OutingDetailPage(props: { params: Promise<{ id: st
         displayName: p.displayName,
         active: p.deactivatedAt === null,
         ...participantClaim(p),
-        isMember: p.profileId !== null && (p.profileId === group.memberA || p.profileId === group.memberB),
+        isMember: p.profileId !== null && (p.profileId === pair.memberA || p.profileId === pair.memberB),
       }))}
       settlements={[...detail.settlements].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).map((s) => ({
         id: s.id,
