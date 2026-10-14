@@ -473,8 +473,10 @@ function Card3({
         {bullets.map((b, i) => <li key={i}>{b}</li>)}
       </ul>
       {/* #1611 — export first. The records stay in this ledger after a leave;
-          a copy of your own is optional. The copy names expenses only: the
-          export is CashTransactions only until #1460 widens it. */}
+          a copy of your own is optional, and since #1460 the leaver can also
+          export this chapter later. The copy names what the file holds
+          (expenses, income, settlements) and that the chapter goes if the
+          stayer later deletes their account. */}
       <p className="text-sm mt-5 mb-3 text-ink-2">{exportHint}</p>
       <Button variant="secondary" fullWidth onClick={onExport} disabled={exportPending}>
         {exportCta}

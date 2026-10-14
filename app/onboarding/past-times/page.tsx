@@ -6,6 +6,7 @@ import { listEpochsForViewer, PAST_EPOCH_COOKIE } from '@/lib/db/queries/epoch'
 import { cookies } from 'next/headers'
 import { getLocale, getTranslations } from '@/lib/i18n/t'
 import { PastTimesList } from '@/app/(dashboard)/settings/past-times/_components/PastTimesList'
+import { PastTimesExport } from './_components/PastTimesExport'
 
 // Auth-walled, like the rest of /onboarding (#391): keep crawlers out.
 export const metadata: Metadata = {
@@ -25,6 +26,9 @@ export const metadata: Metadata = {
  * PastChapterBar's exit brings them back here via /dashboard → /onboarding.
  *
  * Someone who does have a ledger uses the in-app page instead.
+ *
+ * #1460 — below the list, the CSV export (this person cannot reach
+ * /settings/trust). Shown only when there is a chapter to export.
  */
 export default async function StandalonePastTimesPage() {
   const { user } = await requireViewerOrRedirect()
@@ -59,6 +63,14 @@ export default async function StandalonePastTimesPage() {
         neutralPartnerLabel={t.common.partner}
         backHref="/onboarding"
       />
+      {epochs.length > 0 && (
+        <PastTimesExport
+          hint={t.pastTimes.exportHint}
+          cta={t.pastTimes.exportCta}
+          preparing={t.csvExport.preparing}
+          failed={t.csvExport.failed}
+        />
+      )}
     </main>
   )
 }

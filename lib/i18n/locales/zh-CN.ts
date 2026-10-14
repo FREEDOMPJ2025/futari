@@ -1010,8 +1010,8 @@ export const zhCN: Translations = {
             '尚未接受的邀请链接会失效',
             '原账本变回单人状态，由 {memberA} 继续使用',
           ],
-          exportHint: '想自己留一份支出记录，离开前可以先导出。',
-          exportCta: '先导出支出记录',
+          exportHint: '离开后，也能在「数据安全」页导出这段章节的支出、进账和结算。不过对方之后若删除账号，这段章节可能会跟着删除；想确定留一份，可以现在先导出。',
+          exportCta: '先导出支出、进账和结算',
         },
         card4: {
           title: '确定这些都是你跟对方一起想要的吗？',
@@ -1195,6 +1195,8 @@ export const zhCN: Translations = {
     bannerHeading: '你正在看 {start} – {end} 的过去',
     bannerExitCta: '回到现在',
     empty: '还没有过去的时光。第一段才刚开始。',
+    exportHint: '想自己留一份记录，可以把这些章节里的支出、进账和结算导出成 CSV。',
+    exportCta: '导出支出、进账和结算',
   },
 
   csvExport: {
@@ -1202,14 +1204,29 @@ export const zhCN: Translations = {
     failed: '导出失败，请稍后再试',
     filenamePrefix: 'futari-transactions',
     columns: {
+      type: '类型',
       date: '日期',
-      description: '描述',
+      description: '说明',
       amount: '金额',
+      currency: '货币',
+      originalAmount: '原币金额',
+      originalCurrency: '原货币',
       category: '分类',
-      paidBy: '谁付的',
-      splitType: '分摊',
+      person: '付款／收款人',
+      settlementTo: '给谁（结算）',
+      myShare: '我的分摊',
+      theirShare: '对方分摊',
+      status: '状态',
       notes: '备注',
+      chapter: '章节',
     },
+    types: {
+      expense: '支出',
+      income: '进账',
+      settlement: '结算',
+    },
+    chapter: '{start} – {end}・{who}',
+    chapterOngoing: '至今',
   },
 
   assets: {
@@ -1365,8 +1382,8 @@ export const zhCN: Translations = {
       body: '账本只对你们两人的账号开放。连接以 HTTPS 加密；宝宝本名、身份证号、车牌和地址这类敏感数据，我们会再加密一层才存进数据库。',
     },
     portability: {
-      heading: '随时都能整包带走',
-      body: '我们不会把你们绑在这里。日后想离开，所有记录都能整批带走。',
+      heading: '支出、进账和结算，随时能带走',
+      body: '我们不会把你们绑在这里。你待过的每段章节里的支出、进账和结算，都能导出成 CSV 带走，离开账本之后也可以。',
     },
     backup: {
       heading: '每一笔，都会好好留着',
@@ -1374,7 +1391,7 @@ export const zhCN: Translations = {
     },
     onboarding: {
       line1: '数据只属于你们俩',
-      line2: '随时都能整包带走',
+      line2: '支出、进账和结算随时能带走',
       line3: '每一笔，都会好好留着',
     },
     bilateral: {

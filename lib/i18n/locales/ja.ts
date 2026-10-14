@@ -1020,8 +1020,8 @@ export const ja: Translations = {
             'まだ受け入れていない招待リンクは無効になります',
             '元の家計簿はソロモードに戻り、{memberA} がそのまま使い続けます',
           ],
-          exportHint: '支出の記録を手元にも残したいときは、離れる前に書き出せます。',
-          exportCta: '先に支出を書き出す',
+          exportHint: '離れたあとも「データの安心」ページから、この時間の支出・収入・精算を書き出せます。ただ、相手がのちにアカウントを削除すると、この時間も一緒に消えることがあります。確実に残したいときは、いま書き出しておくと安心です。',
+          exportCta: '先に支出・収入・精算を書き出す',
         },
         card4: {
           title: 'これがふたりの望みで間違いありませんか？',
@@ -1207,6 +1207,8 @@ export const ja: Translations = {
     bannerHeading: '{start} – {end} の過去を見ています',
     bannerExitCta: '今に戻る',
     empty: 'まだ過ぎた時間はありません。最初の時間が始まったばかりです。',
+    exportHint: '手元に記録を残したいときは、これらの時間の支出・収入・精算を CSV で書き出せます。',
+    exportCta: '支出・収入・精算を書き出す',
   },
 
   csvExport: {
@@ -1214,14 +1216,29 @@ export const ja: Translations = {
     failed: '書き出しに失敗しました。もう一度お試しください。',
     filenamePrefix: 'futari-transactions',
     columns: {
+      type: '種類',
       date: '日付',
       description: '内容',
       amount: '金額',
+      currency: '通貨',
+      originalAmount: '元の金額',
+      originalCurrency: '元の通貨',
       category: 'カテゴリー',
-      paidBy: '支払者',
-      splitType: '負担',
+      person: '支払者／受取人',
+      settlementTo: '精算の相手',
+      myShare: '自分の負担',
+      theirShare: '相手の負担',
+      status: '状態',
       notes: 'メモ',
+      chapter: '期間',
     },
+    types: {
+      expense: '支出',
+      income: '収入',
+      settlement: '精算',
+    },
+    chapter: '{start} – {end}・{who}',
+    chapterOngoing: 'いま',
   },
 
   assets: {
@@ -1377,8 +1394,8 @@ export const ja: Translations = {
       body: 'この家計簿を開けるのは、お二人のアカウントだけです。通信は HTTPS で暗号化され、お子さまの本名・マイナンバー・ナンバープレート・住所などの機微な情報は、さらに暗号化してから保存しています。',
     },
     portability: {
-      heading: 'いつでも、まるごと持ち出せます',
-      body: 'お二人を縛りつけることはありません。離れる時も、すべて持っていけます。',
+      heading: '支出・収入・精算は、いつでも持ち出せます',
+      body: 'お二人を縛りつけることはありません。参加していたそれぞれの時間の支出・収入・精算を CSV で書き出せます。家計簿を離れたあとも同じです。',
     },
     backup: {
       heading: '一つひとつ、ちゃんと残ります',
@@ -1386,7 +1403,7 @@ export const ja: Translations = {
     },
     onboarding: {
       line1: '記録は、お二人だけのもの',
-      line2: 'いつでも、まるごと持ち出せます',
+      line2: '支出・収入・精算はいつでも持ち出せます',
       line3: '一つひとつ、ちゃんと残ります',
     },
     bilateral: {

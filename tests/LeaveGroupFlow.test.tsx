@@ -276,7 +276,7 @@ describe('LeaveGroupFlow — member_a path (must swap first)', () => {
 // After a leave the records stay in this ledger, so card 3 offers a copy of
 // one's own before leaving. It must start the SAME export as /settings/trust
 // (GET /api/export/transactions — no new route, no new scope), and its copy
-// must say expenses only: the export reads CashTransactions only until #1460.
+// must name what the file holds: expenses, income and settlements (#1460).
 describe('LeaveGroupFlow — card 3 export-first hint (#1611)', () => {
   const toCard3 = () => {
     fireEvent.click(screen.getByText('下一步'))
@@ -289,10 +289,10 @@ describe('LeaveGroupFlow — card 3 export-first hint (#1611)', () => {
         <LeaveGroupFlow open onClose={() => {}} viewerIsMemberA={viewerIsMemberA}
           viewerName="小明" partnerName="小華" groupBalance={0} />,
       )
-      expect(screen.queryByText('先匯出支出紀錄')).toBeNull() // not before card 3
+      expect(screen.queryByText('先匯出支出、進帳和結算')).toBeNull() // not before card 3
       toCard3()
-      expect(screen.getByText('想自己留一份支出紀錄，離開前可以先匯出。')).toBeTruthy()
-      expect(screen.getByRole('button', { name: '先匯出支出紀錄' })).toBeTruthy()
+      expect(screen.getByText(zhTW.settings.dangerZone.flow.card3.exportHint)).toBeTruthy()
+      expect(screen.getByRole('button', { name: '先匯出支出、進帳和結算' })).toBeTruthy()
       expect(screen.getByText('收支、結算和月回顧留言會完整留在這本帳本，離開後仍能回頭查看')).toBeTruthy()
       expect(screen.queryByText(/誰付的／誰收的/)).toBeNull()
     })
@@ -317,7 +317,7 @@ describe('LeaveGroupFlow — card 3 export-first hint (#1611)', () => {
           viewerName="小明" partnerName="小華" groupBalance={0} />,
       )
       toCard3()
-      fireEvent.click(screen.getByRole('button', { name: '先匯出支出紀錄' }))
+      fireEvent.click(screen.getByRole('button', { name: '先匯出支出、進帳和結算' }))
       await waitFor(() => expect(click).toHaveBeenCalledTimes(1))
       expect(fetchMock).toHaveBeenCalledTimes(1)
       expect(fetchMock).toHaveBeenCalledWith('/api/export/transactions', { credentials: 'same-origin' })
@@ -325,7 +325,7 @@ describe('LeaveGroupFlow — card 3 export-first hint (#1611)', () => {
       expect(leaveGroup).not.toHaveBeenCalled()
       expect(proposeSwap).not.toHaveBeenCalled()
       // Still on card 3: exporting does not advance or close the flow.
-      expect(screen.getByRole('button', { name: '先匯出支出紀錄' })).toBeTruthy()
+      expect(screen.getByRole('button', { name: '先匯出支出、進帳和結算' })).toBeTruthy()
     } finally {
       click.mockRestore()
       urlStatics.createObjectURL = saved.create
@@ -342,31 +342,34 @@ describe('LeaveGroupFlow — card 3 export-first hint (#1611)', () => {
           viewerName="小明" partnerName="小華" groupBalance={0} />,
       )
       toCard3()
-      fireEvent.click(screen.getByRole('button', { name: '先匯出支出紀錄' }))
+      fireEvent.click(screen.getByRole('button', { name: '先匯出支出、進帳和結算' }))
       await waitFor(() => expect(screen.getByRole('alert').textContent).toBe(zhTW.csvExport.failed))
       expect(leaveGroup).not.toHaveBeenCalled()
-      expect(screen.getByRole('button', { name: '先匯出支出紀錄' })).toBeTruthy()
+      // The error is set inside the transition; the label returns from
+      // 「準備中…」 when it settles, which under load can be a tick later.
+      expect(await screen.findByRole('button', { name: '先匯出支出、進帳和結算' })).toBeTruthy()
     } finally {
       vi.unstubAllGlobals()
     }
   })
 })
 
-describe('#1611 copy: the export-first strings name expenses only, in every locale', () => {
-  // What each locale must say (its word for expenses) and must not imply can
-  // be exported (income, settlements, messages, "all records").
+describe('#1611 / #1460 copy: the export-first strings name what the export holds, in every locale', () => {
+  // Each locale must name expenses, income and settlements (what the file
+  // holds), and must not imply messages or "everything / all records" go too.
   const rules = {
-    'zh-TW': { must: /支出/, mustNot: /收入|收支|結算|留言|所有|全部|整批/ },
-    'zh-CN': { must: /支出/, mustNot: /收入|收支|结算|留言|所有|全部|整批/ },
-    en: { must: /expense/i, mustNot: /income|settlement|note|message|\ball\b|everything|records/i },
-    ja: { must: /支出/, mustNot: /収入|精算|メッセージ|すべて|全部/ },
+    'zh-TW': { must: [/支出/, /進帳/, /結算/], mustNot: /留言|所有|全部|整批|整包|整本/ },
+    'zh-CN': { must: [/支出/, /进账/, /结算/], mustNot: /留言|所有|全部|整批|整包|整本/ },
+    en: { must: [/expense/i, /income/i, /settlement/i], mustNot: /message|\ball\b|everything|records/i },
+    ja: { must: [/支出/, /収入/, /精算/], mustNot: /メッセージ|すべて|全部|まるごと/ },
   } as const
   for (const [locale, dict] of Object.entries({ 'zh-TW': zhTW, 'zh-CN': zhCN, en, ja })) {
     it(locale, () => {
       const c = dict.settings.dangerZone.flow.card3
+      const r = rules[locale as keyof typeof rules]
       for (const s of [c.exportHint, c.exportCta]) {
-        expect(s).toMatch(rules[locale as keyof typeof rules].must)
-        expect(s).not.toMatch(rules[locale as keyof typeof rules].mustNot)
+        for (const must of r.must) expect(s).toMatch(must)
+        expect(s).not.toMatch(r.mustNot)
         expect(s).not.toMatch(/[!！]/)
       }
     })
