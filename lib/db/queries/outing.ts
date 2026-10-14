@@ -86,23 +86,66 @@ export interface OutingDetailRow {
   settlements: (typeof outingSettlements.$inferSelect)[]
 }
 
+const outingHeader = {
+  id: outings.id,
+  groupId: outings.groupId,
+  epochId: outings.epochId,
+  name: outings.name,
+  currency: outings.currency,
+  status: outings.status,
+  foldFromParticipantId: outings.foldFromParticipantId,
+  foldToParticipantId: outings.foldToParticipantId,
+}
+
+/**
+ * Unscoped: the outing by id, whoever's it is. For tests and callers that have
+ * already authorised the outing some other way. A dashboard page must use
+ * {@link getOutingInChapter} and then {@link loadOutingDetailRows}.
+ */
 export async function getOutingDetail(outingId: string): Promise<OutingDetailRow | null> {
   const [outing] = await db
-    .select({
-      id: outings.id,
-      groupId: outings.groupId,
-      epochId: outings.epochId,
-      name: outings.name,
-      currency: outings.currency,
-      status: outings.status,
-      foldFromParticipantId: outings.foldFromParticipantId,
-      foldToParticipantId: outings.foldToParticipantId,
-    })
+    .select(outingHeader)
     .from(outings)
     .where(and(eq(outings.id, outingId), isNull(outings.deletedAt)))
     .limit(1)
   if (!outing) return null
+  return { outing, ...(await loadOutingDetailRows(outing.id)) }
+}
 
+/**
+ * #1682 — an outing as the dashboard viewer may read it: only inside the
+ * chapter being viewed (outing analogue of getTripInChapter). `groupId` /
+ * `epochId` must come from `resolveViewerEpochContext` (the open chapter, or a
+ * pinned chapter the viewer is named on). An outing of any other chapter — an
+ * earlier partner's, the stayer's solo one, another group's — is not found.
+ *
+ * Failure this prevents: no error. A partner who joined later opened an
+ * earlier chapter's outing by URL and read the ex's and the friends' amounts.
+ */
+export async function getOutingInChapter(
+  outingId: string,
+  groupId: string,
+  epochId: string,
+): Promise<OutingDetailRow['outing'] | null> {
+  const [outing] = await db
+    .select(outingHeader)
+    .from(outings)
+    .where(and(
+      eq(outings.id, outingId),
+      eq(outings.groupId, groupId),
+      eq(outings.epochId, epochId),
+      isNull(outings.deletedAt),
+    ))
+    .limit(1)
+  return outing ?? null
+}
+
+/**
+ * Participants, expenses (with shares) and settlements of one outing. No
+ * access check: call only with an outing id the caller has already scoped
+ * (getOutingInChapter, or an authorised actor).
+ */
+export async function loadOutingDetailRows(outingId: string): Promise<Omit<OutingDetailRow, 'outing'>> {
   const participants = await db
     .select({
       id: outingParticipants.id,
@@ -148,5 +191,5 @@ export async function getOutingDetail(outingId: string): Promise<OutingDetailRow
     .from(outingSettlements)
     .where(and(eq(outingSettlements.outingId, outingId), isNull(outingSettlements.deletedAt)))
 
-  return { outing, participants, expenses, settlements }
+  return { participants, expenses, settlements }
 }
