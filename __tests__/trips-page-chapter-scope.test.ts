@@ -310,11 +310,11 @@ describe('/trips/[id] — chapter scope (#1614)', () => {
     await expectNotFoundWithoutData(w.t1)
     as(C, randomUUID()) // stale
     await expectNotFoundWithoutData(w.t1)
-    // A malformed pin fails the resolver's uuid lookup (a pre-existing
-    // resolver behaviour shared by every dashboard page): the request errors
-    // and serves nothing, which is still closed.
+    // A malformed pin is treated as no pin (#1699; it used to fail the
+    // resolver's uuid lookup with 22P02 and error every dashboard page): the
+    // open chapter, where T1 is still not found.
     as(C, 'garbage')
-    await expectRefusedWithoutData(w.t1, /Failed query/)
+    await expectNotFoundWithoutData(w.t1)
     // #1612 — the ex, named on the CLOSED chapter E1 but no longer in G, gets
     // that chapter read-only (former-member look-back): T1 opens, without the
     // ledger's live rates; any other chapter's trip is still not found.

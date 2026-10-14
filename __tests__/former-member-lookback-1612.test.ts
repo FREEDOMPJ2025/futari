@@ -663,6 +663,27 @@ describe('#1612 — 6. forged and stale pins fall through', () => {
     as(B, eGone.id)
     expect((await memberValue()).group.id).toBe(w.lb)
   })
+
+  // #1699 — a cookie that is not uuid-shaped used to reach Postgres as an
+  // invalid uuid cast (22P02); the resolver threw, and with it the dashboard
+  // layout, so every page 500'd until the cookie was cleared.
+  it('a pin that is not a uuid → own ledger / onboarding, instead of throwing', async () => {
+    as(B, 'garbage')
+    const ctx = await resolveViewerEpochContext(B)
+    expect(ctx!.group.id).toBe(w.lb)
+    expect(ctx!.window.isPast).toBe(false)
+    expect(ctx!.isFormerMemberView).toBe(false)
+    expect((await memberValue()).group.id).toBe(w.lb)
+    as(B2, 'garbage')
+    expect(await resolveViewerEpochContext(B2)).toBeNull()
+    await expect(DashboardLayout({ children: null })).rejects.toThrow('NEXT_REDIRECT /onboarding')
+  })
+
+  it('enterPastEpoch refuses a non-uuid id and writes no cookie', async () => {
+    as(B)
+    await expect(enterPastEpoch('garbage')).rejects.toThrow('Invalid past-epoch id')
+    expect(cookieStore.has(PAST_EPOCH_COOKIE)).toBe(false)
+  })
 })
 
 describe('#1612 — 7. writes are refused', () => {
