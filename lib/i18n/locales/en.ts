@@ -490,9 +490,9 @@ export const en: Translations = {
   },
 
   logoutButton: {
-    label: 'Log out',
-    pending: 'Logging out…',
-    title: 'Log out of Futari?',
+    label: 'Sign out',
+    pending: 'Signing out…',
+    title: 'Sign out of Futari?',
     description: 'You\'ll need to sign in again with Google next time. Records you\'ve added without inviting your partner won\'t be lost.',
   },
 
@@ -939,7 +939,7 @@ export const en: Translations = {
     sectionApp: 'App',
     offlineBrowsing: 'Offline browsing',
     offlineHintOff: "When offline, history isn't available. Turn this on to keep recently-viewed pages on this device.",
-    offlineHintOn: 'When offline, you can view records from your last connection. Data lives on this device only. Signing out turns this off and clears it, so turn it on again after you sign back in.',
+    offlineHintOn: 'When offline, you can view records from your last connection. Data lives on this device only. Signing out turns this off and clears the data, so turn it on again after you sign back in.',
     offlineToggling: 'Working…',
     offlineToggleError: "Couldn't switch. Try again in a moment.",
     offlineUnsupported: 'This browser does not support offline browsing.',
