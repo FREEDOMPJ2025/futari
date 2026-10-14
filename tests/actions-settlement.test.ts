@@ -36,7 +36,7 @@ const OPEN_EPOCH = {
   memberBId: 'user-b',
 }
 const CLOSED_EPOCH = {
-  id: 'epoch-old',
+  id: '7c9e6679-7425-40de-944b-e07fc1f90ae7',
   groupId: 'grp-1',
   startedAt: '2025-01-01',
   endedAt: '2025-12-31',
@@ -99,7 +99,7 @@ describe('createSettlement', () => {
   })
 
   it('rejects when viewer is pinned to a past epoch', async () => {
-    setCookie(PAST_EPOCH_COOKIE, 'epoch-old')
+    setCookie(PAST_EPOCH_COOKIE, '7c9e6679-7425-40de-944b-e07fc1f90ae7')
     queueDbResult([CLOSED_EPOCH])
     queueDbResult([GROUP])
 
@@ -139,7 +139,7 @@ describe('softDeleteSettlement', () => {
   })
 
   it('rejects when viewer is pinned to a past epoch', async () => {
-    setCookie(PAST_EPOCH_COOKIE, 'epoch-old')
+    setCookie(PAST_EPOCH_COOKIE, '7c9e6679-7425-40de-944b-e07fc1f90ae7')
     queueDbResult([CLOSED_EPOCH])
     queueDbResult([GROUP])
 
@@ -194,7 +194,7 @@ describe('editSettlement', () => {
   })
 
   it('rejects when viewer is pinned to a past epoch', async () => {
-    setCookie(PAST_EPOCH_COOKIE, 'epoch-old')
+    setCookie(PAST_EPOCH_COOKIE, '7c9e6679-7425-40de-944b-e07fc1f90ae7')
     queueDbResult([CLOSED_EPOCH])
     queueDbResult([GROUP])
 
