@@ -1,5 +1,5 @@
 import { db } from '@/lib/db/client'
-import { cashTransactions, profiles } from '@/lib/db/schema'
+import { cashTransactions } from '@/lib/db/schema'
 import { and, eq, isNull, desc, sql, type SQL } from 'drizzle-orm'
 import type { CategoryId } from '@/lib/categories'
 import type { SplitType } from '@/lib/balance'
@@ -995,48 +995,6 @@ export async function getGroupCreationMonthKey(groupId: string): Promise<string 
   return rows[0]?.month ?? null
 }
 
-export interface ExportTxnDbRow {
-  transactedAt: Date
-  description: string
-  amount: number
-  category: string
-  splitType: SplitType
-  paidByName: string
-  notes: string | null
-}
-
-/**
- * Fetch the active CashTransactions of a group for CSV export, limited to
- * the chapters `viewerId` belonged to (`viewerChaptersClause`) — every such
- * chapter, not only the current one, and none from before the viewer
- * joined or after they left.
- * Joins Profiles so the export shows display names instead of opaque UUIDs.
- * Caller is responsible for the group-membership check.
- */
-export async function listAllActiveCashTransactionsForExport(
-  groupId: string,
-  viewerId: string,
-): Promise<ExportTxnDbRow[]> {
-  return db
-    .select({
-      transactedAt: cashTransactions.transactedAt,
-      description: cashTransactions.description,
-      amount: cashTransactions.amount,
-      category: cashTransactions.category,
-      splitType: cashTransactions.splitType,
-      paidByName: profiles.displayName,
-      notes: cashTransactions.notes,
-    })
-    .from(cashTransactions)
-    .innerJoin(profiles, eq(profiles.id, cashTransactions.paidBy))
-    .where(and(
-      eq(cashTransactions.groupId, groupId),
-      isNull(cashTransactions.deletedAt),
-      viewerChaptersClause('"CashTransactions"."created_at"', groupId, viewerId),
-    ))
-    .orderBy(desc(cashTransactions.transactedAt), desc(cashTransactions.createdAt))
-}
-
 /**
  * Fetch unique CashTransaction descriptions for a group, ordered by frequency
  * (most-used first). Used by AddSheet's description autocomplete so partners
@@ -1044,8 +1002,8 @@ export async function listAllActiveCashTransactionsForExport(
  * whitespace-only descriptions are excluded; results are capped to keep the
  * payload small (autocomplete only needs a handful of matches anyway).
  *
- * Drawn only from the chapters `viewerId` belonged to (`viewerChaptersClause`),
- * the same scope as the CSV export.
+ * Drawn only from the chapters `viewerId` belonged to (`viewerChaptersClause`)
+ * in this ledger.
  */
 export async function listDescriptionSuggestions(
   groupId: string,

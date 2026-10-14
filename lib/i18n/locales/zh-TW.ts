@@ -1374,9 +1374,8 @@ export type Translations = {
           title: string
           intro: string
           bullets: string[]
-          /** #1611 export-first hint. Expenses only: the export reads
-           *  CashTransactions only until #1460; never imply income,
-           *  settlements or messages can be exported. */
+          /** #1611 / #1460 export-first hint. Name what the export holds —
+           *  expenses, income, settlements — never messages or "everything". */
           exportHint: string
           exportCta: string
         }
@@ -1606,6 +1605,10 @@ export type Translations = {
     bannerHeading: string
     bannerExitCta: string
     empty: string
+    /** #1460 — export on the standalone list (a person with no ledger). Name
+     *  what the file holds: expenses, income, settlements. */
+    exportHint: string
+    exportCta: string
   }
 
   csvExport: {
@@ -1613,15 +1616,37 @@ export type Translations = {
     failed: string
     /** Filename stem; `-YYYYMMDD.csv` is appended at download time. */
     filenamePrefix: string
+    /** Header row of the ledger export (#1460), in column order. */
     columns: {
+      type: string
       date: string
       description: string
       amount: string
+      currency: string
+      originalAmount: string
+      originalCurrency: string
       category: string
-      paidBy: string
-      splitType: string
+      /** Payer of an expense / settlement, recipient of an income. */
+      person: string
+      /** Settlement only: who received it. */
+      settlementTo: string
+      myShare: string
+      theirShare: string
+      status: string
       notes: string
+      chapter: string
     }
+    /** 類型 cell. */
+    types: {
+      expense: string
+      income: string
+      settlement: string
+    }
+    /** 章節 cell: `{start}` / `{end}` dates, `{who}` = pastTimes.withPartner
+     *  or pastTimes.soloLabel. */
+    chapter: string
+    /** Stands in for `{end}` while the chapter is open. */
+    chapterOngoing: string
   }
 
   assets: {
@@ -4354,8 +4379,8 @@ export const zhTW: Translations = {
             '尚未接受的邀請連結會失效',
             '原帳本變回單人狀態，由 {memberA} 繼續使用',
           ],
-          exportHint: '想自己留一份支出紀錄，離開前可以先匯出。',
-          exportCta: '先匯出支出紀錄',
+          exportHint: '離開後，也能在「資料安全」頁匯出這段章節的支出、進帳和結算。不過對方之後若刪除帳號，這段章節可能會跟著刪除；想確定留一份，可以現在先匯出。',
+          exportCta: '先匯出支出、進帳和結算',
         },
         card4: {
           title: '確定這些都是你跟對方一起想要的嗎？',
@@ -4538,6 +4563,8 @@ export const zhTW: Translations = {
     bannerHeading: '你正在看 {start} – {end} 的過去',
     bannerExitCta: '回到現在',
     empty: '還沒有過去的時光。第一段才剛開始。',
+    exportHint: '想留一份自己的紀錄，可以把這些章節裡的支出、進帳和結算匯出成 CSV。',
+    exportCta: '匯出支出、進帳和結算',
   },
 
   csvExport: {
@@ -4545,14 +4572,29 @@ export const zhTW: Translations = {
     failed: '匯出失敗，請稍後再試',
     filenamePrefix: 'futari-transactions',
     columns: {
+      type: '類型',
       date: '日期',
-      description: '描述',
+      description: '說明',
       amount: '金額',
+      currency: '幣別',
+      originalAmount: '原幣金額',
+      originalCurrency: '原幣別',
       category: '分類',
-      paidBy: '誰付的',
-      splitType: '分攤',
+      person: '付款／收款人',
+      settlementTo: '給誰（結算）',
+      myShare: '我的分攤',
+      theirShare: '對方分攤',
+      status: '狀態',
       notes: '備註',
+      chapter: '章節',
     },
+    types: {
+      expense: '支出',
+      income: '進帳',
+      settlement: '結算',
+    },
+    chapter: '{start} – {end}・{who}',
+    chapterOngoing: '至今',
   },
 
   assets: {
@@ -4708,8 +4750,8 @@ export const zhTW: Translations = {
       body: '帳本只對你們兩人的帳號開放。連線以 HTTPS 加密；寶寶本名、身分證字號、車牌和地址這類機敏資料，我們會再加密一層才存進資料庫。',
     },
     portability: {
-      heading: '隨時都能整包帶走',
-      body: '我們不會把你們綁在這裡。日後想離開，所有紀錄都能整批帶走。',
+      heading: '支出、進帳和結算，隨時能帶走',
+      body: '我們不會把你們綁在這裡。你待過的每段章節裡的支出、進帳和結算，都能匯出成 CSV 帶走，離開帳本之後也可以。',
     },
     backup: {
       heading: '每一筆，都會好好留著',
@@ -4717,7 +4759,7 @@ export const zhTW: Translations = {
     },
     onboarding: {
       line1: '資料只屬於你們倆',
-      line2: '隨時都能整包帶走',
+      line2: '支出、進帳和結算隨時能帶走',
       line3: '每一筆，都會好好留著',
     },
     bilateral: {

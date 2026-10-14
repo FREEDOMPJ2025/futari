@@ -1019,8 +1019,8 @@ export const en: Translations = {
             'Any pending invite links to this ledger become invalid',
             'The original ledger reverts to solo mode, kept by {memberA}',
           ],
-          exportHint: 'Want your own copy of the expenses? You can export them before you leave.',
-          exportCta: 'Export expenses first',
+          exportHint: 'After you leave, you can still export this chapter\'s expenses, income and settlements from the Your data page. If your partner later deletes their account, this chapter may be deleted with it, so export now if you want to be sure you keep a copy.',
+          exportCta: 'Export expenses, income and settlements first',
         },
         card4: {
           title: 'Are you sure this is what both of you want?',
@@ -1206,6 +1206,8 @@ export const en: Translations = {
     bannerHeading: "You're looking at {start} – {end}",
     bannerExitCta: 'Back to now',
     empty: "No past chapters yet. The first one is just beginning.",
+    exportHint: 'To keep a copy of your own, you can export the expenses, income and settlements from these chapters as a CSV.',
+    exportCta: 'Export expenses, income and settlements',
   },
 
   csvExport: {
@@ -1213,14 +1215,29 @@ export const en: Translations = {
     failed: 'Export failed. Please try again.',
     filenamePrefix: 'futari-transactions',
     columns: {
+      type: 'Type',
       date: 'Date',
       description: 'Description',
       amount: 'Amount',
+      currency: 'Currency',
+      originalAmount: 'Original amount',
+      originalCurrency: 'Original currency',
       category: 'Category',
-      paidBy: 'Paid by',
-      splitType: 'Split',
+      person: 'Paid by / received by',
+      settlementTo: 'Paid to (settlement)',
+      myShare: 'My share',
+      theirShare: 'Their share',
+      status: 'Status',
       notes: 'Notes',
+      chapter: 'Chapter',
     },
+    types: {
+      expense: 'Expense',
+      income: 'Income',
+      settlement: 'Settlement',
+    },
+    chapter: '{start} – {end} · {who}',
+    chapterOngoing: 'now',
   },
 
   assets: {
@@ -1376,8 +1393,8 @@ export const en: Translations = {
       body: "Only your two accounts can open the ledger. Connections are encrypted over HTTPS, and sensitive details like a child's legal name, ID number, licence plate, and address get an extra layer of encryption before we store them.",
     },
     portability: {
-      heading: 'Take it all with you, anytime',
-      body: 'We won\'t lock you in. If you ever want to leave, you can take everything with you.',
+      heading: 'Take your expenses, income and settlements with you',
+      body: 'We won\'t lock you in. The expenses, income and settlements from every chapter you\'ve been part of can be exported as a CSV, even after you leave a ledger.',
     },
     backup: {
       heading: 'Every entry, kept',
@@ -1385,7 +1402,7 @@ export const en: Translations = {
     },
     onboarding: {
       line1: 'Your records, only yours',
-      line2: 'Take it all with you, anytime',
+      line2: 'Expenses, income and settlements go with you',
       line3: 'Every entry, kept',
     },
     bilateral: {

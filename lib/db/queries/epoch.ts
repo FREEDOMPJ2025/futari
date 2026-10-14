@@ -160,9 +160,16 @@ interface ChapterNameSource {
  * up whatever name the other person chose later. Since #1612 lets a former
  * member open a closed chapter of the ledger they left, a NULL snapshot that
  * fell back to `Profiles` would hand them the other person's current name.
+ *
+ * Caller contract (exported for the CSV export, #1460): like
+ * {@link getEpochMembers}, no viewer check — pass only chapter rows the viewer
+ * may already see.
  */
-async function withChapterNames<R extends ChapterNameSource>(
+export async function withChapterNames<R extends ChapterNameSource>(
   rows: R[],
+  /** The CSV export (#1460) passes its read-only transaction so the names
+   *  come from the same snapshot as the rows. */
+  executor: typeof db | DbTransaction = db,
 ): Promise<(R & { memberAName: string | null; memberBName: string | null })[]> {
   const isClosed = (r: R) => r.endedAt != null
   const needLive = new Set<string>()
@@ -173,7 +180,7 @@ async function withChapterNames<R extends ChapterNameSource>(
   }
   const liveRows = needLive.size === 0
     ? []
-    : await db
+    : await executor
         .select({ id: profiles.id, displayName: profiles.displayName })
         .from(profiles)
         .where(inArray(profiles.id, Array.from(needLive)))
