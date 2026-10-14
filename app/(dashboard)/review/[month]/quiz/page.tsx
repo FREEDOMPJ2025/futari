@@ -5,11 +5,16 @@ import { partnerQuizSessions } from '@/lib/db/schema'
 import { profiles } from '@/lib/db/schema'
 import { inArray, sql } from 'drizzle-orm'
 import {
-  loadPartnerQuizSessionByGroup,
+  loadPartnerQuizSessionByEpoch,
   loadPartnerQuizAnswers,
+  type PartnerQuizSessionRow,
 } from '@/lib/db/queries/partnerQuiz'
-import { resolveViewerEpochContext } from '@/lib/db/queries/epoch'
-import { parseYearMonth, currentYearMonthInTaipei, isAfter } from '@/lib/monthlyReview'
+import {
+  getEpochMembers,
+  lockOpenEpochForWrite,
+  resolveViewerEpochContext,
+} from '@/lib/db/queries/epoch'
+import { parseYearMonth, currentYearMonthInTaipei, isAfter, isMonthInChapter } from '@/lib/monthlyReview'
 import { pickQuizQuestions } from '@/lib/partnerQuiz'
 import { captureServer } from '@/lib/analytics/server'
 import { QuizClient } from './_components/QuizClient'
@@ -32,15 +37,29 @@ export default async function PartnerQuizPage({ params }: PageProps) {
 
   const context = await resolveViewerEpochContext(user.id)
   if (!context) redirect('/onboarding')
-  // A closed chapter is read-only (#1603 / F7). The quiz session below is the
-  // group's live one — loading it from a past chapter would show, or lazily
-  // INSERT, a session belonging to today's pair. The review page already
-  // hides the quiz entry when pinned; this guards the URL itself.
+  // A closed chapter is read-only (#1603 / F7), and its quiz stays hidden
+  // (#1683, owner decision D4: no look-back of quiz results). This guards the
+  // URL itself; the review page shows no quiz entry when pinned.
   if (context.window.isPast) notFound()
+  // Same chapter guard as /review/[month] (#1380): a month outside the viewed
+  // chapter's window is not this chapter's.
+  if (!isMonthInChapter(reviewedMonth, context.window)) notFound()
+  // #1683 — the quiz belongs to a chapter. No chapter row, no quiz (fail
+  // closed): never fall back to anything keyed by the ledger.
+  const epochId = context.window.epochId
+  if (!epochId) notFound()
   const { group } = context
 
-  // Solo group → soft fallback (spec: solo mode 不渲染整段 quiz).
-  if (!group.memberB) {
+  // The chapter's two people, from its GroupEpochs row — not the ledger's
+  // members, which change when a partner leaves and someone else joins.
+  const chapter = await getEpochMembers(epochId)
+  if (!chapter) notFound()
+  const memberIds = [chapter.memberAId, chapter.memberBId].filter((x): x is string => !!x)
+  // Not one of this chapter's two people → 404 (never /sign-in, #1603).
+  if (!memberIds.includes(user.id)) notFound()
+
+  // Solo chapter → soft fallback (spec: solo mode 不渲染整段 quiz).
+  if (!chapter.memberBId) {
     return (
       <QuizClient
         reviewedMonth={reviewedMonth}
@@ -51,7 +70,7 @@ export default async function PartnerQuizPage({ params }: PageProps) {
         revealedAt={null}
         viewer={{ id: user.id, displayName: '', avatarUrl: null }}
         partner={null}
-        memberAId={group.memberA}
+        memberAId={chapter.memberAId}
         memberBId=""
         answers={[]}
       />
@@ -59,7 +78,6 @@ export default async function PartnerQuizPage({ params }: PageProps) {
   }
 
   // Profiles for both members (used by the answer / reveal / waiting screens).
-  const memberIds = [group.memberA, group.memberB]
   const profileRows = await db
     .select({
       id: profiles.id,
@@ -72,14 +90,14 @@ export default async function PartnerQuizPage({ params }: PageProps) {
     .where(inArray(profiles.id, memberIds))
 
   const viewerProfile = profileRows.find((p) => p.id === user.id)
-  // Not one of the group's members: 404, not /sign-in — a signed-in user
+  // Not one of the chapter's members: 404, not /sign-in — a signed-in user
   // sent to /sign-in bounces back to /dashboard and loops (#1603).
   if (!viewerProfile) notFound()
   const partnerProfile = profileRows.find((p) => p.id !== user.id)
   if (!partnerProfile) redirect('/dashboard')
 
-  // Load (or lazily create) the session. Entering this page IS the "start"
-  // event per spec — we don't gate it behind a button click.
+  // Load (or lazily create) THIS chapter's session (#1683). Entering this page
+  // IS the "start" event per spec — we don't gate it behind a button click.
   //
   // Session creation lives here, inline, and not behind a server action: the
   // page has to have a session before it can render anything, so a `'use server'`
@@ -88,39 +106,55 @@ export default async function PartnerQuizPage({ params }: PageProps) {
   // it had no caller for months while the telemetry inside it silently reported
   // zero (#1139). Please don't reintroduce one — put changes to how a session
   // comes into existence right here.
-  let session = await loadPartnerQuizSessionByGroup(group.id)
+  let session = await loadPartnerQuizSessionByEpoch(epochId)
   if (!session) {
     const picked = pickQuizQuestions()
     let createdNew = false
-    // Tolerate the race where a partner just clicked the same link by relying
-    // on UNIQUE (group_id) — re-read on conflict.
+    // The insert holds the open chapter row FOR SHARE (lockOpenEpochForWrite)
+    // and only writes when that row is still the chapter this page resolved:
+    // a leave / remove / accept committing meanwhile closes it, and a session
+    // created after that would belong to a chapter that is already over.
+    // `null` = the chapter closed under us; `undefined` = the insert failed
+    // (the partner just created the session — UNIQUE (epoch_id)) → re-read.
+    let created: PartnerQuizSessionRow | null | undefined
     try {
-      const [created] = await db
-        .insert(partnerQuizSessions)
-        .values({ groupId: group.id, questionKeys: picked })
-        .returning({
-          id: partnerQuizSessions.id,
-          groupId: partnerQuizSessions.groupId,
-          questionKeys: partnerQuizSessions.questionKeys,
-          createdAt: partnerQuizSessions.createdAt,
-          revealedAt: partnerQuizSessions.revealedAt,
-        })
+      created = await db.transaction(async (tx) => {
+        const open = await lockOpenEpochForWrite(tx, group.id)
+        if (!open || open.id !== epochId) return null
+        const [row] = await tx
+          .insert(partnerQuizSessions)
+          .values({ groupId: group.id, epochId, questionKeys: picked })
+          .returning({
+            id: partnerQuizSessions.id,
+            groupId: partnerQuizSessions.groupId,
+            epochId: partnerQuizSessions.epochId,
+            questionKeys: partnerQuizSessions.questionKeys,
+            createdAt: partnerQuizSessions.createdAt,
+            revealedAt: partnerQuizSessions.revealedAt,
+          })
+        return row
+      })
+    } catch {
+      created = undefined
+    }
+    if (created === null) notFound()
+    if (created) {
       session = created
       createdNew = true
-    } catch {
-      session = await loadPartnerQuizSessionByGroup(group.id)
+    } else {
+      session = await loadPartnerQuizSessionByEpoch(epochId)
       if (!session) {
         // Truly unexpected — surface as 404 rather than swallow.
         notFound()
       }
     }
     // Engagement signal (#818, moved here from the orphan action in #1139).
-    // UNIQUE (group_id) makes a successful insert the one moment a session comes
-    // into existence, so `createdNew` is the only condition under which this can
-    // fire once per session. The conflict branch above deliberately does not
-    // fire: it re-reads a session the partner just created. Neither does the
-    // outer `if` — that is skipped entirely on every later visit, which is what
-    // keeps a refresh from counting as another start.
+    // UNIQUE (epoch_id) makes a successful insert the one moment a session
+    // comes into existence, so `createdNew` is the only condition under which
+    // this can fire once per session. The conflict branch above deliberately
+    // does not fire: it re-reads a session the partner just created. Neither
+    // does the outer `if` — that is skipped entirely on every later visit,
+    // which is what keeps a refresh from counting as another start.
     //
     // Kept outside the try so a `captureServer` failure can never be mistaken
     // for an insert conflict and send the render down the re-read path.
@@ -129,7 +163,7 @@ export default async function PartnerQuizPage({ params }: PageProps) {
     }
   }
 
-  const answers = await loadPartnerQuizAnswers(session.id)
+  const answers = await loadPartnerQuizAnswers(session.id, memberIds)
   const selfAnsweredKeys = answers
     .filter((a) => a.memberId === user.id)
     .map((a) => a.questionKey)
@@ -158,8 +192,8 @@ export default async function PartnerQuizPage({ params }: PageProps) {
         displayName: partnerProfile.displayName,
         avatarUrl: partnerProfile.avatarUrl,
       }}
-      memberAId={group.memberA}
-      memberBId={group.memberB}
+      memberAId={chapter.memberAId}
+      memberBId={chapter.memberBId}
       answers={answers.map((a) => ({
         memberId: a.memberId,
         questionKey: a.questionKey,

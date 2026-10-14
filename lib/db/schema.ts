@@ -553,10 +553,18 @@ export const monthlyReviewSnapshots = pgTable('MonthlyReviewSnapshots', {
 })
 
 // v0.15.2 #163 — PartnerQuiz: 6 題池抽 3，兩人各自獨立作答，全部到齊後 reveal。
-// One quiz per group (UNIQUE group_id) — MVP 鎖一次；未來放寬只需移除 constraint。
+// #1683 (0095) — one quiz per CHAPTER (UNIQUE epoch_id), not per ledger: the
+// stayer keeps the ledger across partners, and a per-ledger session showed the
+// next partner the previous partner's answers. Load and create it by the
+// viewed chapter's epoch id only (lib/db/queries/partnerQuiz.ts). A ledger can
+// hold several sessions, one per chapter, so never look one up by group_id.
+// ORDER: 0095 must be applied before code that knows this column runs —
+// against a database without it every duo review page fails with
+// "column epoch_id does not exist".
 export const partnerQuizSessions = pgTable('PartnerQuizSessions', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-  groupId: uuid('group_id').notNull().unique().references(() => oikosGroups.id),
+  groupId: uuid('group_id').notNull().references(() => oikosGroups.id),
+  epochId: uuid('epoch_id').notNull().unique().references(() => groupEpochs.id),
   // Picked 3 keys, persisted so re-entering the answer page never re-randomises.
   // Append-only at the dictionary level — keys are static i18n config, not data.
   questionKeys: text('question_keys').array().notNull(),

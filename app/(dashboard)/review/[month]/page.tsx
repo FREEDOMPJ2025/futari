@@ -8,7 +8,7 @@ import {
   loadChapterReviewMessages,
 } from '@/lib/db/queries/monthlyReview'
 import {
-  loadPartnerQuizSessionByGroup,
+  loadPartnerQuizSessionByEpoch,
   loadPartnerQuizAnswers,
 } from '@/lib/db/queries/partnerQuiz'
 import {
@@ -76,8 +76,8 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
   if (!memberIds.includes(user.id)) notFound()
 
   // A closed chapter is read-only (epoch-readonly): no next-month editor, and
-  // no partner quiz — the quiz session is the group's live one, which after a
-  // leave belongs to a different pair.
+  // no partner quiz — a closed chapter's quiz stays hidden (#1683, owner
+  // decision D4: no look-back of quiz results).
   const readOnly = context.window.isPast
 
   // #1612 — in a closed chapter the other person is shown from the chapter
@@ -118,6 +118,8 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
   const isSolo = !memberB
 
   const editorMonth = nextMonth(reviewedMonth)
+  // The quiz is only for an open duo chapter with a chapter row (fail closed).
+  const quizEpochId = !isSolo && !readOnly ? context.window.epochId : null
 
   // #1684 #1685 — messages are group-scoped rows that outlive a leave
   // (#1611). Only the viewed chapter's two people's, written while it was
@@ -135,19 +137,22 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
     readOnly
       ? Promise.resolve([] as Awaited<ReturnType<typeof loadChapterReviewMessages>>)
       : loadChapterReviewMessages(group.id, editorMonth, chapterScope),
-    isSolo || readOnly ? Promise.resolve(null) : loadPartnerQuizSessionByGroup(group.id),
+    // #1683 — the session of THIS chapter, never "the group's": the stayer
+    // keeps the ledger across partners, so a group lookup handed the next
+    // partner the previous partner's session. No chapter id → no quiz.
+    quizEpochId ? loadPartnerQuizSessionByEpoch(quizEpochId) : Promise.resolve(null),
   ])
 
   // Quiz state — only resolved for dyad groups. Spec: solo mode 不渲染整段
   // quiz；surface 條件「第一次有 MonthlyReviewSnapshot row 後」由 snapshot 存在判定。
-  const quizAnswers = quizSession ? await loadPartnerQuizAnswers(quizSession.id) : []
+  const quizAnswers = quizSession ? await loadPartnerQuizAnswers(quizSession.id, memberIds) : []
   const selfAnswered = quizSession
     ? quizAnswers.some((a) => a.memberId === user.id)
     : false
   const partnerAnswered = quizSession && partnerProfile
     ? quizAnswers.some((a) => a.memberId === partnerProfile.id)
     : false
-  const quizStatus = !isSolo && !readOnly && snapshot
+  const quizStatus = quizEpochId && snapshot
     ? derivePartnerQuizStatus({
         hasSession: !!quizSession,
         selfAnswered,

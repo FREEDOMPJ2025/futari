@@ -13,22 +13,35 @@ const GOOD_ANSWERS = [
   { questionKey: 'transparency', choiceKey: 'c' },
 ]
 
+const OPEN_EPOCH = 'ep-ab'
+const CHAPTER_AB = { memberAId: 'user-a', memberBId: 'user-b' }
+
 beforeEach(() => {
   resetDbMocks()
   setMockUser(VIEWER)
 })
 
+/**
+ * #1683 — the reads every submit does, in order, inside ONE transaction:
+ * the ledger row (requireViewerGroup, outside), the session FOR UPDATE, the
+ * open chapter row FOR SHARE (lockOpenEpochForWrite), that chapter's members.
+ */
+function queueLockedReads(opts: {
+  group?: typeof GROUP
+  session: Record<string, unknown>
+  openEpoch?: string | null
+  chapter?: { memberAId: string; memberBId: string | null }
+}) {
+  queueDbResult([opts.group ?? GROUP])
+  queueDbResult([{ epochId: OPEN_EPOCH, ...opts.session }])
+  const open = opts.openEpoch === undefined ? OPEN_EPOCH : opts.openEpoch
+  queueDbResult(open ? [{ id: open }] : [])
+  if (open) queueDbResult([opts.chapter ?? CHAPTER_AB])
+}
+
 describe('submitPartnerQuizAnswers', () => {
   it('writes 3 answers and does NOT reveal when partner hasn’t answered', async () => {
-    // getViewerGroup
-    queueDbResult([GROUP])
-    // session lookup
-    queueDbResult([{
-      id: 'sess-1',
-      groupId: GROUP.id,
-      questionKeys: QUESTION_KEYS,
-      revealedAt: null,
-    }])
+    queueLockedReads({ session: { id: 'sess-1', groupId: GROUP.id, questionKeys: QUESTION_KEYS, revealedAt: null } })
     // transaction: existing-answers-for-self lookup → empty
     queueDbResult([])
     // transaction: insert .values(...) chain promise → []
@@ -59,13 +72,7 @@ describe('submitPartnerQuizAnswers', () => {
   })
 
   it('stamps revealed_at when partner is already done (atomic reveal)', async () => {
-    queueDbResult([GROUP])
-    queueDbResult([{
-      id: 'sess-2',
-      groupId: GROUP.id,
-      questionKeys: QUESTION_KEYS,
-      revealedAt: null,
-    }])
+    queueLockedReads({ session: { id: 'sess-2', groupId: GROUP.id, questionKeys: QUESTION_KEYS, revealedAt: null } })
     queueDbResult([])                                                // self has no answers yet
     queueDbResult([])                                                // insert chain
     // partner had already written 3 rows; insert just added 3 of ours.
@@ -87,13 +94,7 @@ describe('submitPartnerQuizAnswers', () => {
   })
 
   it('refuses to re-submit when the viewer already has answers', async () => {
-    queueDbResult([GROUP])
-    queueDbResult([{
-      id: 'sess-3',
-      groupId: GROUP.id,
-      questionKeys: QUESTION_KEYS,
-      revealedAt: null,
-    }])
+    queueLockedReads({ session: { id: 'sess-3', groupId: GROUP.id, questionKeys: QUESTION_KEYS, revealedAt: null } })
     queueDbResult([{ id: 'ans-existing' }])  // existing-answers lookup non-empty
 
     expect(await submitPartnerQuizAnswers({
@@ -105,13 +106,7 @@ describe('submitPartnerQuizAnswers', () => {
   })
 
   it('refuses to write when the session belongs to a different group', async () => {
-    queueDbResult([GROUP])
-    queueDbResult([{
-      id: 'sess-x',
-      groupId: 'other-group',
-      questionKeys: QUESTION_KEYS,
-      revealedAt: null,
-    }])
+    queueLockedReads({ session: { id: 'sess-x', groupId: 'other-group', questionKeys: QUESTION_KEYS, revealedAt: null } })
 
     expect(await submitPartnerQuizAnswers({
       sessionId: 'sess-x',
@@ -120,13 +115,7 @@ describe('submitPartnerQuizAnswers', () => {
   })
 
   it('refuses when the session is already revealed', async () => {
-    queueDbResult([GROUP])
-    queueDbResult([{
-      id: 'sess-4',
-      groupId: GROUP.id,
-      questionKeys: QUESTION_KEYS,
-      revealedAt: new Date(),
-    }])
+    queueLockedReads({ session: { id: 'sess-4', groupId: GROUP.id, questionKeys: QUESTION_KEYS, revealedAt: new Date() } })
 
     expect(await submitPartnerQuizAnswers({
       sessionId: 'sess-4',
@@ -135,13 +124,7 @@ describe('submitPartnerQuizAnswers', () => {
   })
 
   it('rejects an answer set whose keys don’t match the session', async () => {
-    queueDbResult([GROUP])
-    queueDbResult([{
-      id: 'sess-5',
-      groupId: GROUP.id,
-      questionKeys: QUESTION_KEYS,
-      revealedAt: null,
-    }])
+    queueLockedReads({ session: { id: 'sess-5', groupId: GROUP.id, questionKeys: QUESTION_KEYS, revealedAt: null } })
 
     expect(await submitPartnerQuizAnswers({
       sessionId: 'sess-5',
@@ -165,5 +148,122 @@ describe('submitPartnerQuizAnswers', () => {
       sessionId: 'sess-solo',
       answers: GOOD_ANSWERS,
     })).toEqual({ ok: false, code: 'solo_group' })
+  })
+  // ─── #1683 — one quiz per chapter ───────────────────────────────────────
+
+  it('reads the session FOR UPDATE and the open chapter FOR SHARE, all inside one transaction', async () => {
+    queueLockedReads({ session: { id: 'sess-lock', groupId: GROUP.id, questionKeys: QUESTION_KEYS, revealedAt: null } })
+    queueDbResult([])  // existing
+    queueDbResult([])  // insert
+    queueDbResult([{ memberId: 'user-a' }, { memberId: 'user-a' }, { memberId: 'user-a' }])
+
+    expect(await submitPartnerQuizAnswers({ sessionId: 'sess-lock', answers: GOOD_ANSWERS }))
+      .toEqual({ ok: true, data: { revealed: false } })
+    expect(mockDb.transaction).toHaveBeenCalledTimes(1)
+    expect(mockBuilder.for.mock.calls.map((c) => c[0])).toEqual(['update', 'share'])
+  })
+
+  it('refuses a session of another chapter (a closed A+B session) as session_not_found, writing nothing', async () => {
+    queueLockedReads({
+      session: { id: 'sess-old', groupId: GROUP.id, epochId: 'ep-closed', questionKeys: QUESTION_KEYS, revealedAt: null },
+    })
+
+    expect(await submitPartnerQuizAnswers({ sessionId: 'sess-old', answers: GOOD_ANSWERS }))
+      .toEqual({ ok: false, code: 'session_not_found' })
+    expect(mockDb.insert).not.toHaveBeenCalled()
+    expect(mockDb.update).not.toHaveBeenCalled()
+  })
+
+  it('refuses when the ledger has no open chapter (closed under us), writing nothing', async () => {
+    queueLockedReads({
+      session: { id: 'sess-c', groupId: GROUP.id, questionKeys: QUESTION_KEYS, revealedAt: null },
+      openEpoch: null,
+    })
+
+    expect(await submitPartnerQuizAnswers({ sessionId: 'sess-c', answers: GOOD_ANSWERS }))
+      .toEqual({ ok: false, code: 'session_not_found' })
+    expect(mockDb.insert).not.toHaveBeenCalled()
+  })
+
+  it('refuses a viewer who is not one of the chapter\'s two people', async () => {
+    setMockUser({ id: 'user-x', email: 'x@example.com' })
+    queueLockedReads({
+      group: { ...GROUP, memberA: 'user-x' },
+      session: { id: 'sess-n', groupId: GROUP.id, questionKeys: QUESTION_KEYS, revealedAt: null },
+    })
+
+    expect(await submitPartnerQuizAnswers({ sessionId: 'sess-n', answers: GOOD_ANSWERS }))
+      .toEqual({ ok: false, code: 'wrong_group' })
+    expect(mockDb.insert).not.toHaveBeenCalled()
+  })
+
+  it('reveals per member: each chapter member has N answers, whatever else the session holds', async () => {
+    queueLockedReads({ session: { id: 'sess-pm', groupId: GROUP.id, questionKeys: QUESTION_KEYS, revealedAt: null } })
+    queueDbResult([])  // existing
+    queueDbResult([])  // insert
+    // A's 3 + B's 3, plus 3 rows from someone outside the chapter. The old
+    // rule (total rows == 2N) never revealed this session.
+    queueDbResult([
+      { memberId: 'user-z' }, { memberId: 'user-z' }, { memberId: 'user-z' },
+      { memberId: 'user-b' }, { memberId: 'user-b' }, { memberId: 'user-b' },
+      { memberId: 'user-a' }, { memberId: 'user-a' }, { memberId: 'user-a' },
+    ])
+    queueDbResult([])  // update
+
+    expect(await submitPartnerQuizAnswers({ sessionId: 'sess-pm', answers: GOOD_ANSWERS }))
+      .toEqual({ ok: true, data: { revealed: true } })
+    expect(mockDb.update).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not reveal on 2N rows when one chapter member has none', async () => {
+    queueLockedReads({ session: { id: 'sess-pm2', groupId: GROUP.id, questionKeys: QUESTION_KEYS, revealedAt: null } })
+    queueDbResult([])  // existing
+    queueDbResult([])  // insert
+    queueDbResult([
+      { memberId: 'user-a' }, { memberId: 'user-a' }, { memberId: 'user-a' },
+      { memberId: 'user-z' }, { memberId: 'user-z' }, { memberId: 'user-z' },
+    ])
+
+    expect(await submitPartnerQuizAnswers({ sessionId: 'sess-pm2', answers: GOOD_ANSWERS }))
+      .toEqual({ ok: true, data: { revealed: false } })
+    expect(mockDb.update).not.toHaveBeenCalled()
+  })
+
+  it('B answered, then left; A+C get their own session and it reveals (no longer stuck)', async () => {
+    // Chapter A+B (ep-ab) closed with only B's answers; chapter A+C (ep-ac) is open.
+    const GROUP_AC = { ...GROUP, memberB: 'user-c' }
+    const CHAPTER_AC = { memberAId: 'user-a', memberBId: 'user-c' }
+
+    // A on the old A+B session: refused, nothing written.
+    queueLockedReads({
+      group: GROUP_AC,
+      session: { id: 'sess-ab', groupId: GROUP.id, epochId: 'ep-ab', questionKeys: QUESTION_KEYS, revealedAt: null },
+      openEpoch: 'ep-ac',
+      chapter: CHAPTER_AC,
+    })
+    expect(await submitPartnerQuizAnswers({ sessionId: 'sess-ab', answers: GOOD_ANSWERS }))
+      .toEqual({ ok: false, code: 'session_not_found' })
+    expect(mockDb.insert).not.toHaveBeenCalled()
+
+    // A on the A+C session, after C answered: revealed.
+    resetDbMocks()
+    setMockUser(VIEWER)
+    queueLockedReads({
+      group: GROUP_AC,
+      session: { id: 'sess-ac', groupId: GROUP.id, epochId: 'ep-ac', questionKeys: QUESTION_KEYS, revealedAt: null },
+      openEpoch: 'ep-ac',
+      chapter: CHAPTER_AC,
+    })
+    queueDbResult([])  // existing
+    queueDbResult([])  // insert
+    queueDbResult([
+      { memberId: 'user-c' }, { memberId: 'user-c' }, { memberId: 'user-c' },
+      { memberId: 'user-a' }, { memberId: 'user-a' }, { memberId: 'user-a' },
+    ])
+    queueDbResult([])  // update
+
+    expect(await submitPartnerQuizAnswers({ sessionId: 'sess-ac', answers: GOOD_ANSWERS }))
+      .toEqual({ ok: true, data: { revealed: true } })
+    expect(mockDb.update).toHaveBeenCalledTimes(1)
   })
 })
