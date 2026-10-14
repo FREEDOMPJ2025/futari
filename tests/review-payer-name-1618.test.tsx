@@ -121,7 +121,7 @@ vi.mock('@/lib/db/queries/monthlyReview', async (orig) => ({
     recurringEvents: [], recurringTotalIncome: 0, recurringTotalExpense: 0, assetBreakdown: [],
     bannerDismissedByMemberAAt: null, bannerDismissedByMemberBAt: null,
   }),
-  loadMonthlyReviewMessages: async () => [],
+  loadChapterReviewMessages: async () => [],
 }))
 vi.mock('@/lib/db/queries/partnerQuiz', () => ({
   loadPartnerQuizSessionByGroup: async () => null,

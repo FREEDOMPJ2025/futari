@@ -5,8 +5,9 @@ import baseConfig from './vitest.config'
 //
 // `__tests__/actions/**`, `__tests__/queries-trips.test.ts`,
 // `__tests__/queries-fuelLog.test.ts`, `__tests__/trips-page-chapter-scope.test.ts`,
-// `__tests__/outings-page-chapter-scope.test.ts` and
-// `__tests__/former-member-lookback-1612.test.ts` are *integration*
+// `__tests__/outings-page-chapter-scope.test.ts`,
+// `__tests__/former-member-lookback-1612.test.ts` and
+// `__tests__/review-messages-chapter-1684-1685.test.ts` are *integration*
 // tests: they load `.env.local` themselves and talk to the real dev Supabase
 // Postgres, throwing in `beforeAll` when `DATABASE_URL` is missing. That throw is
 // deliberate — locally a silent skip would let DB regressions slip through — but
@@ -26,6 +27,7 @@ export default mergeConfig(
         '__tests__/trips-page-chapter-scope.test.ts',
         '__tests__/outings-page-chapter-scope.test.ts',
         '__tests__/former-member-lookback-1612.test.ts',
+        '__tests__/review-messages-chapter-1684-1685.test.ts',
       ],
     },
   }),
