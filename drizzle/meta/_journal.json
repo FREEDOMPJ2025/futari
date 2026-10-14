@@ -659,6 +659,13 @@
       "when": 1785000000000,
       "tag": "0094_deleted_rows_chapter_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "7",
+      "when": 1785100000000,
+      "tag": "0095_partner_quiz_epoch",
+      "breakpoints": true
     }
   ]
 }

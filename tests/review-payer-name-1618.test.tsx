@@ -124,7 +124,7 @@ vi.mock('@/lib/db/queries/monthlyReview', async (orig) => ({
   loadChapterReviewMessages: async () => [],
 }))
 vi.mock('@/lib/db/queries/partnerQuiz', () => ({
-  loadPartnerQuizSessionByGroup: async () => null,
+  loadPartnerQuizSessionByEpoch: async () => null,
   loadPartnerQuizAnswers: async () => [],
 }))
 vi.mock('@/lib/monthlyReview', async (orig) => ({

@@ -37,7 +37,12 @@ const PROFILES = [
 let viewer = 'user-b'
 let window: typeof CH1 | typeof CH2 = CH1
 let requestedIds: string[] = []
-const quizLoader = vi.fn(async () => ({ id: 'q-live', questionKeys: [], revealedAt: null }))
+// #1683 — sessions are per chapter: e1 holds A+B's (revealed) quiz, e2 has none
+// yet. The page must look the session up by the viewed chapter's epoch id.
+const SESSIONS: Record<string, { id: string; questionKeys: string[]; revealedAt: Date | null }> = {
+  e1: { id: 'q-ab', questionKeys: ['impulse'], revealedAt: new Date('2026-05-01T00:00:00Z') },
+}
+const quizLoader = vi.fn(async (epochId: string) => SESSIONS[epochId] ?? null)
 
 vi.mock('next/navigation', () => ({
   notFound: () => { throw new Error('NEXT_NOT_FOUND') },
@@ -75,7 +80,7 @@ vi.mock('@/lib/db/queries/monthlyReview', () => ({
   ].filter((m) => scope.memberIds.includes(m.memberId)),
 }))
 vi.mock('@/lib/db/queries/partnerQuiz', () => ({
-  loadPartnerQuizSessionByGroup: quizLoader,
+  loadPartnerQuizSessionByEpoch: quizLoader,
   loadPartnerQuizAnswers: async () => [],
 }))
 vi.mock('@/lib/monthlyReview', async (orig) => ({
@@ -170,12 +175,19 @@ describe('access does not widen', () => {
     await expect(open('2026-04')).rejects.toThrow('NEXT_NOT_FOUND')
   })
 
-  it('C on a chapter-2 month: partner A, editable, live quiz loaded', async () => {
+  // #1683 — flipped. This used to assert the "live quiz" was loaded by group,
+  // which handed C the A+B session (B's answers once revealed). C must get
+  // chapter 2's own quiz, never chapter 1's.
+  it('C on a chapter-2 month: partner A, editable, and only chapter 2\'s quiz — never the A+B session', async () => {
     viewer = 'user-c'; window = CH2
     const p = await open('2026-07')
     expect(p.partner?.id).toBe('user-a')
     expect(p.readOnly).toBe(false)
     expect(quizLoader).toHaveBeenCalledOnce()
+    expect(quizLoader).toHaveBeenCalledWith('e2')
+    expect(quizLoader).not.toHaveBeenCalledWith('e1')
+    // No chapter-2 session yet → the invitation, not A+B's revealed quiz.
+    expect(p.quiz).toMatchObject({ status: 'invited', revealPreview: [] })
     expect(p.pastMessages.map((m) => m.memberId).sort()).toEqual(['user-a', 'user-c'])
   })
 
