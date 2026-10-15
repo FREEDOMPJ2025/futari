@@ -13,6 +13,7 @@ import { action, actionError } from '@/lib/action-errors'
 import { recalcGroupBalance } from '@/lib/db/queries/balance'
 import { revalidateAfterTransactionMutation } from '@/lib/revalidate'
 import { getTranslations } from '@/lib/i18n/t'
+import { captureServer } from '@/lib/analytics/server'
 import { getTodayYMD } from '@/lib/today-server'
 import { ymdToUTCNoon } from '@/lib/local-date'
 import { splitEqual } from '@/lib/outing/split'
@@ -201,6 +202,11 @@ export const createOuting = action(async (input: CreateOutingInput): Promise<{ i
     )
     return outing
   })
+
+  // #1723: server-side so it shares a distinct_id (the user id) with
+  // `signed_up` / `setup_completed`; a client event is anonymous per page load.
+  // No properties: the outing's id and name are not the funnel's business.
+  await captureServer(user.id, 'outing_created')
 
   revalidatePath('/outings')
   return { id: created.id }
