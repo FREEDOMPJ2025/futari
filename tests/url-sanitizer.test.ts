@@ -284,3 +284,28 @@ describe('sanitizeAnalyticsUrl — outing share token (#1558)', () => {
     expect(sanitizeAnalyticsUrl(input)).toBe(expected)
   })
 })
+
+describe('sanitizeAnalyticsUrl — outing friend view /outing/r/<id> (#1742)', () => {
+  const ID = '2b1f6a1e-6c1d-4f8e-9a3c-0d5e7f8a9b10'
+  it.each([
+    ['bare', `/outing/r/${ID}`, '/outing/r/:id'],
+    ['localized', `/en/outing/r/${ID}`, '/en/outing/r/:id'],
+    ['uppercase R', `/en/outing/R/${ID}`, '/en/outing/R/:id'],
+    ['uppercase OUTING', `/en/OUTING/r/${ID}`, '/en/OUTING/r/:id'],
+    ['encoded r', `/en/outing/%72/${ID}`, '/en/outing/%72/:id'],
+    ['trailing slash', `/en/outing/r/${ID}/`, '/en/outing/r/:id/'],
+    ['extra segment', `/en/outing/r/${ID}/extra`, '/en/outing/r/:id/extra'],
+    ['no id', '/en/outing/r', '/en/outing/r'],
+    ['empty id', '/en/outing/r/', '/en/outing/r/'],
+    ['absolute', `https://futari.example/ja/outing/r/${ID}`, 'https://futari.example/ja/outing/r/:id'],
+    ['protocol-relative', `//futari.example/ja/outing/r/${ID}`, '//futari.example/ja/outing/r/:id'],
+    ['next value is masked anyway', `/sign-in?next=/en/outing/r/${ID}`, `/sign-in?next=${MASKED_VALUE}`],
+    ['token route unchanged', `/en/outing/${TOKEN}`, '/en/outing/:token'],
+    ['token then r', `/en/outing/${TOKEN}/r`, '/en/outing/:token/r'],
+    ['invite/r is still a token', `/invite/r/${ID}`, `/invite/:token/${ID}`],
+    ['plural outings unchanged', `/outings/${ID}`, `/outings/${ID}`],
+    ['plural outings/r unchanged', `/outings/r/${ID}`, `/outings/r/${ID}`],
+  ])('%s', (_name, input, expected) => {
+    expect(sanitizeAnalyticsUrl(input)).toBe(expected)
+  })
+})
