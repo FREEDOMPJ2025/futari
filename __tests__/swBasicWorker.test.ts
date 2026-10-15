@@ -153,6 +153,25 @@ async function settle() {
   for (let i = 0; i < 20; i++) await new Promise((r) => setImmediate(r))
 }
 
+/**
+ * Waits (in real time) until the worker has called `fetch` `n` times in total.
+ * A navigation hashes its pathname with the real crypto.subtle first, and only
+ * then calls `fetch` and arms its 8 s timer, both in the same synchronous step.
+ * The digest runs on libuv's threadpool, so no fixed number of event-loop turns
+ * is enough. Advancing fake time before the timer exists skips it.
+ *
+ * Failure looks like: on a loaded CI runner, the stall tests hit the 5 s test
+ * timeout (the timer was armed after the advance and never fires), or
+ * `release is not a function`. Locally everything passes.
+ */
+async function untilFetched(fetch: Scope['fetch'], n: number) {
+  const deadline = performance.now() + 4_000
+  while (fetch.mock.calls.length < n) {
+    if (performance.now() > deadline) throw new Error(`worker called fetch ${fetch.mock.calls.length} times, expected ${n}`)
+    await new Promise((r) => setImmediate(r))
+  }
+}
+
 const pathKey = (p: string) => createHash('sha256').update(p, 'utf8').digest('hex')
 
 afterEach(() => {
@@ -286,7 +305,7 @@ describe('fetch: GET navigations fall back to the offline page (#1674)', () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
     s.fetch.mockImplementation(() => new Promise(() => {}))
     const { responded } = navigate(s, '/dashboard?month=2026-10&q=secret')
-    await settle()
+    await untilFetched(s.fetch, 1)
     await vi.advanceTimersByTimeAsync(NAV_TIMEOUT_MS - 1)
     let done = false
     void responded!.then(() => { done = true })
@@ -312,7 +331,7 @@ describe('fetch: GET navigations fall back to the offline page (#1674)', () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
     s.fetch.mockImplementationOnce(() => new Promise(() => {}))
     const first = navigate(s, '/dashboard').responded!
-    await settle()
+    await untilFetched(s.fetch, 1)
     await vi.advanceTimersByTimeAsync(NAV_TIMEOUT_MS)
     expect(await (await first).text()).toBe(PAGE_BODY)
     await settle()
@@ -320,7 +339,7 @@ describe('fetch: GET navigations fall back to the offline page (#1674)', () => {
     let release!: (r: Response) => void
     s.fetch.mockImplementationOnce(() => new Promise<Response>((r) => { release = r }))
     const second = navigate(s, '/dashboard?other=1').responded!
-    await settle()
+    await untilFetched(s.fetch, 2)
     await vi.advanceTimersByTimeAsync(12_000)
     let done = false
     void second.then(() => { done = true })
@@ -338,7 +357,7 @@ describe('fetch: GET navigations fall back to the offline page (#1674)', () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
     s.fetch.mockImplementationOnce(() => new Promise(() => {}))
     const first = navigate(s, '/assets').responded!
-    await settle()
+    await untilFetched(s.fetch, 1)
     await vi.advanceTimersByTimeAsync(NAV_TIMEOUT_MS)
     await first
     await settle()
@@ -357,7 +376,7 @@ describe('fetch: GET navigations fall back to the offline page (#1674)', () => {
     restarted.listeners = listeners
     restarted.fetch.mockImplementationOnce(() => new Promise(() => {}))
     const again = navigate(restarted, '/assets').responded!
-    await settle()
+    await untilFetched(restarted.fetch, 1)
     await vi.advanceTimersByTimeAsync(NAV_TIMEOUT_MS + 5_000)
     let done = false
     void again.then(() => { done = true })
@@ -368,7 +387,7 @@ describe('fetch: GET navigations fall back to the offline page (#1674)', () => {
     await vi.advanceTimersByTimeAsync(SLOW_WINDOW_MS)
     restarted.fetch.mockImplementationOnce(() => new Promise(() => {}))
     const later = navigate(restarted, '/assets').responded!
-    await settle()
+    await untilFetched(restarted.fetch, 2)
     await vi.advanceTimersByTimeAsync(NAV_TIMEOUT_MS)
     expect(await (await later).text()).toBe(PAGE_BODY)
   })
@@ -379,7 +398,7 @@ describe('fetch: GET navigations fall back to the offline page (#1674)', () => {
     const page = s.caches.stores.get(CACHE)!
     s.fetch.mockImplementationOnce(() => new Promise(() => {}))
     const { responded } = navigate(s, '/dashboard')
-    await settle()
+    await untilFetched(s.fetch, 1)
     s.caches.stores.delete(CACHE) // a full off ran meanwhile
     await vi.advanceTimersByTimeAsync(NAV_TIMEOUT_MS)
     await responded
