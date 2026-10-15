@@ -43,6 +43,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **出遊介紹頁開頭直接回答「怎麼分帳才不用每個人都裝 App」，並附一個算好的例子（#1725）**
+  使用者：`/features/outing` 四語在開頭多一段問答，介紹步驟之後多一個四人出遊的分帳例子（每筆支出、合計、每人分攤、結清要轉的幾筆）。
+  技術：例子的數字由 `OUTING_MOCK` 經產品自己的平分／結清函式算出；JSON-LD 加 `WebApplication`（免費、瀏覽器即可用）；`llms.txt`、`llms-full.txt` 加出遊段落與四語連結。
+
 - **首頁、使用情境總覽與 Splitwise 搬遷頁都能連到出遊頁（#1724）**
   使用者：首頁功能區下方與頁尾多了「出遊分帳」連結，`/use-case` 總覽與 `/migrate/splitwise` 多一列出遊介紹；出遊連結列的標題改成帶「出遊分帳」的說法（四語）。
   技術：`feature_outing_link_clicked` 新增 `source`（`landing_features`／`landing_footer`／`use_case_hub`／`migrate_splitwise`）；migrate registry 加 `featureLinks`；sitemap 的 `/`、`/use-case`、`/features/outing` lastModified 改為 2026-10-15。
