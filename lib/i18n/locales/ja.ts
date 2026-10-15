@@ -627,6 +627,15 @@ export const ja: Translations = {
       resetConfirmBody: '古いリンクはすぐに使えなくなります。すでに参加している人はそのまま記録できます。',
       resetConfirm: '再発行',
       resetDone: '新しいリンクにしました。古いリンクはもう使えません。',
+      shareCta: '友だちに送る',
+      message: '「{name}」の記録はここで。リンクを開いて、自分の名前を選んでください。',
+      messageCopied: 'メッセージとリンクをコピーしました。グループに貼り付けてください。',
+      qrShow: 'QR コードを表示',
+      qrHide: 'QR コードを閉じる',
+      qrHint: '近くの友だちがスマホのカメラで読み取ると、このおでかけが開きます。',
+      qrAlt: 'このおでかけの QR コード',
+      unpicked: 'まだ選ばれていない名前：{n}',
+      reshare: 'もう一度送る',
     },
     participant: {
       claim: {

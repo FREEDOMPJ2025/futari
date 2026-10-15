@@ -619,6 +619,15 @@ export const zhCN: Translations = {
       resetConfirmBody: '旧链接会立刻失效。已经加入的人不受影响，照常记账。',
       resetConfirm: '重设',
       resetDone: '已换成新链接，旧链接不能再用了。',
+      shareCta: '分享给朋友',
+      message: '「{name}」的账记这里，点开选你的名字就能一起记。',
+      messageCopied: '已复制消息和链接，粘贴到群里就好。',
+      qrShow: '显示二维码',
+      qrHide: '收起二维码',
+      qrHint: '让旁边的朋友用手机相机扫，就能打开这次出游。',
+      qrAlt: '这次出游的二维码',
+      unpicked: '还有 {n} 个名字没人选',
+      reshare: '再分享一次',
     },
     participant: {
       claim: {

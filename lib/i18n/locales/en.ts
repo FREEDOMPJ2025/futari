@@ -626,6 +626,15 @@ export const en: Translations = {
       resetConfirmBody: 'The old link stops working right away. People who already joined are unaffected and keep logging.',
       resetConfirm: 'Reset',
       resetDone: 'New link ready. The old one no longer works.',
+      shareCta: 'Share with friends',
+      message: 'We\'re logging {name} here. Open the link and pick your name to join in.',
+      messageCopied: 'Message and link copied. Paste it into the group chat.',
+      qrShow: 'Show QR code',
+      qrHide: 'Hide QR code',
+      qrHint: 'Friends nearby can scan this with their phone camera to open the outing.',
+      qrAlt: 'QR code for this outing',
+      unpicked: 'Names nobody has picked yet: {n}',
+      reshare: 'Share again',
     },
     participant: {
       claim: {
