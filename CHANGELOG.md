@@ -58,6 +58,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - **App 沒網路或網路卡住時，幾秒內就會看到離線畫面（#1672）**
   使用者：iOS／Android App 不再空白等十幾秒；連上網路後會自己回到帳本（跟下一版 App 一起上架）。
   技術：殼內載入看門狗（6／15／30 秒逐次放寬）＋離線頁自動重連與失敗上限。
+- **網頁版沒網路或網路卡住時，也會看到 Futari 的離線畫面（#1674）**
+  使用者：沒開離線瀏覽的人斷線時不再是瀏覽器的錯誤頁，約 8 秒內出現離線畫面，連上後自己回到原本的頁面；這頁不存任何帳本資料。
+  技術：基本 SW `/sw-basic.js` 只快取 `prebuild` 產生、hash 鎖定的 `offline-basic.html`，探測公開的 `/api/ping`；回滾要部署 `swBasicMode = 'kill'`，單純 revert 不會移除已安裝的 SW。
 - **離線畫面的四語文案定稿（#1678）**
   使用者：按鈕名稱改用「」、英文標題改成「Can't connect right now」、日文改用「タップ」，跟 App 其他地方一致（跟下一版 App 一起上架）。
 - **舊的語言連結會打開對應語言（#1675）**
