@@ -153,6 +153,8 @@ export const en: Translations = {
       seeAll: 'See all migration guides',
     },
     footerTrust: 'Open only to you two · Your data stays between the two of you',
+    featuresOutingLink: 'Split trip costs with friends — one link, no app for them to install',
+    footerOutingLink: 'Split trip costs',
     jsonLdAppName: 'Futari',
     jsonLdAlternateNames: ["Futari · couple's ledger", 'Futari shared finance app', '兩個人的家計簿', 'ふたり 家計簿'],
     jsonLdAppDescription:
@@ -3852,7 +3854,7 @@ I will upload the screenshots once you confirm.`,
     ],
     closingHeading: 'Next trip, start an outing first',
     crossLink: {
-      name: 'Trips with friends',
+      name: 'Split trip costs with friends',
       description: 'Drop one link and friends can log the trip with you, no download needed.',
       cta: 'See how outings work',
     },

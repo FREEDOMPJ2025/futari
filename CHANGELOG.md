@@ -47,6 +47,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：從 `/features/outing` 按「用 Futari 開一個出遊」註冊後，略過理念卡直接取名，取名頁說明出遊會記在帳本裡；邀請伴侶可以「先去開出遊」，略過後直接打開建立出遊。其他入口的 onboarding 不變。
   技術：CTA 的 `next` 改為 `/onboarding?intent=outing`；`intent` 是封閉集合（`lib/onboarding/intent.ts`），對應寫死的站內路徑，不從網址取轉址目標；`/outings?create=1` 開啟建立 sheet 後移除參數。
 
+- **首頁、使用情境總覽與 Splitwise 搬遷頁都能連到出遊頁（#1724）**
+  使用者：首頁功能區下方與頁尾多了「出遊分帳」連結，`/use-case` 總覽與 `/migrate/splitwise` 多一列出遊介紹；出遊連結列的標題改成帶「出遊分帳」的說法（四語）。
+  技術：`feature_outing_link_clicked` 新增 `source`（`landing_features`／`landing_footer`／`use_case_hub`／`migrate_splitwise`）；migrate registry 加 `featureLinks`；sitemap 的 `/`、`/use-case`、`/features/outing` lastModified 改為 2026-10-15。
+
 ### 技術變更
 
 - **出遊漏斗補上建立與分享兩個事件（#1723）**

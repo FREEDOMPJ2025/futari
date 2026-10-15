@@ -248,6 +248,10 @@ export type Translations = {
     }
     /** Footer trust note. */
     footerTrust: string
+    /** #1724 — quiet link under the feature list to /features/outing; anchor carries the outing search phrase. */
+    featuresOutingLink: string
+    /** #1724 — footer link to /features/outing. */
+    footerOutingLink: string
     /** schema.org `name` for WebSite + SoftwareApplication JSON-LD (#467). */
     jsonLdAppName: string
     /** schema.org `alternateName` array for WebSite + SoftwareApplication (#467). */
@@ -3248,7 +3252,7 @@ export type Translations = {
       { question: string; answer: string },
     ]
     closingHeading: string
-    /** Row on /use-case/travel and /use-case/aa-split. `cta` is the screen-reader text. */
+    /** Row on /use-case/travel, /use-case/aa-split, the /use-case hub and /migrate/splitwise (#1724). `name` carries the outing search phrase. `cta` is the screen-reader text. */
     crossLink: { name: string; description: string; cta: string }
     /** Quiet text links: outing share page (shareLink) and in-app empty state (emptyLink). */
     entries: { shareLink: string; emptyLink: string }
@@ -3532,6 +3536,8 @@ export const zhTW: Translations = {
       seeAll: '看全部搬遷指南',
     },
     footerTrust: '只開放給你們倆 · 資料只屬於你們兩個',
+    featuresOutingLink: '出遊分帳：丟一個連結，朋友不用下載 App',
+    footerOutingLink: '出遊分帳',
     jsonLdAppName: 'Futari · 雙人記帳',
     jsonLdAlternateNames: ['Futari 家計簿', '情侶記帳 app', '夫妻記帳', '兩個人的家計簿', 'ふたり 家計簿', "Futari · couple's ledger"],
     jsonLdAppDescription:
@@ -7157,7 +7163,7 @@ export const zhTW: Translations = {
     ],
     closingHeading: '下次出去玩，先開一個出遊',
     crossLink: {
-      name: '跟朋友一起出遊',
+      name: '出遊分帳，跟朋友一起記',
       description: '丟一個連結，朋友不用下載就能一起記這次的帳。',
       cta: '看出遊怎麼用',
     },
