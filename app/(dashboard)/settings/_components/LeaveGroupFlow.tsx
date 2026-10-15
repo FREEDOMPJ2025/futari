@@ -475,8 +475,9 @@ function Card3({
       {/* #1611 — export first. The records stay in this ledger after a leave;
           a copy of your own is optional, and since #1460 the leaver can also
           export this chapter later. The copy names what the file holds
-          (expenses, income, settlements) and that the chapter goes if the
-          stayer later deletes their account. */}
+          (expenses, income, settlements). Since #1701 the chapter stays for
+          the leaver even if the stayer later deletes their account, so the
+          copy no longer warns about that. */}
       <p className="text-sm mt-5 mb-3 text-ink-2">{exportHint}</p>
       <Button variant="secondary" fullWidth onClick={onExport} disabled={exportPending}>
         {exportCta}
