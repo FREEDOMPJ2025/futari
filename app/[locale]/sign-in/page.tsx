@@ -11,6 +11,7 @@ import { hasTokenBearingNext } from '@/lib/analytics/tokenBearingUrl'
 import { SignInActions } from './SignInActions'
 import { SignInNotice } from './SignInNotice'
 import { SignedInRedirect } from './SignedInRedirect'
+import { OfflineSignInSweep } from './OfflineSignInSweep'
 import { InstallHint } from './InstallHint'
 import { FeatureCards } from './FeatureCards'
 import { BlogSection } from './BlogSection'
@@ -151,6 +152,8 @@ export default async function SignInPage({
       {/* Already-signed-in viewers get bounced to /dashboard client-side (#920
           Phase 1) — the proxy no longer verifies auth on this public path. */}
       <SignedInRedirect checkingLabel={t.signIn.signingIn} />
+      {/* #1673 — no ledger pages survive on a device that reaches sign-in. */}
+      <OfflineSignInSweep />
 
       {/* Warm TLS to the OAuth hosts so the post-click redirect costs less.
           Supabase (the auth backend the OAuth handshake routes through) is

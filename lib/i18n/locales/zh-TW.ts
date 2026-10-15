@@ -4299,7 +4299,7 @@ export const zhTW: Translations = {
     sectionApp: '應用',
     offlineBrowsing: '離線瀏覽',
     offlineHintOff: '在無網路時看不到歷史記錄。開啟後，最近瀏覽過的頁面會存在這台裝置上。',
-    offlineHintOn: '無網路時可看最近一次連線時的記錄。資料只存在這台裝置，登出時會自動清除。',
+    offlineHintOn: '無網路時可看最近一次連線時的記錄。資料只存在這台裝置；登出時會一併關閉並清除，重新登入後需要再開啟一次。',
     offlineToggling: '處理中…',
     offlineToggleError: '無法切換，請稍後再試',
     offlineUnsupported: '目前的瀏覽器不支援離線瀏覽',

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { decideOffReload, guardedReload, offReloadMayApply } from '@/lib/offline/swControl'
 
 const VISIBILITY_REFRESH_THRESHOLD_MS = 30_000
 
@@ -28,7 +29,19 @@ export function ReconnectRefresh() {
 
     const refresh = () => {
       lastRefreshAt.current = Date.now()
-      router.refresh()
+      // #1673 reload rule: offline browsing is off but this tab is still
+      // controlled by the full worker → reload (releases control) instead of
+      // refreshing through it. While its registration still exists the reload
+      // would come back controlled, so skip; the off broadcast follows.
+      if (!offReloadMayApply()) {
+        router.refresh()
+        return
+      }
+      void decideOffReload().then((decision) => {
+        if (decision === 'wait') return
+        if (decision === 'reload' && guardedReload()) return
+        router.refresh()
+      })
     }
 
     const handleOnline = () => {

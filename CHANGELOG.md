@@ -90,6 +90,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - **前一段章節的出遊，之後的伴侶打不開也改不了（#1682）**
   使用者：之後才加入的伴侶用網址打不開前一段章節的出遊（分享連結只看得到出遊名稱與參與者名字，跟一般拿到連結的人一樣，看不到金額），也不能改名、刪除、結束或動分享連結；自己要看舊出遊，先在「過去的時光」進入那段章節，出遊列表也跟著顯示那段的出遊，還沒結束的可以在那裡結束；朋友與前伴侶照舊以參與者身分唯讀。
   技術：`resolveActor` 的成員層另需名列出遊所屬章節；`/outings`、`/outings/[id]` 改走 `resolveViewerEpochContext` 與 `getOutingInChapter`；已關閉章節的出遊管理動作一律拒絕，只有該章節成員在未 pin 或 pin 到該章節時能結束。
+- **關掉離線瀏覽、登出或刪除帳號，這台裝置上的帳本資料都會清乾淨（#1673）**
+  使用者：登出與刪除帳號會一併關閉離線瀏覽並清除，重新登入後要再開一次；換另一個人登入看不到前一個人存下的頁面，Settings 的開關不會再自己打開（開關說明文案待審）。
+  技術：同意標記 `offline-consent-v1` 控制 `sw.js` 寫入 `dynamic-v1`；完整關閉依序刪標記、關 pref、unregister、廣播、刪所有 cache、清 `serwist-expiration`，並加上使用者綁定（SHA-256）、登入頁與掛載 sweep、其他分頁 reload。
 - **前一段章節的旅行，只有在看那段章節時才打得開（#1614）**
   使用者：之後才加入的伴侶用網址也打不開前一段章節的旅行；自己要看舊旅行，先在「過去的時光」進入那段章節，旅行列表也跟著顯示那段的旅行。
   技術：`/trips`、`/trips/[id]` 改走 `resolveViewerEpochContext`，以 `getTripInChapter`（id＋group＋epoch）讀旅行，查不到就 404，且在讀任何支出前就擋下。
