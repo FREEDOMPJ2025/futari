@@ -41,7 +41,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
-_Nothing unreleased yet._
+### 使用者可見變化
+
+- **出遊介紹頁開頭直接回答「怎麼分帳才不用每個人都裝 App」，並附一個算好的例子（#1725）**
+  使用者：`/features/outing` 四語在開頭多一段問答，介紹步驟之後多一個四人出遊的分帳例子（每筆支出、合計、每人分攤、結清要轉的幾筆）。
+  技術：例子的數字由 `OUTING_MOCK` 經產品自己的平分／結清函式算出；JSON-LD 加 `WebApplication`（免費、瀏覽器即可用）；`llms.txt`、`llms-full.txt` 加出遊段落與四語連結。
 
 ## [1.7.3] - 2026-10-15
 
