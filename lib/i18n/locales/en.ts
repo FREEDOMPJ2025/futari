@@ -1019,7 +1019,7 @@ export const en: Translations = {
             'Any pending invite links to this ledger become invalid',
             'The original ledger reverts to solo mode, kept by {memberA}',
           ],
-          exportHint: 'After you leave, you can still export this chapter\'s expenses, income and settlements from the Your data page. You can also export now if you want a copy of your own.',
+          exportHint: 'After you leave, you can still export this chapter\'s expenses, income and settlements from Your data. You can also export now if you want a copy of your own.',
           exportCta: 'Export expenses, income and settlements first',
         },
         card4: {
