@@ -74,7 +74,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：在「過去的時光」打開出遊，只看得到紀錄；那段章節還沒結束的出遊只留「結束出遊」，離開的人回看時不顯示任何管理按鈕；被拒絕時的說明改成「過去的章節只能查看，不能修改」（文案待 #1688 審稿）。
   技術：`lockForAdmin` 的章節規則抽成 `adminChapterRefusal`／`endChapterRefusal`，詳情頁以同一組函式算出 `canManage`／`canEnd` 傳給畫面。
 - **對外頁面說清楚匯出包含什麼（#1702）**
-  使用者：首頁、登入頁的「關於」、各搬家頁與比較表，不再說「整本帳」「資料永遠是你的」，改成點名支出、進帳和結算能匯出 CSV，離開帳本之後也可以（文案待 #1702 審稿）。
+  使用者：首頁、登入頁的「關於」、各搬家頁與比較表，不再說「整本帳」「資料永遠是你的」，改成點名支出、進帳和結算能匯出 CSV，離開帳本之後也可以。
 - **「過去的時光」的設定壞掉時，App 不會整個打不開（#1699）**
   使用者：瀏覽器裡記住的「正在看哪段章節」若是一個無效的值，現在當成沒選，直接回到現在的帳本，不再每一頁都出錯。
   技術：`resolveViewerEpochContext` 與 `enterPastEpoch` 先檢查 pin 是 uuid（`isUuid`），不合法的值不送進查詢（原本 22P02 讓 dashboard layout 500）；刪除沒人呼叫的 `resolveViewerEpochWindow`／`getActiveEpochWindow`。
