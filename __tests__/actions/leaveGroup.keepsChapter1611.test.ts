@@ -30,7 +30,10 @@ import { resolve } from 'node:path'
 //      stayer's snapshot for the leave month has no leaver rule text and still
 //      lists the stayer's own resolved events;
 //   3. process_account_deletions completes for the stayer and, in a separate
-//      run, for the leaver.
+//      run, for the leaver. Since #1701 the stayer's deletion keeps the closed
+//      chapter for the leaver (alive: an auth.users row): the ledger stays as
+//      an orphan holding exactly that chapter; once the leaver is gone too,
+//      the stayer's deletion cascades the whole ledger as before.
 //
 // Needs the SQL functions (compute_monthly_review_snapshot,
 // process_account_deletions), so the database must be MIGRATED (drizzle's
@@ -99,6 +102,7 @@ const recurringExpense = await import('@/actions/recurringExpense')
 const recurringIncome = await import('@/actions/recurringIncome')
 const { and, eq, inArray, isNull, sql } = await import('drizzle-orm')
 const { unwrapAction } = await import('@/lib/action-errors')
+const { seedAuthUsers, deleteAuthUsers } = await import('./_authUser')
 
 vi.setConfig({ testTimeout: 60_000 })
 
@@ -200,6 +204,8 @@ async function seed(tag: string): Promise<Fixture> {
     { id: f.A, displayName: `${tag}_A` },
     { id: f.B, displayName: `${tag}_B` },
   ])
+  // Both are live users (#1701: "alive" = an auth.users row).
+  await seedAuthUsers([{ id: f.A, displayName: `${tag}_A` }, { id: f.B, displayName: `${tag}_B` }])
   const startedAt = new Date(Date.now() - 30 * 86400_000)
   const [g] = await db.insert(oikosGroups).values({
     name: `${tag}_duo`, memberA: f.A, memberB: f.B, currentEpochStartedAt: startedAt, guardianBetaEnabled: true,
@@ -351,6 +357,7 @@ async function cleanup(f: Fixture | undefined) {
     await db.delete(groupBalance).where(inArray(groupBalance.groupId, existing))
     await db.delete(oikosGroups).where(inArray(oikosGroups.id, existing))
   }
+  await deleteAuthUsers([f.A, f.B])
   await db.delete(profiles).where(inArray(profiles.id, [f.A, f.B]))
 }
 
@@ -472,10 +479,40 @@ describe.skipIf(!isLocalDb)('#1611 — leave keeps the chapter; stayer renames n
     expect(names).toEqual([`${f.tag} A bonus`, `${f.tag} A gym`])
   })
 
-  it('(3) the stayer\'s account deletion completes (solo ledger: whole-ledger cascade)', async () => {
+  it('(3) the stayer\'s account deletion completes and keeps the closed chapter for the leaver (#1701)', async () => {
+    const [ep] = await db.select().from(groupEpochs).where(eq(groupEpochs.id, f.duoEpoch))
+    // What the leaver's look-back reads (created_at in the chapter window;
+    // review messages also need the whole month inside it — the reader's rule).
+    const inChapter = (t: string) => sql`
+      SELECT count(*)::int n FROM ${sql.identifier(t)}
+      WHERE group_id = ${f.G}::uuid
+        AND created_at >= ${ep.startedAt.toISOString()}::timestamptz AND created_at < ${ep.endedAt!.toISOString()}::timestamptz`
+    const keptBefore = {
+      CashTransactions: await scalar(inChapter('CashTransactions')),
+      IncomeTransactions: await scalar(inChapter('IncomeTransactions')),
+      Settlements: await scalar(inChapter('Settlements')),
+      MonthlyReviewMessages: await scalar(sql`
+        SELECT count(*)::int n FROM "MonthlyReviewMessages"
+        WHERE group_id = ${f.G}::uuid
+          AND created_at >= ${ep.startedAt.toISOString()}::timestamptz AND created_at < ${ep.endedAt!.toISOString()}::timestamptz
+          AND make_timestamptz(year, month, 1, 0, 0, 0, 'Asia/Taipei') >= date_trunc('milliseconds', ${ep.startedAt.toISOString()}::timestamptz)
+          AND make_timestamptz(year, month, 1, 0, 0, 0, 'Asia/Taipei') + interval '1 month'
+              <= date_trunc('milliseconds', ${ep.endedAt!.toISOString()}::timestamptz)`),
+    }
+    expect(keptBefore.CashTransactions).toBeGreaterThan(0)
+
     expect(await deleteAccount(f.A)).toBe(1)
     expect(await deletionCompleted(f.A)).toBe(true)
-    expect(await db.select().from(oikosGroups).where(eq(oikosGroups.id, f.G))).toHaveLength(0)
+    // The ledger stays as an orphan: no member_b, member_a's account gone.
+    const [g] = await db.select().from(oikosGroups).where(eq(oikosGroups.id, f.G))
+    expect(g).toMatchObject({ memberA: f.A, memberB: null, name: '家計簿' })
+    expect(await scalar(sql`SELECT count(*)::int n FROM auth.users WHERE id = ${f.A}::uuid`)).toBe(0)
+    // Exactly the chapter's records remain; the duo chapter names A as 「已離開的夥伴」.
+    expect(await recordCounts(f.G)).toEqual(keptBefore)
+    const [after] = await db.select().from(groupEpochs).where(eq(groupEpochs.id, f.duoEpoch))
+    expect(after.memberAName).toBe('已離開的夥伴')
+    expect(after.memberBName).toBe(`${f.tag}_B`)
+    expect(await db.select().from(groupEpochs).where(and(eq(groupEpochs.groupId, f.G), isNull(groupEpochs.endedAt)))).toHaveLength(0)
     // The leaver's ledger is untouched by it.
     expect(await db.select().from(recurringExpenseRules).where(eq(recurringExpenseRules.id, f.reB))).toHaveLength(1)
   })
