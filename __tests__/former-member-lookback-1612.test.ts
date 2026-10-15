@@ -461,7 +461,7 @@ describe('#1612 — 3. the chapter\'s own rows are served', () => {
 describe('#1612 — 4. the way in and out', () => {
   it('B2 (no ledger): /onboarding offers the list → enter → /dashboard; exit → /onboarding', async () => {
     as(B2)
-    const onboarding = await payloadOf(await OnboardingPage())
+    const onboarding = await payloadOf(await OnboardingPage({}))
     expect(onboarding).toContain('"el":"PastTimesEntryLink"')
 
     const list = await StandalonePastTimesPage() as ReactElement<{ props: unknown }>
@@ -480,7 +480,7 @@ describe('#1612 — 4. the way in and out', () => {
 
   it('B (own ledger): /onboarding sends them to /dashboard; exit returns to LB', async () => {
     as(B)
-    await expect(OnboardingPage()).rejects.toThrow('NEXT_REDIRECT /dashboard')
+    await expect(OnboardingPage({})).rejects.toThrow('NEXT_REDIRECT /dashboard')
     await expect(StandalonePastTimesPage()).rejects.toThrow('NEXT_REDIRECT /settings/past-times')
     as(B, w.e1)
     expect((await exitPastEpoch()).ok).toBe(true)
@@ -494,7 +494,7 @@ describe('#1612 — 4. the way in and out', () => {
     await db.insert(profiles).values({ id: lonely, displayName: 'TEST_1612_LONELY' })
     try {
       as(lonely)
-      expect(await payloadOf(await OnboardingPage())).not.toContain('PastTimesEntryLink')
+      expect(await payloadOf(await OnboardingPage({}))).not.toContain('PastTimesEntryLink')
     } finally {
       await db.delete(profiles).where(eq(profiles.id, lonely))
     }

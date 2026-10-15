@@ -9,6 +9,7 @@ import { oikosGroups } from '@/lib/db/schema'
 import { eq, or } from 'drizzle-orm'
 import { getTranslations } from '@/lib/i18n/t'
 import { hasClosedChapterForViewer } from '@/lib/db/queries/epoch'
+import { INTENT_EXISTING_USER_DESTINATION, intentQuery, parseOnboardingIntent } from '@/lib/onboarding/intent'
 import PhilosophyCards from './PhilosophyCards'
 import { PastTimesEntryLink } from './PastTimesEntryLink'
 
@@ -18,9 +19,15 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ intent?: string | string[] }>
+}) {
   const user = await getCurrentUser()
   if (!user) redirect('/sign-in')
+  // #1726 — closed-set intent from the /features/outing CTA; see lib/onboarding/intent.ts.
+  const intent = parseOnboardingIntent((await searchParams)?.intent)
 
   const [group] = await db
     .select()
@@ -28,7 +35,12 @@ export default async function OnboardingPage() {
     .where(or(eq(oikosGroups.memberA, user.id), eq(oikosGroups.memberB, user.id)))
     .limit(1)
 
-  if (group) redirect('/dashboard')
+  if (group) redirect(intent ? INTENT_EXISTING_USER_DESTINATION[intent] : '/dashboard')
+
+  // Someone who came to split a trip goes straight to naming the ledger: the
+  // philosophy cards are about the two of you, and five of them stand between
+  // this visitor and the thing they asked for. Other entries keep the cards.
+  if (intent) redirect(`/setup${intentQuery(intent)}`)
 
   // Outside the (dashboard) layout, so there is no TranslationsProvider here —
   // hand the cards their copy directly, the same way /setup does (#1163).

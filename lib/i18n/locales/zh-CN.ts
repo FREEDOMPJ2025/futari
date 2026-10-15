@@ -1464,6 +1464,7 @@ export const zhCN: Translations = {
       next: '下一步',
       required: '请输入名称',
       failed: '出错了',
+      outingReason: '先建好你们的账本，出游会记在里面。',
     },
     invite: {
       heading: '账本准备好了，让对方也进来',
@@ -1476,6 +1477,8 @@ export const zhCN: Translations = {
       copy: '复制',
       share: '分享链接',
       skip: '稍后再邀请 →',
+      skipToOuting: '先去开出游 →',
+      outingHint: '对方之后随时可以加入，出游现在就能开。',
       copied: '已复制链接',
       shareFailed: '分享失败',
       creating: '创建中…',
