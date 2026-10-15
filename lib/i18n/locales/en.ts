@@ -740,6 +740,10 @@ export const en: Translations = {
     signUpTitle: 'Want to find this outing later?',
     signUpBody: 'Sign in and {name} is linked to your account. You can keep logging without signing in.',
     signUpCta: 'Sign in',
+    ledgerInviteTitle: 'Everything from this outing is here',
+    ledgerInviteBody: 'Futari is where two people keep their everyday spending together. If there is someone you would like to do that with, you can open a ledger of your own.',
+    ledgerInviteCta: 'Open a shared ledger',
+    ledgerInviteDismiss: 'No thanks',
   },
 
   tripDetail: {

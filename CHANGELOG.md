@@ -43,6 +43,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **出遊結束後，朋友的出遊頁多一張「兩人帳本」的邀請卡（#1728）**
+  使用者：出遊結束後，朋友在出遊頁看到一張卡片，說明 Futari 也能兩個人一起記平常的帳，可以點去建立帳本或關掉；關掉後同一個出遊不再出現，進行中的出遊與已經有帳本的人都不顯示。
+  技術：新增 `outing_ledger_invite_viewed`／`outing_ledger_invite_clicked`（無屬性）；未登入的連結帶 `from=outing`、`next=/onboarding`，`signed_up` 帶 `entry_source=outing`；server 只查看的人自己有沒有帳本。
+
 - **出遊連結可以用系統分享、QR code 送出，並看到還有幾個名字沒人選（#1727）**
   使用者：出遊頁「分享給朋友」打開手機的分享面板並附上一句訊息，沒有分享面板時改複製訊息和連結；可以顯示 QR code 給旁邊的朋友掃；參與者清單下顯示還有幾個名字沒人選，並可再分享一次。
   技術：`outing_link_shared` 新增 `method=share`／`qr`；有分享面板時連結在卡片出現與回到分頁時預先取得，讓分享在點擊內同步呼叫；QR 用既有的 `uqr`，沒有新增依賴或 Capacitor plugin。

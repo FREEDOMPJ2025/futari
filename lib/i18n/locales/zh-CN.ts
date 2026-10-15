@@ -733,6 +733,10 @@ export const zhCN: Translations = {
     signUpTitle: '之后也想找得到这次出游？',
     signUpBody: '登录后，「{name}」会连到你的账号。不登录也能继续记。',
     signUpCta: '登录',
+    ledgerInviteTitle: '这次的账都在这里了',
+    ledgerInviteBody: 'Futari 平常是两个人一起记账用的。如果你也有想一起记的人，可以开一本你们自己的账本。',
+    ledgerInviteCta: '建立两人账本',
+    ledgerInviteDismiss: '不用了',
   },
 
   tripDetail: {
