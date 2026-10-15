@@ -13,7 +13,7 @@ Futari (codebase name: Oikos) is a Traditional-Chinese-first expense tracker des
 
 ## Outings: splitting a trip with friends
 
-Futari also covers the one time money involves more than the two of you. A ledger member starts an **outing** (出遊 / 出游 / おでかけ) and drops its link in the group chat. Friends open it in a phone browser and pick their name: no app to download, no sign-up. Each expense is split evenly between the people chosen for it; to settle up, Futari lists who pays whom in at most one fewer transfer than there are people. Up to 20 people, one currency per outing. When the outing ends, the friends have settled inside it and the couple's part goes back to their own ledger as one settlement.
+Futari also covers the one time money involves more than the two of you. A ledger member starts an **outing** (出遊 / 出游 / おでかけ) and drops its link in the group chat. Friends open it in a phone browser and pick their name: no app to download, no sign-up. Each expense is split evenly between the people chosen for it; to settle up, Futari lists who pays whom in at most one fewer transfer than there are people. Up to 20 people, one currency per outing. Friends settle up inside the outing; when it ends, the couple's part goes back to their own ledger as one settlement.
 
 Worked example (4 people, NT$): you pay NT$8,000 for the guesthouse, your partner NT$4,000 for food, a friend NT$800 for fuel. Total NT$12,800, NT$3,200 each. Settlement: friend A sends you NT$3,200, friend B sends you NT$1,600 and your partner NT$800. Three transfers, and everyone has paid exactly NT$3,200.
 
