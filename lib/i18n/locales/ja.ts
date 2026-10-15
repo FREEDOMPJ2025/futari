@@ -50,7 +50,7 @@ export const ja: Translations = {
       s6Body: [
         'もっともな心配だと思います。Honeydue はここ数年でゆっくり衰退していて、Spendee は過去にユーザーのデータが消えてしまったこともあります——そういう話で怖い思いをしたことがあるなら、その警戒は正しいです。',
         'Futari は私自身が毎日使っているツールです。それが「ちゃんと誰かが手入れしている」という一番直接的な証拠です。永遠に問題が起きないという話ではなく、その裏側に、ちゃんと使えるかどうかを気にかけている本物の人間がいる、ということ。',
-        'データについては、Futari は CSV エクスポートに対応しています。いつでも、データを持ち出したくなったら、持ち出せます。「私たちは消えません」という言葉で安心させようとは思いません——けれど、これは言えます。あなたのデータが囲い込まれることはない、と。',
+        'データについては、Futari は CSV の書き出しに対応しています。支出・収入・精算は、家計簿を離れたあとも含めて、いつでも持ち出せます。「私たちは消えません」という言葉で安心させようとは思いません——けれど、これは言えます。その記録が囲い込まれることはない、と。',
       ],
       s7Heading: 'Futari がそうであるもの、そうでないもの',
       s7Body: [
@@ -111,7 +111,7 @@ export const ja: Translations = {
       },
       portability: {
         title: 'いつでも持ち出せる',
-        body: 'CSVでエクスポート可能。データはずっとあなたのもの、囲い込みません。',
+        body: '支出・収入・精算を CSV で書き出せます。家計簿を離れたあとも同じです。',
       },
       forever: {
         title: 'ずっと無料',
@@ -2421,7 +2421,7 @@ export const ja: Translations = {
       featCsvExport: 'CSV の書き出し',
       featCloudSync: 'クラウド同期',
       featRealtimeCloudSync: 'リアルタイムのクラウド同期',
-      featDataExport: 'データを持ち出せる',
+      featDataExport: 'データの書き出し',
       featCrossPlatform: '対応プラットフォーム',
       featDailyEntries: '1日の記録件数',
       verdictSupported: '対応',
@@ -2443,7 +2443,7 @@ export const ja: Translations = {
       verdictUnlimited: '無制限',
       verdictBuiltInConversion: '換算機能あり',
       verdictSpreadsheetExport: 'スプレッドシートで書き出し',
-      verdictCsvExport: 'CSV で書き出し',
+      verdictCsvExport: 'CSV：支出・収入・精算',
       verdictPlatforms: 'iOS／Android／Web',
     },
     howToStepName: 'ステップ {n}',
@@ -2456,7 +2456,7 @@ export const ja: Translations = {
         },
         {
           title: 'いつでも持ち出せる',
-          body: '気が変わったら、まるごと CSV で書き出し可能。引っ越しは縛りの始まりではありません。',
+          body: '気が変わったら、支出・収入・精算をいつでも CSV で書き出せます。引っ越しは縛りの始まりではありません。',
         },
         {
           title: 'ずっと無料で使える',
@@ -2848,7 +2848,7 @@ I will upload the screenshots once you confirm.`,
         differentiators: [
           {
             title: 'データの出し入れがずっと無料',
-            body: 'まねーぼ では記録を CSV で書き出すのにプレミアム契約が必要です。Futari は取り込みも書き出しも無料で、記録はいつでも持ち出せます。',
+            body: 'まねーぼ では記録を CSV で書き出すのにプレミアム契約が必要です。Futari は取り込みも書き出しも無料で、支出・収入・精算はいつでも持ち出せます。',
           },
           {
             title: '按分と精算を内蔵',
@@ -2901,7 +2901,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             title: 'データの出し入れが自由',
-            body: '簡単家計簿では CSV 書き出しは VIP 機能です。Futari は取り込みも書き出しも無料で、記録はいつでもふたりのものです。',
+            body: '簡単家計簿では CSV 書き出しは VIP 機能です。Futari は取り込みも書き出しも無料で、支出・収入・精算はいつでも書き出せます。',
           },
         ],
         stepsHeading: '3 ステップ',
@@ -2954,7 +2954,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             title: 'データの出し入れが自由',
-            body: 'Futari では書き出しに契約は不要で、ファイルは標準の UTF-8 CSV です。いつか離れるときも、そのまま持ち出せます。',
+            body: 'Futari では書き出しに契約は不要で、支出・収入・精算を標準の UTF-8 CSV で書き出せます。いつか離れるときも、そのまま持ち出せます。',
           },
         ],
         stepsHeading: '3 ステップ',
@@ -2998,7 +2998,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             title: '同期され、いつでも持ち出せる',
-            body: '記録はクラウドにあるので機種変更でも消えません。離れるときは CSV で書き出し。',
+            body: '記録はクラウドにあるので機種変更でも消えません。離れるときは、支出・収入・精算を CSV で書き出せます。',
           },
         ],
         stepsHeading: '3 ステップ',
