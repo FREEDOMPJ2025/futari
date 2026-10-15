@@ -3813,7 +3813,7 @@ export const zhCN: Translations = {
       outing_description_too_long: '说明最长 100 字',
       outing_currency_changed: '这次出游的币别和账本目前的基准币别不一致，所以不能折回主账本。',
       outing_admin_only: '只有开这次出游的账本成员可以这样做',
-      outing_viewing_past_chapter: '你正在看过去的章节，回到目前的章节才能修改',
+      outing_viewing_past_chapter: '过去的章节只能查看，不能修改',
       outing_expense_not_found: '找不到这笔支出',
       outing_settlement_not_found: '找不到这笔还款',
       outing_link_invalid: '这个链接已失效，请向开局的人要新链接',
