@@ -93,16 +93,14 @@ export const ja: Translations = {
     cta: 'ふたりで記録する',
     ctaHint: '無料 · ふたりで一冊の家計簿 · Google または Apple で続ける',
     alreadyHaveAccount: 'アカウントをお持ちの方',
-    // TODO(i18n): native review pending (#1413) — MT-quality draft.
     appStoreCta: 'App Store でダウンロード',
     appStoreCtaHint: 'iPhone・iPad どちらでも使えます',
-    androidBetaCta: 'Android版テストに参加する',
+    androidBetaCta: 'Android ベータ版に参加',
     androidBetaCtaHint: 'Play ストアで使っている Google アカウントでテストグループに参加すると、アプリをインストールできるようになります。',
     useWebVersion: 'まずはウェブ版を使う',
     trustEncrypted: 'ふたりだけに開放',
     trustFree: '無料で使える',
-    // TODO(i18n): native review pending (#1333) — MT-quality draft.
-    trustPwa: 'iPhone App · Web PWA',
+    trustPwa: 'iPhone App · ウェブ版',
     trust: {
       narrative: 'あなたたちの記録は、二人だけのもの。広告もデータ販売もありません。',
       encryption: {
@@ -314,10 +312,8 @@ export const ja: Translations = {
       tripAria: '旅行：旅行の一覧へ',
     },
     soloHero: {
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
       monthLabel: '{month}の記録',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      countLabel: '{count} 件',
+      countLabel: '{count}件',
     },
     addExpense: '記録を追加',
     addIncome: '収入を記録',
@@ -370,10 +366,8 @@ export const ja: Translations = {
     generating: '生成中…',
     sharedAndCopied: '共有しました。リンクもコピー済み',
     copied: 'リンクをコピーしました',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     shareTitle: 'Futari で一緒に家計簿をつける',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
-    shareText: '二人のための共有家計簿です。リンクを開くと参加できます。',
+    shareText: 'ふたりの家計簿です。リンクを開くと参加できます。',
   },
 
   addSheet: {
@@ -916,12 +910,10 @@ export const ja: Translations = {
     sectionPersonal: '個人',
     addToHomeScreen: 'ホーム画面に追加',
     displayName: '表示名',
-    // TODO(i18n): native review pending (#1328) — MT-quality draft.
     avatarVisibility: {
       title: 'アバターを表示する',
       description: 'オフにすると名前の頭文字が表示されます',
     },
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     soloLockHint: 'ひとりのあいだは、記録はすべて自分の分になります。',
     defaultSplitLabel: 'デフォルトの分担方法',
     inviteCta: '相手を招待',
@@ -1103,7 +1095,6 @@ export const ja: Translations = {
         subtitle: 'この取り込み全体のデフォルトを設定します',
         payerLabel: 'デフォルト支払者',
         payerHint: '取り込み後に行ごとに調整できます',
-        // TODO(i18n): native review pending (#1016) — MT-quality draft.
         payerSoloHint: 'ひとりのあいだは、支払者はすべて自分になります',
         splitLabel: 'デフォルト分担',
         splitOptions: {
@@ -1161,8 +1152,7 @@ export const ja: Translations = {
     partnerLeftBody: 'ここまでの記録はすべて残っています。ここからは、ひとりの時間です。',
     welcomeSoloHeading: 'おかえり、ひとりの時間に',
     welcomeSoloBody: 'これまでの記録は元の家計簿に残っていて、いつでも見返せます。これから、ゆっくりで大丈夫。',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
-    removedPartnerHeading: 'ひとりの時間に戻りました',
+    removedPartnerHeading: 'ひとりに戻りました',
     removedPartnerBody: '家計簿はぜんぶ、そのまま残っています。これから、ゆっくりで大丈夫。',
     dismissAria: '閉じる',
     newLedgerName: '家計簿',
@@ -2043,11 +2033,9 @@ export const ja: Translations = {
       unknown: '家計簿に参加できません',
     },
     meta: {
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      title: '二人で家計簿をつけませんか · Futari',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      description: '二人のための共有家計簿です。リンクを開いてサインインすると参加できます。',
-      ogDescription: '二人のための共有家計簿です。リンクを開いてサインインすると参加できます。',
+      title: '家計簿に招待されました · Futari',
+      description: 'ふたりの家計簿です。リンクを開いてサインインすると参加できます。',
+      ogDescription: 'ふたりの家計簿です。リンクを開いてサインインすると参加できます。',
     },
   },
 
@@ -2232,19 +2220,14 @@ export const ja: Translations = {
     revealFraming: '君は朝日、相手は月明かり。違う時間に、同じ家を照らしている。どっちの答えが正しいわけじゃない。相手が気にしていることを、覚えていればそれでいい。',
     revealHeaderA: 'あなた',
     revealHeaderB: '相手',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     soloHeading: 'ふたりの問答',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     soloFallback: 'この 3 問は、ふたりで答えるものです。今月のふりかえりの他の部分は、そのまま見られます。',
     errorNotFound: 'この問答が見つかりません',
     errors: {
       submitFailed: '送信できませんでした。少し待ってから試してください',
-      alreadyAnswered: 'もう答え終わっているよ',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      alreadyRevealed: 'この問答はもう開いたから、答えは変えられないよ',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
+      alreadyAnswered: 'もう答え終わっています',
+      alreadyRevealed: 'この問答はもう明かされているので、答えは変えられません',
       wrongGroup: 'この問答は、この家計簿のものではありません',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
       solo: 'この問答は、ふたりで答えるものです',
     },
     questions: {
@@ -3219,11 +3202,9 @@ I will upload the screenshots once you confirm.`,
       description: 'Google アカウントでサインインすると、ふたりで共有する家計簿に入ります。日常の支出や燃費、保険、資産までパートナーと一緒に整える PWA。',
       ogDescription: 'Google でワンタップサインインして、ふたりの家計簿を開きます。',
       invite: {
-        // TODO(i18n): native review pending (#1016) — MT-quality draft.
-        title: '二人で家計簿をつけませんか · Futari',
-        // TODO(i18n): native review pending (#1016) — MT-quality draft.
-        description: '二人のための共有家計簿に招待されました。サインインすると参加できます。',
-        ogDescription: '二人のための共有家計簿です。サインインすると参加できます。',
+        title: '家計簿に招待されました · Futari',
+        description: 'ふたりの家計簿に招待されました。サインインすると参加できます。',
+        ogDescription: 'ふたりの家計簿です。サインインすると参加できます。',
       },
     },
     terms: {

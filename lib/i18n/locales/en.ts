@@ -92,7 +92,6 @@ export const en: Translations = {
     cta: 'Record together',
     ctaHint: 'Free · One ledger for two · Continue with Google or Apple',
     alreadyHaveAccount: 'I already have an account',
-    // TODO(i18n): native review pending (#1413) — MT-quality draft.
     appStoreCta: 'Get it on the App Store',
     appStoreCtaHint: 'Works on iPhone and iPad',
     androidBetaCta: 'Join the Android beta',
@@ -100,8 +99,7 @@ export const en: Translations = {
     useWebVersion: 'Use the web version',
     trustEncrypted: 'Open only to you two',
     trustFree: 'Free to use',
-    // TODO(i18n): native review pending (#1333) — MT-quality draft.
-    trustPwa: 'iPhone app · Web PWA',
+    trustPwa: 'iPhone app · Web',
     trust: {
       narrative: 'Your records belong only to the two of you. No ads, no data selling.',
       encryption: {
@@ -313,10 +311,8 @@ export const en: Translations = {
       tripAria: 'Trips: go to your trips',
     },
     soloHero: {
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      monthLabel: '{month}',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      countLabel: '{count} recorded',
+      monthLabel: 'Logged in {month}',
+      countLabel: '{count} entries',
     },
     addExpense: 'Add entry',
     addIncome: 'Add income',
@@ -371,7 +367,6 @@ export const en: Translations = {
     sharedAndCopied: 'Shared. Link also copied.',
     copied: 'Link copied',
     shareTitle: 'Keep the books together on Futari',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     shareText: 'A shared ledger for two. Open the link to join.',
   },
 
@@ -915,12 +910,10 @@ export const en: Translations = {
     sectionPersonal: 'Personal',
     addToHomeScreen: 'Add to Home Screen',
     displayName: 'Display name',
-    // TODO(i18n): native review pending (#1328) — MT-quality draft.
     avatarVisibility: {
       title: 'Show my avatar',
       description: 'Off shows the first letter of your name instead',
     },
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     soloLockHint: 'While solo, every record is yours.',
     defaultSplitLabel: 'Default split',
     inviteCta: 'Invite partner',
@@ -1102,7 +1095,6 @@ export const en: Translations = {
         subtitle: 'Set a default for this batch; you can adjust rows later',
         payerLabel: 'Default payer',
         payerHint: 'You can edit each row after the import',
-        // TODO(i18n): native review pending (#1016) — MT-quality draft.
         payerSoloHint: 'While solo, you are the payer on every row',
         splitLabel: 'Default split',
         splitOptions: {
@@ -1160,7 +1152,6 @@ export const en: Translations = {
     partnerLeftBody: "Everything until now is still here. From this point on, this ledger is just for you.",
     welcomeSoloHeading: 'Welcome back to one person',
     welcomeSoloBody: 'Earlier records stay in the ledger you shared, and you can look back any time. Take your time from here.',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     removedPartnerHeading: 'Back to one person',
     removedPartnerBody: 'Your ledger stays, all of it. Take your time from here.',
     dismissAria: 'Dismiss',
@@ -2042,9 +2033,7 @@ export const en: Translations = {
       unknown: "Can't join this ledger.",
     },
     meta: {
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
       title: 'Someone invited you to a shared ledger · Futari',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
       description: 'A shared ledger for two. Open the link, sign in, and you can join.',
       ogDescription: 'A shared ledger for two. Open the link, sign in, and you can join.',
     },
@@ -2232,20 +2221,15 @@ export const en: Translations = {
     revealFraming: "One of you is sunrise, the other is moonlight. Different hours, same home. No answer is more right; it's enough to remember what the other one cares about.",
     revealHeaderA: 'You',
     revealHeaderB: 'Partner',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     soloHeading: 'A quiz for two',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
-    soloFallback: 'These three questions are answered by two people. The rest of this month’s review is still there.',
+    soloFallback: "These 3 questions are for two people to answer together. The rest of this month's review is still here.",
     errorNotFound: "Couldn't find this quiz",
     errors: {
       submitFailed: 'Submission failed. Please try again.',
-      alreadyAnswered: "You've already finished",
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      alreadyRevealed: 'This quiz is already open, so the answers are set.',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
+      alreadyAnswered: "You've already answered",
+      alreadyRevealed: "This quiz has already been revealed, so the answers can't be changed.",
       wrongGroup: 'This quiz belongs to a different ledger',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      solo: 'This quiz is answered by two people',
+      solo: 'This quiz is for two people to answer together',
     },
     questions: {
       impulse: {
@@ -3220,9 +3204,7 @@ I will upload the screenshots once you confirm.`,
       description: 'Sign in with Google and you land in your shared ledger, where partners log spending and fuel costs together and look after insurance and shared things.',
       ogDescription: 'One tap to sign in with Google and open your shared household ledger.',
       invite: {
-        // TODO(i18n): native review pending (#1016) — MT-quality draft.
         title: 'Someone invited you to a shared ledger · Futari',
-        // TODO(i18n): native review pending (#1016) — MT-quality draft.
         description: 'Someone invited you to a shared ledger for two. Sign in to join.',
         ogDescription: 'A shared ledger for two. Sign in to join.',
       },

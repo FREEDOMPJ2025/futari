@@ -41,7 +41,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
-_Nothing unreleased yet._
+### 使用者可見變化
+
+- **清掉標成機翻、尚未審的 en／ja 文案（#1280）**
+  使用者：單人月份改成 “Logged in September” 這類說法；問答揭曉後不再說成已經打開；邀請頁日文改成「被邀請」，不再像是在招人開始記帳；問答錯誤裡的帳本改回「帳本」。
 
 ## [1.7.3] - 2026-10-15
 
