@@ -49,7 +49,7 @@ export const en: Translations = {
       s6Body: [
         'That worry is fair. Honeydue has been slowly fading. Spendee once made user data vanish. If those stories have made you cautious, your caution is the right instinct.',
         'Futari is something I use every day myself. That\'s the most direct evidence that "someone is maintaining it." It doesn\'t mean nothing will ever break; it means there\'s a real person on the other end who cares whether it works.',
-        'On data: Futari supports CSV export. Whenever you want to take your data with you, you can. I\'m not going to convince you with "we\'ll never disappear," but I can tell you this: your data won\'t be locked in.',
+        'On data: Futari supports CSV export. Your expenses, income and settlements are yours to take whenever you want, even after you leave a ledger. I\'m not going to convince you with "we\'ll never disappear," but I can tell you this: those records won\'t be locked in.',
       ],
       s7Heading: 'What Futari is (and isn\'t)',
       s7Body: [
@@ -110,7 +110,7 @@ export const en: Translations = {
       },
       portability: {
         title: 'Take it with you',
-        body: 'Export to CSV anytime. Your data is always yours, never locked in.',
+        body: 'Export your expenses, income and settlements to CSV, even after you leave a ledger. Never locked in.',
       },
       forever: {
         title: 'Free forever',
@@ -2421,7 +2421,7 @@ export const en: Translations = {
       featCsvExport: 'CSV export',
       featCloudSync: 'Cloud sync',
       featRealtimeCloudSync: 'Real-time cloud sync',
-      featDataExport: 'Take your data with you',
+      featDataExport: 'Data export',
       featCrossPlatform: 'Cross-platform',
       featDailyEntries: 'Entries per day',
       verdictSupported: 'Supported',
@@ -2443,7 +2443,7 @@ export const en: Translations = {
       verdictUnlimited: 'Unlimited',
       verdictBuiltInConversion: 'Built-in conversion',
       verdictSpreadsheetExport: 'Spreadsheet export',
-      verdictCsvExport: 'CSV export',
+      verdictCsvExport: 'CSV: expenses, income, settlements',
       verdictPlatforms: 'iOS / Android / Web',
     },
     howToStepName: 'Step {n}',
@@ -2456,7 +2456,7 @@ export const en: Translations = {
         },
         {
           title: 'Yours to take back',
-          body: 'Export the whole ledger as CSV any time. Moving in is not a lock-in.',
+          body: 'Export your expenses, income and settlements as CSV any time. Moving in is not a lock-in.',
         },
         {
           title: 'Free for the long haul',
@@ -2849,7 +2849,7 @@ I will upload the screenshots once you confirm.`,
         differentiators: [
           {
             title: 'Free to bring data in, free to take it out',
-            body: 'Exporting records to CSV in Manebo requires a Premium subscription; Futari never charges for import or export — your records are always yours to take.',
+            body: 'Exporting records to CSV in Manebo requires a Premium subscription; Futari never charges for import or export, and your expenses, income and settlements are always yours to take.',
           },
           {
             title: 'Splitting and settling built in',
@@ -2902,7 +2902,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             title: 'Data moves freely, in and out',
-            body: 'In Simple Daily Money, CSV export is a VIP feature; in Futari, both import and export are free — the records are always yours.',
+            body: 'In Simple Daily Money, CSV export is a VIP feature; in Futari, both import and export are free, and your expenses, income and settlements can be exported any time.',
           },
         ],
         stepsHeading: 'Three steps',
@@ -2955,7 +2955,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             title: 'Data moves freely, in and out',
-            body: "In Futari, export needs no subscription and the file is standard UTF-8 CSV; whenever you want to leave, you can take it with you.",
+            body: "In Futari, export needs no subscription: your expenses, income and settlements come out as standard UTF-8 CSV, ready to take with you whenever you leave.",
           },
         ],
         stepsHeading: 'Three steps',
@@ -2999,7 +2999,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             title: 'Synced and yours to take',
-            body: 'Records live in the cloud, so a new phone loses nothing; export to CSV whenever you want to leave.',
+            body: 'Records live in the cloud, so a new phone loses nothing; when you want to leave, export your expenses, income and settlements to CSV.',
           },
         ],
         stepsHeading: 'Three steps',

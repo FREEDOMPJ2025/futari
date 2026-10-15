@@ -3418,7 +3418,7 @@ export const zhTW: Translations = {
       s6Body: [
         '這個擔心很合理。Honeydue 這幾年慢慢式微，Spendee 曾經讓用戶的資料憑空消失——如果你被這些事嚇過，你的警覺是對的。',
         'Futari 是我自己每天在用的工具，這是最直接的「有人在維護」的證明。不是說它永遠不會出問題，而是說背後有一個真實的人在意它能不能用。',
-        '資料方面，Futari 支援 CSV 匯出。任何時候你想把資料帶走，都可以。我不想用「我們不會消失」這種話來說服你，但我可以告訴你：你的資料不會被綁住。',
+        '資料方面，Futari 支援 CSV 匯出：支出、進帳和結算，任何時候想帶走都可以，離開帳本之後也行。我不想用「我們不會消失」這種話來說服你，但我可以告訴你：這些紀錄不會被綁住。',
       ],
       s7Heading: 'Futari 是什麼，也是什麼不是',
       s7Body: [
@@ -3477,7 +3477,7 @@ export const zhTW: Translations = {
       },
       portability: {
         title: '隨時帶走',
-        body: 'CSV 匯出，資料永遠是你的。想離開時不會被綁在這裡。',
+        body: '支出、進帳和結算都能匯出成 CSV，離開帳本之後也可以。想離開時不會被綁在這裡。',
       },
       forever: {
         title: '永久免費',
@@ -5765,7 +5765,7 @@ export const zhTW: Translations = {
       featCsvExport: 'CSV 資料匯出',
       featCloudSync: '雲端同步',
       featRealtimeCloudSync: '即時雲端同步',
-      featDataExport: '資料匯出帶走',
+      featDataExport: '資料匯出',
       featCrossPlatform: '跨平台',
       featDailyEntries: '每日記帳筆數',
       verdictSupported: '支援',
@@ -5787,7 +5787,7 @@ export const zhTW: Translations = {
       verdictUnlimited: '不限',
       verdictBuiltInConversion: '內建換算',
       verdictSpreadsheetExport: '試算表匯出',
-      verdictCsvExport: 'CSV 匯出',
+      verdictCsvExport: 'CSV：支出、進帳、結算',
       verdictPlatforms: 'iOS／Android／Web',
     },
     howToStepName: '步驟 {n}',
@@ -5800,7 +5800,7 @@ export const zhTW: Translations = {
         },
         {
           title: '隨時可以帶走',
-          body: '不喜歡的話，整本帳隨時匯出 CSV，搬家不是綁約的起點。',
+          body: '不喜歡的話，支出、進帳和結算隨時能匯出 CSV，搬家不是綁約的起點。',
         },
         {
           title: '免費長期使用',
@@ -6174,7 +6174,7 @@ export const zhTW: Translations = {
         differentiators: [
           {
             title: '資料進出都免費',
-            body: '在 Manebo，把記錄匯出成 CSV 需要 Premium 訂閱；Futari 的匯入與匯出都不收費，記錄永遠帶得走。',
+            body: '在 Manebo，把記錄匯出成 CSV 需要 Premium 訂閱；Futari 的匯入與匯出都不收費，支出、進帳和結算隨時帶得走。',
           },
           {
             title: '分攤與結算內建',
@@ -6224,7 +6224,7 @@ export const zhTW: Translations = {
           },
           {
             title: '資料自由進出',
-            body: '在簡單記帳，CSV 匯出是 VIP 功能；Futari 的匯入與匯出都免費，記錄永遠是你們的。',
+            body: '在簡單記帳，CSV 匯出是 VIP 功能；Futari 的匯入與匯出都免費，支出、進帳和結算隨時能匯出。',
           },
         ],
         stepsHeading: '搬遷三步',
@@ -6270,7 +6270,7 @@ export const zhTW: Translations = {
           },
           {
             title: '資料自由進出',
-            body: '在 Futari，匯出不需要訂閱，檔案是標準 UTF-8 CSV；哪天想離開，也一樣帶得走。',
+            body: '在 Futari，匯出不需要訂閱，支出、進帳和結算是標準 UTF-8 CSV；哪天想離開，也一樣帶得走。',
           },
         ],
         stepsHeading: '搬遷三步',
@@ -6311,7 +6311,7 @@ export const zhTW: Translations = {
           },
           {
             title: '雲端同步、隨時帶走',
-            body: '記錄存在雲端，換手機不怕不見；想離開時 CSV 匯出，資料是你們的。',
+            body: '記錄存在雲端，換手機不怕不見；想離開時，支出、進帳和結算都能匯出 CSV 帶走。',
           },
         ],
         stepsHeading: '搬遷三步',

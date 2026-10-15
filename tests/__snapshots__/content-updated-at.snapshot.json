@@ -25,36 +25,36 @@
       "contentUpdatedAt": "2026-10-03"
     },
     "manebo": {
-      "contentHash": "2b813a05d429fd9e143784b783d8c4eda55d87183b10d3e9f9e400af72941215",
-      "contentUpdatedAt": "2026-10-09"
+      "contentHash": "eeda82819f42e110ea71af2ebb00a577249042bbeb9190de82f35e0be60072ac",
+      "contentUpdatedAt": "2026-10-15"
     },
     "simple-daily-money": {
-      "contentHash": "694c5ee8b23b3e874fb90db1e765371c66c991846bbb741b3a1d224e8be2b661",
-      "contentUpdatedAt": "2026-10-03"
+      "contentHash": "7792268a5a85ccf907dae9f5a7ab4e5402f76f3aaa7abd1c94af88dcfa2a64f8",
+      "contentUpdatedAt": "2026-10-15"
     },
     "fortune-city": {
-      "contentHash": "cb0b4072eb253e35a96d6feaf784b201711ad03612194df96316401aa90f90e4",
-      "contentUpdatedAt": "2026-10-03"
+      "contentHash": "35ebda4d92d597a48c9d8ceb99cf6b59e0ad034c493464bfdcce72ff5cb19d20",
+      "contentUpdatedAt": "2026-10-15"
     },
     "cashman": {
-      "contentHash": "5b7c032338b85229c5dc70575b69f67eb4af799ffb705aebad23d759dc79cbbd",
-      "contentUpdatedAt": "2026-10-03"
+      "contentHash": "29a16153d182d6c4ba60ed0ec24076e990c9cf2814cecced1ad40f3f68208eff",
+      "contentUpdatedAt": "2026-10-15"
     },
     "1money": {
-      "contentHash": "3e998d8f7c63b54a281793d6c07c5d2e1b55c83006cd51bff52e945de0beb05c",
-      "contentUpdatedAt": "2026-10-03"
+      "contentHash": "5b6bded1f6ea58341f6995576dfaa31c3a6ad187e55847e95dfdd91c430bdcaa",
+      "contentUpdatedAt": "2026-10-15"
     },
     "icost": {
-      "contentHash": "7026566e8235d39bdfddc8b7d8cfb40c9ff2f87dc6593121feacb9d22c99e577",
-      "contentUpdatedAt": "2026-10-03"
+      "contentHash": "e719f97e9b5489ab127836bf26963f8b84c17228daf1859289075468ad8bbead",
+      "contentUpdatedAt": "2026-10-15"
     },
     "splitwise": {
-      "contentHash": "ad14b5ea9f1894b62a7b92e404e0694ad95fbf35bb4091ce538ee714a6dc3b9b",
-      "contentUpdatedAt": "2026-10-09"
+      "contentHash": "c785577c079828b740c403fece3a8e4188c1e7cfcf117a34ba384a87e55c9b60",
+      "contentUpdatedAt": "2026-10-15"
     },
     "suishouji": {
-      "contentHash": "08e130ac4901692b9266d3317391f62e9099361a7899f6d846ec68fe30f16864",
-      "contentUpdatedAt": "2026-10-09"
+      "contentHash": "f4b60e6397a64b1cc3a922002ba017a67769a64d76a29fa9f86f0fd4117f5de4",
+      "contentUpdatedAt": "2026-10-15"
     }
   },
   "useCases": {
