@@ -2073,7 +2073,7 @@ export const zhCN: Translations = {
 
   termsPage: {
     heading: '服务条款',
-    lastUpdated: '最后更新：2026 年 9 月 16 日',
+    lastUpdated: '最后更新：2026 年 10 月 15 日',
     intro: '使用 Futari（以下简称「本服务」）即表示您同意以下条款。请在使用前详阅。',
     bullets: [
       '本服务提供双人共用记账功能，包含交易记录、结算与共同财物管理。所有结算结果仅供用户自行参考，本服务不对其正确性负责。',
@@ -2093,7 +2093,7 @@ export const zhCN: Translations = {
 
   privacyPage: {
     heading: '隐私权政策',
-    lastUpdated: '最后更新：2026 年 10 月 4 日',
+    lastUpdated: '最后更新：2026 年 10 月 15 日',
     intro: '本页说明 Futari 如何收集、使用与保护您的个人数据。',
     sectionCollectTitle: '收集的数据',
     sectionCollectItems: [
