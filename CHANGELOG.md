@@ -41,7 +41,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
-_Nothing unreleased yet._
+### 技術變更
+
+- **出遊漏斗補上建立與分享兩個事件（#1723）**
+  技術：`createOuting` 成功後 server 發 `outing_created`（與 `signed_up`／`setup_completed` 同一個 distinct_id），複製連結成功後 client 發 `outing_link_shared`（只帶 `method`），都不帶出遊 id、名稱、token 或網址；分享頁事件 0 筆查證為沒有訪客、不是沒送出。
 
 ## [1.7.3] - 2026-10-15
 

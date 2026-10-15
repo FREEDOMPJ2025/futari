@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from '@/lib/i18n/client'
 import { unwrapAction } from '@/lib/action-errors'
 import { describeError } from '@/lib/errors'
 import { getOutingShareLink, resetOutingShareLink } from '@/actions/outing'
+import { trackOutingLinkShared } from '@/lib/analytics/outingEvents'
 
 /** `<origin>/<locale>/outing/<token>` — the public join page (S3). */
 export function outingShareUrl(origin: string, locale: string, token: string): string {
@@ -74,6 +75,9 @@ export function ShareLinkCard({ outingId }: { outingId: string }) {
       try {
         await copyP
         setNote('copied')
+        // Only a copy that worked: on copyFailed the URL is on screen, but
+        // whether it gets selected and sent is not something we can see.
+        trackOutingLinkShared('copy')
       } catch {
         setNote('copyFailed')
       }

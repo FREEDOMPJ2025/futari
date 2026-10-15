@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-10-07
+last_updated: 2026-10-15
 status: shipped
 first_shipped_in: v1.2.0
 updates:
@@ -15,8 +15,9 @@ updates:
   - v1.7.0: 補「`invite_revoked` 只在真的讓一條有效連結失效時才發」這條邊界（#1546）
   - v1.7.0: 補「`android_beta_invite_*` 是新測量點、基準從部署日重算」這條邊界（#1553）
   - v1.7.2: 補「`android_beta_step_clicked`、`tester_feedback_clicked`、`android_beta_outing_link_clicked`、`android_beta_share_clicked` 是新測量點，`android_beta_invite_clicked` 的語意改變」這條邊界（#1648）
+  - v1.7.4: 補「`outing_created`、`outing_link_shared` 是新測量點；出遊分享頁事件 0 筆是沒有訪客、不是沒送出；出遊漏斗在分享那一步換人」這條邊界（#1723）
 related_specs: [conversion-analytics, product]
-related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", "#1415", "#1453", "#1552", "#1546", "#1553", "#1648"]
+related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", "#1415", "#1453", "#1552", "#1546", "#1553", "#1648", "#1723"]
 ---
 
 # 觀測的邊界與讀數據的紀律
@@ -107,3 +108,7 @@ related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", 
 
 - **`android_beta_outing_link_clicked` 與 `android_beta_share_clicked`（#1648）是兩個招募入口的新測量點，基準從部署日起算。** 前者在出遊分享頁底部那行「Android 正在測試」連結被點時發，沒有屬性，只有 Android 瀏覽器訪客看得到（iPhone、桌面、任何殼內都不顯示）；連結只帶語系路徑，不帶分享 token，事件也不帶任何 URL 內容。後者在「設定」裡「邀請用 Android 的伴侶或朋友來測試」那一列分享成功時發，屬性 `method` 固定為 `share`（系統分享面板，使用者沒取消）或 `copy`（沒有分享面板或分享失敗後改複製連結）；使用者取消分享不發事件，iOS 殼內該列隱藏（Apple 2.3.10）。兩者都是暫時的，與 #1553 一起移除。
   - **失效的樣子**：`android_beta_share_clicked` 的 `method=copy` 占多數不代表使用者偏好複製，Android 殼的 WebView 沒有 Web Share API，殼內一律走複製。出遊連結點擊數為 0 不代表沒人看到，可能是訪客用的不是 Android 瀏覽器；更糟的是這條連結若被改成帶 `from=` 或沿用分享頁網址，出遊分享 token 會靜默進到 /android-beta 的 referrer 或 PostHog，沒有任何錯誤。這兩個入口帶來的人，在 `/android-beta` 的 `android_beta_step_clicked` 上沒有來源欄位可區分（刻意不加 `from=`），要看成效只能比對事件時間與點擊數。
+
+- **`outing_created` 與 `outing_link_shared`（#1723）是出遊漏斗的新測量點，基準從部署日起算。** `outing_created` 由 server 在 `createOuting` 成功後發（`captureServer`，distinct_id 是使用者 id），沒有屬性；放 server 是為了跟同樣在 server、以使用者 id 為 key 的 `signed_up`、`setup_completed` 串成同一個人的漏斗。`outing_link_shared` 在出遊頁「複製連結」真的寫進剪貼簿後由 client 發，屬性只有 `method`：`copy`（現在唯一的入口）、`share`（系統分享面板，使用者沒取消）、`qr`（顯示 QR 給人掃）；後兩種等 #1727 的入口上線才會出現。兩者都不帶出遊 id、名稱、分享 token 或任何 URL 內容；重設連結不算分享，剪貼簿失敗也不發。
+  - **出遊分享頁的事件 0 筆，是沒有訪客，不是沒送出（2026-10-15 查證）。** v1.7.0（10-08）上線到 10-15，PostHog 在 `/<locale>/outing/*` 上連無條件發送的 `$pageview` 都是 0，但同期 `/outings` 儀表板頁有 18 筆 pageview（iOS 殼），代表 PostHog 本身正常。以 production build（`VERCEL_ENV=production`）接 DEV 資料庫、在 headless 瀏覽器開分享頁，`outing_link_opened` 與 `$pageview` 都有送出，token 在 `$current_url`／`$pathname`／`$session_entry_url` 都被換成 `:token`（請求在瀏覽器端攔下，沒有進 PostHog）。分享連結也沒有 universal link，一定是在瀏覽器開。所以 prod 那 2 次出遊的參與者沒有人是開分享頁進來的（推論自分享頁 0 個 pageview；沒有查 prod 資料庫）。
+  - **失效的樣子**：漏斗在 `outing_link_shared` → `outing_joined` 這一步**換人**：前者是成員，後者是朋友，兩人沒有共同的 distinct_id，事件也刻意不帶出遊 id，所以這一步只能比次數、算不出逐人轉換率；用 PostHog funnel 硬串會靜默回 0。`outing_link_shared` 是 client 事件，每次載入頁面一個匿名 id，跟 server 的 `outing_created` 也串不起來（見本檔第一條）——`outing_created` → `outing_link_shared` 同樣只能比次數。`outing_link_shared` 只量到「連結離開了 App」，量不到有沒有真的貼給朋友；剪貼簿失敗時畫面上仍有網址可以手動選取，那種分享不會被記到。
