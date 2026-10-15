@@ -108,7 +108,7 @@ export const zhCN: Translations = {
       },
       portability: {
         title: '随时带走',
-        body: '支出、进账和结算都能导出成 CSV，离开账本之后也可以。想离开时不会被绑在这里。',
+        body: '支出、进账和结算都能导出成 CSV，离开账本之后也可以，不会被绑在这里。',
       },
       forever: {
         title: '永久免费',
@@ -2904,7 +2904,7 @@ export const zhCN: Translations = {
           },
           {
             title: '数据自由进出',
-            body: '在 Futari，导出不需要订阅，支出、进账和结算是标准 UTF-8 CSV；哪天想离开，也一样带得走。',
+            body: '在 Futari，导出不需要订阅，支出、进账和结算会导出成标准 UTF-8 CSV；哪天想离开，也一样带得走。',
           },
         ],
         stepsHeading: '搬迁三步',

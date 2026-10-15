@@ -3477,7 +3477,7 @@ export const zhTW: Translations = {
       },
       portability: {
         title: '隨時帶走',
-        body: '支出、進帳和結算都能匯出成 CSV，離開帳本之後也可以。想離開時不會被綁在這裡。',
+        body: '支出、進帳和結算都能匯出成 CSV，離開帳本之後也可以，不會被綁在這裡。',
       },
       forever: {
         title: '永久免費',
@@ -6270,7 +6270,7 @@ export const zhTW: Translations = {
           },
           {
             title: '資料自由進出',
-            body: '在 Futari，匯出不需要訂閱，支出、進帳和結算是標準 UTF-8 CSV；哪天想離開，也一樣帶得走。',
+            body: '在 Futari，匯出不需要訂閱，支出、進帳和結算會匯出成標準 UTF-8 CSV；哪天想離開，也一樣帶得走。',
           },
         ],
         stepsHeading: '搬遷三步',

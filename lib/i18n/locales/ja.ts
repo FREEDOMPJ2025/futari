@@ -111,7 +111,7 @@ export const ja: Translations = {
       },
       portability: {
         title: 'いつでも持ち出せる',
-        body: '支出・収入・精算を CSV で書き出せます。家計簿を離れたあとも同じです。囲い込みはしません。',
+        body: '支出・収入・精算を CSV で書き出せます。家計簿を離れたあとも同じです。',
       },
       forever: {
         title: 'ずっと無料',

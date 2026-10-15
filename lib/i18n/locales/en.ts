@@ -110,7 +110,7 @@ export const en: Translations = {
       },
       portability: {
         title: 'Take it with you',
-        body: 'Export your expenses, income and settlements to CSV, even after you leave a ledger. Never locked in.',
+        body: 'Export your expenses, income and settlements to CSV, even after you leave a ledger.',
       },
       forever: {
         title: 'Free forever',
@@ -2456,7 +2456,7 @@ export const en: Translations = {
         },
         {
           title: 'Yours to take back',
-          body: 'Export your expenses, income and settlements as CSV any time. Moving in is not a lock-in.',
+          body: "Export your expenses, income and settlements as CSV any time. Moving here doesn't lock you in.",
         },
         {
           title: 'Free for the long haul',
@@ -2999,7 +2999,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             title: 'Synced and yours to take',
-            body: 'Records live in the cloud, so a new phone loses nothing; when you want to leave, export your expenses, income and settlements to CSV.',
+            body: 'Records live in the cloud, so switching phones loses nothing. When you want to leave, export your expenses, income and settlements to CSV.',
           },
         ],
         stepsHeading: 'Three steps',
