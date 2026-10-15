@@ -501,7 +501,7 @@ export const en: Translations = {
     pending: 'Working…',
     title: 'Delete your account?',
     description:
-      "We'll remove your data after 14 days. You can come back and cancel any time before then. If you share a ledger, your partner's records stay, and your name will show as “a partner who left”.",
+      "We'll remove your data after 14 days. You can come back and cancel any time before then. The records you wrote together stay with your partner, including a past shared chapter if they have already left, and your name will show as “a partner who left”.",
   },
 
   accountDeletionBanner: {
@@ -1019,7 +1019,7 @@ export const en: Translations = {
             'Any pending invite links to this ledger become invalid',
             'The original ledger reverts to solo mode, kept by {memberA}',
           ],
-          exportHint: 'After you leave, you can still export this chapter\'s expenses, income and settlements from the Your data page. If your partner later deletes their account, this chapter may be deleted with it, so export now if you want to be sure you keep a copy.',
+          exportHint: 'After you leave, you can still export this chapter\'s expenses, income and settlements from the Your data page. You can also export now if you want a copy of your own.',
           exportCta: 'Export expenses, income and settlements first',
         },
         card4: {
@@ -2095,7 +2095,7 @@ export const en: Translations = {
       'Your data belongs to you. The Service uses your data solely to display your ledger and calculate balances — it will never be sold or shared with third parties.',
       'Please do not record highly sensitive personal information (such as national ID numbers or credit card numbers). The Service is designed for budgeting, not confidential document storage.',
       'By signing in with Google, you agree that Google will share your basic account information (name, avatar, email) with the Service for account identification purposes.',
-      'You may sign out or delete your account at any time from the settings page. A deletion request has a 14-day grace period and can be cancelled during it. After that, a solo ledger is deleted in full, while a ledger shared with a partner stays with them — the records the two of you wrote together are not removed. See “Data retention” in the privacy policy for details.',
+      'You may sign out or delete your account at any time from the settings page. A deletion request has a 14-day grace period and can be cancelled during it. After that, the records you wrote on your own are deleted. A ledger shared with a partner stays with them, and so does a past shared chapter whose other person has since left — the records the two of you wrote together are not removed. See “Data retention” in the privacy policy for details.',
       'The Service reserves the right to suspend or adjust the Service for maintenance, security, or system requirements, and will provide advance notice where possible.',
       'These Terms are governed by the laws of the Republic of China (Taiwan). Any disputes shall be submitted to the Taipei District Court as the court of first instance.',
     ],
@@ -2129,7 +2129,7 @@ export const en: Translations = {
     sectionRetentionTitle: 'Data retention',
     sectionRetentionBody: 'Your account data is retained for as long as your account remains active. Transactions you delete are kept as soft-deleted records for about a year, then cleared automatically. When you request account deletion from the settings page there is a 14-day grace period (calendar days, not business days) during which you can cancel at any time; after that it runs automatically. What happens then depends on whether the ledger is yours alone or shared with a partner:',
     sectionRetentionItems: [
-      'A solo ledger: the whole ledger goes — transactions, settlements, recurring rules, aibutsu and trip records are all removed, along with your profile (name, avatar, email). If this ledger was once shared and your partner has since left, the records of your time together are deleted with it, and they can no longer look back at them.',
+      'A solo ledger: the transactions, settlements, recurring rules, aibutsu and trip records you wrote on your own are all deleted, along with your profile (name, avatar, email). If this ledger was once shared and your partner has since left, the records of your time together stay so they can look back at them, and your name appears as “a partner who left”. Once they delete their account too, those records are deleted with it.',
       "A shared ledger: the ledger stays with your partner. The transactions, settlements, aibutsu records and monthly review notes the two of you wrote together remain in their ledger; we do not remove them on your behalf, because those records are theirs as well. Your sign-in identity is deleted (Google / Apple account link, email, avatar, push devices), and your name appears in their ledger as “a partner who left”. The same applies to a ledger you left earlier: the records you wrote during that time stay in your partner's ledger.",
       'If you would like the content in a shared ledger removed as well, talk it over with your partner before deleting your account, or write to us first.',
       'Data you delete (including what is removed when you delete your account) can remain in encrypted backups made before the deletion for up to about 60 days, and disappears as those backups are cleared. We do not use backups to bring it back; backups are only used if the whole service has to be restored, and in that case we apply those deletions again.',
