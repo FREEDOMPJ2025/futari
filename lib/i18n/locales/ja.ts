@@ -2089,7 +2089,7 @@ export const ja: Translations = {
 
   termsPage: {
     heading: '利用規約',
-    lastUpdated: '最終更新：2026年9月16日',
+    lastUpdated: '最終更新：2026年10月15日',
     intro: 'Futari（以下「本サービス」）をご利用になることで、以下の規約に同意したものとみなされます。ご利用前にお読みください。',
     bullets: [
       '本サービスはふたり専用の家計管理機能を提供します（取引記録、精算、共有資産の管理を含む）。すべての精算結果はご自身の参考用であり、本サービスはその正確性について責任を負いません。',
@@ -2109,7 +2109,7 @@ export const ja: Translations = {
 
   privacyPage: {
     heading: 'プライバシーポリシー',
-    lastUpdated: '最終更新：2026年10月4日',
+    lastUpdated: '最終更新：2026年10月15日',
     intro: '本ページは、Futari が個人データをどのように収集・使用・保護するかについて説明します。',
     sectionCollectTitle: '収集するデータ',
     sectionCollectItems: [

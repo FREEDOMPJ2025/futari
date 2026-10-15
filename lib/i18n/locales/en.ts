@@ -2088,7 +2088,7 @@ export const en: Translations = {
 
   termsPage: {
     heading: 'Terms of Service',
-    lastUpdated: 'Last updated: September 16, 2026',
+    lastUpdated: 'Last updated: October 15, 2026',
     intro: 'By using Futari (the "Service"), you agree to the following terms. Please read them before using the Service.',
     bullets: [
       'The Service provides a shared expense tracker for two people, including transaction records, settlements, and shared asset management. All settlement results are for your own reference; the Service is not responsible for their accuracy.',
@@ -2108,7 +2108,7 @@ export const en: Translations = {
 
   privacyPage: {
     heading: 'Privacy Policy',
-    lastUpdated: 'Last updated: October 4, 2026',
+    lastUpdated: 'Last updated: October 15, 2026',
     intro: 'This page explains how Futari collects, uses, and protects your personal data.',
     sectionCollectTitle: 'Data we collect',
     sectionCollectItems: [

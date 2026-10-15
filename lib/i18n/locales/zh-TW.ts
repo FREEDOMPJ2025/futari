@@ -5446,7 +5446,7 @@ export const zhTW: Translations = {
 
   termsPage: {
     heading: '服務條款',
-    lastUpdated: '最後更新：2026 年 9 月 16 日',
+    lastUpdated: '最後更新：2026 年 10 月 15 日',
     intro: '使用 Futari（以下簡稱「本服務」）即表示您同意以下條款。請在使用前詳閱。',
     bullets: [
       '本服務提供雙人共用記帳功能，包含交易紀錄、結算與共同財物管理。所有結算結果僅供使用者自行參考，本服務不對其正確性負責。',
@@ -5466,7 +5466,7 @@ export const zhTW: Translations = {
 
   privacyPage: {
     heading: '隱私權政策',
-    lastUpdated: '最後更新：2026 年 10 月 4 日',
+    lastUpdated: '最後更新：2026 年 10 月 15 日',
     intro: '本頁說明 Futari 如何蒐集、使用與保護您的個人資料。',
     sectionCollectTitle: '蒐集的資料',
     sectionCollectItems: [
