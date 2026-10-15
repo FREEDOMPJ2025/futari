@@ -8,6 +8,7 @@ import { andClause, cursorClause, epochClause, frozenCopyVisibleClause } from '.
 import type { AssetType } from '@/lib/assets'
 import type { FuelType } from '@/lib/fuel'
 import type { CurrencyCode } from '@/lib/currency'
+import { isUuid } from '@/lib/outing/validate'
 
 const policyHolderProfile = alias(profiles, 'policy_holder_profile')
 const insuredUserProfile = alias(profiles, 'insured_user_profile')
@@ -231,6 +232,10 @@ export async function getDrillAssetName(
  * #1484 — a frozen copy resolves only for `viewerId` if they were a member of
  * its ledger at the freeze moment; otherwise null, like an asset of another
  * ledger. Same for the insured child's name.
+ *
+ * #1700 — an id that is not a uuid resolves to null without a query. It comes
+ * straight from the URL on /assets/[id]; Postgres would refuse the uuid cast
+ * and the page would 500 instead of 404.
  */
 export async function getAssetById(
   id: string,
@@ -238,6 +243,7 @@ export async function getAssetById(
   viewerId: string,
   createdBefore: Date | null = null,
 ): Promise<AssetWithCar | null> {
+  if (!isUuid(id)) return null
   const rows = await db
     .select({
       id: assets.id,

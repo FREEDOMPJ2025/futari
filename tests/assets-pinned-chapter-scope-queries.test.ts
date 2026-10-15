@@ -15,6 +15,8 @@ import { listRulesForAsset } from '@/lib/db/queries/recurringIncome'
 
 const dialect = new PgDialect()
 const CUTOFF = new Date('2026-06-15T00:00:00Z')
+// getAssetById resolves a non-uuid to null without a query (#1700).
+const ASSET_ID = '00000000-0000-4000-8000-000000000001'
 
 function lastWhere(): { sql: string; params: unknown[] } {
   const calls = mockBuilder.where.mock.calls
@@ -33,7 +35,7 @@ describe('with a cut-off', () => {
   })
 
   it('getAssetById resolves nothing created at or after it', async () => {
-    await getAssetById('a1', 'g1', 'u1', CUTOFF)
+    await getAssetById(ASSET_ID, 'g1', 'u1', CUTOFF)
     const { sql, params } = lastWhere()
     expect(sql).toContain('"Assets"."created_at" < $')
     expect(params).toContain(CUTOFF.toISOString())
@@ -51,7 +53,7 @@ describe('without a cut-off (current members)', () => {
   it.each([
     ['listAssetsForGroup', () => listAssetsForGroup('g1', 'u1')],
     ['listAssetsForGroup(null)', () => listAssetsForGroup('g1', 'u1', null)],
-    ['getAssetById', () => getAssetById('a1', 'g1', 'u1')],
+    ['getAssetById', () => getAssetById(ASSET_ID, 'g1', 'u1')],
     ['listRulesForAsset', () => listRulesForAsset('g1', 'a1')],
   ])('%s adds no created_at predicate', async (_name, run) => {
     await run()

@@ -7,6 +7,8 @@ import {
   listTransactionsPagedForAsset,
 } from '@/lib/db/queries/asset'
 
+const ASSET_ID = '00000000-0000-4000-8000-000000000001'
+
 beforeEach(() => resetDbMocks())
 
 describe('listAssetsForGroup', () => {
@@ -49,14 +51,21 @@ describe('getAssetById', () => {
         purchasePrice: null,
       },
     ])
-    const row = await getAssetById('asset-1', 'grp-1', 'user-1')
+    const row = await getAssetById(ASSET_ID, 'grp-1', 'user-1')
     expect(row?.deletedAt).not.toBeNull()
   })
 
   it('returns null when not found', async () => {
     queueDbResult([])
-    const row = await getAssetById('missing', 'grp-1', 'user-1')
+    const row = await getAssetById('00000000-0000-4000-8000-0000000000ff', 'grp-1', 'user-1')
     expect(row).toBeNull()
+  })
+
+  // #1700 — the id comes from the URL; a non-uuid would fail Postgres's uuid
+  // cast (500). It resolves to null with no query, so the page 404s.
+  it.each(['not-a-uuid', '123', "x'; select 1; --"])('returns null for %s without a query', async (id) => {
+    expect(await getAssetById(id, 'grp-1', 'user-1')).toBeNull()
+    expect(mockDb.select).not.toHaveBeenCalled()
   })
 })
 
