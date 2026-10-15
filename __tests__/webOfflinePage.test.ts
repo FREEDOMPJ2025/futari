@@ -166,8 +166,8 @@ describe('generator: page hash → worker bytes and cache name (#1674)', () => {
     expect(k.worker).not.toBe(buildOfflineBasic('basic').worker)
   })
 
-  it('the committed mode is basic', () => {
-    expect(SW_BASIC_MODE).toBe('basic')
+  it('the committed mode is kill (rollback of #1674)', () => {
+    expect(SW_BASIC_MODE).toBe('kill')
   })
 
   it('CSP hashes are the hashes of the inline scripts actually in the page', () => {

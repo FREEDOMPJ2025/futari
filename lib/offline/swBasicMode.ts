@@ -20,4 +20,4 @@
 
 export type SwBasicMode = 'basic' | 'kill'
 
-export const SW_BASIC_MODE: SwBasicMode = 'basic'
+export const SW_BASIC_MODE: SwBasicMode = 'kill'
