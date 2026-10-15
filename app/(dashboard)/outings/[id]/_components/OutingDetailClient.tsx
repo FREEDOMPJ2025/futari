@@ -47,6 +47,14 @@ interface Props {
   view: Omit<OutingView, 'participants'> & { participants: Omit<OutingView['participants'][number], 'profileId'>[] }
   /** Signed fold the end would write; 0 unless the outing is active and in the current chapter. */
   foldPreview: number
+  /**
+   * The viewer may administer and write (#1698): a member, outing in the open
+   * chapter, not pinned to a past one. False hides every control the server
+   * would refuse; a former member looking back gets false for both flags.
+   */
+  canManage: boolean
+  /** END is allowed: a member unpinned, or pinned to the outing's own chapter. */
+  canEnd: boolean
   expenses: OutingExpenseWithShares[]
   participants: OutingDetailParticipant[]
   settlements?: SettlementListItem[]
@@ -59,13 +67,14 @@ const DOT_HUES = [
   'var(--asset-color-pet)', 'var(--asset-color-plant)', 'var(--asset-color-insurance)',
 ]
 
-export function OutingDetailClient({ outing, view, foldPreview, expenses, participants, settlements = [] }: Props) {
+export function OutingDetailClient({ outing, view, foldPreview, canManage, canEnd, expenses, participants, settlements = [] }: Props) {
   const t = useTranslations()
   const to = t.outing
   const router = useRouter()
   const [sheet, setSheet] = useState<SheetKey>(null)
   const [editing, setEditing] = useState<OutingExpenseWithShares | null>(null)
   const active = outing.status === 'active'
+  const editable = active && canManage
   const close = () => { setSheet(null); setEditing(null) }
   const byId = useMemo(() => new Map(participants.map((p) => [p.id, p])), [participants])
   // Settle / add-person sheets offer only people still in the outing.
@@ -111,7 +120,7 @@ export function OutingDetailClient({ outing, view, foldPreview, expenses, partic
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <NetAmount net={p.net} currency={outing.currency} />
-                    {info && active && (
+                    {info && editable && (
                       <ParticipantActions
                         outingId={outing.id}
                         participant={{ id: p.id, displayName: p.displayName }}
@@ -162,7 +171,7 @@ export function OutingDetailClient({ outing, view, foldPreview, expenses, partic
                 <button
                   key={e.id}
                   type="button"
-                  disabled={!active}
+                  disabled={!editable}
                   onClick={() => { setEditing(e); setSheet('expense') }}
                   className="flex items-center justify-between gap-3 py-2.5 w-full text-left bg-transparent border-0 cursor-pointer disabled:cursor-default"
                   style={{ borderBottom: i === expenses.length - 1 ? 'none' : '1px solid var(--hairline)' }}
@@ -192,12 +201,12 @@ export function OutingDetailClient({ outing, view, foldPreview, expenses, partic
               currency={outing.currency}
               settlements={settlements}
               nameOf={nameOf}
-              canDelete={active}
+              canDelete={editable}
             />
           </Card>
         )}
 
-        {active && <ShareLinkCard outingId={outing.id} />}
+        {editable && <ShareLinkCard outingId={outing.id} />}
 
         {foldPreview !== 0 && (
           <p className="text-xs px-1 text-ink-3">
@@ -209,7 +218,7 @@ export function OutingDetailClient({ outing, view, foldPreview, expenses, partic
           <p className="text-sm px-1 text-ink-3">{to.endedNote}</p>
         )}
 
-        {active && (
+        {editable && (
           <div className="flex flex-col gap-2.5 pt-1">
             <Button variant="primary" onClick={() => setSheet('expense')}>{to.addExpense}</Button>
             <div className="flex gap-2.5">
@@ -218,12 +227,17 @@ export function OutingDetailClient({ outing, view, foldPreview, expenses, partic
             </div>
             <div className="flex gap-2.5">
               <Button variant="ghost" onClick={() => setSheet('rename')} className="flex-1">{to.rename}</Button>
-              <Button variant="ghost" onClick={() => setSheet('end')} className="flex-1">{to.endOuting}</Button>
+              {canEnd && <Button variant="ghost" onClick={() => setSheet('end')} className="flex-1">{to.endOuting}</Button>}
             </div>
           </div>
         )}
 
-        {!active && (
+        {/* A closed chapter's outing left active: END is the one way out (#1682 D2(a)). */}
+        {active && !canManage && canEnd && (
+          <Button variant="ghost" onClick={() => setSheet('end')}>{to.endOuting}</Button>
+        )}
+
+        {!active && canManage && (
           <Button variant="ghost" onClick={() => setSheet('rename')}>{to.rename}</Button>
         )}
       </div>

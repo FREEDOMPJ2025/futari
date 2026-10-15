@@ -645,6 +645,34 @@
       "when": 1784800000000,
       "tag": "0092_insurance_currency_not_null",
       "breakpoints": true
+    },
+    {
+      "idx": 93,
+      "version": "7",
+      "when": 1784900000000,
+      "tag": "0093_review_snapshot_chapter",
+      "breakpoints": true
+    },
+    {
+      "idx": 94,
+      "version": "7",
+      "when": 1785000000000,
+      "tag": "0094_deleted_rows_chapter_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "7",
+      "when": 1785100000000,
+      "tag": "0095_partner_quiz_epoch",
+      "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "7",
+      "when": 1785200000000,
+      "tag": "0096_deletion_keeps_shared_chapter",
+      "breakpoints": true
     }
   ]
 }

@@ -8,13 +8,14 @@ import { loadEnvLocal } from '../outing/_setup'
 // ─── 0077: compute_monthly_review_snapshot hardening (#1494) ───────────────
 //
 // LOCAL THROWAWAY DATABASE ONLY. This file commits the current function
-// (0089's since #1618 — 0077's hardening plus card 2 storing the payer id, never
-// a name) and swaps in 0061's for the control runs. It never leaves the
+// (0093's since #1621 — 0077's hardening, card 2 storing the payer id, never
+// a name (0089), and rows scoped to the containing chapter) and swaps in
+// 0061's for the control runs. It never leaves the
 // database on a body that writes names (0061 / 0077). It skips itself unless
 // DATABASE_URL points at localhost — never run it against dev or prod.
 //
 // Database: postgres:17 plus the Supabase stand-ins (see PR #1445's
-// description), then `drizzle-kit migrate` through 0089.
+// description), then `drizzle-kit migrate` through 0093.
 //
 //   DATABASE_URL=postgres://postgres:<pw>@localhost:<port>/postgres \
 //     npx vitest run __tests__/actions/monthlyReviewSnapshot0077.test.ts
@@ -51,9 +52,11 @@ const isLocalDb = (() => {
 const postgres = (await import('postgres')).default
 
 const migration = (file: string) => readFileSync(resolve(__dirname, '../../drizzle', file), 'utf-8')
-// #1618: the current definition is 0089's (0077's body; card 2 stores the
-// payer id and writes the name NULL). Every control run restores it.
-const FILE_CURRENT = migration('0089_review_payer_id.sql')
+// #1621: the current definition is 0093's (0089's body — card 2 stores the
+// payer id and writes the name NULL — plus the chapter scope). Every control
+// run restores it. These fixtures have no GroupEpochs rows, so 0093 leaves
+// their cards unfiltered, exactly as 0089 did.
+const FILE_CURRENT = migration('0093_review_snapshot_chapter.sql')
 const STATEMENTS_CURRENT = FILE_CURRENT.split('--> statement-breakpoint')
 const FN_CURRENT = STATEMENTS_CURRENT.find((s) => s.includes('CREATE OR REPLACE FUNCTION public.compute_monthly_review_snapshot'))!
 // 0061 has no breakpoints: take its CREATE OR REPLACE FUNCTION … $$; only
@@ -275,8 +278,8 @@ describe.skipIf(!isLocalDb)('0077 compute_monthly_review_snapshot hardening (#14
     expect(await proconfig()).toEqual(['search_path=public, pg_temp'])
   })
 
-  it('0077/0089: pinned search_path; EXECUTE only for postgres / service_role, also after re-applying 0089', async () => {
-    // Re-apply every 0089 statement (it carries 0077's SET / REVOKE / GRANT
+  it('0077/0093: pinned search_path; EXECUTE only for postgres / service_role, also after re-applying 0093', async () => {
+    // Re-apply every 0093 statement (it carries 0077's SET / REVOKE / GRANT
     // unchanged): CREATE OR REPLACE must keep the revoked
     // ACL (a DROP + CREATE would bring the default grants back).
     for (const stmt of STATEMENTS_CURRENT) await pg.unsafe(stmt)

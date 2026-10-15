@@ -38,6 +38,30 @@ export async function getTripById(id: string) {
   return t ?? null
 }
 
+/**
+ * #1614 — a trip as the viewer may read it: only inside the chapter being
+ * viewed. `groupId` / `epochId` must come from `resolveViewerEpochContext`
+ * (the open chapter, or a pinned chapter the viewer is named on, in a group
+ * they are still in). A trip of any other chapter — an earlier partner's,
+ * the stayer's solo one, another group's — is simply not found.
+ *
+ * Failure this prevents: no error. A partner who joined later opened an
+ * earlier chapter's trip by URL and saw the ex's amounts and notes.
+ */
+export async function getTripInChapter(id: string, groupId: string, epochId: string) {
+  const [t] = await db
+    .select()
+    .from(trips)
+    .where(and(
+      eq(trips.id, id),
+      eq(trips.groupId, groupId),
+      eq(trips.epochId, epochId),
+      isNull(trips.deletedAt),
+    ))
+    .limit(1)
+  return t ?? null
+}
+
 export async function hasActiveTrip(
   groupId: string,
   epochId: string,

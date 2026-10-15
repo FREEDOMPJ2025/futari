@@ -170,6 +170,10 @@ export async function proxy(request: NextRequest) {
     || pathname.startsWith('/auth/')
     || pathname.startsWith('/invite/')
     || pathname === '/offline'
+    // #1674: the web offline page's probe. Exact match, and checked before any
+    // getUser(): it must answer 204 while the session is dead or Supabase is
+    // down, and no prefix may ride along (`/api/ping/x` stays protected).
+    || pathname === '/api/ping'
 
   if (isPublic && isOutingPublicPath(pathname)) {
     // #1558: the outing share pages are public but read the session (a
@@ -231,7 +235,10 @@ export const config = {
   // files in /public. Without these exclusions: /sw.js + /manifest.* get 307'd
   // to /sign-in (PWA registration silently fails, MIME mismatch); robots.txt +
   // sitemap.xml get 307'd too, defeating SEO. See issues #305, #306, #575.
+  // #1674: the basic worker and its offline page, anchored with `$` so a
+  // look-alike (`/sw-basic.jsx`, `/offline-basic.html.bak`) still goes through
+  // the auth gate.
   matcher: [
-    '/((?!_next/static|_next/image|favicon\\.ico|icons/|sw\\.js|service-worker\\.js|manifest\\.(?:json|webmanifest)|robots\\.txt|sitemap\\.xml|llms\\.txt|llms-full\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|xlsx?)$).*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|icons/|sw\\.js|sw-basic\\.js$|offline-basic\\.html$|service-worker\\.js|manifest\\.(?:json|webmanifest)|robots\\.txt|sitemap\\.xml|llms\\.txt|llms-full\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|xlsx?)$).*)',
   ],
 }

@@ -40,7 +40,7 @@ const OPEN_EPOCH = {
   memberBId: 'user-b',
 }
 const CLOSED_EPOCH = {
-  id: 'epoch-old',
+  id: '7c9e6679-7425-40de-944b-e07fc1f90ae7',
   groupId: 'grp-1',
   startedAt: new Date('2025-01-01T00:00:00Z'),
   endedAt: new Date('2025-12-31T23:59:59Z'),
@@ -65,7 +65,7 @@ describe('getViewerWriteContext', () => {
   })
 
   it('throws 過去章節不可編輯 when pinned to a past epoch', async () => {
-    setCookie(PAST_EPOCH_COOKIE, 'epoch-old')
+    setCookie(PAST_EPOCH_COOKIE, '7c9e6679-7425-40de-944b-e07fc1f90ae7')
     queueDbResult([CLOSED_EPOCH])  // pinned epoch lookup
     queueDbResult([GROUP])         // group lookup for pinned epoch
 

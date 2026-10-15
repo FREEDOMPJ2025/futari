@@ -1,5 +1,5 @@
 import { getCurrentUser } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { listRatesForGroup } from '@/lib/db/queries/currencyRates'
 import { listActiveTrips } from '@/lib/db/queries/trips'
 import { currentEpochHasRecords, resolveViewerEpochContext } from '@/lib/db/queries/epoch'
@@ -13,6 +13,10 @@ export default async function CurrencySettingsPage() {
   if (!user) redirect('/sign-in')
   const context = await resolveViewerEpochContext(user.id)
   if (!context) redirect('/onboarding')
+  // #1612 — this page is the ledger's live settings (rates, ratio, whether
+  // the base currency is locked). A former member looking back at a ledger
+  // they left has nothing to read here.
+  if (context.isFormerMemberView) notFound()
   const { group, window: epochWindow } = context
 
   // Same question, same answer as the server action's guard — see

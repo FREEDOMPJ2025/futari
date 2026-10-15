@@ -10,6 +10,11 @@ import {
   type PrecacheEntry,
   type SerwistGlobalConfig,
 } from 'serwist'
+import {
+  buildDynamicCachePlugins,
+  DYNAMIC_CACHE,
+  STATIC_CACHE,
+} from '../lib/offline/swGate'
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -19,31 +24,26 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope
 
-const STATIC_CACHE = 'static-v1'
-const DYNAMIC_CACHE = 'dynamic-v1'
+// The `dynamic-v1` route is gated on the consent marker (#1673 S1.0): see
+// lib/offline/swGate.ts. The ExpirationPlugin instance is shared with the
+// post-check so a write that lost the race can be undone with its record.
+const dynamicExpiration = new ExpirationPlugin({
+  maxEntries: 50,
+  maxAgeSeconds: 60 * 60 * 24 * 7,
+})
+const dynamicPlugins = buildDynamicCachePlugins(dynamicExpiration)
 
-// Cache only successful, non-redirected, authenticated responses. Next.js
-// `redirect()` from a server component or proxy lands here as a followed
-// 3xx → response.redirected = true; this keeps a /sign-in body from being
-// stored under /dashboard.
-const onlyCacheSuccessfulHtml = {
-  cacheWillUpdate: async ({ response }: { response: Response }) => {
-    if (
-      response.status === 200 &&
-      !response.redirected &&
-      !response.url.includes('/sign-in') &&
-      !response.url.includes('/setup') &&
-      !response.url.includes('/onboarding')
-    ) {
-      return response
-    }
-    return null
-  },
-}
+// #1674: `prebuild` writes the basic worker's files into public/, so Serwist's
+// public scan lists them. The full worker doesn't need them; keep its precache
+// what it was before the basic worker existed.
+const BASIC_WORKER_FILES = new Set(['/sw-basic.js', '/offline-basic.html'])
+const manifest = ((self.__SW_MANIFEST ?? []) as (PrecacheEntry | string)[]).filter(
+  (e) => !BASIC_WORKER_FILES.has(typeof e === 'string' ? e : e.url),
+)
 
 const serwist = new Serwist({
   precacheEntries: [
-    ...((self.__SW_MANIFEST ?? []) as (PrecacheEntry | string)[]),
+    ...manifest,
     // /offline is a Next.js route (not in public/), so it must be listed
     // explicitly with a revision. Everything in public/ is already in
     // __SW_MANIFEST with a revision hash — adding them again as plain strings
@@ -79,13 +79,7 @@ const serwist = new Serwist({
       handler: new NetworkFirst({
         cacheName: DYNAMIC_CACHE,
         networkTimeoutSeconds: 3,
-        plugins: [
-          onlyCacheSuccessfulHtml,
-          new ExpirationPlugin({
-            maxEntries: 50,
-            maxAgeSeconds: 60 * 60 * 24 * 7,
-          }),
-        ],
+        plugins: dynamicPlugins,
       }),
     },
     // Same-origin static assets we didn't already precache (icons, og images).

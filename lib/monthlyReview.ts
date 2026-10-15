@@ -88,15 +88,23 @@ export function taipeiMonthStart({ year, month }: YearMonth): Date {
  *
  * A month belongs only if it lies ENTIRELY inside the chapter window —
  * `[startedAt, endedAt)`, endedAt null for the open chapter. A month that
- * straddles a chapter boundary belongs to no chapter, because its snapshot is
- * not chapter-scoped: compute_monthly_review_snapshot (drizzle/0089) sums every
- * group row whose transacted_at falls in the calendar month and stores the
- * largest expense's payer id, so a straddling month mixes both chapters. (The
- * payer's name is resolved per chapter at read time, see
- * resolveReviewPayerName; the amounts and descriptions are not.)
+ * straddles a chapter boundary belongs to no chapter, because only a month
+ * inside one chapter has a chapter-scoped snapshot: since #1621
+ * compute_monthly_review_snapshot (drizzle/0093) finds the chapter holding the
+ * whole month with these same comparisons (on millisecond-truncated bounds, as
+ * JS Dates are) and then counts only rows CREATED inside it. A straddling
+ * month has no such chapter, so its snapshot still sums every group row whose
+ * transacted_at falls in the calendar month and mixes both chapters.
  * Hiding it everywhere is the only rule that never shows one partner's month to
  * the next. What it costs: the partial month in which a chapter starts (or
- * ends) has no review page in either chapter.
+ * ends) has no review page in either chapter. Change this rule and 0093's
+ * lookup together: if they disagree, a month shown here can carry the other
+ * chapter's rows.
+ *
+ * Snapshots are write-once: one computed before 0093 can still hold rows
+ * created in another chapter (a former partner's future-dated expense); the
+ * prod count on 2026-10-13 found none. resolveReviewPayerName and
+ * toClientReviewSnapshot keep the payer's name and id out for such rows.
  *
  * Failure looks like: no error anywhere — just a month from the previous
  * partner appearing in the new partner's list, banner or 月回顧 cell.
@@ -118,8 +126,10 @@ export function isMonthInChapter(ym: YearMonth, chapter: { startedAt: Date; ende
  *   the open one. This applies to the viewer too.
  * - No chapter row (legacy group without epochs): `members` — the page's
  *   Profiles rows, which only ever hold the chapter's member ids.
- * - Anyone else (e.g. a former partner whose future-dated row is the largest
- *   in a later chapter's month) → null: the card shows no name.
+ * - Anyone else → null: the card shows no name. Since 0093 (#1621) a month
+ *   inside a chapter only counts rows created in it, but a snapshot stored
+ *   before 0093 (write-once) can still name a former partner whose
+ *   future-dated row was the largest of a later chapter's month.
  *
  * Never look a payer up in Profiles by id: that is the cross-chapter leak.
  * Failure looks like: nothing errors; the next partner reads the previous
@@ -146,9 +156,9 @@ export function resolveReviewPayerName(
 
 /**
  * #1618 — drop the payer id before the snapshot crosses to the client. The id
- * can be a former partner's (a removed member's future-dated row can be the
- * largest of a later chapter's month), and the client only ever needs the
- * name the server resolved. Failure looks like: nothing breaks; the id shows
+ * can be a former partner's (in a snapshot stored before 0093, #1621, a
+ * removed member's future-dated row can be the largest of a later chapter's
+ * month), and the client only ever needs the name the server resolved. Failure looks like: nothing breaks; the id shows
  * up in the page's RSC payload.
  */
 export function toClientReviewSnapshot(row: MonthlyReviewSnapshotRow): ClientReviewSnapshot {

@@ -6,6 +6,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { I18nWrapper } from './_mocks/i18n'
+import { zhTW } from '@/lib/i18n/locales/zh-TW'
 
 const refresh = vi.fn()
 vi.mock('next/navigation', () => ({
@@ -31,6 +32,8 @@ vi.mock('@/actions/outing', () => actions)
 vi.mock('@/app/(dashboard)/_components/MemberContext', () => ({ useMember: () => ({ isPast: false }) }))
 vi.mock('@/app/(dashboard)/_components/BottomNav', () => ({ BottomNav: () => null }))
 vi.mock('@/app/(dashboard)/outings/_components/OutingSheet', () => ({ OutingSheet: () => null }))
+// Its confirm button shares the page's 「結束出遊」 label; the page button is what #1698 gates.
+vi.mock('@/app/(dashboard)/outings/[id]/_components/EndOutingSheet', () => ({ EndOutingSheet: () => null }))
 
 import { ShareLinkCard, outingShareUrl } from '@/app/(dashboard)/outings/[id]/_components/ShareLinkCard'
 import { OutingDetailClient, type OutingDetailParticipant } from '@/app/(dashboard)/outings/[id]/_components/OutingDetailClient'
@@ -141,11 +144,13 @@ const expense = {
   id: 'e1', paidByParticipantId: 'A', amount: 900, description: '午餐', category: 'food',
   shares: [{ participantId: 'A', shareAmount: 300 }, { participantId: 'X', shareAmount: 300 }, { participantId: 'G', shareAmount: 300 }],
 }
-const detail = (over: { status?: 'active' | 'ended' } = {}) => (
+const detail = (over: { status?: 'active' | 'ended'; canManage?: boolean; canEnd?: boolean } = {}) => (
   <OutingDetailClient
     outing={{ id: 'o1', name: '九份兩日', currency: 'twd', status: over.status ?? 'active' }}
     view={{ participants: people.map((p) => ({ id: p.id, displayName: p.displayName, net: 0 })), transfers: [], coupleNet: 0 }}
     foldPreview={0}
+    canManage={over.canManage ?? true}
+    canEnd={over.canEnd ?? true}
     expenses={[expense]}
     participants={people}
     settlements={[{ id: 's1', fromParticipantId: 'F', toParticipantId: 'A', amount: 300 }]}
@@ -327,6 +332,59 @@ describe('delete a settlement', () => {
     wrap(detail({ status: 'ended' }))
     expect(screen.getByText('還款紀錄')).toBeTruthy()
     expect(screen.queryByRole('button', { name: /刪除還款/ })).toBeNull()
+  })
+})
+
+// ── #1698. Past / closed chapter: only what the server would take ─────────
+describe('a chapter the server refuses admin writes on', () => {
+  const to = zhTW.outing
+  // The page's own buttons, not the (closed) sheets' confirm buttons.
+  const pageButton = (name: string) =>
+    screen.queryAllByRole('button', { name }).find((b) => !b.closest('[role="dialog"]')) ?? null
+  const controls = () => ({
+    addExpense: pageButton(to.addExpense),
+    addParticipant: pageButton(to.addParticipant),
+    settle: pageButton(to.settle),
+    rename: pageButton(to.rename),
+    end: pageButton(to.endOuting),
+    share: screen.queryByText(to.share.label),
+    settlementDelete: screen.queryByRole('button', { name: /刪除還款/ }),
+    menus: screen.queryAllByRole('button', { name: /的操作$/ }),
+  })
+
+  it('canManage: every control is there', () => {
+    wrap(detail())
+    const c = controls()
+    for (const k of ['addExpense', 'addParticipant', 'settle', 'rename', 'end', 'share', 'settlementDelete'] as const) {
+      expect(c[k], k).not.toBeNull()
+    }
+    expect(c.menus.length).toBeGreaterThan(0)
+  })
+
+  it('pinned to the outing\'s own closed chapter: END only', () => {
+    wrap(detail({ canManage: false, canEnd: true }))
+    const c = controls()
+    for (const k of ['addExpense', 'addParticipant', 'settle', 'rename', 'share', 'settlementDelete'] as const) {
+      expect(c[k], k).toBeNull()
+    }
+    expect(c.menus).toHaveLength(0)
+    expect(c.end).not.toBeNull()
+    // Expense rows open nothing: editing is a refused content write.
+    expect((screen.getByText('午餐').closest('button') as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  it('a former member looking back: no admin control at all', () => {
+    wrap(detail({ canManage: false, canEnd: false }))
+    const c = controls()
+    for (const k of ['addExpense', 'addParticipant', 'settle', 'rename', 'end', 'share', 'settlementDelete'] as const) {
+      expect(c[k], k).toBeNull()
+    }
+    expect(c.menus).toHaveLength(0)
+  })
+
+  it('an ended outing in a past chapter offers no rename', () => {
+    wrap(detail({ status: 'ended', canManage: false, canEnd: false }))
+    expect(pageButton(to.rename)).toBeNull()
   })
 })
 

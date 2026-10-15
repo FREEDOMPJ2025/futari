@@ -5,10 +5,10 @@ import { profiles } from '@/lib/db/schema'
 import { inArray, sql } from 'drizzle-orm'
 import {
   loadMonthlyReviewSnapshot,
-  loadMonthlyReviewMessages,
+  loadChapterReviewMessages,
 } from '@/lib/db/queries/monthlyReview'
 import {
-  loadPartnerQuizSessionByGroup,
+  loadPartnerQuizSessionByEpoch,
   loadPartnerQuizAnswers,
 } from '@/lib/db/queries/partnerQuiz'
 import {
@@ -25,6 +25,7 @@ import {
   resolveReviewPayerName,
   toClientReviewSnapshot,
 } from '@/lib/monthlyReview'
+import { getTranslations } from '@/lib/i18n/t'
 import { ReviewClient } from './_components/ReviewClient'
 
 interface PageProps {
@@ -62,20 +63,27 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
   // the group row showed the stayer the NEXT partner as the other half of an
   // old chapter.
   //
-  // A partner who left cannot reach this page today: since #1603
-  // resolveViewerEpochContext ignores a pin into a ledger the viewer is no
-  // longer a member of, and the dashboard layout above this page requires
-  // current membership. The leaver path here is unreachable until #1612
-  // (read-only look-back for former members), which reuses this logic.
+  // #1612 — a partner who left (or was removed) reaches this page for a
+  // closed chapter they were in (resolveViewerEpochContext's former-member
+  // view). The chapter row, not the group row, names the two people.
   const chapter = context.window.epochId ? await getEpochMembers(context.window.epochId) : null
   const memberA = chapter ? chapter.memberAId : group.memberA
   const memberB = chapter ? chapter.memberBId : group.memberB
   const memberIds = [memberA, memberB].filter((x): x is string => !!x)
   // Not one of this chapter's two people → not theirs to see. Unreachable
-  // through resolveViewerEpochContext today; kept so the page never relies on
-  // a caller for its own access rule.
+  // through resolveViewerEpochContext; kept so the page never relies on a
+  // caller for its own access rule.
   if (!memberIds.includes(user.id)) notFound()
 
+  // A closed chapter is read-only (epoch-readonly): no next-month editor, and
+  // no partner quiz — a closed chapter's quiz stays hidden (#1683, owner
+  // decision D4: no look-back of quiz results).
+  const readOnly = context.window.isPast
+
+  // #1612 — in a closed chapter the other person is shown from the chapter
+  // row alone (below), so only the viewer's own profile is read: the other
+  // person's live name and photo are never loaded.
+  const profileIds = readOnly ? [user.id] : memberIds
   const profileRows = await db
     .select({
       id: profiles.id,
@@ -85,58 +93,66 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
       avatarUrl: sql<string | null>`CASE WHEN ${profiles.avatarHidden} THEN NULL ELSE ${profiles.avatarUrl} END`,
     })
     .from(profiles)
-    .where(inArray(profiles.id, memberIds))
+    .where(inArray(profiles.id, profileIds))
 
   const viewerProfile = profileRows.find((p) => p.id === user.id)
   // 404, never /sign-in: the viewer is signed in, and /sign-in would bounce
   // them back to /dashboard in a loop (#1603).
   if (!viewerProfile) notFound()
-  // A closed chapter is read-only (epoch-readonly): no next-month editor, and
-  // no partner quiz — the quiz session is the group's live one, which after a
-  // leave belongs to a different pair.
-  const readOnly = context.window.isPast
-  const liveMember = memberB
-    ? profileRows.find((p) => p.id !== user.id)
-    : null
+  const otherMemberId = memberIds.find((id) => id !== user.id) ?? null
   // #1604 part 2 — in a closed chapter the other person is shown as they were
   // when it closed: the name getEpochMembers returns (the snapshot) and no
   // avatar (after-leaving spec,「人：停在當時」). Never the live profile, whose
-  // name and photo may be from long after the chapter ended. The open chapter
-  // keeps the live profile.
+  // name and photo may be from long after the chapter ended. #1612 — with no
+  // snapshot, the neutral 「對方」 stands in. The open chapter keeps the live
+  // profile.
+  const neutralPartner = readOnly ? (await getTranslations()).common.partner : ''
   const chapterPartnerName = readOnly && chapter
-    ? ((chapter.memberAId === user.id ? chapter.memberBName : chapter.memberAName) ?? null)
+    ? (chapter.memberAId === user.id ? chapter.memberBName : chapter.memberAName)
     : null
-  const partnerProfile = !liveMember
+  const partnerProfile = !otherMemberId
     ? null
     : readOnly
-      ? (chapterPartnerName === null
-          ? null
-          : { id: liveMember.id, displayName: chapterPartnerName, avatarUrl: null })
-      : liveMember
+      ? { id: otherMemberId, displayName: chapterPartnerName ?? neutralPartner, avatarUrl: null }
+      : (profileRows.find((p) => p.id === otherMemberId) ?? null)
   const isSolo = !memberB
 
   const editorMonth = nextMonth(reviewedMonth)
+  // The quiz is only for an open duo chapter with a chapter row (fail closed).
+  const quizEpochId = !isSolo && !readOnly ? context.window.epochId : null
 
-  const [snapshot, allPastMessages, allEditorMessages, quizSession] = await Promise.all([
+  // #1684 #1685 — messages are group-scoped rows that outlive a leave
+  // (#1611). Only the viewed chapter's two people's, written while it was
+  // open, belong here: the window keeps the stayer's words to a previous
+  // partner off a new partner's page (the month can lie wholly inside the new
+  // chapter while the message to it was written in the old one).
+  const chapterScope = { memberIds, window: context.window }
+  const [snapshot, pastMessages, editorMessages, quizSession] = await Promise.all([
     loadMonthlyReviewSnapshot(group.id, reviewedMonth.year, reviewedMonth.month),
-    loadMonthlyReviewMessages(group.id, reviewedMonth.year, reviewedMonth.month),
-    loadMonthlyReviewMessages(group.id, editorMonth.year, editorMonth.month),
-    isSolo || readOnly ? Promise.resolve(null) : loadPartnerQuizSessionByGroup(group.id),
+    loadChapterReviewMessages(group.id, reviewedMonth, chapterScope),
+    // #1612 — read-only has no next-month editor, so the next month's
+    // messages are neither read nor sent. They were written in that month,
+    // which may lie after the chapter closed (the stayer's, or a new
+    // partner's, words to each other).
+    readOnly
+      ? Promise.resolve([] as Awaited<ReturnType<typeof loadChapterReviewMessages>>)
+      : loadChapterReviewMessages(group.id, editorMonth, chapterScope),
+    // #1683 — the session of THIS chapter, never "the group's": the stayer
+    // keeps the ledger across partners, so a group lookup handed the next
+    // partner the previous partner's session. No chapter id → no quiz.
+    quizEpochId ? loadPartnerQuizSessionByEpoch(quizEpochId) : Promise.resolve(null),
   ])
-  // Messages are group-scoped rows; only the chapter's two people's belong here.
-  const pastMessages = allPastMessages.filter((m) => memberIds.includes(m.memberId))
-  const editorMessages = allEditorMessages.filter((m) => memberIds.includes(m.memberId))
 
   // Quiz state — only resolved for dyad groups. Spec: solo mode 不渲染整段
   // quiz；surface 條件「第一次有 MonthlyReviewSnapshot row 後」由 snapshot 存在判定。
-  const quizAnswers = quizSession ? await loadPartnerQuizAnswers(quizSession.id) : []
+  const quizAnswers = quizSession ? await loadPartnerQuizAnswers(quizSession.id, memberIds) : []
   const selfAnswered = quizSession
     ? quizAnswers.some((a) => a.memberId === user.id)
     : false
   const partnerAnswered = quizSession && partnerProfile
     ? quizAnswers.some((a) => a.memberId === partnerProfile.id)
     : false
-  const quizStatus = !isSolo && !readOnly && snapshot
+  const quizStatus = quizEpochId && snapshot
     ? derivePartnerQuizStatus({
         hasSession: !!quizSession,
         selfAnswered,
@@ -151,8 +167,14 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
   // #1618 — card 2's payer: the snapshot stores an id; the name comes only from
   // this chapter's two people (lib/monthlyReview.ts › resolveReviewPayerName),
   // and the id itself never reaches the client.
+  // #1612 — a closed chapter with no snapshot for the payer: the viewer is
+  // themselves, the other person is the neutral 「對方」 (never a live name).
+  const payerId = snapshot?.largestExpensePaidBy ?? null
   const payerName = snapshot
-    ? resolveReviewPayerName(snapshot.largestExpensePaidBy, chapter, profileRows)
+    ? (resolveReviewPayerName(payerId, chapter, profileRows)
+        ?? (readOnly && payerId && memberIds.includes(payerId)
+          ? (payerId === user.id ? viewerProfile.displayName : neutralPartner)
+          : null))
     : null
 
   // Snapshot may be missing for the current (still-in-progress) month or for

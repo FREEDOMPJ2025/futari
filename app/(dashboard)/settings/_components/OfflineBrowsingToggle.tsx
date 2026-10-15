@@ -2,14 +2,22 @@
 
 import { useEffect, useState } from 'react'
 import { Switch } from '@/components/Switch'
-import { getOfflinePref, setOfflinePref } from '@/lib/offline/preference'
 import {
-  clearAllCaches,
-  hasActiveSW,
+  OFFLINE_PREF_KEY,
+  getOfflineOwner,
+  getOfflinePref,
+} from '@/lib/offline/preference'
+import {
+  enqueueOfflineSequence,
+  hasFullSWRegistration,
   isSWSupported,
-  registerSW,
-  unregisterAllSW,
 } from '@/lib/offline/swControl'
+import {
+  getSessionUserHash,
+  runPrefOffMount,
+  runTurnOff,
+  runTurnOn,
+} from '@/lib/offline/lifecycle'
 import { useTranslations } from '@/lib/i18n/client'
 
 export function OfflineBrowsingToggle() {
@@ -19,25 +27,44 @@ export function OfflineBrowsingToggle() {
   const [error, setError] = useState<string | null>(null)
   const [supported, setSupported] = useState(true)
 
-  // Calibrate UI to the actual SW state on mount: trust the registration over
-  // localStorage (handles "user manually cleared storage" + "previous toggle
-  // failed mid-flight" cases).
+  // Displayed state = the preference, with the owner matching (#1673). This
+  // never writes `true`: only handleToggle's ON path may (F4). The old
+  // calibration (`active || stored`) could switch a turned-off device back on
+  // because some worker was still registered.
   useEffect(() => {
     if (!isSWSupported()) {
       setSupported(false)
       return
     }
     let cancelled = false
-    void (async () => {
-      const active = await hasActiveSW()
+    const sync = async () => {
       const stored = getOfflinePref()
-      const real = active || stored
+      if (!stored) {
+        if (!cancelled) setEnabled(false)
+        // Pref off but `/sw.js` still registered → the off path (mount sweep).
+        if (await hasFullSWRegistration()) {
+          void enqueueOfflineSequence((seq) =>
+            seq.expected ? Promise.resolve() : runPrefOffMount(seq),
+          ).catch(() => {})
+        }
+        return
+      }
+      const owner = getOfflineOwner()
+      const hash = owner ? await getSessionUserHash() : null
       if (cancelled) return
-      setEnabled(real)
-      // Resync localStorage to the truth so other tabs / banner agree.
-      if (real !== stored) setOfflinePref(real)
-    })()
-    return () => { cancelled = true }
+      // A different signed-in user: show off; the dashboard mount's binding
+      // check runs the full off.
+      setEnabled(!(owner && hash && owner !== hash))
+    }
+    void sync()
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === OFFLINE_PREF_KEY || e.key === null) void sync()
+    }
+    window.addEventListener('storage', onStorage)
+    return () => {
+      cancelled = true
+      window.removeEventListener('storage', onStorage)
+    }
   }, [])
 
   const handleToggle = async (next: boolean) => {
@@ -46,24 +73,16 @@ export function OfflineBrowsingToggle() {
     setPending(true)
     try {
       if (next) {
-        await registerSW()
-        setOfflinePref(true)
-        setEnabled(true)
+        const result = await enqueueOfflineSequence((seq) => runTurnOn(seq))
+        if (result === 'error') setError(t.settings.offlineToggleError)
       } else {
-        // Order matters: write pref first so a concurrent banner read sees OFF
-        // before caches disappear, then unregister + wipe storage.
-        setOfflinePref(false)
-        await unregisterAllSW()
-        await clearAllCaches()
-        setEnabled(false)
+        await enqueueOfflineSequence((seq) => runTurnOff(seq))
       }
     } catch {
       setError(t.settings.offlineToggleError)
-      // Roll back any optimistic UI: re-read truth.
-      const active = await hasActiveSW()
-      setEnabled(active)
-      setOfflinePref(active)
     } finally {
+      // The pref is the only truth; never re-derive it from "is there a SW".
+      setEnabled(getOfflinePref())
       setPending(false)
     }
   }

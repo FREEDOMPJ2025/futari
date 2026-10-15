@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { signOut } from '@/actions/auth'
 import { clearStoredPushToken, readStoredPushToken } from '@/lib/pushTokenStorage'
 import { ConfirmModal } from '@/app/(dashboard)/_components/ConfirmModal'
-import { clearDynamicCache } from '@/lib/offline/swControl'
+import { beginOfflineOff, createSequence, finishOfflineOff } from '@/lib/offline/swControl'
 import { useTranslations } from '@/lib/i18n/client'
 
 export function LogoutButton() {
@@ -21,10 +21,14 @@ export function LogoutButton() {
   async function handleConfirm() {
     setConfirming(false)
     setPending(true)
-    // Drop cached HTML so the next user on this device can't see the
-    // previous user's pages. Toggle preference / app shell precache are
-    // kept (they're not user-scoped).
-    await clearDynamicCache().catch(() => {})
+    // #1673 — logout turns offline browsing fully off. Steps 0–2 first:
+    // consent marker (every live worker stops writing), pref off, unregister —
+    // so nothing the still-valid session fetches can be cached. This preempts
+    // the per-tab offline queue: it never waits behind a pending `/sw.js`
+    // activation (up to 15 s), which would bring back the slow 登出 #1617 fixed.
+    // The off steps never throw.
+    const offSeq = createSequence()
+    await beginOfflineOff({ reason: 'logout', seq: offSeq })
     // #1605 / #1617 — ONE server action: signOut drops this device's push
     // registration (bounded at 2 s server-side, failures swallowed) and then
     // signs out. Do not split the delete back into a second action awaited
@@ -34,6 +38,9 @@ export function LogoutButton() {
     // forgotten once the action has returned or failed, never before it.
     await signOut(readStoredPushToken() ?? undefined).catch(() => {})
     clearStoredPushToken()
+    // Steps 3–5 after sign-out: broadcast (other tabs reload into a signed-out
+    // state), delete every cache, clear the serwist-expiration records.
+    await finishOfflineOff({ seq: offSeq })
     // Safety net: if signOut()'s soft nav somehow didn't take, force a hard
     // navigation so the user is never visually stranded on /settings.
     window.location.replace('/')

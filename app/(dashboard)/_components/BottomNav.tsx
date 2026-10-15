@@ -8,6 +8,7 @@ import { HomeIndicator } from './HomeIndicator'
 import { NavHomeIcon, NavListIcon, NavAssetsIcon, NavSettingsIcon } from './TabIcons'
 import { DEFAULT_INCOME_PALETTE } from '@/lib/incomePalettes'
 import { useTranslations } from '@/lib/i18n/client'
+import { useIsFormerMember } from './MemberContext'
 
 interface Props {
   onAddClick: () => void
@@ -50,6 +51,7 @@ const TABS = [
 export function BottomNav({ onAddClick, hideFab = false, fabVariant = 'primary', fabContent }: Props) {
   const t = useTranslations()
   const pathname = usePathname()
+  const isFormerMember = useIsFormerMember()
 
   // Defer auto-prefetch of the four tab destinations until after the host page
   // has had time to settle. Prefetching four parallel routes immediately on
@@ -98,7 +100,12 @@ export function BottomNav({ onAddClick, hideFab = false, fabVariant = 'primary',
         <NavTab tab={TABS[1]} label={t.bottomNav.records}  active={activeId === TABS[1].id} allowPrefetch={allowPrefetch} />
         <div className="w-[76px] shrink-0" />
         <NavTab tab={TABS[2]} label={t.bottomNav.assets}   active={activeId === TABS[2].id} allowPrefetch={allowPrefetch} />
-        <NavTab tab={TABS[3]} label={t.bottomNav.settings} active={activeId === TABS[3].id} allowPrefetch={allowPrefetch} />
+        {/* #1612 — Settings acts on the viewer's own ledger, not the chapter a
+            former member is looking back at. The empty slot keeps the other
+            three tabs (and the FAB gap) where they always are. */}
+        {isFormerMember
+          ? <div className="flex-1 min-w-0" aria-hidden="true" />
+          : <NavTab tab={TABS[3]} label={t.bottomNav.settings} active={activeId === TABS[3].id} allowPrefetch={allowPrefetch} />}
       </nav>
 
       {!hideFab && !fabContent && (

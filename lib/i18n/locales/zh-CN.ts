@@ -49,7 +49,7 @@ export const zhCN: Translations = {
       s6Body: [
         '这个担心很合理。Honeydue 这几年慢慢式微，Spendee 曾经让用户的数据凭空消失——如果你被这些事吓过，你的警觉是对的。',
         'Futari 是我自己每天在用的工具，这是最直接的「有人在维护」的证明。不是说它永远不会出问题，而是说背后有一个真实的人在意它能不能用。',
-        '数据方面，Futari 支持 CSV 导出。任何时候你想把数据带走，都可以。我不想用「我们不会消失」这种话来说服你，但我可以告诉你：你的数据不会被绑住。',
+        '数据方面，Futari 支持 CSV 导出：支出、进账和结算，任何时候想带走都可以，离开账本之后也行。我不想用「我们不会消失」这种话来说服你，但我可以告诉你：这些记录不会被绑住。',
       ],
       s7Heading: 'Futari 是什么，也是什么不是',
       s7Body: [
@@ -108,7 +108,7 @@ export const zhCN: Translations = {
       },
       portability: {
         title: '随时带走',
-        body: 'CSV 导出，数据永远是你的。想离开时不会被绑在这里。',
+        body: '支出、进账和结算都能导出成 CSV，离开账本之后也可以，不会被绑在这里。',
       },
       forever: {
         title: '永久免费',
@@ -484,9 +484,9 @@ export const zhCN: Translations = {
   },
 
   logoutButton: {
-    label: '登出',
-    pending: '登出中…',
-    title: '登出 Futari？',
+    label: '退出登录',
+    pending: '正在退出登录…',
+    title: '退出登录 Futari？',
     description: '下次需要重新用 Google 登录。未邀请对方加入的记录不会丢失。',
   },
 
@@ -495,7 +495,7 @@ export const zhCN: Translations = {
     pending: '处理中…',
     title: '确定要删除账号？',
     description:
-      '我们会在 14 天后移除你的资料。在那之前你随时可以回来取消。若你和对方共用账本，对方的记录会保留，你的名字会显示为「已离开的伙伴」。',
+      '我们会在 14 天后移除你的资料。在那之前你随时可以回来取消。如果曾和对方共用账本，一起记下的记录会留给对方，对方已经离开的那段也一样；你的名字会显示为「已离开的伙伴」。',
   },
 
   accountDeletionBanner: {
@@ -930,7 +930,7 @@ export const zhCN: Translations = {
     sectionApp: '应用',
     offlineBrowsing: '离线浏览',
     offlineHintOff: '在无网络时看不到历史记录。开启后，最近浏览过的页面会存在这台设备上。',
-    offlineHintOn: '无网络时可查看最近一次连接时的记录。数据只存在这台设备，登出时会自动清除。',
+    offlineHintOn: '无网络时可查看最近一次连接时的记录。数据只存在这台设备；退出登录时会一并关闭并清除，重新登录后需要再开启一次。',
     offlineToggling: '处理中…',
     offlineToggleError: '无法切换，请稍后再试',
     offlineUnsupported: '当前的浏览器不支持离线浏览',
@@ -1006,10 +1006,12 @@ export const zhCN: Translations = {
             '账目要先结清为 0，才能离开',
             '{memberB} 名下的车、保单、房子会跟着走',
             '孩子、宠物、植物没有归属字段，会留在原账本',
-            '收支记录依「谁付的／谁收的」分配',
+            '收支、结算和月回顾留言会完整留在这本账本，离开后仍能回头查看',
             '尚未接受的邀请链接会失效',
             '原账本变回单人状态，由 {memberA} 继续使用',
           ],
+          exportHint: '离开后，也能在「数据安全」页导出这段章节的支出、进账和结算。想自己留一份，现在导出也可以。',
+          exportCta: '先导出支出、进账和结算',
         },
         card4: {
           title: '确定这些都是你跟对方一起想要的吗？',
@@ -1147,7 +1149,7 @@ export const zhCN: Translations = {
     partnerLeftHeading: '{partner} 已离开',
     partnerLeftBody: '到目前为止的记录都还在。从这里开始，是你一个人的时光。',
     welcomeSoloHeading: '欢迎回到一个人',
-    welcomeSoloBody: '账本完整地跟着你过来。从今天起，可以慢慢来。',
+    welcomeSoloBody: '之前的记录留在原本的账本，随时可以回头看。从今天起，可以慢慢来。',
     removedPartnerHeading: '回到一个人',
     removedPartnerBody: '账本完整地留着。从今天起，可以慢慢来。',
     dismissAria: '关闭',
@@ -1193,6 +1195,8 @@ export const zhCN: Translations = {
     bannerHeading: '你正在看 {start} – {end} 的过去',
     bannerExitCta: '回到现在',
     empty: '还没有过去的时光。第一段才刚开始。',
+    exportHint: '想自己留一份记录，可以把这些章节里的支出、进账和结算导出成 CSV。',
+    exportCta: '导出支出、进账和结算',
   },
 
   csvExport: {
@@ -1200,14 +1204,29 @@ export const zhCN: Translations = {
     failed: '导出失败，请稍后再试',
     filenamePrefix: 'futari-transactions',
     columns: {
+      type: '类型',
       date: '日期',
-      description: '描述',
+      description: '说明',
       amount: '金额',
+      currency: '货币',
+      originalAmount: '原币金额',
+      originalCurrency: '原货币',
       category: '分类',
-      paidBy: '谁付的',
-      splitType: '分摊',
+      person: '付款／收款人',
+      settlementTo: '给谁（结算）',
+      myShare: '我的分摊',
+      theirShare: '对方分摊',
+      status: '状态',
       notes: '备注',
+      chapter: '章节',
     },
+    types: {
+      expense: '支出',
+      income: '进账',
+      settlement: '结算',
+    },
+    chapter: '{start} – {end}・{who}',
+    chapterOngoing: '至今',
   },
 
   assets: {
@@ -1363,8 +1382,8 @@ export const zhCN: Translations = {
       body: '账本只对你们两人的账号开放。连接以 HTTPS 加密；宝宝本名、身份证号、车牌和地址这类敏感数据，我们会再加密一层才存进数据库。',
     },
     portability: {
-      heading: '随时都能整包带走',
-      body: '我们不会把你们绑在这里。日后想离开，所有记录都能整批带走。',
+      heading: '支出、进账和结算，随时能带走',
+      body: '我们不会把你们绑在这里。你待过的每段章节里的支出、进账和结算，都能导出成 CSV 带走，离开账本之后也可以。',
     },
     backup: {
       heading: '每一笔，都会好好留着',
@@ -1372,7 +1391,7 @@ export const zhCN: Translations = {
     },
     onboarding: {
       line1: '数据只属于你们俩',
-      line2: '随时都能整包带走',
+      line2: '支出、进账和结算随时能带走',
       line3: '每一笔，都会好好留着',
     },
     bilateral: {
@@ -2041,21 +2060,27 @@ export const zhCN: Translations = {
 
   nativeOfflinePage: {
     documentTitle: '离线中 · Futari',
-    title: '现在没有网络',
-    body: '连上网络之后，这里就会回到你们的账本。',
+    title: '现在连不上网络',
+    body: '连上 Wi-Fi 或移动网络之后，这里会自己回到你们的账本。',
     retry: '再试一次',
+    /** Shown while the page is probing for the network (#1672). */
+    status: '正在重新连接…',
+    /** Shown after automatic returns stopped; only the manual button is left. */
+    stalled: '还是连不上，等网络稳定一点再按「再试一次」',
+    /** Android shell only, and only when the build flag is on (case 9 of #1672). */
+    offlineBrowsingHint: '下次连上网络后，可以到「设置 › 离线浏览」打开，没网络时也能看最近的记录',
   },
 
   termsPage: {
     heading: '服务条款',
-    lastUpdated: '最后更新：2026 年 9 月 16 日',
+    lastUpdated: '最后更新：2026 年 10 月 15 日',
     intro: '使用 Futari（以下简称「本服务」）即表示您同意以下条款。请在使用前详阅。',
     bullets: [
       '本服务提供双人共用记账功能，包含交易记录、结算与共同财物管理。所有结算结果仅供用户自行参考，本服务不对其正确性负责。',
       '您的数据属于您。本服务仅为显示与计算目的使用您输入的数据，不会出售或对外分享您的个人数据。',
       '请勿记录高度敏感的身份信息（例如身份证号、信用卡号等）。本服务的设计目的是记账，不是机密文件保存。',
       '使用 Google 登录即表示您同意 Google 将您的基本账号信息（姓名、头像、Email）提供给本服务，作为账号识别之用。',
-      '您可随时通过设置页登出或删除账号。提出删除后有 14 天缓冲期，期间可以取消；期满后，只有您一个人的账本会整本删除，与伴侣共用的账本则会留给对方，您和对方共同记下的记录不会一起移除。详见隐私政策的「数据保留期限」。',
+      '您可随时通过设置页退出登录或删除账号。提出删除后有 14 天缓冲期，期间可以取消；期满后，您一个人时记下的记录会删除（对方曾经看得到的部分除外）；与伴侣共用的账本会留给对方，曾经共用、对方已经离开的那段时光也会留给对方回看，您和对方共同记下的记录不会一起移除。详见隐私政策的「数据保留期限」。',
       '本服务保留因维护、安全或系统需求暂停或调整服务的权利，并将在可能的情况下提前告知。',
       '本服务条款适用中华民国法律，如有争议以台湾台北地方法院为第一审管辖法院。',
     ],
@@ -2068,7 +2093,7 @@ export const zhCN: Translations = {
 
   privacyPage: {
     heading: '隐私权政策',
-    lastUpdated: '最后更新：2026 年 10 月 4 日',
+    lastUpdated: '最后更新：2026 年 10 月 15 日',
     intro: '本页说明 Futari 如何收集、使用与保护您的个人数据。',
     sectionCollectTitle: '收集的数据',
     sectionCollectItems: [
@@ -2089,8 +2114,8 @@ export const zhCN: Translations = {
     sectionRetentionTitle: '数据保留期限',
     sectionRetentionBody: '您的账号数据在账号存续期间持续保存。您删除的交易记录会保留软删除标记约 1 年，之后由系统自动清除。在设置页提出删除账号后，有 14 天的缓冲期（日历天，不是工作日），期间随时可以取消；期满由系统自动执行。执行时会发生什么，取决于这本账本是您一个人的，还是和伴侣共用的：',
     sectionRetentionItems: [
-      '一个人的账本：整本一起删除——交易、结算、定期收支规则、爱物与旅行记录都会移除，您的个人资料（姓名、头像、Email）也一并删除。',
-      '两人共用的账本：账本会留给对方。你们一起记下的交易、结算、爱物记录与月回顾留言会留在对方的账本里，我们不会单方面替您删掉——那些记录同时也是对方的。您的登录身份会删除（Google／Apple 账号关联、Email、头像、推送设备），您的名字在对方的账本里会显示为「已离开的伙伴」。',
+      '一个人的账本：您一个人时记下的交易、结算、定期收支规则、爱物与旅行记录会删除（对方曾经看得到的爱物、定期规则和旅行名称，会留给对方回看），您的个人资料（姓名、头像、Email）也一并删除。如果这本账本曾经两人共用、对方已经离开，你们共同那段时光的记录会留给对方回看，您的名字会显示为「已离开的伙伴」；等对方也删除账号，那段记录才会一起删除。',
+      '两人共用的账本：账本会留给对方。你们一起记下的交易、结算、爱物记录与月回顾留言会留在对方的账本里，我们不会单方面替您删掉——那些记录同时也是对方的。您的登录身份会删除（Google／Apple 账号关联、Email、头像、推送设备），您的名字在对方的账本里会显示为「已离开的伙伴」。你之前离开过的账本也一样：你在那段时光记下的记录会留在对方的账本。',
       '如果您希望共用账本里的内容也一并移除，请在删除账号前与伴侣谈过，或先写信告诉我们。',
       '已删除的数据（包括删除账号时移除的内容），在删除前已做好的加密备份中最多还会保留约 60 天，之后随旧备份清除而消失。这段期间我们不会用备份把它们找回来；只有在整个服务需要从备份恢复时才会用到备份，届时我们会重新执行这些删除。',
     ],
@@ -2106,7 +2131,7 @@ export const zhCN: Translations = {
       'Google Drive（存放加密的数据库备份）',
     ],
     sectionRightsTitle: '您的权利',
-    sectionRightsBody: '您可随时通过设置页登出或删除账号。如需导出或查询您的个人数据，',
+    sectionRightsBody: '您可随时通过设置页退出登录或删除账号。如需导出或查询您的个人数据，',
     outro: '本政策若有变更，将在本页更新并修改日期。如有任何疑问，',
     contactLinkLabel: '欢迎到 GitHub 开 Issue 告诉我们',
     contactEmailPrefix: '，或寄信到 ',
@@ -2374,7 +2399,7 @@ export const zhCN: Translations = {
       featCsvExport: 'CSV 数据导出',
       featCloudSync: '云端同步',
       featRealtimeCloudSync: '即时云端同步',
-      featDataExport: '数据导出带走',
+      featDataExport: '数据导出',
       featCrossPlatform: '跨平台',
       featDailyEntries: '每日记账笔数',
       verdictSupported: '支持',
@@ -2396,7 +2421,7 @@ export const zhCN: Translations = {
       verdictUnlimited: '不限',
       verdictBuiltInConversion: '内置换算',
       verdictSpreadsheetExport: '表格导出',
-      verdictCsvExport: 'CSV 导出',
+      verdictCsvExport: 'CSV：支出、进账、结算',
       verdictPlatforms: 'iOS／Android／Web',
     },
     howToStepName: '步骤 {n}',
@@ -2409,7 +2434,7 @@ export const zhCN: Translations = {
         },
         {
           title: '随时可以带走',
-          body: '不喜欢的话，整本账随时导出 CSV，搬家不是绑约的起点。',
+          body: '不喜欢的话，支出、进账和结算随时能导出 CSV，搬家不是绑约的起点。',
         },
         {
           title: '免费长期使用',
@@ -2783,7 +2808,7 @@ export const zhCN: Translations = {
         differentiators: [
           {
             title: '数据进出都免费',
-            body: '在 Manebo，把记录导出成 CSV 需要 Premium 订阅；Futari 的导入与导出都不收费，记录永远带得走。',
+            body: '在 Manebo，把记录导出成 CSV 需要 Premium 订阅；Futari 的导入与导出都不收费，支出、进账和结算随时带得走。',
           },
           {
             title: '分摊与结算内建',
@@ -2833,7 +2858,7 @@ export const zhCN: Translations = {
           },
           {
             title: '数据自由进出',
-            body: '在简单记账，CSV 导出是 VIP 功能；Futari 的导入与导出都免费，记录永远是你们的。',
+            body: '在简单记账，CSV 导出是 VIP 功能；Futari 的导入与导出都免费，支出、进账和结算随时能导出。',
           },
         ],
         stepsHeading: '搬迁三步',
@@ -2879,7 +2904,7 @@ export const zhCN: Translations = {
           },
           {
             title: '数据自由进出',
-            body: '在 Futari，导出不需要订阅，文件是标准 UTF-8 CSV；哪天想离开，也一样带得走。',
+            body: '在 Futari，导出不需要订阅，支出、进账和结算会导出成标准 UTF-8 CSV；哪天想离开，也一样带得走。',
           },
         ],
         stepsHeading: '搬迁三步',
@@ -2920,7 +2945,7 @@ export const zhCN: Translations = {
           },
           {
             title: '云端同步、随时带走',
-            body: '记录存在云端，换手机不怕不见；想离开时 CSV 导出，数据是你们的。',
+            body: '记录存在云端，换手机不怕不见；想离开时，支出、进账和结算都能导出 CSV 带走。',
           },
         ],
         stepsHeading: '搬迁三步',
@@ -3788,7 +3813,7 @@ export const zhCN: Translations = {
       outing_description_too_long: '说明最长 100 字',
       outing_currency_changed: '这次出游的币别和账本目前的基准币别不一致，所以不能折回主账本。',
       outing_admin_only: '只有开这次出游的账本成员可以这样做',
-      outing_viewing_past_chapter: '你正在看过去的章节，回到目前的章节才能修改',
+      outing_viewing_past_chapter: '过去的章节只能查看，不能修改。返回上一页再重新打开，页面会只显示可以用的操作。',
       outing_expense_not_found: '找不到这笔支出',
       outing_settlement_not_found: '找不到这笔还款',
       outing_link_invalid: '这个链接已失效，请向开局的人要新链接',

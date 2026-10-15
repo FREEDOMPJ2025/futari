@@ -49,7 +49,7 @@ export const en: Translations = {
       s6Body: [
         'That worry is fair. Honeydue has been slowly fading. Spendee once made user data vanish. If those stories have made you cautious, your caution is the right instinct.',
         'Futari is something I use every day myself. That\'s the most direct evidence that "someone is maintaining it." It doesn\'t mean nothing will ever break; it means there\'s a real person on the other end who cares whether it works.',
-        'On data: Futari supports CSV export. Whenever you want to take your data with you, you can. I\'m not going to convince you with "we\'ll never disappear," but I can tell you this: your data won\'t be locked in.',
+        'On data: Futari supports CSV export. Your expenses, income and settlements are yours to take whenever you want, even after you leave a ledger. I\'m not going to convince you with "we\'ll never disappear," but I can tell you this: those records won\'t be locked in.',
       ],
       s7Heading: 'What Futari is (and isn\'t)',
       s7Body: [
@@ -110,7 +110,7 @@ export const en: Translations = {
       },
       portability: {
         title: 'Take it with you',
-        body: 'Export to CSV anytime. Your data is always yours, never locked in.',
+        body: 'Export your expenses, income and settlements to CSV, even after you leave a ledger.',
       },
       forever: {
         title: 'Free forever',
@@ -490,9 +490,9 @@ export const en: Translations = {
   },
 
   logoutButton: {
-    label: 'Log out',
-    pending: 'Logging out…',
-    title: 'Log out of Futari?',
+    label: 'Sign out',
+    pending: 'Signing out…',
+    title: 'Sign out of Futari?',
     description: 'You\'ll need to sign in again with Google next time. Records you\'ve added without inviting your partner won\'t be lost.',
   },
 
@@ -501,7 +501,7 @@ export const en: Translations = {
     pending: 'Working…',
     title: 'Delete your account?',
     description:
-      "We'll remove your data after 14 days. You can come back and cancel any time before then. If you share a ledger, your partner's records stay, and your name will show as “a partner who left”.",
+      "We'll remove your data after 14 days. You can come back and cancel any time before then. If you've shared a ledger, the records you wrote together stay with your partner, even if they've already left, and your name will show as “a partner who left”.",
   },
 
   accountDeletionBanner: {
@@ -939,7 +939,7 @@ export const en: Translations = {
     sectionApp: 'App',
     offlineBrowsing: 'Offline browsing',
     offlineHintOff: "When offline, history isn't available. Turn this on to keep recently-viewed pages on this device.",
-    offlineHintOn: 'When offline, you can view records from your last connection. Data lives on this device only and is cleared on sign-out.',
+    offlineHintOn: 'When offline, you can view records from your last connection. Data lives on this device only. Signing out turns this off and clears the data, so turn it on again after you sign back in.',
     offlineToggling: 'Working…',
     offlineToggleError: "Couldn't switch. Try again in a moment.",
     offlineUnsupported: 'This browser does not support offline browsing.',
@@ -1015,10 +1015,12 @@ export const en: Translations = {
             'The balance must be settled to zero before you can leave',
             'Cars, insurance, and houses owned by {memberB} go with them',
             'Children, pets, and plants have no owner field, so they stay in the original ledger',
-            'Income and expenses split by "who paid / who received"',
+            'Income, expenses, settlements and monthly review notes stay whole in this ledger, and can still be looked back on after leaving',
             'Any pending invite links to this ledger become invalid',
             'The original ledger reverts to solo mode, kept by {memberA}',
           ],
+          exportHint: 'After you leave, you can still export this chapter\'s expenses, income and settlements from Your data. You can also export now if you want a copy of your own.',
+          exportCta: 'Export expenses, income and settlements first',
         },
         card4: {
           title: 'Are you sure this is what both of you want?',
@@ -1157,7 +1159,7 @@ export const en: Translations = {
     partnerLeftHeading: '{partner} has left',
     partnerLeftBody: "Everything until now is still here. From this point on, this ledger is just for you.",
     welcomeSoloHeading: 'Welcome back to one person',
-    welcomeSoloBody: 'Your ledger came with you, all of it. Take your time from here.',
+    welcomeSoloBody: 'Earlier records stay in the ledger you shared, and you can look back any time. Take your time from here.',
     // TODO(i18n): native review pending (#1016) — MT-quality draft.
     removedPartnerHeading: 'Back to one person',
     removedPartnerBody: 'Your ledger stays, all of it. Take your time from here.',
@@ -1204,6 +1206,8 @@ export const en: Translations = {
     bannerHeading: "You're looking at {start} – {end}",
     bannerExitCta: 'Back to now',
     empty: "No past chapters yet. The first one is just beginning.",
+    exportHint: 'To keep a copy of your own, you can export the expenses, income and settlements from these chapters as a CSV.',
+    exportCta: 'Export expenses, income and settlements',
   },
 
   csvExport: {
@@ -1211,14 +1215,29 @@ export const en: Translations = {
     failed: 'Export failed. Please try again.',
     filenamePrefix: 'futari-transactions',
     columns: {
+      type: 'Type',
       date: 'Date',
       description: 'Description',
       amount: 'Amount',
+      currency: 'Currency',
+      originalAmount: 'Original amount',
+      originalCurrency: 'Original currency',
       category: 'Category',
-      paidBy: 'Paid by',
-      splitType: 'Split',
+      person: 'Paid by / received by',
+      settlementTo: 'Paid to (settlement)',
+      myShare: 'My share',
+      theirShare: 'Their share',
+      status: 'Status',
       notes: 'Notes',
+      chapter: 'Chapter',
     },
+    types: {
+      expense: 'Expense',
+      income: 'Income',
+      settlement: 'Settlement',
+    },
+    chapter: '{start} – {end} · {who}',
+    chapterOngoing: 'now',
   },
 
   assets: {
@@ -1374,8 +1393,8 @@ export const en: Translations = {
       body: "Only your two accounts can open the ledger. Connections are encrypted over HTTPS, and sensitive details like a child's legal name, ID number, licence plate, and address get an extra layer of encryption before we store them.",
     },
     portability: {
-      heading: 'Take it all with you, anytime',
-      body: 'We won\'t lock you in. If you ever want to leave, you can take everything with you.',
+      heading: 'Take your expenses, income and settlements with you',
+      body: 'We won\'t lock you in. The expenses, income and settlements from every chapter you\'ve been part of can be exported as a CSV, even after you leave a ledger.',
     },
     backup: {
       heading: 'Every entry, kept',
@@ -1383,7 +1402,7 @@ export const en: Translations = {
     },
     onboarding: {
       line1: 'Your records, only yours',
-      line2: 'Take it all with you, anytime',
+      line2: 'Expenses, income and settlements go with you',
       line3: 'Every entry, kept',
     },
     bilateral: {
@@ -2056,21 +2075,27 @@ export const en: Translations = {
 
   nativeOfflinePage: {
     documentTitle: 'Offline · Futari',
-    title: 'No connection right now',
-    body: 'Once you are back online, your shared ledger will be here.',
+    title: "Can't connect right now",
+    body: "Once you're on Wi-Fi or mobile data, this page will take you back to your shared ledger on its own.",
     retry: 'Try again',
+    /** Shown while the page is probing for the network (#1672). */
+    status: 'Reconnecting…',
+    /** Shown after automatic returns stopped; only the manual button is left. */
+    stalled: "Still can't connect. When the connection is steadier, tap Try again.",
+    /** Android shell only, and only when the build flag is on (case 9 of #1672). */
+    offlineBrowsingHint: "Next time you're online, turn on Settings › Offline browsing to see your recent records without a connection",
   },
 
   termsPage: {
     heading: 'Terms of Service',
-    lastUpdated: 'Last updated: September 16, 2026',
+    lastUpdated: 'Last updated: October 15, 2026',
     intro: 'By using Futari (the "Service"), you agree to the following terms. Please read them before using the Service.',
     bullets: [
       'The Service provides a shared expense tracker for two people, including transaction records, settlements, and shared asset management. All settlement results are for your own reference; the Service is not responsible for their accuracy.',
       'Your data belongs to you. The Service uses your data solely to display your ledger and calculate balances — it will never be sold or shared with third parties.',
       'Please do not record highly sensitive personal information (such as national ID numbers or credit card numbers). The Service is designed for budgeting, not confidential document storage.',
       'By signing in with Google, you agree that Google will share your basic account information (name, avatar, email) with the Service for account identification purposes.',
-      'You may sign out or delete your account at any time from the settings page. A deletion request has a 14-day grace period and can be cancelled during it. After that, a solo ledger is deleted in full, while a ledger shared with a partner stays with them — the records the two of you wrote together are not removed. See “Data retention” in the privacy policy for details.',
+      'You may sign out or delete your account at any time from the settings page. A deletion request has a 14-day grace period and can be cancelled during it. After that, the records you wrote on your own are deleted, except what your partner could see. A ledger shared with a partner stays with them, and so does a past shared chapter they have since left — the records the two of you wrote together are not removed. See “Data retention” in the privacy policy for details.',
       'The Service reserves the right to suspend or adjust the Service for maintenance, security, or system requirements, and will provide advance notice where possible.',
       'These Terms are governed by the laws of the Republic of China (Taiwan). Any disputes shall be submitted to the Taipei District Court as the court of first instance.',
     ],
@@ -2083,7 +2108,7 @@ export const en: Translations = {
 
   privacyPage: {
     heading: 'Privacy Policy',
-    lastUpdated: 'Last updated: October 4, 2026',
+    lastUpdated: 'Last updated: October 15, 2026',
     intro: 'This page explains how Futari collects, uses, and protects your personal data.',
     sectionCollectTitle: 'Data we collect',
     sectionCollectItems: [
@@ -2104,8 +2129,8 @@ export const en: Translations = {
     sectionRetentionTitle: 'Data retention',
     sectionRetentionBody: 'Your account data is retained for as long as your account remains active. Transactions you delete are kept as soft-deleted records for about a year, then cleared automatically. When you request account deletion from the settings page there is a 14-day grace period (calendar days, not business days) during which you can cancel at any time; after that it runs automatically. What happens then depends on whether the ledger is yours alone or shared with a partner:',
     sectionRetentionItems: [
-      'A solo ledger: the whole ledger goes — transactions, settlements, recurring rules, aibutsu and trip records are all removed, along with your profile (name, avatar, email).',
-      "A shared ledger: the ledger stays with your partner. The transactions, settlements, aibutsu records and monthly review notes the two of you wrote together remain in their ledger; we do not remove them on your behalf, because those records are theirs as well. Your sign-in identity is deleted (Google / Apple account link, email, avatar, push devices), and your name appears in their ledger as “a partner who left”.",
+      'A solo ledger: the transactions, settlements, recurring rules, aibutsu and trip records you wrote on your own are deleted (aibutsu, recurring rules and trip names your partner could see stay so they can look back at them), along with your profile (name, avatar, email). If this ledger was once shared and your partner has since left, the records of your time together stay so they can look back at them, and your name appears as “a partner who left”. Once they delete their account too, those records are deleted with it.',
+      "A shared ledger: the ledger stays with your partner. The transactions, settlements, aibutsu records and monthly review notes the two of you wrote together remain in their ledger; we do not remove them on your behalf, because those records are theirs as well. Your sign-in identity is deleted (Google / Apple account link, email, avatar, push devices), and your name appears in their ledger as “a partner who left”. The same applies to a ledger you left earlier: the records you wrote during that time stay in your partner's ledger.",
       'If you would like the content in a shared ledger removed as well, talk it over with your partner before deleting your account, or write to us first.',
       'Data you delete (including what is removed when you delete your account) can remain in encrypted backups made before the deletion for up to about 60 days, and disappears as those backups are cleared. We do not use backups to bring it back; backups are only used if the whole service has to be restored, and in that case we apply those deletions again.',
     ],
@@ -2396,7 +2421,7 @@ export const en: Translations = {
       featCsvExport: 'CSV export',
       featCloudSync: 'Cloud sync',
       featRealtimeCloudSync: 'Real-time cloud sync',
-      featDataExport: 'Take your data with you',
+      featDataExport: 'Data export',
       featCrossPlatform: 'Cross-platform',
       featDailyEntries: 'Entries per day',
       verdictSupported: 'Supported',
@@ -2418,7 +2443,7 @@ export const en: Translations = {
       verdictUnlimited: 'Unlimited',
       verdictBuiltInConversion: 'Built-in conversion',
       verdictSpreadsheetExport: 'Spreadsheet export',
-      verdictCsvExport: 'CSV export',
+      verdictCsvExport: 'CSV: expenses, income, settlements',
       verdictPlatforms: 'iOS / Android / Web',
     },
     howToStepName: 'Step {n}',
@@ -2431,7 +2456,7 @@ export const en: Translations = {
         },
         {
           title: 'Yours to take back',
-          body: 'Export the whole ledger as CSV any time. Moving in is not a lock-in.',
+          body: "Export your expenses, income and settlements as CSV any time. Moving here doesn't lock you in.",
         },
         {
           title: 'Free for the long haul',
@@ -2824,7 +2849,7 @@ I will upload the screenshots once you confirm.`,
         differentiators: [
           {
             title: 'Free to bring data in, free to take it out',
-            body: 'Exporting records to CSV in Manebo requires a Premium subscription; Futari never charges for import or export — your records are always yours to take.',
+            body: 'Exporting records to CSV in Manebo requires a Premium subscription; Futari never charges for import or export, and your expenses, income and settlements are always yours to take.',
           },
           {
             title: 'Splitting and settling built in',
@@ -2877,7 +2902,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             title: 'Data moves freely, in and out',
-            body: 'In Simple Daily Money, CSV export is a VIP feature; in Futari, both import and export are free — the records are always yours.',
+            body: 'In Simple Daily Money, CSV export is a VIP feature; in Futari, both import and export are free, and your expenses, income and settlements can be exported any time.',
           },
         ],
         stepsHeading: 'Three steps',
@@ -2930,7 +2955,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             title: 'Data moves freely, in and out',
-            body: "In Futari, export needs no subscription and the file is standard UTF-8 CSV; whenever you want to leave, you can take it with you.",
+            body: "In Futari, export needs no subscription: your expenses, income and settlements come out as standard UTF-8 CSV, ready to take with you whenever you leave.",
           },
         ],
         stepsHeading: 'Three steps',
@@ -2974,7 +2999,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             title: 'Synced and yours to take',
-            body: 'Records live in the cloud, so a new phone loses nothing; export to CSV whenever you want to leave.',
+            body: 'Records live in the cloud, so switching phones loses nothing. When you want to leave, export your expenses, income and settlements to CSV.',
           },
         ],
         stepsHeading: 'Three steps',
@@ -3862,7 +3887,7 @@ I will upload the screenshots once you confirm.`,
       outing_description_too_long: 'Descriptions can be up to 100 characters',
       outing_currency_changed: 'This outing\'s currency doesn\'t match your ledger\'s base currency, so it can\'t fold back into your main ledger.',
       outing_admin_only: 'Only the ledger members who started this outing can do this',
-      outing_viewing_past_chapter: 'You\'re viewing a past chapter. Go back to the current chapter to make changes',
+      outing_viewing_past_chapter: "Past chapters are view-only and can't be changed. Go back and open it again to see only the actions you can take.",
       outing_expense_not_found: 'Couldn\'t find that expense',
       outing_settlement_not_found: 'Couldn\'t find that repayment',
       outing_link_invalid: 'This link no longer works. Ask whoever started the outing for a new one',

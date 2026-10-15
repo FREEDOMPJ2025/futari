@@ -55,8 +55,10 @@ type CapacitorGlobal = {
   getPlatform?: () => string
 }
 
-/** `'ios'` / `'android'` when running inside a native shell, else `null`. */
-function nativeShellPlatform(): 'ios' | 'android' | null {
+/** `'ios'` / `'android'` when running inside a native shell, else `null`.
+ *  Exported for #1674 (the basic worker is web-only), which needs only this
+ *  half: `detectPlatform()` also probes `matchMedia` for the PWA buckets. */
+export function nativeShellPlatform(): 'ios' | 'android' | null {
   const cap = (window as unknown as { Capacitor?: CapacitorGlobal }).Capacitor
   // `isNativePlatform()` — not `Capacitor !== undefined`. See the module note.
   if (!cap?.isNativePlatform?.()) return null

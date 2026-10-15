@@ -7,7 +7,8 @@
 // stopping after `through` (e.g. '0079'). `dropStandInDb` removes it.
 //
 // What is modelled, and why each piece matters (#1518):
-//   - roles anon / authenticated / service_role, auth.users, auth.uid() that
+//   - roles anon / authenticated / service_role, auth.users, auth.identities
+//     (0081 / 0082 grant on it and build a view over it), auth.uid() that
 //     reads `request.jwt.claims` the way Supabase's does, cron.schedule /
 //     cron.unschedule, public.rls_auto_enable(), the supabase_realtime
 //     publication — the objects migrations reference.
@@ -44,6 +45,9 @@ DO $$ BEGIN CREATE ROLE service_role NOLOGIN; EXCEPTION WHEN duplicate_object TH
 CREATE SCHEMA auth;
 GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role;
 CREATE TABLE auth.users (id uuid PRIMARY KEY, email text, raw_user_meta_data jsonb, created_at timestamptz DEFAULT now());
+-- 0081 / 0082 grant on and build views over auth.identities; a stand-in
+-- migrated past 0080 fails there without it (#1621).
+CREATE TABLE auth.identities (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid REFERENCES auth.users (id) ON DELETE CASCADE, provider text, identity_data jsonb, created_at timestamptz DEFAULT now());
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $f$
   SELECT coalesce(nullif(current_setting('request.jwt.claim.sub', true), ''),
     (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub'))::uuid $f$;

@@ -325,9 +325,13 @@ interface ItemCardProps {
   totalAmount: number
   isPast: boolean
   notes?: string | null
+  /** #1612 — the icon and tint of another asset type. A former member's
+   *  look-back lists every asset with this card: name and chapter money
+   *  only, none of the type's current details. Default 'item'. */
+  type?: import('@/lib/assets').AssetType
 }
 
-export function ItemCard({ id, name, monthAmount, totalAmount, isPast, notes }: ItemCardProps) {
+export function ItemCard({ id, name, monthAmount, totalAmount, isPast, notes, type = 'item' }: ItemCardProps) {
   return (
     <Link
       href={`/assets/${id}`}
@@ -336,13 +340,13 @@ export function ItemCard({ id, name, monthAmount, totalAmount, isPast, notes }: 
       <div
         className="rounded-2xl bg-surface overflow-hidden"
         style={{
-          border: '1px solid color-mix(in srgb, var(--asset-color-item) 25%, transparent)',
+          border: `1px solid color-mix(in srgb, var(--asset-color-${type}) 25%, transparent)`,
         }}
       >
         <div
           className="px-4 py-3 flex items-center gap-3"
         >
-          <TintIconBox type="item" tintVar="var(--asset-tint-item)" />
+          <TintIconBox type={type} tintVar={`var(--asset-tint-${type})`} />
           <div className="flex-1 min-w-0">
             <div
               className="flex items-center gap-1.5"

@@ -8,6 +8,7 @@ import { getChildNicknames, getPetListDetailsBatch, getPlantListDetailsBatch } f
 import { resolveInsuredMember, resolvePolicyHolder } from '@/lib/insuranceMemberLink'
 import { loadMemberLinkScope } from '@/lib/db/queries/insuranceView'
 import { AssetsListClient, type AssetsListItem } from './_components/AssetsListClient'
+import { FormerChapterAssetsList, type FormerChapterAsset } from './_components/FormerChapterAssetsList'
 
 export default async function AssetsPage() {
   const user = await getCurrentUser()
@@ -18,10 +19,25 @@ export default async function AssetsPage() {
   const { group, window: epochWindow } = context
 
   // A viewer on a closed chapter of a group they are no longer in only sees
-  // assets that existed before that chapter closed (null for everyone else).
-  // Known limit: those assets still show their current field values — see
-  // lib/pinnedChapterScope.ts.
+  // assets that existed before that chapter closed (null for everyone else),
+  // and (#1612) none of their current field values — see the branch below.
   const createdBefore = nonMemberPinCutoff(context, user.id)
+
+  // #1612 — a former member's look-back: each asset's name and the chapter's
+  // money only (owner decision 2026-10-13). Nothing else of the row leaves
+  // the server — not its current details, notes, policy members or plate.
+  if (context.isFormerMemberView) {
+    const rows = await listAssetsForGroup(group.id, user.id, createdBefore)
+    const summaries = await getAssetSummariesBatch(rows.map((a) => a.id), group.id, epochWindow)
+    const items: FormerChapterAsset[] = rows.map((a) => ({
+      id: a.id,
+      type: a.type,
+      name: a.name,
+      totalAmount: summaries.get(a.id)?.totalAmount ?? 0,
+    }))
+    return <FormerChapterAssetsList items={items} />
+  }
+
   const [assetRows, memberScope] = await Promise.all([
     listAssetsForGroup(group.id, user.id, createdBefore),
     loadMemberLinkScope(context, user.id),

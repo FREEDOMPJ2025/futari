@@ -1,40 +1,16 @@
 'use client'
 
-import { useState, useTransition } from 'react'
 import { useTranslations } from '@/lib/i18n/client'
 import { SubpageHeader } from '@/app/(dashboard)/_components/SubpageHeader'
 import { TrustCommitments } from './TrustCommitments'
+import { useTransactionsExport } from '@/app/(dashboard)/settings/_components/useTransactionsExport'
 
 export function TrustContent() {
   const t = useTranslations()
 
-  const [exportPending, startExportTransition] = useTransition()
-  const [exportError, setExportError] = useState<string | null>(null)
-
-  const handleExport = () => {
-    setExportError(null)
-    startExportTransition(async () => {
-      try {
-        const res = await fetch('/api/export/transactions', { credentials: 'same-origin' })
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const blob = await res.blob()
-        const disposition = res.headers.get('Content-Disposition') ?? ''
-        const match = /filename="?([^";]+)"?/i.exec(disposition)
-        const filename = match?.[1] ?? 'futari-transactions.csv'
-
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = filename
-        document.body.appendChild(a)
-        a.click()
-        a.remove()
-        URL.revokeObjectURL(url)
-      } catch {
-        setExportError(t.csvExport.failed)
-      }
-    })
-  }
+  // Same entry the leave flow's export-first hint starts (#1611).
+  const { start: handleExport, pending: exportPending, error: exportError } =
+    useTransactionsExport(t.csvExport.failed)
 
   return (
     <>

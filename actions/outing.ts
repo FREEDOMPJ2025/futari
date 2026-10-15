@@ -59,13 +59,15 @@ import {
  *
  * ## Who may write (lib/outing/access.ts)
  * - Content (add / edit / delete expense, record / delete settlement): a
- *   member of the outing's group, or a participant (bound by session, or by
- *   the `oc_<outingId>` claim cookie).
+ *   member of the outing's group who is named on the outing's chapter, or a
+ *   participant (bound by session, or by the `oc_<outingId>` claim cookie).
  * - Outing-level (rename, end, delete, add / deactivate participant, get /
  *   reset link, release slot): members only → participants get
- *   `outing_admin_only`.
+ *   `outing_admin_only`. Only while the outing's chapter is open
+ *   (`outing_epoch_closed`), except ending (#1682, see lockForAdmin).
  * - Creating an outing needs the viewer's own ledger (getViewerWriteContext).
- * A member pinned to a past chapter is refused with a code, not a throw.
+ * A member pinned to a past chapter is refused with a code, not a throw —
+ * except ending an outing of exactly the pinned chapter.
  *
  * ## Scoping (every id the client sends is untrusted)
  * - The group always comes from the outing row. No action accepts a group id
@@ -441,6 +443,11 @@ export const deleteOutingSettlement = action(async (input: { outingId: string; s
  * so this path is reached by a solo owner's outing after an invite is accepted
  * (member_b was null → net 0 anyway) or by account deletion.
  *
+ * Who (#1682, D2(a)): a member of the ledger named on the outing's chapter,
+ * unpinned or pinned to exactly that chapter — the route is: pin the chapter
+ * in 過去的時光, open the outing from that chapter's list, End. A later
+ * partner is not this outing's member; a pin to another past chapter refuses.
+ *
  * Idempotent: the conditional UPDATE matches only an active, unfolded outing;
  * a second call gets `outing_not_active` and writes nothing.
  */
@@ -457,7 +464,7 @@ export const endOuting = action(async (input: { outingId: string }): Promise<{ f
     //    does not block the FK check (FOR KEY SHARE) of an insert that
     //    references this group. Asked for up front: upgrading a SHARE lock
     //    later would let two endOutings deadlock.
-    const { outing } = await lockForAdmin(tx, input?.outingId, inputs, 'update', 'no key update')
+    const { outing } = await lockForAdmin(tx, input?.outingId, inputs, 'update', 'no key update', 'end')
     const group = { id: outing.groupId }
 
     // 2. Status flip. Waits for nothing more (the row is ours); later

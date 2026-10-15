@@ -143,14 +143,21 @@ export function openChapterCreatedClause(createdAtColumn: ColRef, groupId: strin
  * (which relabels roles without a new chapter) changes nothing.
  *
  * **Rows older than the group's first chapter** belong to that first
- * chapter: the earliest epoch has no lower bound. Such rows exist because
- * leaving a ledger carries the leaver's own rows into the new solo group
- * the leaver starts — they keep their original `created_at`, which predates
- * that group's first chapter (the leaver's own). Without this, the leaver
- * would lose their own rows from the export; with it, only members of that
- * first chapter see them, so a partner who joins the new group later does
- * not. (Groups from before chapters were recorded behave the same way: their
- * earliest rows are attributed to the first recorded chapter.)
+ * chapter: the earliest epoch has no lower bound. Such rows exist in groups
+ * from before chapters were recorded: their earliest rows are attributed to
+ * the first recorded chapter. Only members of that first chapter see them,
+ * so a partner who joins later does not. The DB twin of this rule,
+ * public.viewer_in_chapter (drizzle/0080, RLS), has the same exception and
+ * also needs it for the FuelLogs of a car that moved with a leaver into the
+ * new solo group: they keep their `created_at`, which predates that group's
+ * first chapter (the leaver's own).
+ *
+ * Withdrawn reason (#1611): this exception was written because leaving
+ * carried the leaver's own records into the new group, older than its first
+ * chapter. A leave no longer moves records — the closed chapter keeps both
+ * people's rows in the original group, where `viewerChaptersClause(old,
+ * leaver)` matches exactly that chapter. The code stays for the cases
+ * above; do not remove it on the strength of #1611 alone.
  *
  * No epoch rows for the group ⇒ nothing matches (fails closed).
  *
@@ -217,7 +224,11 @@ const SQL_IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/
  * (drizzle/0077) stores asset names without ids. In-app review is chapter-
  * gated (review/[month]/page.tsx), so a later partner only reaches a stored
  * name through a duo-chapter record dated (`transacted_at`) into a month
- * wholly inside their own chapter.
+ * wholly inside their own chapter. Since 0093 (#1621) the snapshot of such a
+ * month counts only rows created inside that chapter, so that path is closed
+ * for snapshots computed from then on; snapshots are write-once, and one
+ * stored before 0093 can still carry such a name (prod count 2026-10-13: 0
+ * snapshots with an out-of-chapter row).
  */
 export function frozenCopyVisibleClause(assetAlias: string, viewerId: string): SQL {
   if (!SQL_IDENTIFIER.test(assetAlias)) throw new Error('frozenCopyVisibleClause: invalid alias')

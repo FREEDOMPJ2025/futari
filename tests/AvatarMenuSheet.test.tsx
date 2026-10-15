@@ -40,7 +40,9 @@ vi.mock('@/actions/auth', () => ({
   signOut: vi.fn(),
 }))
 vi.mock('@/lib/offline/swControl', () => ({
-  clearDynamicCache: vi.fn().mockResolvedValue(undefined),
+  beginOfflineOff: vi.fn().mockResolvedValue(true),
+  finishOfflineOff: vi.fn().mockResolvedValue(undefined),
+  createSequence: vi.fn(() => ({ expected: false, ok: () => true, setPref: () => {} })),
 }))
 
 const data: AvatarMenuData = {

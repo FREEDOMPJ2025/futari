@@ -1,11 +1,10 @@
-// 匯出的範圍決定（只含 viewer 待過的章節、刻意含 pending、為什麼入口在信任宣示頁）見
-// docs/superpowers/specs/csv-export-design.md。
+// 匯出的範圍（viewer 可以回看的每一段章節、跨帳本；支出含 pending、進帳、結算）、
+// 分攤欄的規則與已知限制，見 docs/superpowers/specs/csv-export-design.md。
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/supabase/server'
-import { getActiveGroupForUser } from '@/lib/db/queries/group'
-import { listAllActiveCashTransactionsForExport } from '@/lib/db/queries/transactions'
+import { getLedgerExportForViewer } from '@/lib/db/queries/export'
 import { getTranslations } from '@/lib/i18n/t'
-import { buildExportFilename, buildTransactionsCsv } from '@/lib/csv/transactions'
+import { buildExportFilename, buildTransactionsCsv, exportLabelsFor } from '@/lib/csv/transactions'
 import { captureServer } from '@/lib/analytics/server'
 
 export const dynamic = 'force-dynamic'
@@ -16,32 +15,30 @@ export async function GET() {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
-  // Group lookup is the trust boundary: a user can only export the group they
-  // belong to. The query layer doesn't enforce membership on its own.
-  // Same resolver as the dashboard and the server actions, so a user who is
-  // in more than one group always exports the one they are using now.
-  const group = await getActiveGroupForUser(user.id)
-  if (!group) {
-    return NextResponse.json({ error: 'no_group' }, { status: 404 })
-  }
-
-  const [rows, t] = await Promise.all([
-    listAllActiveCashTransactionsForExport(group.id, user.id),
+  // Trust boundary (#1460): the scope is resolved from the signed-in user's id
+  // alone, inside the query — the chapters they may look back at (#1612 rule),
+  // in any ledger. Nothing from the request widens it, and no active ledger is
+  // required: a removed partner with no ledger exports the closed chapters
+  // they were in, and someone with none gets a header-only file.
+  const [ledger, t] = await Promise.all([
+    getLedgerExportForViewer(user.id),
     getTranslations(),
   ])
 
-  const csv = buildTransactionsCsv(rows, {
-    columns: t.csvExport.columns,
-    category: t.category,
-    splitType: t.splitType,
-  })
+  const csv = buildTransactionsCsv(ledger.rows, exportLabelsFor(t))
   const filename = buildExportFilename(t.csvExport.filenamePrefix)
 
-  // Audit trail: who exported, from which group, how many rows. Never the
-  // content. captureServer never throws and only sends from the prod deploy.
+  // Audit trail: who exported and how much, per kind. Never the content, and
+  // no ids — the chapters can belong to ledgers other people use now.
+  // captureServer never throws and only sends from the prod deploy.
+  const count = (kind: string) => ledger.rows.filter((r) => r.kind === kind).length
   await captureServer(user.id, 'transactions_exported', {
-    group_id: group.id,
-    row_count: rows.length,
+    row_count: ledger.rows.length,
+    expense_count: count('expense'),
+    income_count: count('income'),
+    settlement_count: count('settlement'),
+    chapter_count: ledger.chapters.length,
+    group_count: new Set(ledger.chapters.map((c) => c.groupId)).size,
   })
 
   return new NextResponse(csv, {

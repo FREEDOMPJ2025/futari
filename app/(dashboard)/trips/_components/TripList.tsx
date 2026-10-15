@@ -24,7 +24,7 @@ export function TripList(props: { trips: Trip[]; baseCurrency: CurrencyCode }) {
   const router = useRouter()
   const t = useTranslations()
   const tl = t.tripList
-  const { isPast } = useMember()
+  const { isPast, isFormerMember } = useMember()
   const [open, setOpen] = useState(false)
   const active = props.trips.filter(t => t.status === 'active')
   const past = props.trips.filter(t => t.status !== 'active')
@@ -44,7 +44,9 @@ export function TripList(props: { trips: Trip[]; baseCurrency: CurrencyCode }) {
         </p>
       </div>
 
-      <OutingEntryRow />
+      {/* #1612 — 出遊 follows the viewer's own ledger, not the pin: no entry
+          in a former member's look-back. */}
+      {!isFormerMember && <OutingEntryRow />}
 
       {props.trips.length === 0 ? (
         <TripsEmptyState />

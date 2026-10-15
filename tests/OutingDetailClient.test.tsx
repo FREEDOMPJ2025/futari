@@ -42,6 +42,8 @@ describe('OutingDetailClient', () => {
         outing={{ id: 'o1', name: '九份兩日', currency: 'twd', status: 'active' }}
         view={view}
         foldPreview={300}
+        canManage
+        canEnd
         expenses={[{ id: 'e1', paidByParticipantId: 'A', amount: 900, description: '午餐', category: null, shares: [{ participantId: 'A', shareAmount: 300 }, { participantId: 'B', shareAmount: 300 }, { participantId: 'F', shareAmount: 300 }] }]}
         participants={participants}
       />,
@@ -60,6 +62,8 @@ describe('OutingDetailClient', () => {
         outing={{ id: 'o1', name: '宜蘭', currency: 'twd', status: 'ended' }}
         view={{ participants: [], transfers: [], coupleNet: 0 }}
         foldPreview={0}
+        canManage
+        canEnd
         expenses={[]}
         participants={[]}
       />,
@@ -74,6 +78,8 @@ describe('OutingDetailClient', () => {
         outing={{ id: 'o1', name: '九份兩日', currency: 'twd', status }}
         view={view}
         foldPreview={foldPreview}
+        canManage
+        canEnd
         expenses={[]}
         participants={participants}
       />,

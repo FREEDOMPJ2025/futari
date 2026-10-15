@@ -4,15 +4,13 @@ import type { EpochWindow } from '@/lib/db/queries/epoch'
  * Cut-off for entity reads (assets and their recurring rules) when the viewer
  * is looking at a closed chapter of a group they are no longer part of.
  *
- * Before #1603, `resolveViewerEpochContext` followed the past-chapter pin to
- * the chapter's group even after the viewer had left or been removed from it.
- * Since #1603 it no longer does (such a pin falls through to the viewer's own
- * ledger), so this cut-off returns `null` for every viewer in production
- * today. It is kept, with its tests, as the guard #1612 needs when former
- * members can open their old chapters again. Money reads
- * are already bounded by the chapter window, but asset rows are not
+ * Since #1612, `resolveViewerEpochContext` follows a pin to a CLOSED chapter
+ * of a group the viewer left or was removed from (a read-only look-back), and
+ * this cut-off is what sets `ViewerEpochContext.isFormerMemberView`. Money
+ * reads are already bounded by the chapter window, but asset rows are not
  * chapter-scoped: without a cut-off, the pinned viewer would see assets and
- * rules the remaining members created after the chapter closed.
+ * rules the remaining members created after the chapter closed — in /assets,
+ * the records filter list and the records drill-down chip alike.
  *
  * Returns the chapter's `endedAt` when the viewer is on such a pin, so the
  * caller only reads rows with `created_at < endedAt`. Returns `null` —

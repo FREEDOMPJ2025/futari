@@ -1374,6 +1374,10 @@ export type Translations = {
           title: string
           intro: string
           bullets: string[]
+          /** #1611 / #1460 export-first hint. Name what the export holds —
+           *  expenses, income, settlements — never messages or "everything". */
+          exportHint: string
+          exportCta: string
         }
         card4: {
           title: string
@@ -1601,6 +1605,10 @@ export type Translations = {
     bannerHeading: string
     bannerExitCta: string
     empty: string
+    /** #1460 — export on the standalone list (a person with no ledger). Name
+     *  what the file holds: expenses, income, settlements. */
+    exportHint: string
+    exportCta: string
   }
 
   csvExport: {
@@ -1608,15 +1616,37 @@ export type Translations = {
     failed: string
     /** Filename stem; `-YYYYMMDD.csv` is appended at download time. */
     filenamePrefix: string
+    /** Header row of the ledger export (#1460), in column order. */
     columns: {
+      type: string
       date: string
       description: string
       amount: string
+      currency: string
+      originalAmount: string
+      originalCurrency: string
       category: string
-      paidBy: string
-      splitType: string
+      /** Payer of an expense / settlement, recipient of an income. */
+      person: string
+      /** Settlement only: who received it. */
+      settlementTo: string
+      myShare: string
+      theirShare: string
+      status: string
       notes: string
+      chapter: string
     }
+    /** 類型 cell. */
+    types: {
+      expense: string
+      income: string
+      settlement: string
+    }
+    /** 章節 cell: `{start}` / `{end}` dates, `{who}` = pastTimes.withPartner
+     *  or pastTimes.soloLabel. */
+    chapter: string
+    /** Stands in for `{end}` while the chapter is open. */
+    chapterOngoing: string
   }
 
   assets: {
@@ -2581,7 +2611,12 @@ export type Translations = {
    *  inline script picks one from `navigator.language`.
    *
    *  Keep it short: every string here ships inside the app binary and can only
-   *  change by re-submitting to the stores. */
+   *  change by re-submitting to the stores.
+   *
+   *  #1674: the same keys also render the web's `public/offline-basic.html`
+   *  (`prebuild`, served by the basic worker `/sw-basic.js`). On the web a copy
+   *  change ships with the next deploy — the page hash is baked into the worker
+   *  bytes, so browsers pick up the new page on their next update check. */
   nativeOfflinePage: {
     /** HTML <title>; never visible in the shell, but is what a screen reader
      *  and the Android task switcher read. */
@@ -2590,6 +2625,15 @@ export type Translations = {
     body: string
     /** Label on the link back to the app. */
     retry: string
+    /** Shown while the page probes for the network and returns by itself (#1672). */
+    status: string
+    /** Shown once automatic returns stopped; only the manual button is left. */
+    stalled: string
+    /** Android shell: behind a build flag that stays off until case 9 of
+     *  #1672 passes (the iOS shell has no service worker). Web (#1674): shown
+     *  when the browser supports service workers and offline browsing is not
+     *  on. */
+    offlineBrowsingHint: string
   }
 
   termsPage: {
@@ -3381,7 +3425,7 @@ export const zhTW: Translations = {
       s6Body: [
         '這個擔心很合理。Honeydue 這幾年慢慢式微，Spendee 曾經讓用戶的資料憑空消失——如果你被這些事嚇過，你的警覺是對的。',
         'Futari 是我自己每天在用的工具，這是最直接的「有人在維護」的證明。不是說它永遠不會出問題，而是說背後有一個真實的人在意它能不能用。',
-        '資料方面，Futari 支援 CSV 匯出。任何時候你想把資料帶走，都可以。我不想用「我們不會消失」這種話來說服你，但我可以告訴你：你的資料不會被綁住。',
+        '資料方面，Futari 支援 CSV 匯出：支出、進帳和結算，任何時候想帶走都可以，離開帳本之後也行。我不想用「我們不會消失」這種話來說服你，但我可以告訴你：這些紀錄不會被綁住。',
       ],
       s7Heading: 'Futari 是什麼，也是什麼不是',
       s7Body: [
@@ -3440,7 +3484,7 @@ export const zhTW: Translations = {
       },
       portability: {
         title: '隨時帶走',
-        body: 'CSV 匯出，資料永遠是你的。想離開時不會被綁在這裡。',
+        body: '支出、進帳和結算都能匯出成 CSV，離開帳本之後也可以，不會被綁在這裡。',
       },
       forever: {
         title: '永久免費',
@@ -3827,7 +3871,7 @@ export const zhTW: Translations = {
     pending: '處理中…',
     title: '確定要刪除帳號？',
     description:
-      '我們會在 14 天後移除你的資料。在那之前你隨時可以回來取消。若你和對方共用帳本，對方的紀錄會保留，你的名字會顯示為「已離開的夥伴」。',
+      '我們會在 14 天後移除你的資料。在那之前你隨時可以回來取消。如果曾和對方共用帳本，一起記下的紀錄會留給對方，對方已經離開的那段也一樣；你的名字會顯示為「已離開的夥伴」。',
   },
 
   accountDeletionBanner: {
@@ -4262,7 +4306,7 @@ export const zhTW: Translations = {
     sectionApp: '應用',
     offlineBrowsing: '離線瀏覽',
     offlineHintOff: '在無網路時看不到歷史記錄。開啟後，最近瀏覽過的頁面會存在這台裝置上。',
-    offlineHintOn: '無網路時可看最近一次連線時的記錄。資料只存在這台裝置，登出時會自動清除。',
+    offlineHintOn: '無網路時可看最近一次連線時的記錄。資料只存在這台裝置；登出時會一併關閉並清除，重新登入後需要再開啟一次。',
     offlineToggling: '處理中…',
     offlineToggleError: '無法切換，請稍後再試',
     offlineUnsupported: '目前的瀏覽器不支援離線瀏覽',
@@ -4338,10 +4382,12 @@ export const zhTW: Translations = {
             '帳目要先結清為 0，才能離開',
             '{memberB} 名下的車、保單、房子會跟著走',
             '孩子、寵物、植物沒有歸屬欄位，會留在原帳本',
-            '收支記錄依「誰付的／誰收的」分配',
+            '收支、結算和月回顧留言會完整留在這本帳本，離開後仍能回頭查看',
             '尚未接受的邀請連結會失效',
             '原帳本變回單人狀態，由 {memberA} 繼續使用',
           ],
+          exportHint: '離開後，也能在「資料安全」頁匯出這段章節的支出、進帳和結算。想自己留一份，現在匯出也可以。',
+          exportCta: '先匯出支出、進帳和結算',
         },
         card4: {
           title: '確定這些都是你跟對方一起想要的嗎？',
@@ -4479,7 +4525,7 @@ export const zhTW: Translations = {
     partnerLeftHeading: '{partner} 已離開',
     partnerLeftBody: '到目前為止的記錄都還在。從這裡開始，是你一個人的時光。',
     welcomeSoloHeading: '歡迎回到一個人',
-    welcomeSoloBody: '帳本完整地跟著你過來。從今天起，可以慢慢來。',
+    welcomeSoloBody: '先前的紀錄留在原本的帳本，隨時可以回頭看。從今天起，可以慢慢來。',
     removedPartnerHeading: '回到一個人',
     removedPartnerBody: '帳本完整地留著。從今天起，可以慢慢來。',
     dismissAria: '關閉',
@@ -4524,6 +4570,8 @@ export const zhTW: Translations = {
     bannerHeading: '你正在看 {start} – {end} 的過去',
     bannerExitCta: '回到現在',
     empty: '還沒有過去的時光。第一段才剛開始。',
+    exportHint: '想留一份自己的紀錄，可以把這些章節裡的支出、進帳和結算匯出成 CSV。',
+    exportCta: '匯出支出、進帳和結算',
   },
 
   csvExport: {
@@ -4531,14 +4579,29 @@ export const zhTW: Translations = {
     failed: '匯出失敗，請稍後再試',
     filenamePrefix: 'futari-transactions',
     columns: {
+      type: '類型',
       date: '日期',
-      description: '描述',
+      description: '說明',
       amount: '金額',
+      currency: '幣別',
+      originalAmount: '原幣金額',
+      originalCurrency: '原幣別',
       category: '分類',
-      paidBy: '誰付的',
-      splitType: '分攤',
+      person: '付款／收款人',
+      settlementTo: '給誰（結算）',
+      myShare: '我的分攤',
+      theirShare: '對方分攤',
+      status: '狀態',
       notes: '備註',
+      chapter: '章節',
     },
+    types: {
+      expense: '支出',
+      income: '進帳',
+      settlement: '結算',
+    },
+    chapter: '{start} – {end}・{who}',
+    chapterOngoing: '至今',
   },
 
   assets: {
@@ -4694,8 +4757,8 @@ export const zhTW: Translations = {
       body: '帳本只對你們兩人的帳號開放。連線以 HTTPS 加密；寶寶本名、身分證字號、車牌和地址這類機敏資料，我們會再加密一層才存進資料庫。',
     },
     portability: {
-      heading: '隨時都能整包帶走',
-      body: '我們不會把你們綁在這裡。日後想離開，所有紀錄都能整批帶走。',
+      heading: '支出、進帳和結算，隨時能帶走',
+      body: '我們不會把你們綁在這裡。你待過的每段章節裡的支出、進帳和結算，都能匯出成 CSV 帶走，離開帳本之後也可以。',
     },
     backup: {
       heading: '每一筆，都會好好留著',
@@ -4703,7 +4766,7 @@ export const zhTW: Translations = {
     },
     onboarding: {
       line1: '資料只屬於你們倆',
-      line2: '隨時都能整包帶走',
+      line2: '支出、進帳和結算隨時能帶走',
       line3: '每一筆，都會好好留著',
     },
     bilateral: {
@@ -5370,21 +5433,27 @@ export const zhTW: Translations = {
 
   nativeOfflinePage: {
     documentTitle: '離線中 · Futari',
-    title: '現在沒有網路',
-    body: '連上網路之後，這裡就會回到你們的帳本。',
+    title: '現在連不上網路',
+    body: '連上 Wi-Fi 或行動網路之後，這裡會自己回到你們的帳本。',
     retry: '再試一次',
+    /** Shown while the page is probing for the network (#1672). */
+    status: '正在重新連線…',
+    /** Shown after automatic returns stopped; only the manual button is left. */
+    stalled: '還是連不上，等網路穩定一點再按「再試一次」',
+    /** Android shell only, and only when the build flag is on (case 9 of #1672). */
+    offlineBrowsingHint: '下次連上網路後，可以到「設定 › 離線瀏覽」打開，沒網路時也能看最近的紀錄',
   },
 
   termsPage: {
     heading: '服務條款',
-    lastUpdated: '最後更新：2026 年 9 月 16 日',
+    lastUpdated: '最後更新：2026 年 10 月 15 日',
     intro: '使用 Futari（以下簡稱「本服務」）即表示您同意以下條款。請在使用前詳閱。',
     bullets: [
       '本服務提供雙人共用記帳功能，包含交易紀錄、結算與共同財物管理。所有結算結果僅供使用者自行參考，本服務不對其正確性負責。',
       '您的資料屬於您。本服務僅為顯示與計算目的使用您輸入的資料，不會出售或對外分享您的個人資料。',
       '請勿記錄高度敏感的身分資訊（例如身分證字號、信用卡號等）。本服務的設計目的是記帳，不是機密文件保存。',
       '使用 Google 登入即表示您同意 Google 將您的基本帳號資訊（姓名、頭像、Email）提供給本服務，作為帳號識別之用。',
-      '您可隨時透過設定頁登出或刪除帳號。提出刪除後有 14 天緩衝期，期間可以取消；期滿後，只有您一個人的帳本會整本刪除，與伴侶共用的帳本則會留給對方，您和對方共同記下的紀錄不會一起移除。詳見隱私權政策的「資料保留期限」。',
+      '您可隨時透過設定頁登出或刪除帳號。提出刪除後有 14 天緩衝期，期間可以取消；期滿後，您一個人時記下的紀錄會刪除（對方曾經看得到的部分除外）；與伴侶共用的帳本會留給對方，曾經共用、對方已經離開的那段時光也會留給對方回看，您和對方共同記下的紀錄不會一起移除。詳見隱私權政策的「資料保留期限」。',
       '本服務保留因維護、安全或系統需求暫停或調整服務的權利，並將在可能的情況下提前告知。',
       '本服務條款適用中華民國法律，如有爭議以臺灣臺北地方法院為第一審管轄法院。',
     ],
@@ -5397,7 +5466,7 @@ export const zhTW: Translations = {
 
   privacyPage: {
     heading: '隱私權政策',
-    lastUpdated: '最後更新：2026 年 10 月 4 日',
+    lastUpdated: '最後更新：2026 年 10 月 15 日',
     intro: '本頁說明 Futari 如何蒐集、使用與保護您的個人資料。',
     sectionCollectTitle: '蒐集的資料',
     sectionCollectItems: [
@@ -5418,8 +5487,8 @@ export const zhTW: Translations = {
     sectionRetentionTitle: '資料保留期限',
     sectionRetentionBody: '您的帳號資料在帳號存續期間持續保存。您刪除的交易紀錄會保留軟刪除標記約 1 年，之後由系統自動清除。在設定頁提出刪除帳號後，有 14 天的緩衝期（日曆天，不是工作天），期間隨時可以取消；期滿由系統自動執行。執行時會發生什麼，取決於這本帳本是您一個人的，還是和伴侶共用的：',
     sectionRetentionItems: [
-      '一個人的帳本：整本一起刪除——交易、結算、定期收支規則、愛物與旅行紀錄都會移除，您的個人資料（姓名、頭像、Email）也一併刪除。',
-      '兩人共用的帳本：帳本會留給對方。你們一起記下的交易、結算、愛物紀錄與月回顧留言會留在對方的帳本裡，我們不會單方面替您刪掉——那些紀錄同時也是對方的。您的登入身分會刪除（Google／Apple 帳號連結、Email、頭像、推播裝置），您的名字在對方的帳本裡會顯示為「已離開的夥伴」。',
+      '一個人的帳本：您一個人時記下的交易、結算、定期收支規則、愛物與旅行紀錄會刪除（對方曾經看得到的愛物、定期規則和旅行名稱，會留給對方回看），您的個人資料（姓名、頭像、Email）也一併刪除。如果這本帳本曾經兩人共用、對方已經離開，你們共同那段時光的紀錄會留給對方回看，您的名字會顯示為「已離開的夥伴」；等對方也刪除帳號，那段紀錄才會一起刪除。',
+      '兩人共用的帳本：帳本會留給對方。你們一起記下的交易、結算、愛物紀錄與月回顧留言會留在對方的帳本裡，我們不會單方面替您刪掉——那些紀錄同時也是對方的。您的登入身分會刪除（Google／Apple 帳號連結、Email、頭像、推播裝置），您的名字在對方的帳本裡會顯示為「已離開的夥伴」。你先前離開過的帳本也一樣：你在那段時光記下的紀錄會留在對方的帳本。',
       '如果您希望共用帳本裡的內容也一併移除，請在刪除帳號前與伴侶談過，或先寫信告訴我們。',
       '已刪除的資料（包括刪除帳號時移除的內容），在刪除前就做好的加密備份裡最多還會留存約 60 天，之後隨舊備份清除而消失。這段期間我們不會用備份把它們找回來；只有在整個服務需要從備份還原時才會用到備份，而那時我們會重新套用這些刪除。',
     ],
@@ -5703,7 +5772,7 @@ export const zhTW: Translations = {
       featCsvExport: 'CSV 資料匯出',
       featCloudSync: '雲端同步',
       featRealtimeCloudSync: '即時雲端同步',
-      featDataExport: '資料匯出帶走',
+      featDataExport: '資料匯出',
       featCrossPlatform: '跨平台',
       featDailyEntries: '每日記帳筆數',
       verdictSupported: '支援',
@@ -5725,7 +5794,7 @@ export const zhTW: Translations = {
       verdictUnlimited: '不限',
       verdictBuiltInConversion: '內建換算',
       verdictSpreadsheetExport: '試算表匯出',
-      verdictCsvExport: 'CSV 匯出',
+      verdictCsvExport: 'CSV：支出、進帳、結算',
       verdictPlatforms: 'iOS／Android／Web',
     },
     howToStepName: '步驟 {n}',
@@ -5738,7 +5807,7 @@ export const zhTW: Translations = {
         },
         {
           title: '隨時可以帶走',
-          body: '不喜歡的話，整本帳隨時匯出 CSV，搬家不是綁約的起點。',
+          body: '不喜歡的話，支出、進帳和結算隨時能匯出 CSV，搬家不是綁約的起點。',
         },
         {
           title: '免費長期使用',
@@ -6112,7 +6181,7 @@ export const zhTW: Translations = {
         differentiators: [
           {
             title: '資料進出都免費',
-            body: '在 Manebo，把記錄匯出成 CSV 需要 Premium 訂閱；Futari 的匯入與匯出都不收費，記錄永遠帶得走。',
+            body: '在 Manebo，把記錄匯出成 CSV 需要 Premium 訂閱；Futari 的匯入與匯出都不收費，支出、進帳和結算隨時帶得走。',
           },
           {
             title: '分攤與結算內建',
@@ -6162,7 +6231,7 @@ export const zhTW: Translations = {
           },
           {
             title: '資料自由進出',
-            body: '在簡單記帳，CSV 匯出是 VIP 功能；Futari 的匯入與匯出都免費，記錄永遠是你們的。',
+            body: '在簡單記帳，CSV 匯出是 VIP 功能；Futari 的匯入與匯出都免費，支出、進帳和結算隨時能匯出。',
           },
         ],
         stepsHeading: '搬遷三步',
@@ -6208,7 +6277,7 @@ export const zhTW: Translations = {
           },
           {
             title: '資料自由進出',
-            body: '在 Futari，匯出不需要訂閱，檔案是標準 UTF-8 CSV；哪天想離開，也一樣帶得走。',
+            body: '在 Futari，匯出不需要訂閱，支出、進帳和結算會匯出成標準 UTF-8 CSV；哪天想離開，也一樣帶得走。',
           },
         ],
         stepsHeading: '搬遷三步',
@@ -6249,7 +6318,7 @@ export const zhTW: Translations = {
           },
           {
             title: '雲端同步、隨時帶走',
-            body: '記錄存在雲端，換手機不怕不見；想離開時 CSV 匯出，資料是你們的。',
+            body: '記錄存在雲端，換手機不怕不見；想離開時，支出、進帳和結算都能匯出 CSV 帶走。',
           },
         ],
         stepsHeading: '搬遷三步',
@@ -7118,7 +7187,7 @@ export const zhTW: Translations = {
       outing_description_too_long: '說明最長 100 字',
       outing_currency_changed: '這次出遊的幣別和帳本目前的基準幣別不一致，所以不能折回主帳本。',
       outing_admin_only: '只有開這次出遊的帳本成員可以這樣做',
-      outing_viewing_past_chapter: '你正在看過去的章節，回到目前的章節才能修改',
+      outing_viewing_past_chapter: '過去的章節只能查看，不能修改。回上一頁再重新打開，畫面會只顯示可以用的操作。',
       outing_expense_not_found: '找不到這筆支出',
       outing_settlement_not_found: '找不到這筆還款',
       outing_link_invalid: '這個連結已失效，請向開局的人要新連結',

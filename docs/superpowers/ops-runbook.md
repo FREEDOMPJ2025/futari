@@ -282,6 +282,49 @@ group by 1;
 - **失效的樣子**：合法的長查詢被砍會丟 57014 `canceling statement due to statement timeout`；交易開著不動超過 60 秒，連線會被終止（25P03）。看到這兩個 code 先確認是不是有 query 真的變慢了，不要直接把逾時調大。
 - `futari_app` 可以對自己 `ALTER ROLE … SET` 改掉這兩個值——所以事故處理要 `RESET ALL` 再重設（見下）。
 
+### 依請求清除單一保留章節（#1701，手動；先在 dev 跑過）
+
+情境：離開的人 X 還活著、不想刪帳號，但要求把留在孤兒帳本裡、自己「過去的時光」那段共同章節清掉（走 privacy 頁的「寫信給我們」）。沒有 app 內入口，也沒有新函式；用 0096 的 `_prune_ledger` 本身，只是先讓 X 不再是那段章節的成員。**不可逆**（章節紀錄與 X 的回看都消失），所以：
+
+- **誰的請求**：只受理 X 本人從註冊的 email 寄來的請求（比對 `auth.users.email`）；一句話確認是哪一段章節（日期範圍）。別人（包括曾經的伴侶）的請求不受理。
+- **範圍限制**：只處理**孤兒帳本**裡、成員恰為「已刪除的留下者 D（該帳本的 `member_a`）＋X」的**一段**已關閉章節。章節還有別的活著的成員、或帳本仍有現任成員，停下來問擁有者；X 若要的其實是整個帳號刪除，請 X 走 app 內刪除（會走同一條 `_prune_ledger`）。
+- 以 `postgres`（admin）執行；`_prune_ledger` 沒有給任何 app 角色 grant。
+
+事前（唯讀，記下結果）：
+
+```sql
+-- :g = 帳本 id, :e = 章節 (GroupEpochs.id), :x = X 的 auth.users.id
+SELECT g.id, g.member_a, g.member_b, (SELECT count(*) FROM auth.users u WHERE u.id = g.member_a) AS member_a_alive
+  FROM "OikosGroups" g WHERE g.id = :'g';             -- member_b 為 NULL、member_a_alive = 0
+SELECT id, started_at, ended_at, member_a_id, member_b_id FROM "GroupEpochs" WHERE id = :'e' AND group_id = :'g';
+                                                       -- ended_at 不為 NULL，成員恰為 member_a 與 :x
+SELECT count(*) FILTER (WHERE ended_at IS NOT NULL) AS closed_epochs FROM "GroupEpochs" WHERE group_id = :'g';
+```
+
+執行（單一 transaction；任何一個前置條件不成立就 ROLLBACK）：
+
+```sql
+BEGIN;
+-- 讓 X 不再是這段章節的成員：章節只剩已刪除的 D（墓碑 Profiles 仍在），名字槽維持「已離開的夥伴」。
+UPDATE "GroupEpochs" e
+   SET member_a_id = g.member_a, member_b_id = NULL,
+       member_a_name = '已離開的夥伴', member_b_name = NULL
+  FROM "OikosGroups" g
+ WHERE e.id = :'e' AND e.group_id = :'g' AND g.id = e.group_id
+   AND g.member_b IS NULL AND e.ended_at IS NOT NULL
+   AND ((e.member_a_id = g.member_a AND e.member_b_id = :'x')
+     OR (e.member_b_id = g.member_a AND e.member_a_id = :'x'));
+-- 必須剛好 1 列，否則 ROLLBACK。
+SELECT public._prune_ledger(:'g');
+-- 事後檢查（還在 transaction 內）：
+SELECT count(*) FROM "GroupEpochs" e JOIN auth.users u ON u.id IN (e.member_a_id, e.member_b_id)
+ WHERE e.id = :'e';                                   -- 0
+-- 如果 X 是這個帳本最後一位活著的前成員，_prune_ledger 回傳 'purged'，整個帳本已刪；否則該章節的交易／旅行／出遊／月回顧等已隨之刪除（以章節日期範圍抽查 CashTransactions、Trips、Outings 筆數 = 0）。
+COMMIT;
+```
+
+事後：X 的「過去的時光」不再列出該章節（請 X 確認）；跑上面三條不變式仍為 0；在擁有者的請求紀錄寫下日期與帳本 id（不寫內容）。**這段 SQL 會改 `GroupEpochs`，寫好之後先在 dev 用 0096 的測試夾具跑一遍**（`__tests__/actions/deletionKeepsChapter1701*.test.ts` 的情境）再用在 prod；跑 dev 時若 `GroupEpochs` 有 trigger 或 CHECK 擋下 UPDATE，不要繞過，回報擁有者重新設計。
+
 ### 事故處理：懷疑 `futari_app` 的密碼外洩
 
 1. **換密碼**：admin service 裡 `\password futari_app`（照啟用步驟 3–4；步驟 3 的腳本看到舊的 `futari_<env>_app.pw` 會拒絕執行，先把它改名成 `.pw.old`，新密碼上線後再刪；dev 的 `.env.local` 要先 `futari-app-db-url.py … dev --rollback` 再重跑，因為它看到已經是 `futari_app` 會拒絕），更新 `.pgpass` 與各環境 env（Vercel 標 Sensitive），redeploy。需要立刻切斷時先 `ALTER ROLE futari_app NOLOGIN;`（會造成 app 停擺，直到新密碼上線再 `LOGIN`）。
@@ -512,7 +555,9 @@ where n.nspname in ('public', 'drizzle') and c.relkind in ('r', 'p')
    - 再依 manifest 的 `## cron` 逐一 `SELECT cron.schedule('<jobname>', '<schedule>', convert_from(decode('<base64 command>', 'base64'), 'UTF8'));`。還原到**新的** project 時，command 裡的 Edge Function 網址是舊 project 的，要改。
    - 漏掉：定期收支推播不再送出，**帳號刪除也不再自動執行**——隱私權政策承諾的 14 天就此失效，而且沒有任何錯誤。
 7. **重新套用備份日之後處理過的刪除**：
-   - 開放 app 之前，先手動跑一次 `SELECT public.process_account_deletions();`。在備份時已提出、之後才到期的刪除請求，就是在這一步重新執行的。
+   - **先** `npm run db:migrate`（指向目標 project），**再**手動跑一次 `SELECT public.process_account_deletions();`。順序不能反：備份早於 `0096`（#1701）時，備份裡的 `process_account_deletions` 是舊本體，留下的人（單人狀態）的刪除會走整本 cascade，把本來要留給離開的人的共同章節整本硬刪。先 migrate 才會換成新本體，並建好 `sweep-orphan-ledgers` job（也要核對 `cron.job` 有它：`SELECT jobname, schedule FROM cron.job WHERE jobname = 'sweep-orphan-ledgers';` → `0 15 * * *`）。
+     - 漏掉的樣子：沒有任何錯誤；離開的人打開「過去的時光」，那段章節不見了，而且救不回來（只剩下一份備份）。
+     - 在備份時已提出、之後才到期的刪除請求，就是在這一步重新執行的。
    - 備份之後才提出的刪除請求不在備份裡。從客服信件，以及舊 prod 還讀得到時拿它的 `auth.users`／`Profiles.deletion_requested_at` 比對，逐一補上。
    - 漏掉：已經刪除的帳號和資料，在還原後又回來了。
    - 備份早於 `0089`（#1618）時，月回顧快照裡還有付款人的名字（`largest_expense_paid_by_name`）。開放 app 之前跑 `npm run db:migrate`（指向目標 project）會重新套用 0089，回填 id 並清掉名字；之後這個必須是 0：`SELECT count(*) FROM "MonthlyReviewSnapshots" WHERE largest_expense_paid_by_name IS NOT NULL;`。
@@ -520,6 +565,35 @@ where n.nspname in ('public', 'drizzle') and c.relkind in ('r', 'p')
    - 備份早於 `0090`（#1622）時，離開帳本時自動建立的帳本可能還叫「某某 的家計簿」。`npm run db:migrate` 會重新套用 0090；若目標的 journal 已有 0090 那一列，就手動跑一次 `psql -f drizzle/0090_ledger_autoname.sql`（idempotent）。之後 `psql -f scripts/ops/ledger-autoname-audit-0090.sql` 的 `matched` 必須是 0（只印數字，不印名字）。
      - 漏掉：帳本名又帶回某個人的真名（包括已刪除帳號者），沒有任何錯誤。
 8. **比對**：`psql -f scripts/ops/futari-backup-manifest.sql` 的輸出逐段對 manifest（演練腳本只接受本機目標，這裡手動比）。再跑一次上方的覆蓋檢查，以及〈Runtime DB role〉的覆蓋檢查。
+   - **孤兒帳本不變式（#1701）**，三條都必須是 0（只印數字，不印內容）。「孤兒」＝`OikosGroups.member_a` 在 `auth.users` 已無列且 `member_b IS NULL`：
+
+     ```sql
+     -- (1) 沒有任何活著的前成員的孤兒帳本（應該已被清掉）
+     SELECT count(*) FROM "OikosGroups" g
+      WHERE g.member_b IS NULL
+        AND NOT EXISTS (SELECT 1 FROM auth.users u WHERE u.id = g.member_a)
+        AND NOT EXISTS (
+          SELECT 1 FROM "GroupEpochs" e JOIN auth.users u ON u.id IN (e.member_a_id, e.member_b_id)
+           WHERE e.group_id = g.id AND e.ended_at IS NOT NULL);
+
+     -- (2) 孤兒帳本裡仍有加密欄位（愛物名稱、旅行／出遊分享連結等）
+     SELECT count(*) FROM "Assets" a JOIN "OikosGroups" g ON g.id = a.group_id
+      WHERE g.member_b IS NULL
+        AND NOT EXISTS (SELECT 1 FROM auth.users u WHERE u.id = g.member_a)
+        AND a.name_encrypted IS NOT NULL;
+     SELECT count(*) FROM "Outings" o JOIN "OikosGroups" g ON g.id = o.group_id
+      WHERE g.member_b IS NULL
+        AND NOT EXISTS (SELECT 1 FROM auth.users u WHERE u.id = g.member_a)
+        AND (o.share_token_hash IS NOT NULL OR o.share_token_encrypted IS NOT NULL);
+
+     -- (3) 提出刪除超過 15 天仍在（刪除排程壞了或某個帳號卡住）
+     SELECT count(*) FROM "Profiles"
+      WHERE deletion_requested_at < now() - interval '15 days';
+     ```
+
+     - (1) 不是 0：`sweep_orphan_ledgers` 沒在跑或一直失敗。沒有任何錯誤，只是沒人看得到的帳本留在資料庫；看 Postgres log 有沒有 `sweep_orphan_ledgers: failed for` 或 `prune of … failed` WARNING。
+     - (2) 不是 0：保留章節的去識別沒做完（0096 的規則比 app 讀取的寬）。
+     - (3) 不是 0：多半是 solo 分支的 `_prune_ledger` raise，整個區塊 rollback，每天一筆 `process_account_deletions: failed for <uid>` WARNING，帳號過了 14 天還在（#1377 的樣子）。**不要**為了讓它過去把該帳本改成直接 cascade：那會毀掉離開的人的章節。先修 `_prune_ledger` 失敗的原因。
 9. **角色登入**：`futari_app`、`futari_backup` 照各自的步驟重設密碼、`LOGIN`，更新 env。
 10. **加密金鑰**：manifest 的 `## encrypted_kids` 列出這份備份需要哪些 kid；目標環境的 `ENCRYPTION_KEYS` 必須都有。
 11. 備份之後到壞掉之間的資料（最多約一天）沒有了；要不要通知使用者，是使用者的決定。

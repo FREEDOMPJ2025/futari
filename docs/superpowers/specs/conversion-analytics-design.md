@@ -8,6 +8,7 @@ updates:
   - v1.6.3: 事件清單新增稽核事件 `transactions_exported`（#1290）
   - v1.6.8: 事件清單新增 iOS Apple 瀏覽器備援的 `sign_in_fallback_*` 事件（#1552）
   - v1.7.0: 邀請漏斗新增 `invite_revoked`（#1546）
+  - v1.7.3: `transactions_exported` 屬性改為各類筆數與章節／帳本數，不再帶 `group_id`（#1460）
 related_specs: [csv-import, solo-mode, csv-export]
 related_issues: ["#734", "#1056", "#1062", "#1290", "#1552", "#1546"]
 ---
@@ -193,7 +194,7 @@ migrate 流程 → `app/[locale]/migrate/_components/MigrateTool.tsx` + `Migrate
 
 | event | 觸發時機 | side | 關鍵屬性 |
 |---|---|---|---|
-| `transactions_exported` | CSV 匯出成功產生檔案（#1290） | server | `group_id`、`row_count` |
+| `transactions_exported` | CSV 匯出成功產生檔案（#1290；#1460 起跨帳本） | server | `row_count`、`expense_count`、`income_count`、`settlement_count`、`chapter_count`、`group_count`（#1460 起不再帶 `group_id`） |
 
 只記「誰、何時、從哪本帳、幾列」，**不帶任何紀錄內容**。次數本來就低，不拿來當 KPI；和所有 server 事件一樣只在 prod 部署送出、送失敗不擋匯出，所以查不到事件不代表沒有匯出過。語意與範圍見 [csv-export](csv-export-design.md)「觀測」。實作落地點：`app/api/export/transactions/route.ts`。
 

@@ -49,7 +49,7 @@ const {
 const { and, eq, inArray, isNull, sql } = await import('drizzle-orm')
 const {
   createOuting, addOutingParticipant, addOutingExpense, recordOutingSettlement,
-  endOuting, softDeleteOuting,
+  endOuting, softDeleteOuting, renameOuting,
 } = await import('@/actions/outing')
 const { leaveGroup, removePartner } = await import('@/actions/membership')
 const { setBaseCurrency } = await import('@/actions/currency')
@@ -407,18 +407,28 @@ describe('endOuting folds the couple debt into the main ledger (S-D)', () => {
     ok(await softDeleteOuting({ outingId: o.outingId }))
   })
 
-  it('a viewer pinned to a past epoch is rejected by the write gate', async () => {
+  it("a member pinned to the outing's own closed chapter can end it (no fold), but not rename or delete it (#1682, D2(a))", async () => {
     const o = await seedOuting()
+    ok(await addOutingExpense({ outingId: o.outingId, paidByParticipantId: o.pA, amount: 100, participantIds: [o.pA, o.pB] }))
     const [oldEpoch] = await db.select().from(groupEpochs).where(and(eq(groupEpochs.groupId, o.groupId), isNull(groupEpochs.endedAt)))
     const now = new Date()
     await db.update(groupEpochs).set({ endedAt: now }).where(eq(groupEpochs.id, oldEpoch.id))
     await db.insert(groupEpochs).values({ groupId: o.groupId, startedAt: now, memberAId: o.userId, memberBId: o.partnerId })
     await db.update(oikosGroups).set({ currentEpochStartedAt: now }).where(eq(oikosGroups.id, o.groupId))
     cookieJar.set(PAST_EPOCH_COOKIE, oldEpoch.id)
-    // #1558: a code, not a throw (the viewer is still a member of the outing's group).
-    expect(await endOuting({ outingId: o.outingId })).toEqual({ ok: false, code: 'outing_viewing_past_chapter' })
+    // #1558: codes, not throws (the viewer is still a member of the outing's group).
+    expect(await renameOuting({ outingId: o.outingId, name: 'renamed' })).toEqual({ ok: false, code: 'outing_viewing_past_chapter' })
+    expect(await softDeleteOuting({ outingId: o.outingId })).toEqual({ ok: false, code: 'outing_viewing_past_chapter' })
     const [still] = await db.select().from(outings).where(eq(outings.id, o.outingId))
-    expect(still.status).toBe('active')
+    expect(still).toMatchObject({ status: 'active', name: '宜蘭', deletedAt: null })
+
+    // Ending is the one way out of a closed chapter: the chapter is over, so
+    // the B-owes-A 50 does not fold into today's ledger.
+    expect(ok(await endOuting({ outingId: o.outingId }))).toEqual({ folded: false })
+    const [ended] = await db.select().from(outings).where(eq(outings.id, o.outingId))
+    expect(ended.status).toBe('ended')
+    expect(await db.select().from(settlements).where(eq(settlements.groupId, o.groupId))).toHaveLength(0)
+    expect(await balanceOf(o.groupId)).toBe(0)
   })
 
   it("a solo owner's outing whose epoch closed (partner accepted an invite) can still be ended, without a Settlement", async () => {

@@ -129,7 +129,7 @@ export function RecordsList({
   const router = useRouter()
   const searchParams = useSearchParams()
   const t = useTranslations()
-  const { isPast } = useMember()
+  const { isPast, isFormerMember } = useMember()
   // L2 dual toggle — internal state is the set of selected kinds; both
   // selected = 全部. Downstream (TabContext, stats title, feed loader,
   // drill-applies-to-tab) keeps the legacy `'all' | 'expense' | 'income'`
@@ -574,15 +574,19 @@ export function RecordsList({
               </svg>
             </button>
             {/* Recurring entry — moved from the inline section card (#545 §4)
-                to keep L3 focused on time/filter chips. */}
-            <Link
-              href="/settings/recurring"
-              className="text-sm no-underline flex items-center gap-1 cursor-pointer"
-              style={{ color: 'var(--ink-2)' }}
-            >
-              {t.records.recurringShortcut}
-              <span aria-hidden className="text-sm leading-none">›</span>
-            </Link>
+                to keep L3 focused on time/filter chips. #1612 — not offered
+                in a former member's look-back: /settings/recurring is the
+                viewer's own ledger, not this chapter. */}
+            {!isFormerMember && (
+              <Link
+                href="/settings/recurring"
+                className="text-sm no-underline flex items-center gap-1 cursor-pointer"
+                style={{ color: 'var(--ink-2)' }}
+              >
+                {t.records.recurringShortcut}
+                <span aria-hidden className="text-sm leading-none">›</span>
+              </Link>
+            )}
           </div>
         </div>
         )}

@@ -126,9 +126,10 @@ related_issues: ["#44", "#1618"]
 ### `MonthlyReviewSnapshots`
 
 - `group_id` / `year` / `month` + UNIQUE — 一個帳本 / 一個月恰一筆
+- 算哪些紀錄（#1621，migration 0093）：整個月落在同一章節時，四張卡都只算在該章節**建立**（`created_at`）的紀錄；月份用 `transacted_at`／`occurred_at` 選。跨兩個章節的月份不過濾，但回顧頁本來就不顯示（`isMonthInChapter`）。快照只寫一次，0093 之前算好的不重算。失效的樣子：沒有任何錯誤；新伴侶在自己章節的某個月看到前伴侶記在未來日期的金額與描述。
 - `top_category` + `top_category_total` — 卡片 1 凍結結果
 - `largest_expense_*`（amount / description / category / paid_by）— 卡片 2 凍結。付款人存 **id**，不存名字（#1618，migration 0089）：
-  - 原本的 `paid_by_name` 把付款人當時的名字凍成字串，刪除帳號後真名仍留著，而且前伴侶記在未來日期的紀錄若是下一段章節某月的最大一筆，新伴侶會看到前伴侶的名字。0089 起這欄一律 NULL（欄位留到 v2.0.0 清理）。
+  - 原本的 `paid_by_name` 把付款人當時的名字凍成字串，刪除帳號後真名仍留著，而且前伴侶記在未來日期的紀錄若是下一段章節某月的最大一筆，新伴侶會看到前伴侶的名字。0089 起這欄一律 NULL（欄位之後再清理，目前沒有對應的 issue）。
   - 名字在伺服器端解析，且只對「正在看的那段章節」的兩個人：已關閉章節用關閉當時的名字（`getEpochMembers`，刪除帳號後是「已離開的夥伴」），進行中章節用現在的名字，看的人自己也一樣。付款人不是這兩人之一 → 不顯示名字，卡片用 `card2BodyNoName`（不帶名字 chip，也不出現「 付的」）。
   - id 不送到前端：`ReviewClient` 收到的 snapshot 沒有 `largestExpensePaidBy`，只有解析好的 `payerName`。
   - 失效的樣子：沒有任何錯誤；新伴侶在自己章節的月回顧看到前伴侶的名字，或對方在刪除帳號者付的那個月看到真名。

@@ -107,7 +107,7 @@ export async function SettingsContent({
 
       {/* Direct logout entry — sheet-buried before #768, but登出 is a clear
         * intent that deserves a top-level row on the settings page itself.
-        * LogoutButton owns its own ConfirmModal + clearDynamicCache flow. */}
+        * LogoutButton owns its own ConfirmModal + offline full-off flow (#1673). */}
       <div className="px-4 mt-4 mb-5">
         <LogoutButton />
         <DeleteAccountButton />

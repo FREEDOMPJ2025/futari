@@ -22,7 +22,7 @@ import { parseCurrencyCode } from '@/lib/currency'
 import {
   loadMonthlyReviewSnapshot,
   listMonthlyReviewMonths,
-  loadMonthlyReviewMessages,
+  loadChapterReviewMessages,
 } from '@/lib/db/queries/monthlyReview'
 import {
   currentYearMonthInTaipei,
@@ -96,8 +96,23 @@ export default async function DashboardPage() {
   // just spends the morning looking at last month and has no way to tell. It
   // also fixes itself by lunchtime, which is why it survived this long. (#1130)
   const yyyymm = formatYearMonth(todayYM)
-  const isSolo = !group.memberB
-  const viewerIsA = group.memberA === user.id
+  // #1612 — a former member's side and solo-ness come from the chapter row
+  // (the same source as the layout), never from the group row today: who is in
+  // the ledger now must not change what they are served (e.g. whether the solo
+  // expense hero is fetched). Same known limit as the layout for a swap made
+  // after the leave.
+  const formerChapter = context.isFormerMemberView && epochWindow.epochId
+    ? await getEpochMembers(epochWindow.epochId)
+    : null
+  const isSolo = context.isFormerMemberView ? !formerChapter?.memberBId : !group.memberB
+  const viewerIsA = context.isFormerMemberView
+    ? formerChapter?.memberAId === user.id
+    : group.memberA === user.id
+
+  // The open chapter's two people: outside a past view the group row is the
+  // open chapter's pair (resolveViewedPair reads it the same way).
+  const openChapterMemberIds = [group.memberA, group.memberB].filter((x): x is string => !!x)
+  const chapterPartnerId = group.memberA === user.id ? group.memberB : group.memberA
 
   // Fast path — what hero/banner/post-leave needs to paint immediately. All of
   // these only depend on (group, epochWindow, dates) so they fan out as one
@@ -140,12 +155,23 @@ export default async function DashboardPage() {
     getLocale(),
     loadMonthlyReviewSnapshot(group.id, reviewedYM.year, reviewedYM.month),
     listMonthlyReviewMonths(group.id, epochWindow),
-    loadMonthlyReviewMessages(group.id, todayYM.year, todayYM.month),
+    // #1612 — the banner quotes this month's messages, written in today's
+    // chapter (not the pinned one), and its dismiss writes to the viewer's
+    // own ledger. A past view shows no banner, so it reads no message.
+    // #1684 — only the open chapter's two people's, written since it opened:
+    // a row a former partner wrote ahead for a far-future month stays in the
+    // ledger (#1611) and must never be quoted to whoever is here when that
+    // month comes.
+    epochWindow.isPast
+      ? Promise.resolve([] as Awaited<ReturnType<typeof loadChapterReviewMessages>>)
+      : loadChapterReviewMessages(group.id, todayYM, { memberIds: openChapterMemberIds, window: epochWindow }),
     shouldCheckPriorLeaver ? getLatestPriorClosedEpoch(group.id) : Promise.resolve(null),
     epochWindow.epochId
       ? listActiveTrips(group.id, epochWindow.epochId)
       : Promise.resolve([]),
-    listRatesForGroup(group.id),
+    // #1612 — the ledger's rates are today's settings; a former member's
+    // look-back writes nothing, so the add sheet needs none.
+    context.isFormerMemberView ? Promise.resolve([]) : listRatesForGroup(group.id),
   ])
 
   // Map raw DB rows to the prop shapes the client components expect.
@@ -225,15 +251,19 @@ export default async function DashboardPage() {
     hasAnyReview,
   })
 
-  if (reviewSnapshot) {
+  // #1612 — no banner in any past view: its quote would be a message from
+  // today's chapter, and dismissing it writes to the viewer's active ledger.
+  if (reviewSnapshot && !epochWindow.isPast) {
     const dismissedAt = viewerIsA
       ? reviewSnapshot.bannerDismissedByMemberAAt
       : reviewSnapshot.bannerDismissedByMemberBAt
 
     if (!dismissedAt) {
-      const partnerMsg = isSolo
+      // #1684 — the partner is the open chapter's other person, by id; never
+      // "anyone who is not the viewer".
+      const partnerMsg = isSolo || !chapterPartnerId
         ? null
-        : currentMonthMessages.find((m) => m.memberId !== user.id)
+        : currentMonthMessages.find((m) => m.memberId === chapterPartnerId)
       const ownMsg = currentMonthMessages.find((m) => m.memberId === user.id)
       const preferred = partnerMsg ?? ownMsg ?? null
       bannerProps = {
@@ -328,7 +358,7 @@ export default async function DashboardPage() {
         pendings={pendings}
         expensePendings={expensePendings}
         feedDataPromise={feedDataPromise}
-        groupDefaultRatioA={group.defaultSplitRatioA ?? null}
+        groupDefaultRatioA={context.isFormerMemberView ? null : (group.defaultSplitRatioA ?? null)}
         baseCurrency={parseCurrencyCode(group.baseCurrency) ?? 'twd'}
         activeTrips={activeTrips}
         rates={rates}

@@ -75,7 +75,7 @@ viewer 對了、group 對了，不代表他送進來的 id 屬於這一本：
 
 - **`app/api/export/transactions/route.ts`** 不用 `lib/auth/`（它是唯一的 route handler，沒有 server action 的 context），但反查 group 用的是同一個 `getActiveGroupForUser(viewer.id)`，行為等價於第 1 層；匯出內容再限縮到 viewer 待過的章節。見 [csv-export](csv-export-design.md)。
 - **`actions/auth.ts`** — `signOut` 與一支 analytics action，不碰 group 資料。
-- **`actions/epoch-view.ts`** — 只設一個 httpOnly cookie，**刻意不驗 `epochId`**。讀取側的 `getActiveEpochWindow` 會拒絕不屬於 viewer group 的 id，惡意值只會 fallback 回當前章節。驗證放在讀取側而不是寫入側，是因為 cookie 值隨時可能因為 group 變動而失效，寫入時驗過不代表讀取時仍然有效。
+- **`actions/epoch-view.ts`** — 只設一個 httpOnly cookie，**只驗 `epochId` 的格式**（不是 uuid 就拒絕、不寫 cookie，#1699），不驗權限。讀取側的 `resolveViewerEpochContext` 每次都重新判斷（`pinAcceptable`），不是 uuid 的值不查詢、當成沒 pin，看不到的章節同樣 fallback 回當前章節。權限放在讀取側而不是寫入側，是因為 cookie 值隨時可能因為 group 變動而失效，寫入時驗過不代表讀取時仍然有效。
 
 ## Acceptance
 

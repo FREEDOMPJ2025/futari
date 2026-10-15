@@ -7,7 +7,9 @@ import { db } from '@/lib/db/client'
 import { oikosGroups } from '@/lib/db/schema'
 import { eq, or } from 'drizzle-orm'
 import { getTranslations } from '@/lib/i18n/t'
+import { hasClosedChapterForViewer } from '@/lib/db/queries/epoch'
 import SetupForm from './SetupForm'
+import { PastTimesEntryLink } from '@/app/onboarding/PastTimesEntryLink'
 
 export default async function SetupPage() {
   const user = await getCurrentUser()
@@ -21,6 +23,17 @@ export default async function SetupPage() {
 
   if (group) redirect('/dashboard')
 
-  const t = await getTranslations()
-  return <SetupForm t={t} />
+  // #1612 — /onboarding forwards anyone who has seen the cards straight here
+  // (PhilosophyCards' localStorage check), so a removed partner with no
+  // ledger meets the way back to their past chapters on this page too.
+  const [t, hasPastChapter] = await Promise.all([
+    getTranslations(),
+    hasClosedChapterForViewer(user.id),
+  ])
+  return (
+    <>
+      {hasPastChapter && <PastTimesEntryLink label={t.pastTimes.title} corner="right" />}
+      <SetupForm t={t} />
+    </>
+  )
 }

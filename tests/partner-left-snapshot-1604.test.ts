@@ -57,7 +57,7 @@ vi.mock('@/lib/db/queries/currencyRates', () => ({ listRatesForGroup: async () =
 vi.mock('@/lib/db/queries/monthlyReview', () => ({
   loadMonthlyReviewSnapshot: async () => null,
   listMonthlyReviewMonths: async () => [],
-  loadMonthlyReviewMessages: async () => [],
+  loadChapterReviewMessages: async () => [],
 }))
 vi.mock('@/lib/today-server', () => ({ getTodayYMD: async () => '2026-10-07' }))
 vi.mock('@/app/(dashboard)/dashboard/_components/Dashboard', () => ({ Dashboard: () => null }))

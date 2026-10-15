@@ -66,6 +66,7 @@ describe("C's 月回顧 cell shows none of A+B's months", () => {
 
 const notFound = vi.fn(() => { throw new Error('NEXT_NOT_FOUND') })
 const loadSnapshot = vi.fn(async () => null)
+const loadMessages = vi.fn(async (..._args: unknown[]) => [])
 vi.mock('next/navigation', () => ({ notFound, redirect: vi.fn(() => { throw new Error('NEXT_REDIRECT') }) }))
 vi.mock('@/lib/supabase/server', () => ({ getCurrentUser: async () => ({ id: 'user-c' }) }))
 vi.mock('@/lib/db/queries/epoch', () => ({
@@ -85,10 +86,10 @@ vi.mock('@/lib/db/client', () => ({
 }))
 vi.mock('@/lib/db/queries/monthlyReview', () => ({
   loadMonthlyReviewSnapshot: loadSnapshot,
-  loadMonthlyReviewMessages: async () => [],
+  loadChapterReviewMessages: loadMessages,
 }))
 vi.mock('@/lib/db/queries/partnerQuiz', () => ({
-  loadPartnerQuizSessionByGroup: async () => null,
+  loadPartnerQuizSessionByEpoch: async () => null,
   loadPartnerQuizAnswers: async () => [],
 }))
 vi.mock('@/lib/monthlyReview', async (orig) => ({
@@ -99,16 +100,24 @@ vi.mock('@/lib/monthlyReview', async (orig) => ({
 const { default: MonthlyReviewPage } = await import('@/app/(dashboard)/review/[month]/page')
 
 describe('/review/[month] for C (chapter 2)', () => {
-  beforeEach(() => { notFound.mockClear(); loadSnapshot.mockClear() })
+  beforeEach(() => { notFound.mockClear(); loadSnapshot.mockClear(); loadMessages.mockClear() })
 
   it.each(['2026-03', '2026-05', '2026-06'])('%s (A+B or straddling) → 404, before any snapshot or message is read', async (month) => {
     await expect(MonthlyReviewPage({ params: Promise.resolve({ month }) })).rejects.toThrow('NEXT_NOT_FOUND')
     expect(loadSnapshot).not.toHaveBeenCalled()
+    expect(loadMessages).not.toHaveBeenCalled()
   })
 
   it('2026-07 (inside C\'s chapter) renders', async () => {
     await expect(MonthlyReviewPage({ params: Promise.resolve({ month: '2026-07' }) })).resolves.toBeTruthy()
     expect(notFound).not.toHaveBeenCalled()
     expect(loadSnapshot).toHaveBeenCalledWith('g1', 2026, 7)
+    // #1685 — both months' messages are read as chapter 2's: its two people
+    // and its window, so a message A wrote to July during chapter 1 stays out.
+    const scope = { memberIds: ['user-a', 'user-c'], window: { ...CH2, epochId: 'e2', isPast: false } }
+    expect(loadMessages.mock.calls).toEqual([
+      ['g1', { year: 2026, month: 7 }, scope],
+      ['g1', { year: 2026, month: 8 }, scope],
+    ])
   })
 })
