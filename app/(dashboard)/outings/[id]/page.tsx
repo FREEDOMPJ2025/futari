@@ -5,7 +5,7 @@ import { getOutingInChapter, loadOutingDetailRows } from '@/lib/db/queries/outin
 import { buildOutingView } from '@/lib/outing/view'
 import { isUuid } from '@/lib/outing/validate'
 import { foldPreviewFor, memberPidsOf } from '@/lib/outing/foldback'
-import { currentEpochId } from '@/lib/outing/access'
+import { adminChapterRefusal, currentEpochId, endChapterRefusal, resolveActor } from '@/lib/outing/access'
 import { db } from '@/lib/db/client'
 import { participantClaim } from '../_components/participantClaim'
 import { OutingDetailClient } from './_components/OutingDetailClient'
@@ -51,7 +51,18 @@ export default async function OutingDetailPage(props: { params: Promise<{ id: st
 
   // Same in-request check the end action makes: only an active outing in the
   // current chapter folds, so only then is there anything to preview.
-  const foldPreview = foldPreviewFor(detail.outing, await currentEpochId(db, group.id), view.coupleNet)
+  const currentEpoch = await currentEpochId(db, group.id)
+  const foldPreview = foldPreviewFor(detail.outing, currentEpoch, view.coupleNet)
+
+  // #1698 — which controls the page offers, from the rule the actions refuse
+  // with (lockForAdmin; content writes refuse the same chapter states). A
+  // closed chapter or a pinned viewer gets END only, where END is allowed; a
+  // former member looking back is no member here and gets none. The claim
+  // cookie is irrelevant: only a member administers.
+  const actor = await resolveActor(db, outing, { userId: user.id, claimToken: null }, { lockGroup: false })
+  const member = actor?.kind === 'member' ? actor : null
+  const canManage = member !== null && adminChapterRefusal(member, outing, currentEpoch) === null
+  const canEnd = member !== null && endChapterRefusal(member, outing) === null
 
   return (
     <OutingDetailClient
@@ -65,6 +76,8 @@ export default async function OutingDetailPage(props: { params: Promise<{ id: st
       // viewer's to see, and nothing on the page needs it.
       view={{ ...view, participants: view.participants.map((p) => ({ id: p.id, displayName: p.displayName, net: p.net })) }}
       foldPreview={foldPreview}
+      canManage={canManage}
+      canEnd={canEnd}
       expenses={detail.expenses}
       participants={detail.participants.map((p) => ({
         id: p.id,

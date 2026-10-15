@@ -240,6 +240,8 @@ function as(user: string, pin?: string) {
 
 type DetailProps = {
   outing: { id: string; status: string }
+  canManage: boolean
+  canEnd: boolean
   expenses: Array<{ id: string; amount: number }>
   participants: Array<{ id: string; isMember: boolean }>
 }
@@ -302,7 +304,10 @@ describe('/outings/[id] — chapter scope (#1682)', () => {
 
   it('2. the later partner opens the open chapter\'s outing', async () => {
     as(C)
-    expect((await openOuting(w.o2)).outing.id).toBe(w.o2)
+    const props = await openOuting(w.o2)
+    expect(props.outing.id).toBe(w.o2)
+    // #1698 — the open chapter: every control.
+    expect(props).toMatchObject({ canManage: true, canEnd: true })
   })
 
   it('3a. the stayer, unpinned, cannot open the earlier chapter\'s outing', async () => {
@@ -316,6 +321,8 @@ describe('/outings/[id] — chapter scope (#1682)', () => {
     expect(props.outing.id).toBe(w.o1)
     expect(props.expenses.map((e) => e.id)).toEqual([w.o1Expense])
     expect(props.participants.find((p) => p.id === w.o1SlotX)?.isMember).toBe(true)
+    // #1698 — pinned to O1's own closed chapter: END only (test 11 / 13 are the refusals).
+    expect(props).toMatchObject({ canManage: false, canEnd: true })
   })
 
   it('3c. the stayer pinned to E1 cannot open the open chapter\'s outing', async () => {
@@ -331,7 +338,10 @@ describe('/outings/[id] — chapter scope (#1682)', () => {
 
   it('5. the former member X, pinned to E1, reads O1 and nothing else', async () => {
     as(X, w.e1)
-    expect((await openOuting(w.o1)).outing.id).toBe(w.o1)
+    const props = await openOuting(w.o1)
+    expect(props.outing.id).toBe(w.o1)
+    // #1698 — looking back is no admin: no control (endOuting refuses X, test 12).
+    expect(props).toMatchObject({ canManage: false, canEnd: false })
     await expectNotFoundWithoutData(w.o2)
     await expectNotFoundWithoutData(w.o0)
     as(X) // unpinned, with no ledger of their own
@@ -454,6 +464,7 @@ describe('admin actions on a closed-chapter outing (#1682, D2(a))', () => {
     expect(await listedOutingIds()).toEqual([w.oSolo])
     const props = await openOuting(w.oSolo)
     expect(props.outing).toMatchObject({ id: w.oSolo, status: 'active' })
+    expect(props).toMatchObject({ canManage: false, canEnd: true })
     as(S, w.eSolo)
     expect(await endOuting({ outingId: w.oSolo })).toEqual({ ok: true, data: { folded: false } })
     expect((await statusOf(w.oSolo)).status).toBe('ended')

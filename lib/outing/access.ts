@@ -307,15 +307,42 @@ export async function lockForAdmin(
   const actor = await resolveActor(tx, outing, inputs, { lockGroup: groupLock })
   if (!actor) throw actionError('outing_not_found')
   if (actor.kind !== 'member') throw actionError('outing_admin_only')
-  if (mode === 'end') {
-    if (actor.pinnedEpochId !== null && actor.pinnedEpochId !== outing.epochId) {
-      throw actionError('outing_viewing_past_chapter')
-    }
-    return { outing, actor }
-  }
-  if (actor.pinnedPast) throw actionError('outing_viewing_past_chapter')
-  if (outing.epochId !== await currentEpochId(tx, outing.groupId)) throw actionError('outing_epoch_closed')
+  const refusal = mode === 'end'
+    ? endChapterRefusal(actor, outing)
+    // A pinned viewer is refused before the current chapter matters.
+    : adminChapterRefusal(actor, outing, actor.pinnedPast ? null : await currentEpochId(tx, outing.groupId))
+  if (refusal) throw actionError(refusal)
   return { outing, actor }
+}
+
+type MemberActor = Extract<OutingActor, { kind: 'member' }>
+
+/**
+ * The chapter half of lockForAdmin, pure (#1698): the code an admin action
+ * gets from this member on this outing, or null when the chapter allows it.
+ * The detail page derives which controls it shows from these same two
+ * functions, so a control is on screen exactly when the server would take it.
+ * Failure looks like (if the page used its own rule): no error; a button that
+ * is always refused, or a missing END on the outing it was meant to close.
+ */
+export function adminChapterRefusal(
+  actor: MemberActor,
+  outing: Pick<OutingRow, 'epochId'>,
+  currentEpoch: string | null,
+): 'outing_viewing_past_chapter' | 'outing_epoch_closed' | null {
+  if (actor.pinnedPast) return 'outing_viewing_past_chapter'
+  if (outing.epochId !== currentEpoch) return 'outing_epoch_closed'
+  return null
+}
+
+/** END's chapter rule (D2(a)): unpinned, or pinned to exactly the outing's chapter. */
+export function endChapterRefusal(
+  actor: MemberActor,
+  outing: Pick<OutingRow, 'epochId'>,
+): 'outing_viewing_past_chapter' | null {
+  return actor.pinnedEpochId !== null && actor.pinnedEpochId !== outing.epochId
+    ? 'outing_viewing_past_chapter'
+    : null
 }
 
 export async function currentEpochId(conn: Conn, groupId: string): Promise<string | null> {
