@@ -125,6 +125,7 @@ export default async function RootPage({ params }: { params: Params }) {
           cwmoney: localizedHref('/migrate/cwmoney', locale),
           hub: localizedHref('/migrate', locale),
         }}
+        featureOutingHref={localizedHref('/features/outing', locale)}
         legalLinks={{
           termsHref: localizedHref('/terms', locale),
           termsLabel: t.signIn.termsLink,

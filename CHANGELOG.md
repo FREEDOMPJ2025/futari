@@ -47,6 +47,15 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：`/features/outing` 四語在開頭多一段問答，介紹步驟之後多一個四人出遊的分帳例子（每筆支出、合計、每人分攤、結清要轉的幾筆）。
   技術：例子的數字由 `OUTING_MOCK` 經產品自己的平分／結清函式算出；JSON-LD 加 `WebApplication`（免費、瀏覽器即可用）；`llms.txt`、`llms-full.txt` 加出遊段落與四語連結。
 
+- **首頁、使用情境總覽與 Splitwise 搬遷頁都能連到出遊頁（#1724）**
+  使用者：首頁功能區下方與頁尾多了「出遊分帳」連結，`/use-case` 總覽與 `/migrate/splitwise` 多一列出遊介紹；出遊連結列的標題改成帶「出遊分帳」的說法（四語）。
+  技術：`feature_outing_link_clicked` 新增 `source`（`landing_features`／`landing_footer`／`use_case_hub`／`migrate_splitwise`）；migrate registry 加 `featureLinks`；sitemap 的 `/`、`/use-case`、`/features/outing` lastModified 改為 2026-10-15。
+
+### 技術變更
+
+- **出遊漏斗補上建立與分享兩個事件（#1723）**
+  技術：`createOuting` 成功後 server 發 `outing_created`（與 `signed_up`／`setup_completed` 同一個 distinct_id），複製連結成功後 client 發 `outing_link_shared`（只帶 `method`），都不帶出遊 id、名稱、token 或網址；分享頁事件 0 筆查證為沒有訪客、不是沒送出。
+
 ## [1.7.3] - 2026-10-15
 
 主題：**離開之後．章節完整、能回看**——離開或被移除的人、以及對方刪除帳號之後，兩人的那段章節都完整留下、只在那段章節裡看得到；匯出補上進帳與結算；網頁與 App 斷線時都有離線畫面，登出會把裝置上的帳本資料清乾淨。

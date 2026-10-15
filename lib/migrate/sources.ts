@@ -134,6 +134,9 @@ export type SourceDef = {
    *  walkthrough (MigrateChatgptWorkflow) between the steps and the upload tool.
    *  The uploaded file is the ChatGPT output, detected as `futari_generic`. */
   screenshotWorkflow?: boolean
+  /** Feature pages (/features/<key>) this source cross-links to after its comparison (#1724).
+   *  Splitwise users already split with friends, which is what outings are for. */
+  featureLinks?: readonly 'outing'[]
   comparison: { rows: ComparisonRow[] }
 }
 
@@ -317,6 +320,7 @@ export const MIGRATE_SOURCES = {
     // friendship (kb.splitwise.com "How can I double check my balances?"),
     // so users arrive holding a real CSV. Headers don't match any dedicated
     // sniff signature, so the file routes to the generic mapping wizard.
+    featureLinks: ['outing'],
     comparison: {
       rows: [
         { feature: { i18n: 'featSharedLedger' },   futari: { label: { i18n: 'verdictDefaultMode' },   tone: 'yes'     }, other: { label: { i18n: 'verdictGroupSupport' },      tone: 'yes'     } },

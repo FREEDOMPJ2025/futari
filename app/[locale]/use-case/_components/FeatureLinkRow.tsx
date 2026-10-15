@@ -4,10 +4,12 @@ import Link from 'next/link'
 import { track } from '@/lib/analytics/track'
 import { Ember } from '../../_components/Ember'
 import { s } from '../../_components/brand-inner'
+import type { FeatureOutingLinkSource } from '../../_components/FeatureOutingTextLink'
 
 /**
  * LampLinkRow's markup (app/[locale]/_components/LampLinkRow.tsx), plus the
- * `feature_outing_link_clicked` click. A client twin rather than an onClick
+ * `feature_outing_link_clicked` click. Used on the use-case pages, the
+ * /use-case hub and /migrate/splitwise (#1724). A client twin rather than an onClick
  * prop on the shared row, so the hubs and migrate pages keep a server row.
  * Keep the two in step.
  */
@@ -22,7 +24,7 @@ export function FeatureLinkRow({
   name: string
   description: string
   cta: string
-  source: 'use_case_travel' | 'use_case_aa_split'
+  source: FeatureOutingLinkSource
 }) {
   return (
     <li>

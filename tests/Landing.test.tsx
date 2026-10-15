@@ -43,6 +43,7 @@ const renderLanding = () =>
         cwmoney: '/zh-TW/migrate/cwmoney',
         hub: '/zh-TW/migrate',
       }}
+      featureOutingHref="/zh-TW/features/outing"
       legalLinks={{
         termsHref: '/zh-TW/terms',
         termsLabel: '服務條款',
@@ -141,6 +142,7 @@ describe('Landing — SSR CTAs work without JS (#1521)', () => {
         checkingLabel={zhTW.signIn.signingIn}
         useCaseHrefs={{ cohabitation: '/a', newlyweds: '/b', petOwners: '/c', hub: '/d' }}
         migrateHrefs={{ honeydue: '/e', spendee: '/f', cwmoney: '/g', hub: '/h' }}
+        featureOutingHref="/i"
         legalLinks={{ termsHref: '/t', termsLabel: 't', privacyHref: '/p', privacyLabel: 'p' }}
       />,
     )
