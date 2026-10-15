@@ -150,6 +150,12 @@ export class FakeRegistration {
   constructor(private container: FakeSWContainer, public path: string) {}
   addEventListener() {}
   removeEventListener() {}
+  /** #1674: `registration.update()`; `onUpdate` lets a test model what it does. */
+  onUpdate: (() => void) | null = null
+  async update() {
+    this.container.ops.push(`update:${this.path}`)
+    this.onUpdate?.()
+  }
   async unregister() {
     this.container.ops.push(`unregister:${this.path}`)
     this.container.regs = this.container.regs.filter((r) => r !== this)
@@ -169,6 +175,8 @@ export class FakeSWContainer {
   controller: FakeWorker | null = null
   /** register() leaves the worker installing unless autoActivate is set. */
   autoActivate = false
+  /** #1674: runs after a register() of this script path (e.g. seed its cache). */
+  onRegister: Record<string, (reg: FakeRegistration) => void> = {}
   constructor(public ops: Ops) {}
   async getRegistrations() { return [...this.regs] }
   async register(url: string) {
@@ -180,6 +188,7 @@ export class FakeSWContainer {
       this.regs.push(reg)
     }
     if (this.autoActivate) reg.activate()
+    this.onRegister[url]?.(reg)
     return reg
   }
   get ready() { return Promise.resolve(this.regs[0]) }

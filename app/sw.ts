@@ -33,9 +33,17 @@ const dynamicExpiration = new ExpirationPlugin({
 })
 const dynamicPlugins = buildDynamicCachePlugins(dynamicExpiration)
 
+// #1674: `prebuild` writes the basic worker's files into public/, so Serwist's
+// public scan lists them. The full worker doesn't need them; keep its precache
+// what it was before the basic worker existed.
+const BASIC_WORKER_FILES = new Set(['/sw-basic.js', '/offline-basic.html'])
+const manifest = ((self.__SW_MANIFEST ?? []) as (PrecacheEntry | string)[]).filter(
+  (e) => !BASIC_WORKER_FILES.has(typeof e === 'string' ? e : e.url),
+)
+
 const serwist = new Serwist({
   precacheEntries: [
-    ...((self.__SW_MANIFEST ?? []) as (PrecacheEntry | string)[]),
+    ...manifest,
     // /offline is a Next.js route (not in public/), so it must be listed
     // explicitly with a revision. Everything in public/ is already in
     // __SW_MANIFEST with a revision hash — adding them again as plain strings

@@ -77,6 +77,20 @@ describe('frame-ancestors on signed-in routes (#1535)', () => {
     expectNoFrameHeaders(p)
   })
 
+  it('/offline-basic.html (#1674) carries frame-ancestors in its own CSP, plus XFO', () => {
+    const h = headersFor('/offline-basic.html')
+    expect(h['content-security-policy']).toContain("frame-ancestors 'none'")
+    expect(h['content-security-policy']).toContain("default-src 'none'")
+    expect(h['x-frame-options']).toBe('DENY')
+    expect(h['referrer-policy']).toBe('no-referrer')
+    expect(h['cache-control']).toBe('no-store, max-age=0')
+  })
+
+  it('/sw-basic.js (#1674) is no-store; /api/ping is frame-denied like every /api path', () => {
+    expect(headersFor('/sw-basic.js')['cache-control']).toBe('no-store, max-age=0')
+    expectFrameDenied('/api/ping')
+  })
+
   it('leaves the existing Cache-Control rules intact', () => {
     expect(headersFor('/sw.js')['cache-control']).toBe('no-store, max-age=0')
     expect(headersFor('/og-image.png')['cache-control']).toBe('public, max-age=604800')

@@ -27,9 +27,11 @@ import {
 } from './swGate'
 
 export const FULL_SW_PATH = '/sw.js'
-/** #1674's basic worker. S1 never registers it; the mount sweep keeps it. */
+/** #1674's basic worker (web only): serves `/offline-basic.html` and nothing else. */
 export const BASIC_SW_PATH = '/sw-basic.js'
 export const BASIC_CACHE_PREFIX = 'offline-basic-'
+export const BASIC_PAGE_PATH = '/offline-basic.html'
+export const BASIC_SW_ACTIVATION_TIMEOUT_MS = 10_000
 export const OFFLINE_CHANNEL = 'futari-offline'
 export const OFFLINE_OFF_MESSAGE = 'offline-off'
 export const SW_ACTIVATION_TIMEOUT_MS = 15_000
@@ -282,7 +284,16 @@ function postOffBroadcast(): void {
 
 // ─── Full off (#1673 S1.1) ──────────────────────────────────────────────────
 
-export type OffReason = 'user' | 'logout' | 'account-deletion' | 'user-changed' | 'on-failed'
+export type OffReason =
+  | 'user'
+  | 'logout'
+  | 'account-deletion'
+  | 'user-changed'
+  | 'on-failed'
+  /** #1674: the basic worker could not be installed or holds no offline page. */
+  | 'basic-failed'
+  /** #1674: kill mode (lib/offline/swBasicMode.ts) — every off path is the full off. */
+  | 'basic-kill'
 
 interface OffOptions {
   reason: OffReason
@@ -372,11 +383,35 @@ export async function deleteNamedCaches(names: readonly string[]): Promise<void>
   await deleteCaches((n) => names.includes(n))
 }
 
+/** #1674: everything except the basic worker's own cache. */
+export async function deleteNonBasicCaches(): Promise<void> {
+  await deleteCaches((n) => !n.startsWith(BASIC_CACHE_PREFIX))
+}
+
+/** #1674: the basic worker's caches (the ON handler, once `/sw.js` is active). */
+export async function deleteBasicCaches(): Promise<void> {
+  await deleteCaches((n) => n.startsWith(BASIC_CACHE_PREFIX))
+}
+
+/** #1674: does an `offline-basic-*` cache actually hold the offline page? */
+export async function basicPageCached(): Promise<boolean> {
+  if (!hasCaches()) return false
+  try {
+    const names = (await caches.keys()).filter((n) => n.startsWith(BASIC_CACHE_PREFIX))
+    for (const cacheName of names) {
+      if (await caches.match(BASIC_PAGE_PATH, { cacheName })) return true
+    }
+  } catch (err) {
+    log('basic page check failed', err)
+  }
+  return false
+}
+
 // ─── Registration (#1673 S1.7, rev 2) ───────────────────────────────────────
 
-function fullSWActivated(reg: ServiceWorkerRegistration): boolean {
+function activatedWith(reg: ServiceWorkerRegistration, path: string): boolean {
   const a = reg.active
-  return !!a && scriptPath(a.scriptURL) === FULL_SW_PATH && a.state === 'activated'
+  return !!a && scriptPath(a.scriptURL) === path && a.state === 'activated'
 }
 
 /**
@@ -388,6 +423,23 @@ export function waitForFullSWActivated(
   reg: ServiceWorkerRegistration,
   timeoutMs = SW_ACTIVATION_TIMEOUT_MS,
 ): Promise<void> {
+  return waitForActivated(reg, FULL_SW_PATH, timeoutMs)
+}
+
+/** #1674: same wait for the basic worker (10 s cap). */
+export function waitForBasicSWActivated(
+  reg: ServiceWorkerRegistration,
+  timeoutMs = BASIC_SW_ACTIVATION_TIMEOUT_MS,
+): Promise<void> {
+  return waitForActivated(reg, BASIC_SW_PATH, timeoutMs)
+}
+
+function waitForActivated(
+  reg: ServiceWorkerRegistration,
+  path: string,
+  timeoutMs: number,
+): Promise<void> {
+  const fullSWActivated = (r: ServiceWorkerRegistration) => activatedWith(r, path)
   return new Promise((resolve, reject) => {
     if (fullSWActivated(reg)) {
       resolve()
@@ -435,6 +487,25 @@ export async function registerSW(timeoutMs = SW_ACTIVATION_TIMEOUT_MS): Promise<
   const reg = await navigator.serviceWorker.register(FULL_SW_PATH, { scope: '/' })
   await waitForFullSWActivated(reg, timeoutMs)
   return reg
+}
+
+/** #1674: register the basic worker and wait until it is the active, activated worker. */
+export async function registerBasicSW(
+  timeoutMs = BASIC_SW_ACTIVATION_TIMEOUT_MS,
+): Promise<ServiceWorkerRegistration | null> {
+  if (!isSWSupported()) return null
+  const reg = await navigator.serviceWorker.register(BASIC_SW_PATH, { scope: '/' })
+  await waitForBasicSWActivated(reg, timeoutMs)
+  return reg
+}
+
+/** #1674: a registration whose ACTIVE worker is `/sw-basic.js`, if any. */
+export async function findActiveBasicRegistration(): Promise<ServiceWorkerRegistration | null> {
+  try {
+    return (await getRegistrations()).find((r) => scriptPath(r.active?.scriptURL) === BASIC_SW_PATH) ?? null
+  } catch {
+    return null
+  }
 }
 
 export async function hasFullSWRegistration(): Promise<boolean> {

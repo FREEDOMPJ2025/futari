@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-10-13
+last_updated: 2026-10-15
 status: shipped
 first_shipped_in: v0.14.0
 updates:
@@ -7,8 +7,9 @@ updates:
   - v1.5.14: 使用中斷線提示與 toggle 脫鉤，對所有人顯示；toggle 只決定文案（#1206）
   - v1.5.15: 斷線提示加顯示門檻（換網不再閃一下），並補上 spec 從 v0.14.0 就寫著、實作一直沒有的 fade out（#1244）
   - v1.7.3: 關閉／登出／刪除帳號一律完整關閉並清乾淨（SW、所有 cache、serwist-expiration 紀錄）；SW 寫入閘門（同意標記）、綁定開啟的使用者、登入頁 sweep、校準只往下、其他分頁 reload；撤回「per device、登出不變」（#1673）
+  - v1.7.3: web 上沒開離線瀏覽的人也有 Futari 離線頁：基本 SW `/sw-basic.js` 只存一頁自我包含的離線頁、不存任何帳本資料；kill switch 回滾；撤回「沒開就不註冊任何 SW」（#1674）
 related_specs: [realtime, product]
-related_issues: ["#19", "#126", "#1206", "#1225", "#1244", "#1673"]
+related_issues: ["#19", "#126", "#1206", "#1225", "#1244", "#1672", "#1673", "#1674"]
 ---
 
 # 離線瀏覽 / PWA Cache
@@ -33,10 +34,10 @@ Oikos 是 mobile-first PWA：`public/manifest.json` 已宣告 `display: standalo
 ### In
 
 - Settings 頁「離線瀏覽」開關（**預設關閉**；存在這台裝置的 localStorage，並綁定開啟時登入的使用者；登出、刪除帳號會把它關掉，#1673）
-- Service Worker 安裝與生命週期管理（Serwist + `@serwist/next`），**僅在 toggle 開啟時 register**
+- Service Worker 安裝與生命週期管理（Serwist + `@serwist/next`）：完整 SW `/sw.js` **僅在 toggle 開啟時 register**；toggle 關的 web 使用者改註冊**基本 SW** `/sw-basic.js`（只存離線頁，見「基本 SW」，#1674）
 - App shell precache（`_next/static/**`、icons、manifest）
 - Runtime cache：`/dashboard`、`/records`、`/assets`、`/assets/[id]`、`/assets/[id]/*` 的 RSC HTML，network-first + 3s timeout
-- `/offline` fallback 頁
+- `/offline` fallback 頁（完整 SW）；`/offline-basic.html` 自我包含離線頁（基本 SW，#1674）
 - Online / offline banner（`navigator.onLine` 偵測；v1.5.14 起**不論 toggle 都顯示**，toggle 只決定文案，見「Offline banner」）
 - Toggle 關閉、登出、刪除帳號都走同一個**完整關閉**：刪同意標記 → pref 關 → unregister 所有 SW → 廣播 → 刪所有 cache → 清 `serwist-expiration`（#1673）
 - SW 寫入閘門：只在同意標記存在時寫 `dynamic-v1`（#1673）
@@ -59,7 +60,7 @@ Oikos 是 mobile-first PWA：`public/manifest.json` 已宣告 `display: standalo
 
 | 維度 | 決定 | 理由 |
 |---|---|---|
-| 啟用模式 | **opt-in via Settings 開關**，預設關閉；存 localStorage `offline-browsing-enabled` | Cache PII 是裝置端隱私決定（v0.10.0 才剛以欄位級靜態加密保護敏感欄位）；尊重「使用者控制自己資料」基調 |
+| 啟用模式 | **opt-in via Settings 開關**，預設關閉；存 localStorage `offline-browsing-enabled`。關著的 web 使用者有基本 SW（不存帳本資料，#1674） | Cache PII 是裝置端隱私決定（v0.10.0 才剛以欄位級靜態加密保護敏感欄位）；尊重「使用者控制自己資料」基調。opt-in 的對象是「帳本頁面存在裝置上」，不是「有沒有 SW」 |
 | Toggle 持久化位置 | **localStorage（這台裝置／瀏覽器）＋綁定使用者**：開啟時存 `offline-browsing-owner` = 登入者 user id 的 SHA-256 hex（取自瀏覽器端 Supabase client 的 `auth.getSession()`，不取頁面 payload——cache 住的頁面帶的是 cache 當時那個人的 id）。不存 Supabase user prefs | SW 是裝置能力，同帳號跨裝置要分別 opt-in；但 cache 的內容是某個人的帳本，所以同一台裝置換人時要清掉（#1673，見下方撤回紀錄） |
 | Toggle off 行為 | **完整關閉**（`turnOfflineBrowsingOff`）：遞增 `offline-off-epoch` → 刪同意標記 `offline-consent-v1` → pref 關、清 owner → unregister 所有 SW → `BroadcastChannel('futari-offline')` 廣播 → 刪所有 Cache Storage → 清空並刪除 `serwist-expiration`。每一步 best-effort、不丟錯 | 使用者關閉是主動撤回信任，不只 bypass cache 還要把已存資料抹乾淨；標記先刪，所有還活著的 SW 立刻停寫 |
 | SW framework | **Serwist (`@serwist/next`)** | next-pwa 維護停滯、Next 16 / App Router 兼容回報差；Serwist 為其精神後繼 |
@@ -72,7 +73,7 @@ Oikos 是 mobile-first PWA：`public/manifest.json` 已宣告 `display: standalo
 | SW 寫入閘門 | **`dynamic-v1` 只在同意標記（Cache Storage `offline-consent-v1`，一筆不含 PII 的小項目）存在時寫入**。兩個 plugin：pre-check 放第一個（標記不在就 `cacheWillUpdate` 回 null，連 cache 都不開）；post-check 放在 ExpirationPlugin 之後（寫完再查一次，標記沒了就用 `ExpirationPlugin.deleteCacheAndMetadata()` 把這筆和它的 IndexedDB 紀錄一起收回）。邏輯在 `lib/offline/swGate.ts` | 隱私不能押在 reload 的時機上：關閉後還被舊 SW 控制的分頁（含 Android 殼唯一的 WebView），在 reload 之前標記已經沒了，寫不進去。`static-v1`（icons／og，無 PII）不設閘 |
 | 誰能把 pref 打開 | **只有使用者在 Settings 按開**；校準與錯誤路徑只會往下（關） | 舊的校準 `active || stored` 會因為「還有 SW 註冊著」把關掉的裝置自己打開（#1673 F4） |
 | Cache 寫入條件 | **只在 200 OK + 已登入態下寫入；redirect 到 `/sign-in` 不寫** | 防止把「未登入畫面」cache 進去蓋掉登入態頁 |
-| Offline UI | **`/offline` fallback 頁 + 斷線 banner** | banner 讓使用者知道目前離線；toggle 開時另外說明資料是 cache |
+| Offline UI | **`/offline` fallback 頁（toggle 開）／`/offline-basic.html`（toggle 關、web）+ 斷線 banner** | banner 讓使用者知道目前離線；toggle 開時另外說明資料是 cache；toggle 關的 web 使用者斷線或網路卡住時看到 Futari 的離線頁，而不是瀏覽器的（#1674） |
 | Realtime 行為 | **離線時靜音 reconnect retry** | 避免無限 reconnect log noise；上線時恢復訂閱 |
 | SW 更新策略 | **`skipWaiting + clientsClaim`** | chunk hash 變動時新版立刻接管，不要使用者關 tab 重開 |
 | Dev / Prod | **prod-only build**（dev 不啟用 SW） | 避免干擾 Turbopack HMR |
@@ -86,7 +87,7 @@ iOS PWA standalone 沒有下拉刷新；Router Cache + Serwist NetworkFirst 在�
 
 ### 不採用
 
-- ❌ **預設啟用**：cache PII 在裝置上是隱私決定，需明確同意
+- ❌ **預設啟用（離線瀏覽）**：cache PII 在裝置上是隱私決定，需明確同意。基本 SW 預設就有，但它不存任何帳本資料，不是「預設啟用離線瀏覽」（#1674）
 - ❌ **Toggle 存 Supabase user preferences（跨裝置同步）**：SW / cache 是裝置能力，跨裝置同步可能造成「我在朋友家用過一次的瀏覽器自動開了 cache」這種反直覺結果
 - ❌ **首次安裝後彈 modal 邀請開啟**：MVP 不做主動推銷；toggle 放在 Settings 等使用者主動發現
 - ❌ **next-pwa**：維護停滯、Next 16 / App Router 兼容問題多
@@ -131,7 +132,7 @@ L2 · Dynamic HTML（runtime, network-first）
 - 顯示條件：`navigator.onLine === false` **且已持續 2s**，**不論 toggle 開關**（v1.5.14 #1206；2s 門檻 v1.5.15 #1244，見下）
 - 文案依 toggle 分兩種：
   - toggle 開：「離線中・顯示最近一次連線的資料」（`offlineBanner.text`）
-  - toggle 關：「離線中・恢復連線後會自動更新」（`offlineBanner.textNoCache`）——沒有 SW、沒有 cache，畫面上只是斷線前已載入的頁面，「顯示快取」的說法不成立；「會自動更新」由 `ReconnectRefresh` 的 online 事件無條件 `router.refresh()` 兌現
+  - toggle 關：「離線中・恢復連線後會自動更新」（`offlineBanner.textNoCache`）——沒有帳本 cache（web 上只有基本 SW，它不存帳本頁面，#1674），畫面上只是斷線前已載入的頁面，「顯示快取」的說法不成立；「會自動更新」由 `ReconnectRefresh` 的 online 事件無條件 `router.refresh()` 兌現
 - 播報：`role="status"` + `aria-live="polite"`
 
 **為什麼原本只對 toggle 開啟者顯示、後來改掉**：v0.14.0 時 banner 只有一句描述 cache 的文案，對沒開 toggle 的人是假話，所以用 toggle 擋掉——在只有一種文案的前提下這是合理解。代價是 toggle 預設關，等於**幾乎所有人斷線時什麼提示都沒有**，直到送出記帳失敗才發現（#1206，Android 實機回報）。解法是加第二種文案，而不是讓錯的文案顯示給所有人。
@@ -184,9 +185,30 @@ client click 登出／刪除帳號
 - `ReconnectRefresh` 在 `router.refresh()` 前套同樣的判斷，成立就 reload 取代 refresh。
 - 隱私不靠 reload 的時機：寫入閘門已經先擋住了；reload 只是結束控制。
 
+### 基本 SW（web，toggle 關，#1674）
+
+toggle 關的 web 使用者（不含 iOS／Android 殼：那裡由 #1672 的看門狗＋殼內 `offline.html` 負責，iOS 殼也沒有 SW），dashboard 掛載時註冊 `/sw-basic.js`。它只做一件事：導覽失敗或卡住時，在原本的網址回應一頁 Futari 的離線頁。
+
+- **產生方式**：`prebuild`（`scripts/build-web-offline-basic.ts`）用殼內離線頁同一個 renderer 的 web target 產生 `public/offline-basic.html`，算出它的 SHA-256，寫進 `public/sw-basic.js` 的 bytes 與 cache 名 `offline-basic-<hash>`；兩檔都 gitignore。文案一改，worker bytes 就變，瀏覽器下次更新檢查就裝新的。殼內的 `out/offline.html` 逐 byte 不變（測試守）。
+- **離線頁**：四語烤進同一份 HTML（語系先看 `lang` cookie 的四語白名單，再看 `navigator.languages`）；探測同源 `/api/ping`，只有 `204 && !redirected` 算通，通了 `location.reload()`；探測節奏與「失敗的自動返回 2 次就停」沿用殼內那份規則。只在支援 SW、且 pref 不是開時顯示「下次連上網路後，可以到『設定 › 離線瀏覽』打開」。文字只來自烤進去的區塊，script 只切換屬性；不讀 `location` 的任何欄位。回應標頭：CSP `default-src 'none'`、inline script 只靠 `sha256-` hash（hash 由 `prebuild` 寫進 `.offline-basic.build.json`，`next build` 讀不到就直接失敗）、`connect-src 'self'`、`frame-ancestors 'none'`、`X-Frame-Options: DENY`、`Referrer-Policy: no-referrer`、`no-store`。
+- **worker 規則**（`scripts/sw-basic-worker.ts`）：
+  - install：只在拿到 200、`text/html`、沒被轉址、bytes 的 hash 對得上時才存；否則 install 失敗（sign-in 頁、captive portal 永遠不會變成「離線頁」）。
+  - activate：刪掉自己以外的所有 cache（舊 `/sw.js` 的 `dynamic-v1`、`static-v1`、precache、同意標記）、刪 `serwist-expiration`、關 navigation preload、`clients.claim()`。
+  - fetch：只回應同源 GET 導覽。`/auth/*`、`/sign-in`、`/<locale>/sign-in`、非 GET 導覽、所有非導覽請求**都不 `respondWith`**，原封不動到網路。GET 導覽與 8s 賽跑，網路錯誤或逾時就給離線頁。
+  - 防迴圈：因**逾時**給了離線頁的導覽，記下 pathname 的 SHA-256（不含查詢字串、不存網址）與時間；2 分鐘內再導覽到同一 pathname 就不設逾時、等網路。用到的網路回應會清掉這筆。慢但會通的頁面第二次一定進得去。
+  - 從不 `cache.put` 網路回應；cache 被別人刪掉後也不會重建它。
+- **client**（`lib/offline/lifecycle.ts › ensureBasicWorker`）：pref 關的掛載先跑掛載 sweep（保留基本 SW 與 `offline-basic-*`），只有在沒有任何註冊的 active worker 是 `/sw-basic.js` 時才 register，等 `activated`（上限 10s）。不只信 activation：刪掉 `offline-basic-*` 以外的 cache、清 `serwist-expiration`、確認 cache 裡真的有離線頁；沒有就 `registration.update()` 一次，還是沒有就完整關閉——使用者不會比 #1674 之前更糟。register 失敗或逾時同樣完整關閉。每一步都先重讀 pref（S1 的佇列規則），使用者這時按下的「開」不會被它推翻。
+  - Settings 關閉：完整關閉（連基本 SW 一起清）→ reload 規則 → 重新註冊基本 SW。
+  - Settings 開啟：`/sw.js` 取代基本 SW（同一個 scope），看到 `/sw.js` activated 之後刪掉 `offline-basic-*`。`/sw.js` 本身不變。
+  - 登出的「unregister 所有 SW」也會拿掉基本 SW；下一次 dashboard 掛載再註冊回來。登入頁 sweep 不動它。
+  - 被基本 SW 控制的分頁不受 reload 規則影響（規則只看 `/sw.js`）。toggle 顯示的狀態仍然只看 pref，不看 scriptURL。
+- **kill switch（回滾）**：`lib/offline/swBasicMode.ts` 改成 `'kill'` 並部署。產生的 `/sw-basic.js` 變成刪掉自己的 cache、unregister 自己、**不導覽也不 reload 任何分頁**的 worker；client 端所有關閉路徑改走完整關閉，不再註冊 `/sw-basic.js`。**單純 revert 不是回滾**：已安裝的 SW 在自己的 script 404 時仍會繼續存在、繼續回應導覽。
+  - **失效的樣子**：revert 之後一切看起來正常（部署綠、新使用者沒有 SW），但已經裝了基本 SW 的人斷線時照樣看到離線頁，而且這頁的文案再也不會更新。
+- **`/api/ping`**：GET／HEAD 回 204、`no-store`；不驗身分、不碰 DB。proxy 以完全相等（`===`）放行、在任何 `getUser()` 之前；`/api/ping/x` 仍受保護。proxy matcher 排除 `sw-basic\.js$`、`offline-basic\.html$`（錨定，`/sw-basic.jsx` 這類仍經過 proxy）。
+
 ### 掛載 sweep 與登入頁 sweep
 
-- **pref 關的 dashboard 掛載**跑 `sweepOfflineLedgerData()`：先刪同意標記 → unregister 除了 `/sw-basic.js`（#1674）以外的 SW → 刪除了 `offline-basic-*` 以外的 cache → 清 serwist-expiration；不廣播、不動 pref。reload 前漏寫的任何東西，下一次掛載就清掉。
+- **pref 關的 dashboard 掛載**跑 `sweepOfflineLedgerData()`：先刪同意標記 → unregister 除了 `/sw-basic.js`（#1674）以外的 SW → 刪除了 `offline-basic-*` 以外的 cache → 清 serwist-expiration；不廣播、不動 pref。reload 前漏寫的任何東西，下一次掛載就清掉。web 上接著確保基本 SW（見上一節）；kill mode 時改跑完整關閉。
 - **pref 開的 dashboard 掛載**先做使用者綁定：有 session 且 hash ≠ owner → 完整關閉＋reload；pref 開但沒有 owner（#1673 之前開啟的人）→ 清一次 `dynamic-v1`、`static-v1` 與紀錄，再綁定目前的人、pref 保持開；**沒有 session**（離線且 token 過期）→ 什麼都不做（猜錯會清掉正當使用者的離線資料，交給登入頁 sweep 處理下一個人）。owner 相符（或剛綁定）之後才重建同意標記，再 register `/sw.js`；逾時不寫 pref、不完整關閉，下次掛載再試。
 - **登入頁 sweep**（`app/[locale]/sign-in/OfflineSignInSweep.tsx`，不改 `SignInButton.tsx`）：到登入頁的人（包括沒登出就過期的 session）先刪同意標記，再刪 `dynamic-v1` 與 serwist-expiration 紀錄；保留 precache、SW 與 pref，登入後由綁定決定、也只有它會重建標記。仍登入、已開啟的人打開 `/sign-in` 也會被清掉 `dynamic-v1`，之後逛 dashboard 會再補回（接受）。
 
@@ -194,7 +216,7 @@ client click 登出／刪除帳號
 
 ## 實作落地點
 
-`next.config.ts`（Serwist 設定）/ `app/sw.ts`（runtime caching rules + precache manifest）/ `lib/offline/preference.ts` / `lib/offline/swControl.ts`（完整關閉、sweep、佇列、reload 規則） / `lib/offline/swGate.ts`（SW 寫入閘門） / `lib/offline/lifecycle.ts`（掛載、開、關、使用者綁定） / `app/[locale]/sign-in/OfflineSignInSweep.tsx`（登入頁 sweep） / `app/(dashboard)/settings/_components/{LogoutButton,DeleteAccountButton}.tsx` / `lib/hooks/useOnlineStatus.ts` / `app/(dashboard)/settings/_components/OfflineBrowsingToggle.tsx` / `app/(dashboard)/_components/{OfflineLifecycle,ReconnectRefresh}.tsx` / `app/(dashboard)/_components/ContextStrip.tsx`（離線橫幅已併入 ContextStrip 的 priority-1 分支，沒有獨立的 OfflineBanner 元件） / `app/offline/page.tsx`
+`next.config.ts`（Serwist 設定、離線頁標頭與 build 守門）/ `app/sw.ts`（runtime caching rules + precache manifest）/ `scripts/build-web-offline-basic.ts`、`scripts/sw-basic-worker.ts`、`scripts/build-native-offline-page.ts`（web target）/ `lib/offline/{swBasicMode,offlineBasicHeaders}.ts` / `app/api/ping/route.ts` / `proxy.ts`/ `lib/offline/preference.ts` / `lib/offline/swControl.ts`（完整關閉、sweep、佇列、reload 規則） / `lib/offline/swGate.ts`（SW 寫入閘門） / `lib/offline/lifecycle.ts`（掛載、開、關、使用者綁定） / `app/[locale]/sign-in/OfflineSignInSweep.tsx`（登入頁 sweep） / `app/(dashboard)/settings/_components/{LogoutButton,DeleteAccountButton}.tsx` / `lib/hooks/useOnlineStatus.ts` / `app/(dashboard)/settings/_components/OfflineBrowsingToggle.tsx` / `app/(dashboard)/_components/{OfflineLifecycle,ReconnectRefresh}.tsx` / `app/(dashboard)/_components/ContextStrip.tsx`（離線橫幅已併入 ContextStrip 的 priority-1 分支，沒有獨立的 OfflineBanner 元件） / `app/offline/page.tsx`
 
 ---
 
@@ -216,7 +238,13 @@ client click 登出／刪除帳號
 
 | 平台 | 場景 | 期望 |
 |---|---|---|
-| 任意平台 | 第一次安裝 PWA 後（toggle 預設關） | SW 未註冊；飛航模式開 app 看到瀏覽器離線頁 |
+| Web（非殼） | 第一次進 dashboard（toggle 預設關） | 只註冊 `/sw-basic.js`；`caches.keys()` 只有 `offline-basic-<hash>`；斷線再導覽看到 Futari 離線頁（含「設定 › 離線瀏覽」提示）（#1674） |
+| Web（非殼） | toggle 關、網路卡住（連得上但不回應） | 約 8s 內出現離線頁；網路恢復後約 5s 內自己 reload 回原頁 |
+| Web（非殼） | toggle 關、某頁固定 12s 才回 | 最多一次離線頁，之後進得去，不反覆 reload |
+| Web（非殼） | toggle 關、`/auth/callback`、`/sign-in`、POST 導覽 | 基本 SW 不回應，8s 之後仍到網路 |
+| Web（非殼） | toggle 關 → Settings 開啟 | `/sw.js` 接手；沒有 `offline-basic-*` cache；toggle 開、無錯誤 |
+| Web（非殼） | kill switch 部署後 | 沒有任何註冊、沒有 `offline-basic-*`；下一次導覽到網路；不 reload |
+| iOS／Android 殼 | toggle 關 | 不註冊任何 SW（殼內離線頁由 #1672 負責） |
 | 任意平台 | Settings 開啟 toggle | SW register 成功；開始 cache |
 | 任意平台 | Settings 關閉 toggle | SW unregister；所有 cache 與 serwist-expiration 紀錄清空；其他還被 `/sw.js` 控制的分頁 reload 一次，reload 後的掛載 sweep 之後 DevTools 看不到 cache 與紀錄 |
 | 任意平台 | 切換進行中連點 | 第二次點擊被 disable，無中間態殘留 |
@@ -248,6 +276,14 @@ client click 登出／刪除帳號
 **失效的樣子**：沒有任何錯誤。關掉離線瀏覽或登出的裝置，`dynamic-v1` 在背景裡安靜地被補回來，下次打開 Settings 甚至顯示「已開啟」。只有打開 DevTools 看 Cache Storage 才看得出來。
 
 所以現在：開關仍存在這台裝置上，但綁定開啟它的使用者；登出、刪除帳號一律完整關閉；寫入受同意標記控制。引用舊規則的段落（Scope、Locked decisions、Settings 頁開關、Sign-out flow、風險、Acceptance）都已同步改寫——下次有人從「SW 是裝置能力」重新推出「登出不用關」，就是這條撤回在擋的那個錯。
+
+**「toggle 關就不註冊任何 SW」——v0.14.0 寫下，#1674（v1.7.3）撤回。**
+
+原本的推論：cache PII 是裝置端的隱私決定，所以沒開的人不該有 SW。前半句仍然成立，後半句把「有 SW」和「存帳本頁面」綁在一起了。基本 SW 只存一頁不含任何個人資料的靜態離線頁，而且在 activate 時主動刪掉 opt-in 的 cache——它讓沒開的人斷線時看到 Futari 而不是瀏覽器的錯誤頁，不改變誰的帳本會留在裝置上。
+
+**失效的樣子**：之前沒有錯誤，只有體驗：沒開離線瀏覽的 web 使用者（幾乎所有人）斷線時看到瀏覽器的「沒有網際網路」，網路卡住時則是一頁白、等很久。
+
+所以現在：「有沒有開離線瀏覽」仍然只看 pref；有沒有 SW 不再是它的代理指標。
 
 ---
 

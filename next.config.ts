@@ -1,10 +1,21 @@
 import type { NextConfig } from "next";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { PHASE_PRODUCTION_BUILD } from "next/constants";
 import withSerwistInit from "@serwist/next";
 import { withSentryConfig } from "@sentry/nextjs";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 import { PROTECTED_ROOT_SEGMENTS } from "./lib/auth/protectedPaths";
 import { SUPPORTED_LOCALES } from "./lib/i18n/locales-meta";
 import { TOKEN_BEARING_NEXT_PATTERN } from "./lib/analytics/tokenBearingUrl";
+import {
+  OFFLINE_BASIC_BUILD_ARTIFACT,
+  OFFLINE_BASIC_PAGE_SOURCE,
+  OFFLINE_BASIC_WORKER_HEADERS,
+  OFFLINE_BASIC_WORKER_SOURCE,
+  offlineBasicPageHeaders,
+  type OfflineBasicBuildArtifact,
+} from "./lib/offline/offlineBasicHeaders";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -113,6 +124,27 @@ export const INVITE_REFERRER_RULES = [
   })),
 ];
 
+// #1674 — the web's offline page and basic worker. The page's CSP allows its
+// inline scripts only by hash; the hashes come from the artifact `prebuild`
+// writes (scripts/build-web-offline-basic.ts). Without the artifact (`next dev`,
+// tests) the CSP allows no script at all, and a production build refuses to
+// start (see the default export). Details: lib/offline/offlineBasicHeaders.ts.
+function readOfflineBasicArtifact(): OfflineBasicBuildArtifact | null {
+  const file = join(process.cwd(), OFFLINE_BASIC_BUILD_ARTIFACT);
+  if (!existsSync(file)) return null;
+  return JSON.parse(readFileSync(file, "utf8")) as OfflineBasicBuildArtifact;
+}
+
+const offlineBasicArtifact = readOfflineBasicArtifact();
+
+export const OFFLINE_BASIC_RULES = [
+  {
+    source: OFFLINE_BASIC_PAGE_SOURCE,
+    headers: offlineBasicPageHeaders(offlineBasicArtifact?.scriptHashes ?? []),
+  },
+  { source: OFFLINE_BASIC_WORKER_SOURCE, headers: OFFLINE_BASIC_WORKER_HEADERS },
+];
+
 // Exported unwrapped (no Sentry/Serwist/analyzer) so tests can match paths
 // with Next's own matcher.
 export const headerRules = [
@@ -159,6 +191,7 @@ export const headerRules = [
   },
   ...OUTING_PUBLIC_SOURCES.map((source) => ({ source, headers: OUTING_PUBLIC_HEADERS })),
   ...INVITE_REFERRER_RULES,
+  ...OFFLINE_BASIC_RULES,
 ];
 
 const nextConfig: NextConfig = {
@@ -209,7 +242,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default analyzer(withSentryConfig(withSerwist(nextConfig), {
+const wrappedConfig = analyzer(withSentryConfig(withSerwist(nextConfig), {
   org: "southern-light-dev",
   project: "prj-futari",
   // Suppress Sentry build logs.
@@ -226,3 +259,15 @@ export default analyzer(withSentryConfig(withSerwist(nextConfig), {
     treeshake: { removeDebugLogging: true },
   },
 }));
+
+// #1674: a production build must not ship /offline-basic.html without its CSP
+// hashes. `prebuild` writes the artifact; if it didn't run (or failed), stop
+// here instead of deploying a page whose inline scripts the CSP would block.
+export default function config(phase: string): NextConfig {
+  if (phase === PHASE_PRODUCTION_BUILD && !offlineBasicArtifact) {
+    throw new Error(
+      `missing ${OFFLINE_BASIC_BUILD_ARTIFACT}: run \`npm run build\` (its prebuild step generates the web offline page), not \`next build\` directly`,
+    );
+  }
+  return wrappedConfig;
+}
