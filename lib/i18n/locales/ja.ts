@@ -154,6 +154,8 @@ export const ja: Translations = {
       seeAll: 'すべての移行ガイドを見る',
     },
     footerTrust: 'ふたりだけに開放 · データはふたりだけのもの',
+    featuresOutingLink: '旅行の割り勘も：リンクひとつで、友だちはアプリ不要',
+    footerOutingLink: '旅行の割り勘',
     jsonLdAppName: 'Futari · ふたり',
     jsonLdAlternateNames: ['ふたり 家計簿', 'Futari 家計簿', '二人の家計簿', "Futari · couple's ledger"],
     jsonLdAppDescription:
@@ -3847,7 +3849,7 @@ I will upload the screenshots once you confirm.`,
     ],
     closingHeading: '次に出かけるときは、先におでかけを作っておきましょう',
     crossLink: {
-      name: '友だちと一緒におでかけ',
+      name: 'グループ旅行の割り勘',
       description: 'リンクを 1 つ送るだけで、友だちもダウンロードなしで一緒に記録できます。',
       cta: 'おでかけの使い方を見る',
     },
