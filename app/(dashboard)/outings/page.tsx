@@ -6,8 +6,15 @@ import { listParticipatingOutings } from '@/lib/db/queries/outingPublic'
 import { getLocale } from '@/lib/i18n/t'
 import { OutingList } from './_components/OutingList'
 
-export default async function OutingsPage() {
+export default async function OutingsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ create?: string | string[] }>
+}) {
   const { user } = await requireViewerOrRedirect()
+  // #1726 — `/outings?create=1` (end of setup for someone who came to split a
+  // trip) opens the new-outing sheet. Exact match; it only opens a sheet.
+  const openCreate = (await searchParams)?.create === '1'
 
   // #1682 — the list follows the chapter being viewed (pin included), the
   // same chapter /outings/[id] will open (as /trips does, #1614). No chapter
@@ -26,6 +33,7 @@ export default async function OutingsPage() {
   ])
   return (
     <OutingList
+      openCreate={openCreate}
       outings={outings}
       participating={participating.map((o) => ({
         id: o.id,

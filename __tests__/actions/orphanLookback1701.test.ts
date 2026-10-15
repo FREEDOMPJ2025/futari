@@ -191,7 +191,7 @@ function surfaces(w: World): Page[] {
     ['trip detail tripIn', trip('tripIn')],
     ['trip detail tripPre', trip('tripPre')],
     ['trip detail tripPost', trip('tripPost')],
-    ['outings list', () => OutingsPage()],
+    ['outings list', () => OutingsPage({})],
     ['outing detail outingIn', outing('outingIn')],
     ['outing detail outingPost', outing('outingPost')],
     ['outing resume outingIn', () => OutingResumePage({ params: Promise.resolve({ locale: 'zh-TW', outingId: id('outingIn') }) })],

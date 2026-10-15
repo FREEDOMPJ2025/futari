@@ -1912,6 +1912,8 @@ export type Translations = {
       next: string
       required: string
       failed: string
+      /** Shown only to someone who came from /features/outing (#1726). */
+      outingReason: string
     }
     invite: {
       heading: string
@@ -1925,6 +1927,9 @@ export type Translations = {
       copy: string
       share: string
       skip: string
+      /** #1726 — the skip button and the line under it, for someone who came to split a trip. */
+      skipToOuting: string
+      outingHint: string
       copied: string
       shareFailed: string
       creating: string
@@ -4849,6 +4854,7 @@ export const zhTW: Translations = {
       next: '下一步',
       required: '請輸入名稱',
       failed: '發生錯誤',
+      outingReason: '先建好你們的帳本，出遊會記在裡面。',
     },
     invite: {
       heading: '帳本準備好了，讓對方也進來',
@@ -4861,6 +4867,8 @@ export const zhTW: Translations = {
       copy: '複製',
       share: '分享連結',
       skip: '稍後再邀請 →',
+      skipToOuting: '先去開出遊 →',
+      outingHint: '對方之後隨時可以加入，出遊現在就能開。',
       copied: '已複製連結',
       shareFailed: '分享失敗',
       creating: '建立中…',
