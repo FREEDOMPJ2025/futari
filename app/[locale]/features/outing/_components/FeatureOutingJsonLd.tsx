@@ -11,10 +11,15 @@ function Ld({ data }: { data: object }) {
 }
 
 /**
- * The three JSON-LD blocks of /features/outing (#1633), all per-locale:
+ * The JSON-LD blocks of /features/outing, all per-locale (#1633):
  * BreadcrumbList (Home -> this page; there is no /features hub, so no middle
  * node), HowTo (the walkthrough's four steps, anchored #step-N like
  * MigrateHowToJsonLd), and FAQPage (same six questions the page shows).
+ * #1725 adds WebApplication: the outing as something that runs in a browser,
+ * free, nothing to install. It joins the landing's graph by @id. It carries no
+ * rating or review: we have none, and Google's software-app rich result asks
+ * for one, so the Rich Results Test lists it as ineligible for that card while
+ * the node still reads fine as structured data.
  */
 export function FeatureOutingJsonLd({
   locale,
@@ -50,6 +55,23 @@ export function FeatureOutingJsonLd({
       url: `${pageUrl}#step-${i + 1}`,
     })),
   }
+  const webApp = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    '@id': `${pageUrl}#webapp`,
+    name: `${homeName} · ${t.breadcrumbLabel}`,
+    description: t.answer,
+    url: pageUrl,
+    inLanguage,
+    applicationCategory: 'FinanceApplication',
+    operatingSystem: 'Any',
+    browserRequirements: 'Requires a modern web browser',
+    isAccessibleForFree: true,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'TWD' },
+    featureList: t.steps.map((step) => step.title),
+    isPartOf: { '@id': `${APP_URL}/#software` },
+    publisher: { '@id': `${APP_URL}/#organization` },
+  }
   const faq = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -65,6 +87,7 @@ export function FeatureOutingJsonLd({
     <>
       <Ld data={breadcrumb} />
       <Ld data={howTo} />
+      <Ld data={webApp} />
       <Ld data={faq} />
     </>
   )
