@@ -666,6 +666,13 @@
       "when": 1785100000000,
       "tag": "0095_partner_quiz_epoch",
       "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "7",
+      "when": 1785200000000,
+      "tag": "0096_deletion_keeps_shared_chapter",
+      "breakpoints": true
     }
   ]
 }

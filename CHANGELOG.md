@@ -62,6 +62,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - **離開帳本時，兩人的那段章節完整留下（#1611）**
   使用者：離開後支出、進帳、結算與月回顧留言都留在原帳本的那段章節，不再依誰付的拆走；離開前可先匯出支出紀錄，離開流程與隱私權政策的說明跟著更新（文案待 #1688 審稿）。
   技術：`leaveGroup` 只搬名下愛物、定期規則與未處理／已略過的卡片、發票載具、推播裝置，離開者規則的已確認卡片改為刪除，兩本帳本之間不留跨帳本引用；無 migration。
+- **留下的人刪除帳號後，離開的人仍能回看那段共同章節（#1701）**
+  使用者：離開之後，留下的人若刪除帳號，你們共同的那段時光仍留給離開的人回看與匯出，名字顯示為「已離開的夥伴」，等對方也刪除帳號才一起刪；那段時光外的紀錄、愛物明細與備註、匯入檔、分享連結都會刪除（隱私權政策、服務條款與刪除確認的說明跟著更新，文案待 #1688 審稿）。
+  技術：migration `0096` 新增 `_prune_ledger`（按章節修剪孤兒帳本，無保留章節時等同整本 cascade）與 `sweep_orphan_ledgers()`＋pg_cron `sweep-orphan-ledgers`（每日 15:00 UTC），`process_account_deletions` 的 solo 分支改走 `_prune_ledger`；保留章節去除 `*Details`、`*_encrypted`、備註、匯入批次、匯率、出遊分享連結，帳本名改「家計簿」。
+
 - **「過去的時光」的設定壞掉時，App 不會整個打不開（#1699）**
   使用者：瀏覽器裡記住的「正在看哪段章節」若是一個無效的值，現在當成沒選，直接回到現在的帳本，不再每一頁都出錯。
   技術：`resolveViewerEpochContext` 與 `enterPastEpoch` 先檢查 pin 是 uuid（`isUuid`），不合法的值不送進查詢（原本 22P02 讓 dashboard layout 500）；刪除沒人呼叫的 `resolveViewerEpochWindow`／`getActiveEpochWindow`。

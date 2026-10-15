@@ -81,6 +81,7 @@ const isLocalDb = (() => {
 })()
 
 const { db } = await import('@/lib/db/client')
+const { seedAuthUsers, deleteAuthUsers } = await import('./_authUser')
 const {
   profiles, oikosGroups, groupBalance, groupEpochs, cashTransactions, importBatches,
 } = await import('@/lib/db/schema')
@@ -430,9 +431,16 @@ async function runAccountDeletionFor(userId: string): Promise<number> {
   if (!/^[0-9a-f-]{36}$/.test(userId) || !body.includes(header) || !body.includes(scan)) {
     throw new Error('runAccountDeletionFor: unexpected function body')
   }
+  // #1701 — the body ends with sweep_orphan_ledgers(), which prunes EVERY
+  // orphan ledger in the database; scoped to one user, it must not run here.
+  const sweep = 'PERFORM public.sweep_orphan_ledgers();'
+  if (body.includes('sweep_orphan_ledgers') && !body.includes(sweep)) {
+    throw new Error('runAccountDeletionFor: unexpected sweep call')
+  }
   const scoped = body
     .replace(header, 'CREATE FUNCTION pg_temp.process_account_deletions_1460()')
     .replace(scan, `WHERE id = '${userId}'::uuid AND deletion_requested_at IS NOT NULL`)
+    .replace(sweep, 'NULL;')
   return db.transaction(async (tx) => {
     await tx.execute(sql.raw(scoped))
     const [row] = await tx.execute<{ n: number }>(sql`SELECT pg_temp.process_account_deletions_1460() AS n`)
@@ -466,6 +474,12 @@ describe.skipIf(!isLocalDb)('#1460 export across ledgers', () => {
       { id: p.A4, displayName: `${P}_A4` }, { id: p.R4, displayName: `${P}_R4` },
       { id: p.Z, displayName: `${P}_Z` },
     ])
+    // #1701 — live people have an auth.users row. Without one, a solo ledger
+    // whose member_a is one of these ids is an orphan (account gone) and the
+    // deletion job's prune purges it.
+    const rows = await db.select({ id: profiles.id, displayName: profiles.displayName }).from(profiles)
+      .where(inArray(profiles.id, Object.values(p)))
+    await seedAuthUsers(rows)
 
     // ── W1 ──
     w2.G1 = await newLedger(p.A1, p.B1, t0, `${P}_G1`)
@@ -555,6 +569,7 @@ describe.skipIf(!isLocalDb)('#1460 export across ledgers', () => {
       await db.delete(groupBalance).where(inArray(groupBalance.groupId, all))
       await db.delete(oikosGroups).where(inArray(oikosGroups.id, all))
     }
+    await deleteAuthUsers(persons)
     await db.delete(profiles).where(inArray(profiles.id, persons))
   })
 
