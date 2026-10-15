@@ -1466,6 +1466,7 @@ export const en: Translations = {
       next: 'Next',
       required: 'Please enter a name',
       failed: 'Something went wrong',
+      outingReason: 'Set up your shared ledger first. The outing will live inside it.',
     },
     invite: {
       heading: 'Your ledger is ready — bring your partner in',
@@ -1478,6 +1479,8 @@ export const en: Translations = {
       copy: 'Copy',
       share: 'Share link',
       skip: 'Invite later →',
+      skipToOuting: 'Start the outing first →',
+      outingHint: 'Your partner can join any time. You can start the outing now.',
       copied: 'Link copied',
       shareFailed: 'Could not share',
       creating: 'Creating…',

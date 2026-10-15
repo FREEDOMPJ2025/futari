@@ -1,9 +1,9 @@
 ---
-last_updated: 2026-09-13
+last_updated: 2026-10-15
 status: shipped
 first_shipped_in: v0.2.0
 related_specs: [solo-mode, transactions, locale-currency]
-related_issues: []
+related_issues: ["#1726"]
 ---
 
 # Onboarding Flow
@@ -49,6 +49,24 @@ Phase 1 假設使用者一定是雙人組合。但在友人測試階段，部分
 
 ---
 
+## 從出遊頁進來的人（#1726）
+
+`/features/outing` 的 CTA 帶的是 `next=/onboarding?intent=outing`。帶著這個意圖的新使用者，流程改成這樣：
+
+- **不看理念卡**，直接進 `/setup` 取名。理念卡講的是你們兩個人；這個人是來跟朋友分旅費的，五張卡擋在他和想做的事之間。
+- 取名那一步多一句原因：「先建好你們的帳本，出遊會記在裡面」。出遊仍然屬於一本兩人帳本（[outing-acquisition](outing-acquisition-design.md) §2）。
+- 信任那一步不變。
+- 邀請那一步照樣顯示，略過的按鈕改成「先去開出遊 →」，下面一行說對方之後隨時可以加入。略過不是問題狀態（solo 寫作規則）。
+- 略過後**不跳安裝引導**，直接到 `/outings?create=1`，建立出遊的 sheet 已經打開。安裝引導沒有被標成看過。
+- 已經有帳本的人：`/onboarding?intent=outing` 轉到 `/outings`，跟 #1726 之前一樣。
+
+其他入口（landing、搬遷頁、伴侶邀請）的 onboarding 不變。
+
+**`intent` 是封閉集合，不是網址。** 只有字面上的 `outing` 算數，每個值對應一個寫死的站內路徑（`lib/onboarding/intent.ts`）；網址裡的任何東西都不會被拿來當轉址目標，所以這裡不會變成 open redirect。值不認得、重複帶、大小寫不同，一律當作沒有意圖，走一般流程。
+失效的樣子：不會報錯。`?intent=` 在哪一跳掉了，使用者就照舊走完理念卡、邀伴侶、落在 dashboard，整段沒提到出遊。
+
+---
+
 ## Locked decisions
 
 | 維度 | 決定 | 理由 |
@@ -58,7 +76,7 @@ Phase 1 假設使用者一定是雙人組合。但在友人測試階段，部分
 | 邀請 token 期限 | 24 小時（#1288；原為 7 天） | 連結的副本（GA、瀏覽紀錄、剪貼簿、聊天伺服器）收不回來，只能縮短它還能用的時間。prod 已接受的邀請全部在 5 小時內接受，24 小時留足餘裕；過期後對方看到「邀請已過期」，邀請方再產一條即可。常數是 `lib/invite.ts` 的 `INVITE_TTL_MS` |
 | 「稍後再邀請」出口 | 永遠提供 | 沒有對象的人也能用；不要在第三步擋人 |
 | 第二步建議 chips | 5 個固定選項 | 不暴露所有可能，給人「立刻可選」的快感；不喜歡的人 input 自由打 |
-| Onboarding 完成後 redirect | `/dashboard` | 直接進主畫面開始記帳 |
+| Onboarding 完成後 redirect | `/dashboard`；從出遊頁來的人到 `/outings?create=1`（#1726） | 直接進主畫面開始記帳；為出遊而來的人直接開出遊 |
 
 ### 不採用
 

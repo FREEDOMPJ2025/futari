@@ -41,6 +41,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+### 使用者可見變化
+
+- **從出遊頁註冊的人，建好帳本就直接開出遊（#1726）**
+  使用者：從 `/features/outing` 按「用 Futari 開一個出遊」註冊後，略過理念卡直接取名，取名頁說明出遊會記在帳本裡；邀請伴侶可以「先去開出遊」，略過後直接打開建立出遊。其他入口的 onboarding 不變。
+  技術：CTA 的 `next` 改為 `/onboarding?intent=outing`；`intent` 是封閉集合（`lib/onboarding/intent.ts`），對應寫死的站內路徑，不從網址取轉址目標；`/outings?create=1` 開啟建立 sheet 後移除參數。
+
 ### 技術變更
 
 - **出遊漏斗補上建立與分享兩個事件（#1723）**

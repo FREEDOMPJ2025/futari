@@ -13,6 +13,7 @@ import { TrustCommitments } from '@/app/(dashboard)/settings/trust/_components/T
 import InviteQr from '@/app/setup/InviteQr'
 import type { Translations } from '@/lib/i18n/locales/zh-TW'
 import { unwrapAction } from '@/lib/action-errors'
+import { INTENT_DESTINATION, type OnboardingIntent } from '@/lib/onboarding/intent'
 const NAME_MAX = 20
 const INSTALL_GUIDE_SEEN_KEY = 'oikos_install_guide_seen'
 
@@ -23,7 +24,7 @@ interface CreatedGroup {
   name: string
 }
 
-export default function SetupForm({ t }: { t: Translations }) {
+export default function SetupForm({ t, intent = null }: { t: Translations; intent?: OnboardingIntent | null }) {
   const trust = t.trust
   const invite = t.setup.invite
   const nameT = t.setup.name
@@ -131,6 +132,13 @@ export default function SetupForm({ t }: { t: Translations }) {
   const [installGuideOpen, setInstallGuideOpen] = useState(false)
 
   const goToDashboard = () => {
+    // #1726 — came to split a trip: straight to the new-outing sheet. The
+    // install guide waits for a later setup-free visit rather than standing
+    // between them and the outing; it isn't marked seen.
+    if (intent) {
+      router.push(INTENT_DESTINATION[intent])
+      return
+    }
     // Skip the install guide if (a) already a PWA, or (b) the user has seen it before.
     if (typeof window === 'undefined') {
       router.push('/dashboard')
@@ -306,8 +314,11 @@ export default function SetupForm({ t }: { t: Translations }) {
             className="text-sm bg-transparent border-0 cursor-pointer mt-2"
             style={{ color: 'var(--ink-2)' }}
           >
-            {invite.skip}
+            {intent === 'outing' ? invite.skipToOuting : invite.skip}
           </button>
+          {intent === 'outing' && (
+            <p className="m-0 -mt-4 text-xs text-center text-ink-3">{invite.outingHint}</p>
+          )}
 
           {/* Live region stays mounted so screen readers announce the toast
               when its text appears (copy / share feedback). */}
@@ -339,6 +350,9 @@ export default function SetupForm({ t }: { t: Translations }) {
           <p id={nameHintId} className="text-sm mt-2" style={{ color: 'var(--ink-2)' }}>
             {nameT.subtitle}
           </p>
+          {intent === 'outing' && (
+            <p className="m-0 mt-2 text-sm text-ink-2">{nameT.outingReason}</p>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
