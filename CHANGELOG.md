@@ -47,6 +47,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：出遊結束後，朋友在出遊頁看到一張卡片，說明 Futari 也能兩個人一起記平常的帳，可以點去建立帳本或關掉；關掉後同一個出遊不再出現，進行中的出遊與已經有帳本的人都不顯示。
   技術：新增 `outing_ledger_invite_viewed`／`outing_ledger_invite_clicked`（無屬性）；未登入的連結帶 `from=outing`、`next=/onboarding`，`signed_up` 帶 `entry_source=outing`；server 只查看的人自己有沒有帳本。
 
+- **出遊連結可以用系統分享、QR code 送出，並看到還有幾個名字沒人選（#1727）**
+  使用者：出遊頁「分享給朋友」打開手機的分享面板並附上一句訊息，沒有分享面板時改複製訊息和連結；可以顯示 QR code 給旁邊的朋友掃；參與者清單下顯示還有幾個名字沒人選，並可再分享一次。
+  技術：`outing_link_shared` 新增 `method=share`／`qr`；有分享面板時連結在卡片出現與回到分頁時預先取得，讓分享在點擊內同步呼叫；QR 用既有的 `uqr`，沒有新增依賴或 Capacitor plugin。
+
+- **從出遊頁註冊的人，建好帳本就直接開出遊（#1726）**
+  使用者：從 `/features/outing` 按「用 Futari 開一個出遊」註冊後，略過理念卡直接取名，取名頁說明出遊會記在帳本裡；邀請伴侶可以「先去開出遊」，略過後直接打開建立出遊。其他入口的 onboarding 不變。
+  技術：CTA 的 `next` 改為 `/onboarding?intent=outing`；`intent` 是封閉集合（`lib/onboarding/intent.ts`），對應寫死的站內路徑，不從網址取轉址目標；`/outings?create=1` 開啟建立 sheet 後移除參數。
+
 - **出遊介紹頁開頭直接回答「怎麼分帳才不用每個人都裝 App」，並附一個算好的例子（#1725）**
   使用者：`/features/outing` 四語在開頭多一段問答，介紹步驟之後多一個四人出遊的分帳例子（每筆支出、合計、每人分攤、結清要轉的幾筆）。
   技術：例子的數字由 `OUTING_MOCK` 經產品自己的平分／結清函式算出；JSON-LD 加 `WebApplication`（免費、瀏覽器即可用）；`llms.txt`、`llms-full.txt` 加出遊段落與四語連結。

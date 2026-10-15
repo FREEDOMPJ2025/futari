@@ -882,6 +882,19 @@ export type Translations = {
       resetConfirmBody: string
       resetConfirm: string
       resetDone: string
+      /** #1727 — primary button: system share sheet, or copy message + link without one. */
+      shareCta: string
+      /** Prefilled share text; `{name}` = outing name. Goes into the friends' chat. */
+      message: string
+      /** No share sheet (Android shell, most desktops): message + link copied. */
+      messageCopied: string
+      qrShow: string
+      qrHide: string
+      qrHint: string
+      qrAlt: string
+      /** Under the participant list; `{n}` = friends' names nobody has picked. */
+      unpicked: string
+      reshare: string
     }
     participant: {
       /** Claim status under a participant's name (簡潔中性). */
@@ -1917,6 +1930,8 @@ export type Translations = {
       next: string
       required: string
       failed: string
+      /** Shown only to someone who came from /features/outing (#1726). */
+      outingReason: string
     }
     invite: {
       heading: string
@@ -1930,6 +1945,9 @@ export type Translations = {
       copy: string
       share: string
       skip: string
+      /** #1726 — the skip button and the line under it, for someone who came to split a trip. */
+      skipToOuting: string
+      outingHint: string
       copied: string
       shareFailed: string
       creating: string
@@ -4019,6 +4037,15 @@ export const zhTW: Translations = {
       resetConfirmBody: '舊連結會立刻失效。已經加入的人不受影響，照常記帳。',
       resetConfirm: '重設',
       resetDone: '已換成新連結，舊連結不能再用了。',
+      shareCta: '分享給朋友',
+      message: '「{name}」的帳記這裡，點開選你的名字就能一起記。',
+      messageCopied: '已複製訊息和連結，貼到群組就好。',
+      qrShow: '顯示 QR code',
+      qrHide: '收起 QR code',
+      qrHint: '讓旁邊的朋友用手機相機掃，就能打開這次出遊。',
+      qrAlt: '這次出遊的 QR code',
+      unpicked: '還有 {n} 個名字沒人選',
+      reshare: '再分享一次',
     },
     participant: {
       claim: {
@@ -4858,6 +4885,7 @@ export const zhTW: Translations = {
       next: '下一步',
       required: '請輸入名稱',
       failed: '發生錯誤',
+      outingReason: '先建好你們的帳本，出遊會記在裡面。',
     },
     invite: {
       heading: '帳本準備好了，讓對方也進來',
@@ -4870,6 +4898,8 @@ export const zhTW: Translations = {
       copy: '複製',
       share: '分享連結',
       skip: '稍後再邀請 →',
+      skipToOuting: '先去開出遊 →',
+      outingHint: '對方之後隨時可以加入，出遊現在就能開。',
       copied: '已複製連結',
       shareFailed: '分享失敗',
       creating: '建立中…',

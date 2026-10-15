@@ -17,7 +17,7 @@ import type { ParticipantClaim } from '@/app/(dashboard)/outings/_components/par
 import { AddParticipantSheet } from './AddParticipantSheet'
 import { SettleSheet } from './SettleSheet'
 import { EndOutingSheet } from './EndOutingSheet'
-import { ShareLinkCard } from './ShareLinkCard'
+import { ShareLinkCardView, useOutingShare } from './ShareLinkCard'
 import { ParticipantActions } from './ParticipantActions'
 
 type SheetKey = 'expense' | 'participant' | 'settle' | 'end' | 'rename' | null
@@ -75,6 +75,9 @@ export function OutingDetailClient({ outing, view, foldPreview, canManage, canEn
   const [editing, setEditing] = useState<OutingExpenseWithShares | null>(null)
   const active = outing.status === 'active'
   const editable = active && canManage
+  const share = useOutingShare(outing.id, outing.name, editable)
+  // #1727 — friends' names nobody has picked yet (members are always in).
+  const unpicked = participants.filter((p) => p.active && !p.isMember && p.claim === 'unclaimed').length
   const close = () => { setSheet(null); setEditing(null) }
   const byId = useMemo(() => new Map(participants.map((p) => [p.id, p])), [participants])
   // Settle / add-person sheets offer only people still in the outing.
@@ -133,6 +136,19 @@ export function OutingDetailClient({ outing, view, foldPreview, canManage, canEn
               )
             })}
           </div>
+          {editable && unpicked > 0 && (
+            <div className="mt-2 pt-2.5 border-t border-hairline flex items-center justify-between gap-3">
+              <p className="m-0 text-xs text-ink-3">{to.share.unpicked.replace('{n}', String(unpicked))}</p>
+              <button
+                type="button"
+                onClick={share.share}
+                disabled={share.pending}
+                className="shrink-0 min-h-11 px-2 bg-transparent border-0 cursor-pointer text-sm text-ink-2 underline disabled:opacity-50"
+              >
+                {to.share.reshare}
+              </button>
+            </div>
+          )}
         </Card>
 
         {/* Who pays whom */}
@@ -206,7 +222,7 @@ export function OutingDetailClient({ outing, view, foldPreview, canManage, canEn
           </Card>
         )}
 
-        {editable && <ShareLinkCard outingId={outing.id} />}
+        {editable && <ShareLinkCardView share={share} />}
 
         {foldPreview !== 0 && (
           <p className="text-xs px-1 text-ink-3">

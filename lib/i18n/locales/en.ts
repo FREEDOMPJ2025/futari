@@ -626,6 +626,15 @@ export const en: Translations = {
       resetConfirmBody: 'The old link stops working right away. People who already joined are unaffected and keep logging.',
       resetConfirm: 'Reset',
       resetDone: 'New link ready. The old one no longer works.',
+      shareCta: 'Share with friends',
+      message: 'We\'re logging {name} here. Open the link and pick your name to join in.',
+      messageCopied: 'Message and link copied. Paste it into the group chat.',
+      qrShow: 'Show QR code',
+      qrHide: 'Hide QR code',
+      qrHint: 'Friends nearby can scan this with their phone camera to open the outing.',
+      qrAlt: 'QR code for this outing',
+      unpicked: 'Names nobody has picked yet: {n}',
+      reshare: 'Share again',
     },
     participant: {
       claim: {
@@ -1472,6 +1481,7 @@ export const en: Translations = {
       next: 'Next',
       required: 'Please enter a name',
       failed: 'Something went wrong',
+      outingReason: 'Set up your shared ledger first. The outing will live inside it.',
     },
     invite: {
       heading: 'Your ledger is ready — bring your partner in',
@@ -1484,6 +1494,8 @@ export const en: Translations = {
       copy: 'Copy',
       share: 'Share link',
       skip: 'Invite later →',
+      skipToOuting: 'Start the outing first →',
+      outingHint: 'Your partner can join any time. You can start the outing now.',
       copied: 'Link copied',
       shareFailed: 'Could not share',
       creating: 'Creating…',

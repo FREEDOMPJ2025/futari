@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BottomNav } from '@/app/(dashboard)/_components/BottomNav'
 import { SubpageHeader } from '@/app/(dashboard)/_components/SubpageHeader'
 import { useMember } from '@/app/(dashboard)/_components/MemberContext'
@@ -22,12 +22,25 @@ export interface ParticipatingOuting {
   href: string
 }
 
-export function OutingList({ outings, participating = [] }: { outings: OutingListRow[]; participating?: ParticipatingOuting[] }) {
+export function OutingList({
+  outings,
+  participating = [],
+  openCreate = false,
+}: {
+  outings: OutingListRow[]
+  participating?: ParticipatingOuting[]
+  /** Open the new-outing sheet on arrival (`/outings?create=1`, #1726). Never in a past chapter. */
+  openCreate?: boolean
+}) {
   const router = useRouter()
   const t = useTranslations()
   const tl = t.outingList
   const { isPast } = useMember()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(openCreate && !isPast)
+  // Drop `?create=1` so a refresh or back navigation doesn't reopen the sheet.
+  useEffect(() => {
+    if (openCreate) router.replace('/outings')
+  }, [openCreate, router])
   const active = outings.filter((o) => o.status === 'active')
   const past = outings.filter((o) => o.status !== 'active')
 
