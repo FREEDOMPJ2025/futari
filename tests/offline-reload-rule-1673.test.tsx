@@ -24,6 +24,13 @@ import {
 
 const refreshSpy = vi.fn()
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: refreshSpy }) }))
+// #1674: these S1 cases run without the web's basic worker — as in the native
+// shells, where it is never registered — so they keep asserting S1's own rules.
+// The basic worker on the web is covered by tests/offline-basic-1674.test.tsx.
+vi.mock('@/lib/platform', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/platform')>()),
+  nativeShellPlatform: () => 'android',
+}))
 vi.mock('@/lib/supabase/client', () => ({
   createClient: () => ({ auth: { getSession: async () => ({ data: { session: null } }) } }),
 }))
