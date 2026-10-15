@@ -2611,7 +2611,12 @@ export type Translations = {
    *  inline script picks one from `navigator.language`.
    *
    *  Keep it short: every string here ships inside the app binary and can only
-   *  change by re-submitting to the stores. */
+   *  change by re-submitting to the stores.
+   *
+   *  #1674: the same keys also render the web's `public/offline-basic.html`
+   *  (`prebuild`, served by the basic worker `/sw-basic.js`). On the web a copy
+   *  change ships with the next deploy — the page hash is baked into the worker
+   *  bytes, so browsers pick up the new page on their next update check. */
   nativeOfflinePage: {
     /** HTML <title>; never visible in the shell, but is what a screen reader
      *  and the Android task switcher read. */
@@ -2624,8 +2629,10 @@ export type Translations = {
     status: string
     /** Shown once automatic returns stopped; only the manual button is left. */
     stalled: string
-    /** Android shell only, behind a build flag that stays off until case 9 of
-     *  #1672 passes (the iOS shell has no service worker). */
+    /** Android shell: behind a build flag that stays off until case 9 of
+     *  #1672 passes (the iOS shell has no service worker). Web (#1674): shown
+     *  when the browser supports service workers and offline browsing is not
+     *  on. */
     offlineBrowsingHint: string
   }
 

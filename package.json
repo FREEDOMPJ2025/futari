@@ -5,6 +5,7 @@
   "license": "AGPL-3.0-or-later",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "npm run web:offline-basic",
     "build": "next build --webpack",
     "analyze": "ANALYZE=true next build --webpack",
     "start": "next start",
@@ -17,6 +18,7 @@
     "db:studio": "node --env-file=.env.local node_modules/.bin/drizzle-kit studio",
     "cap:sync": "npx cap sync",
     "cap:offline-page": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-native-offline-page.ts",
+    "web:offline-basic": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-web-offline-basic.ts",
     "capacitor:copy:before": "npm run cap:offline-page",
     "cap:open:android": "npx cap open android",
     "cap:build:android": "npx cap build android",
