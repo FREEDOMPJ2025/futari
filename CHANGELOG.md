@@ -46,6 +46,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - **出遊連結可以用系統分享、QR code 送出，並看到還有幾個名字沒人選（#1727）**
   使用者：出遊頁「分享給朋友」打開手機的分享面板並附上一句訊息，沒有分享面板時改複製訊息和連結；可以顯示 QR code 給旁邊的朋友掃；參與者清單下顯示還有幾個名字沒人選，並可再分享一次。
   技術：`outing_link_shared` 新增 `method=share`／`qr`；有分享面板時連結在卡片出現與回到分頁時預先取得，讓分享在點擊內同步呼叫；QR 用既有的 `uqr`，沒有新增依賴或 Capacitor plugin。
+
+- **出遊介紹頁開頭直接回答「怎麼分帳才不用每個人都裝 App」，並附一個算好的例子（#1725）**
+  使用者：`/features/outing` 四語在開頭多一段問答，介紹步驟之後多一個四人出遊的分帳例子（每筆支出、合計、每人分攤、結清要轉的幾筆）。
+  技術：例子的數字由 `OUTING_MOCK` 經產品自己的平分／結清函式算出；JSON-LD 加 `WebApplication`（免費、瀏覽器即可用）；`llms.txt`、`llms-full.txt` 加出遊段落與四語連結。
+
 - **首頁、使用情境總覽與 Splitwise 搬遷頁都能連到出遊頁（#1724）**
   使用者：首頁功能區下方與頁尾多了「出遊分帳」連結，`/use-case` 總覽與 `/migrate/splitwise` 多一列出遊介紹；出遊連結列的標題改成帶「出遊分帳」的說法（四語）。
   技術：`feature_outing_link_clicked` 新增 `source`（`landing_features`／`landing_footer`／`use_case_hub`／`migrate_splitwise`）；migrate registry 加 `featureLinks`；sitemap 的 `/`、`/use-case`、`/features/outing` lastModified 改為 2026-10-15。

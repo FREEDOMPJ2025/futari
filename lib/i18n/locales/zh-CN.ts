@@ -3741,6 +3741,16 @@ export const zhCN: Translations = {
     breadcrumbLabel: '出游分账',
     howHeading: '从一个链接开始',
     howToStepName: '第 {n} 步',
+    answerQuestion: '出游分账，怎么做才不用每个人都装 App？',
+    answer: '在 Futari 开一个出游，把链接发到群里。朋友用手机浏览器点开、选自己的名字，就能记下自己付的钱，不用下载，也不用注册。每笔支出按分到的人数 AA 平分；要结清时，Futari 列出谁该转给谁，最多只要「人数减一」笔。',
+    example: {
+      heading: '一次出游分账的例子',
+      intro: '{outing}：{count} 个人、{expenses} 笔支出，每笔都由所有人平分。',
+      cols: { item: '支出', paidBy: '谁付', amount: '金额' },
+      total: '合计 {total}，每人分摊 {share}。',
+      settleLead: '结清时，Futari 列出这 {n} 笔转账：',
+      outcome: '转完之后，每个人实际花的都刚好是 {share}。',
+    },
     steps: [
       { title: '开一个出游', body: '在 Futari 的「旅行」页点「出游」那一行，开一个出游，取个名字就行。你和伴侣会自动在里面。' },
       { title: '把链接发到群里', body: '复制出游的链接，粘贴到微信或任何聊天群。' },
