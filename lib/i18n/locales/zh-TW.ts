@@ -1034,6 +1034,11 @@ export type Translations = {
     /** {name} = the viewer's slot. */
     signUpBody: string
     signUpCta: string
+    /** #1728 — after the outing ends (溫和的見證者). No partner or relationship assumed: the friend may be single. */
+    ledgerInviteTitle: string
+    ledgerInviteBody: string
+    ledgerInviteCta: string
+    ledgerInviteDismiss: string
   }
 
   /** Trip detail page (#42). */
@@ -4104,6 +4109,10 @@ export const zhTW: Translations = {
     signUpTitle: '之後也想找得到這次出遊？',
     signUpBody: '登入後，「{name}」會連到你的帳號。不登入也能繼續記。',
     signUpCta: '登入',
+    ledgerInviteTitle: '這次的帳都在這裡了',
+    ledgerInviteBody: 'Futari 平常是兩個人一起記帳用的。如果你也有想一起記的人，可以開一本你們自己的帳本。',
+    ledgerInviteCta: '建立兩人帳本',
+    ledgerInviteDismiss: '不用了',
   },
 
   tripDetail: {

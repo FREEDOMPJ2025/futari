@@ -732,6 +732,10 @@ export const ja: Translations = {
     signUpTitle: 'あとでもこのおでかけを見つけたいですか？',
     signUpBody: 'サインインすると「{name}」があなたのアカウントにつながります。サインインしなくても記録は続けられます。',
     signUpCta: 'サインイン',
+    ledgerInviteTitle: '今回の記録はここにそろっています',
+    ledgerInviteBody: 'Futari は、ふたりで日々の支出を一緒に記録するためのアプリです。一緒に記録したい人がいれば、ふたりの帳簿を作れます。',
+    ledgerInviteCta: 'ふたりの帳簿を作る',
+    ledgerInviteDismiss: '今はいい',
   },
 
   tripDetail: {

@@ -16,6 +16,7 @@ import { SettlementList } from '@/app/(dashboard)/outings/_components/Settlement
 import { Card, OutingHeader, SectionTitle } from './OutingPublicChrome'
 import { FeatureOutingLink } from './FeatureOutingLink'
 import { AndroidBetaOutingLink } from './AndroidBetaOutingLink'
+import { LedgerInviteCard } from './LedgerInviteCard'
 
 interface Props {
   view: Omit<OutingFullView, 'isAdmin'>
@@ -24,6 +25,8 @@ interface Props {
   signedIn: boolean
   /** /<locale>/sign-in?next=/<locale>/outing/r/<id>&from=outing */
   signInHref: string
+  /** #1728 — where the ledger invite card leads, or null when it is not offered. */
+  ledgerInviteHref?: string | null
 }
 
 /**
@@ -33,7 +36,7 @@ interface Props {
  * sheet and repayment list are the dashboard's own components (S4), not
  * copies: the outing actions resolve the friend by session or claim cookie.
  */
-export function OutingParticipantView({ view, needsBind, signedIn, signInHref }: Props) {
+export function OutingParticipantView({ view, needsBind, signedIn, signInHref, ledgerInviteHref = null }: Props) {
   const t = useTranslations()
   const c = t.outingPublic
   const to = t.outing
@@ -179,6 +182,8 @@ export function OutingParticipantView({ view, needsBind, signedIn, signInHref }:
         ) : (
           <p className="text-sm px-1 text-ink-3">{c.endedNote}</p>
         )}
+
+        {!active && ledgerInviteHref && <LedgerInviteCard outingId={outing.id} href={ledgerInviteHref} />}
 
         {!signedIn && (
           <Card>
