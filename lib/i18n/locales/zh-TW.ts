@@ -3207,6 +3207,21 @@ export type Translations = {
     howHeading: string
     /** HowToStep name template, contains `{n}`. */
     howToStepName: string
+    /** Opening direct answer (#1725): a question heading plus a self-contained
+     *  answer an AI engine can quote as-is. Same fact limits as the rest. */
+    answerQuestion: string
+    answer: string
+    /** Worked example (#1725), rendered as text from OUTING_MOCK through the
+     *  product's split/settle functions. Placeholders: intro `{outing}` `{count}`
+     *  `{expenses}`; total `{total}` `{share}`; settleLead `{n}`; outcome `{share}`. */
+    example: {
+      heading: string
+      intro: string
+      cols: { item: string; paidBy: string; amount: string }
+      total: string
+      settleLead: string
+      outcome: string
+    }
     steps: readonly [
       { title: string; body: string },
       { title: string; body: string },
@@ -7119,6 +7134,16 @@ export const zhTW: Translations = {
     breadcrumbLabel: '出遊分帳',
     howHeading: '從一個連結開始',
     howToStepName: '步驟 {n}',
+    answerQuestion: '出遊分帳，怎麼做才不用每個人都裝 App？',
+    answer: '在 Futari 開一個出遊，把連結丟到群組。朋友用手機瀏覽器點開、選自己的名字，就能記下自己付的錢，不用下載，也不用註冊。每筆支出照分到的人數平分；要結清時，Futari 列出誰該轉給誰，最多只要「人數減一」筆。',
+    example: {
+      heading: '一次出遊分帳的例子',
+      intro: '{outing}：{count} 個人、{expenses} 筆支出，每筆都由全部的人平分。',
+      cols: { item: '支出', paidBy: '誰付', amount: '金額' },
+      total: '合計 {total}，每人分攤 {share}。',
+      settleLead: '結清時，Futari 列出這 {n} 筆轉帳：',
+      outcome: '轉完之後，每個人實際花的都剛好是 {share}。',
+    },
     steps: [
       { title: '開一個出遊', body: '在 Futari 的「旅行」頁點「出遊」那一列，開一個出遊，取個名字就好。你和伴侶會自動在裡面。' },
       { title: '把連結丟到群組', body: '複製出遊的連結，貼到 LINE 或任何聊天群組。' },
