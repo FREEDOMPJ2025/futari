@@ -26,6 +26,9 @@ import { loadEnvLocal } from '../outing/_setup'
 // ──────────────────────────────────────────────────────────────────────────
 
 loadEnvLocal()
+// Each test seeds over the network (incl. an auth.users row, #1710); the default
+// 5 s is too tight against dev.
+vi.setConfig({ testTimeout: 60_000 })
 
 let mockUserId = ''
 const authSignOut = vi.fn(async () => ({ error: null }))
@@ -81,14 +84,14 @@ if (!process.env.DATABASE_URL?.includes('ufhcprrauwsxdmscbkrf')) {
 
 const created = { profiles: [] as string[], auth: [] as string[], groups: [] as string[] }
 
-async function person(label: string, withAuth = false): Promise<string> {
+// Every person gets an auth.users row: a ledger whose member_a has none, with
+// no member_b, is swept as an orphan (0096, #1710).
+async function person(label: string): Promise<string> {
   const id = randomUUID()
   await db.insert(profiles).values({ id, displayName: `TEST_1605_${label}` })
   created.profiles.push(id)
-  if (withAuth) {
-    await seedAuthUsers([{ id, displayName: `TEST_1605_${label}` }])
-    created.auth.push(id)
-  }
+  await seedAuthUsers([{ id, displayName: `TEST_1605_${label}` }])
+  created.auth.push(id)
   return id
 }
 
@@ -181,7 +184,7 @@ describe('#1605 push tokens follow membership', () => {
   })
 
   it('acceptInvite moves the joiner\'s tokens from their solo ledger to the joined one', async () => {
-    const inviter = await person('inviter', true); const joiner = await person('joiner', true)
+    const inviter = await person('inviter'); const joiner = await person('joiner')
     const target = await ledger('target', inviter, null)
     const solo = await ledger('joiner-solo', joiner, null)
     await token(inviter, target, 'TEST_1605_acc_inviter')

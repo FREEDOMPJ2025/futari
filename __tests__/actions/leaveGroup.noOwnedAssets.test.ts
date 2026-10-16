@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 
 // ─── Regression for #139 ──────────────────────────────────────────────────
 //
@@ -41,6 +42,9 @@ function loadEnvLocal() {
   }
 }
 loadEnvLocal()
+// Each test seeds over the network (incl. an auth.users row, #1710); the default
+// 5 s is too tight against dev.
+vi.setConfig({ testTimeout: 60_000 })
 
 let mockUserId: string = ''
 vi.mock('@/lib/supabase/server', () => ({
@@ -123,6 +127,10 @@ async function seedDuoGroup(): Promise<SeedRefs> {
     { id: userAId, displayName: 'TEST_139_userA' },
     { id: userBId, displayName: 'TEST_139_userB' },
   ])
+  await seedAuthUsers([
+    { id: userAId, displayName: 'TEST_139_userA' },
+    { id: userBId, displayName: 'TEST_139_userB' },
+  ])
 
   const [group] = await db.insert(oikosGroups).values({
     name: 'TEST_139_duo',
@@ -168,6 +176,7 @@ async function cleanup(refs: SeedRefs) {
   }
   await db.delete(groupBalance).where(eq(groupBalance.groupId, refs.oldGroupId))
   await db.delete(oikosGroups).where(eq(oikosGroups.id, refs.oldGroupId))
+  await deleteAuthUsers([refs.userAId, refs.userBId])
   await db.delete(profiles).where(inArray(profiles.id, [refs.userAId, refs.userBId]))
 }
 

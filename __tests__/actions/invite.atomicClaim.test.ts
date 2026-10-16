@@ -41,6 +41,9 @@ function loadEnvLocal() {
   }
 }
 loadEnvLocal()
+// Each test seeds over the network (incl. an auth.users row, #1710); the default
+// 5 s is too tight against dev.
+vi.setConfig({ testTimeout: 60_000 })
 
 // Concurrent calls need different viewers, so the auth mock reads the user id
 // from an AsyncLocalStorage scope set by `as()`.

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 
 // ─── #1589 — a car / house whose 主要使用人 / owner left the ledger ─────────
 //
@@ -94,13 +95,15 @@ beforeAll(async () => {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL not set; cannot run integration test. Ensure .env.local has DATABASE_URL.')
   }
-  await db.insert(profiles).values([
+  const people = [
     { id: p.A, displayName: `${T}_A` },
     { id: p.A2, displayName: `${T}_A2` },
     { id: p.N, displayName: `${T}_N` },
     { id: p.B, displayName: `${T}_B_ex` },
     { id: p.C, displayName: `${T}_C_stranger` },
-  ])
+  ]
+  await db.insert(profiles).values(people)
+  await seedAuthUsers(people)
   await seed(solo, p.A, null, 'solo')
   await seed(duo, p.A2, p.N, 'duo')
 })
@@ -123,6 +126,7 @@ afterAll(async () => {
         await db.delete(oikosGroups).where(eq(oikosGroups.id, l.group))
       }
     }
+    await deleteAuthUsers(Object.values(p))
     await db.delete(profiles).where(inArray(profiles.id, Object.values(p)))
   } catch (err) {
     console.error('cleanup failed', err)

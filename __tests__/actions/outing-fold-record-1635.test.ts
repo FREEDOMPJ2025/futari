@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import postgres from 'postgres'
-import { loadEnvLocal, seedGroup as seedGroupRow } from '../outing/_setup'
+import { loadEnvLocal, seedGroup as seedGroupRow, deleteSeededAuthUsers } from '../outing/_setup'
 
 // ─── #1635: an ended outing stops listing the line it already folded ────────
 //
@@ -76,6 +76,9 @@ async function purgeOutingRows(ids: string[]) {
     await tx.delete(outings).where(inArray(outings.groupId, ids))
   })
 }
+
+// Its own hook so a failing purge below cannot leave the auth rows behind.
+afterAll(async () => { await deleteSeededAuthUsers() })
 
 afterAll(async () => {
   const ids = [...seededGroups]

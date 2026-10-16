@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 
 // Regression for #912: a user already in a DUO group must be server-blocked
 // from accepting an invite to another group (no double-membership).
@@ -24,6 +25,9 @@ function loadEnvLocal() {
   }
 }
 loadEnvLocal()
+// Each test seeds over the network (incl. an auth.users row, #1710); the default
+// 5 s is too tight against dev.
+vi.setConfig({ testTimeout: 60_000 })
 
 let mockUserId = ''
 vi.mock('@/lib/supabase/server', () => ({
@@ -57,7 +61,10 @@ describe('acceptInvite — accepter already in a duo (#912)', () => {
         await db.delete(oikosGroups).where(eq(oikosGroups.id, gid))
       }
       const people = [ids.accepter, ids.partner, ids.inviter].filter(Boolean)
-      if (people.length) await db.delete(profiles).where(inArray(profiles.id, people))
+      if (people.length) {
+        await deleteAuthUsers(people)
+        await db.delete(profiles).where(inArray(profiles.id, people))
+      }
     } catch (e) {
       console.error('cleanup failed', e)
     }
@@ -68,6 +75,11 @@ describe('acceptInvite — accepter already in a duo (#912)', () => {
     ids.partner = randomUUID()
     ids.inviter = randomUUID()
     await db.insert(profiles).values([
+      { id: ids.accepter, displayName: 'TEST_912_accepter' },
+      { id: ids.partner, displayName: 'TEST_912_partner' },
+      { id: ids.inviter, displayName: 'TEST_912_inviter' },
+    ])
+    await seedAuthUsers([
       { id: ids.accepter, displayName: 'TEST_912_accepter' },
       { id: ids.partner, displayName: 'TEST_912_partner' },
       { id: ids.inviter, displayName: 'TEST_912_inviter' },

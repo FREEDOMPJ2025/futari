@@ -41,6 +41,9 @@ function loadEnvLocal() {
   }
 }
 loadEnvLocal()
+// Each test seeds over the network (incl. an auth.users row); the default 5 s is
+// too tight against dev, and a timed-out test races its own afterEach (#1710).
+vi.setConfig({ testTimeout: 60_000 })
 
 const { AsyncLocalStorage } = await import('node:async_hooks')
 const viewerStore = new AsyncLocalStorage<string>()

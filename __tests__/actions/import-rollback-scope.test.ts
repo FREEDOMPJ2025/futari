@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import postgres from 'postgres'
+import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 
 // ─── Integration test: rollbackImportBatch scoping ────────────────────────
 //
@@ -36,6 +37,9 @@ function loadEnvLocal() {
   }
 }
 loadEnvLocal()
+// Each test seeds over the network (incl. an auth.users row, #1710); the default
+// 5 s is too tight against dev.
+vi.setConfig({ testTimeout: 60_000 })
 
 let mockUserId: string = ''
 vi.mock('@/lib/supabase/server', () => ({
@@ -104,6 +108,7 @@ async function seedSoloGroup(refs: Seeded, label: string): Promise<{ userId: str
   const epochStartedAt = new Date('2026-01-01T00:00:00Z')
 
   await db.insert(profiles).values({ id: userId, displayName: `TEST_rollback_${label}` })
+  await seedAuthUsers([{ id: userId, displayName: `TEST_rollback_${label}` }])
   refs.userIds.push(userId)
 
   const [group] = await db
@@ -130,6 +135,7 @@ async function cleanup(refs: Seeded) {
     await db.delete(groupBalance).where(eq(groupBalance.groupId, groupId))
     await db.delete(oikosGroups).where(eq(oikosGroups.id, groupId))
   }
+  await deleteAuthUsers(refs.userIds)
   for (const userId of refs.userIds) {
     await db.delete(profiles).where(eq(profiles.id, userId))
   }

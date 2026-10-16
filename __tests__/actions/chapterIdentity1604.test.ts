@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 
 // ─── #1604 part 1: a past chapter's 「對方」 is that chapter's partner — dev DB ───
 //
@@ -37,6 +38,9 @@ function loadEnvLocal() {
   }
 }
 loadEnvLocal()
+// Each test seeds over the network (incl. an auth.users row, #1710); the default
+// 5 s is too tight against dev.
+vi.setConfig({ testTimeout: 60_000 })
 
 let viewer = ''
 let pin: string | undefined
@@ -76,8 +80,13 @@ afterEach(async () => {
 
 async function seedProfiles(names: string[]) {
   const ids = names.map(() => randomUUID())
-  await db.insert(profiles).values(ids.map((id, i) => ({ id, displayName: names[i] })))
-  cleanups.push(async () => { await db.delete(profiles).where(inArray(profiles.id, ids)) })
+  const people = ids.map((id, i) => ({ id, displayName: names[i] }))
+  await db.insert(profiles).values(people)
+  await seedAuthUsers(people)
+  cleanups.push(async () => {
+    await deleteAuthUsers(ids)
+    await db.delete(profiles).where(inArray(profiles.id, ids))
+  })
   return ids
 }
 
