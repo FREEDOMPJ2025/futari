@@ -66,7 +66,8 @@ describe.each(SUPPORTED_LOCALES)('%s', (locale) => {
   })
 
   it('keeps the trust claim: no auto-logging / binding wording, no exclamation marks', () => {
-    const all = JSON.stringify(t)
+    // #1751: the SEO strings and the settings row are user-facing copy of the same page.
+    const all = JSON.stringify([t, dictionaries[locale].seo.featureShortcuts, dictionaries[locale].settings.shortcutsGuide])
     expect(all).not.toMatch(/自動記帳|自动记账|綁定|绑定|串接|[!！]|加密|encrypt|暗号化/i)
     expect(all).not.toMatch(/管理|追蹤|追踪|監控|监控/)
     // The iOS shell opens this page (Apple 2.3.10): never name another platform.
