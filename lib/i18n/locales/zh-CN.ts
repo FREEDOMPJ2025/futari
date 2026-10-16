@@ -3322,9 +3322,9 @@ export const zhCN: Translations = {
       ogDescription: '开一个出游、把链接发到群里，朋友点开选自己的名字就能一起记账，不用下载、不用注册。',
     },
     featureShortcuts: {
-      title: 'iPhone 快捷指令记账：Apple Pay 付款后打开「新增一笔」 | Futari',
-      description: '用 iPhone 的快捷指令，在 Apple Pay 付款后打开 Futari 的「新增一笔」，金额先填好，由你确认后保存。Futari 不连接付款账户，也不读取付款数据。',
-      ogDescription: '付款后，iPhone 快捷指令打开 Futari 的「新增一笔」，金额、分类和描述先填好，保存由你来按。',
+      title: 'iPhone 快捷指令记账：Apple Pay 付款后打开「新增记录」 | Futari',
+      description: '用 iPhone 的快捷指令，在 Apple Pay 付款后打开 Futari 的「新增记录」，金额先填好，由你确认后保存。Futari 不连接付款账户，也不读取付款数据。',
+      ogDescription: '付款后，iPhone 快捷指令打开 Futari 的「新增记录」，金额、分类和描述先填好，保存由你来按。',
     },
   },
   useCase: {
@@ -3821,19 +3821,19 @@ export const zhCN: Translations = {
 
   featureShortcuts: {
     heroKicker: '快捷指令记账',
-    heroTitle: '付完款，让 iPhone 把「新增一笔」打开',
-    heroSubtitle: '用 iPhone 的「快捷指令」，在付款后打开 Futari 的「新增一笔」。金额、分类和描述先填好，你看过、需要就改，再按保存。',
+    heroTitle: '付完款，让 iPhone 把「新增记录」打开',
+    heroSubtitle: '用 iPhone 的「快捷指令」，在付款后打开 Futari 的「新增记录」。金额、分类和描述先填好，你看过、需要就改，再按保存。',
     breadcrumbLabel: '快捷指令记账',
     howToStepName: '步骤 {n}',
     answerQuestion: 'Apple Pay 付款后，怎么快速记到 Futari？',
-    answer: 'Futari 不连接任何付款账户，也不读取你的付款数据。做事的是 iPhone 的「快捷指令」：付款后它打开 Futari 的「新增一笔」，把金额、分类和描述先填好，你确认后自己按保存，记录才会写进账本。这个做法只适用于 iPhone 的「快捷指令」App。',
+    answer: 'Futari 不连接任何付款账户，也不读取你的付款数据。做事的是 iPhone 的「快捷指令」：付款后它打开 Futari 的「新增记录」，把金额、分类和描述先填好，你确认后自己按保存，记录才会写进账本。这个做法只适用于 iPhone 的「快捷指令」App。',
     vars: {
       amount: '金额',
       merchant: '商家',
     },
     applePay: {
-      heading: 'Apple Pay：刷完卡就跳出「新增一笔」',
-      intro: '前提：iPhone 已安装 Futari 并登录。下面用「钱包」的交易自动化，每次用 Apple Pay 付款，就打开一次填好的「新增一笔」。',
+      heading: 'Apple Pay：刷完卡就跳出「新增记录」',
+      intro: '前提：iPhone 已安装 Futari 并登录。下面用「钱包」的交易自动化，每次用 Apple Pay 付款，就打开一次填好的「新增记录」。',
       steps: [
         {
           title: '新建交易自动化',
@@ -3853,12 +3853,12 @@ export const zhCN: Translations = {
         },
         {
           title: '打开 URL',
-          body: '加一个「打开 URL」动作，输入选上一步的文本。之后每次用 Apple Pay 付款，Futari 会打开并跳出「新增一笔」，确认后按保存。',
+          body: '加一个「打开 URL」动作，输入选上一步的文本。之后每次用 Apple Pay 付款，Futari 会打开并跳出「新增记录」，确认后按保存。',
         },
       ],
       urlLabel: '网址（App）',
       platformNote: '这个流程只适用于 iPhone 的「快捷指令」App。',
-      foreignNote: '外币提醒：用 Apple Pay 付外币时，快捷指令给的是外币金额，Futari 会把它当成账本主币种的金额带入。请在「新增一笔」里改成实际的金额。',
+      foreignNote: '外币提醒：用 Apple Pay 付外币时，快捷指令给的是外币金额，Futari 会把它当成账本主币种的金额带入。请在「新增记录」里改成实际的金额。',
     },
     linePay: {
       heading: '',
@@ -3901,7 +3901,7 @@ export const zhCN: Translations = {
         id: 'id',
         name: '显示',
       },
-      fixedNote: '网址只能带这三个值。日期（今天）、谁付的（你）、分摊方式与币种，都照「新增一笔」平常的默认，写在网址里也不会采用；也不会自动归到进行中的旅行，要归到旅行请在界面上自己选。',
+      fixedNote: '网址只能带这三个值。日期（今天）、谁付的（你）、分摊方式与币种，都照「新增记录」平常的默认，写在网址里也不会采用；也不会自动归到进行中的旅行，要归到旅行请在界面上自己选。',
     },
     whenNot: {
       heading: '什么时候不会跳出来',
@@ -3909,7 +3909,7 @@ export const zhCN: Translations = {
       items: [
         '另一个窗口正开着（例如正在改某一笔）：快捷指令会被忽略，改到一半的内容不会被动到。关掉窗口后再运行一次。',
         '正在看过去的章节：过去章节是只读的，先切回当前的章节。',
-        '还没登录：登录后，在 App 里通常会接着跳出填好的「新增一笔」；在网页上会停在首页，要再触发一次。',
+        '还没登录：登录后会停在首页，填好的内容不会保留，再运行一次快捷指令就好。',
       ],
     },
     trouble: {

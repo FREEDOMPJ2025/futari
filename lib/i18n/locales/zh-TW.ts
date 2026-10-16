@@ -6796,9 +6796,9 @@ export const zhTW: Translations = {
       ogDescription: '開一個出遊、把連結丟到群組，朋友點開選自己的名字就能一起記帳，不用下載、不用註冊。',
     },
     featureShortcuts: {
-      title: 'iPhone 捷徑記帳：Apple Pay、LINE Pay 付款後打開「記一筆」 | Futari',
-      description: '用 iPhone 的捷徑，在 Apple Pay 或 LINE Pay 付款後打開 Futari 的「記一筆」，金額先填好，由你確認後儲存。Futari 不連結付款帳戶，也不讀付款資料。',
-      ogDescription: '付款後，iPhone 捷徑打開 Futari 的「記一筆」，金額、分類和描述先填好，儲存由你按。',
+      title: 'iPhone 捷徑記帳：Apple Pay、LINE Pay 付款後打開「新增紀錄」 | Futari',
+      description: '用 iPhone 的捷徑，在 Apple Pay 或 LINE Pay 付款後打開 Futari 的「新增紀錄」，金額先填好，由你確認後儲存。Futari 不連結付款帳戶，也不讀付款資料。',
+      ogDescription: '付款後，iPhone 捷徑打開 Futari 的「新增紀錄」，金額、分類和描述先填好，儲存由你按。',
     },
   },
   useCase: {
@@ -7295,19 +7295,19 @@ export const zhTW: Translations = {
 
   featureShortcuts: {
     heroKicker: '捷徑記帳',
-    heroTitle: '付完款，讓 iPhone 把「記一筆」打開',
-    heroSubtitle: '用 iPhone 的「捷徑」，在付款後打開 Futari 的「記一筆」。金額、分類和描述先填好，你看過、需要就改，再按儲存。',
+    heroTitle: '付完款，讓 iPhone 把「新增紀錄」打開',
+    heroSubtitle: '用 iPhone 的「捷徑」，在付款後打開 Futari 的「新增紀錄」。金額、分類和描述先填好，你看過、需要就改，再按儲存。',
     breadcrumbLabel: '捷徑記帳',
     howToStepName: '步驟 {n}',
     answerQuestion: 'Apple Pay 或 LINE Pay 付款後，怎麼快速記到 Futari？',
-    answer: 'Futari 不連結任何付款帳戶，也不讀你的付款資料。做事的是 iPhone 的「捷徑」：付款後它打開 Futari 的「記一筆」，把金額、分類和描述先填好，你確認後自己按儲存，紀錄才會寫進帳本。這個做法只適用於 iPhone 的「捷徑」App。',
+    answer: 'Futari 不連結任何付款帳戶，也不讀你的付款資料。做事的是 iPhone 的「捷徑」：付款後它打開 Futari 的「新增紀錄」，把金額、分類和描述先填好，你確認後自己按儲存，紀錄才會寫進帳本。這個做法只適用於 iPhone 的「捷徑」App。',
     vars: {
       amount: '金額',
       merchant: '商家',
     },
     applePay: {
-      heading: 'Apple Pay：刷完卡就跳出「記一筆」',
-      intro: '前提：iPhone 已安裝 Futari 並登入。下面用「錢包」的交易記錄自動化，每次用 Apple Pay 付款，就打開一次填好的「記一筆」。',
+      heading: 'Apple Pay：刷完卡就跳出「新增紀錄」',
+      intro: '前提：iPhone 已安裝 Futari 並登入。下面用「錢包」的交易記錄自動化，每次用 Apple Pay 付款，就打開一次填好的「新增紀錄」。',
       steps: [
         {
           title: '新增交易記錄自動化',
@@ -7327,12 +7327,12 @@ export const zhTW: Translations = {
         },
         {
           title: '打開 URL',
-          body: '加一個「打開 URL」動作，輸入選上一步的文字。之後每次用 Apple Pay 付款，Futari 會打開並跳出「記一筆」，確認後按儲存。',
+          body: '加一個「打開 URL」動作，輸入選上一步的文字。之後每次用 Apple Pay 付款，Futari 會打開並跳出「新增紀錄」，確認後按儲存。',
         },
       ],
       urlLabel: '網址（App）',
       platformNote: '這個流程只適用於 iPhone 的「捷徑」App。',
-      foreignNote: '外幣提醒：用 Apple Pay 付外幣時，捷徑給的是外幣金額，Futari 會把它當成帳本主幣別的金額帶入。請在「記一筆」裡改成實際的金額。',
+      foreignNote: '外幣提醒：用 Apple Pay 付外幣時，捷徑給的是外幣金額，Futari 會把它當成帳本主幣別的金額帶入。請在「新增紀錄」裡改成實際的金額。',
     },
     linePay: {
       heading: 'LINE Pay：用「付款完成」的通知觸發',
@@ -7392,7 +7392,7 @@ export const zhTW: Translations = {
         id: 'id',
         name: '顯示',
       },
-      fixedNote: '網址只能帶這三個值。日期（今天）、誰付的（你）、分攤方式與幣別，都照「記一筆」平常的預設，寫在網址裡也不會採用；也不會自動歸到進行中的旅行，要歸到旅行請在畫面上自己選。',
+      fixedNote: '網址只能帶這三個值。日期（今天）、誰付的（你）、分攤方式與幣別，都照「新增紀錄」平常的預設，寫在網址裡也不會採用；也不會自動歸到進行中的旅行，要歸到旅行請在畫面上自己選。',
     },
     whenNot: {
       heading: '什麼時候不會跳出來',
@@ -7400,7 +7400,7 @@ export const zhTW: Translations = {
       items: [
         '另一個視窗正開著（例如正在改某一筆）：捷徑會被忽略，改到一半的內容不會被動到。關掉視窗後再跑一次。',
         '正在看過去的章節：過去章節是唯讀的，先切回目前的章節。',
-        '還沒登入：登入後，在 App 裡通常會接著跳出填好的「記一筆」；在網頁上會停在首頁，要再觸發一次。',
+        '還沒登入：登入後會停在首頁，填好的內容不會留著，再執行一次捷徑就好。',
       ],
     },
     trouble: {
