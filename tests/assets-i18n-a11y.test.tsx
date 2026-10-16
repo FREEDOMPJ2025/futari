@@ -146,7 +146,7 @@ describe('/assets i18n (#1173) — no zh-TW leaks under en / ja', () => {
     const text = container.textContent ?? ''
     expect(text).not.toMatch(CJK)
     expect(text).toMatch(/\d+ yr \d+ mo/)
-    expect(text).toMatch(/\d+ days together/)
+    expect(text).toMatch(/\d+ day\(s\) together/)
   })
 
   it('fuel log sheet and fuel row render fully in English', () => {

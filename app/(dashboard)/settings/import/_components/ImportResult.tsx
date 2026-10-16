@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useId, useRef, useState } from 'react'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import type { ResultState } from './ImportContent'
 import { SectionCard } from './SectionCard'
 import { WizardNavButtons } from './WizardNavButtons'
@@ -16,6 +17,7 @@ interface Props {
 
 export function ImportResult({ result, onRollback, onDone, onAnother, rollbacking }: Props) {
   const t = useTranslations()
+  const locale = useLocale()
   const tImport = t.settings.import.result
   const [confirming, setConfirming] = useState(false)
   const headingRef = useRef<HTMLHeadingElement>(null)
@@ -46,7 +48,7 @@ export function ImportResult({ result, onRollback, onDone, onAnother, rollbackin
         </h2>
         <div id={bodyId}>
           <div className="text-sm" style={{ color: 'var(--ink-2)' }}>
-            {tImport.successBody.replace('{count}', String(result.importedCount))}
+            {pickPlural(locale, result.importedCount, tImport.successBody).replace('{count}', String(result.importedCount))}
           </div>
           <div className="text-xs mt-3" style={{ color: 'var(--ink-3)' }}>
             {tImport.rollbackHint}

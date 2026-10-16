@@ -14,7 +14,8 @@ import { loadMoreTransactionsForAsset } from '@/actions/transaction'
 import { AibutsuHintCard } from './AibutsuHintCard'
 import { computeAge } from '@/lib/age'
 import { useToday } from '@/app/(dashboard)/_components/TodayProvider'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { useBaseCurrency, useMember } from '@/app/(dashboard)/_components/MemberContext'
 import { formatLedgerAmountSpaced } from '@/lib/currency'
 import { unwrapAction } from '@/lib/action-errors'
@@ -39,6 +40,7 @@ interface Props {
 export function PetDetailClient({ assetId, name, notes, details, summary, assetSheetInitial, initialTxns, pageSize, siblings }: Props) {
   const router = useRouter()
   const t = useTranslations()
+  const locale = useLocale()
   const td = t.assetDetail.pet
   const { isPast } = useMember()
   const baseCurrency = useBaseCurrency()
@@ -147,7 +149,7 @@ export function PetDetailClient({ assetId, name, notes, details, summary, assetS
         emptyState={<AibutsuHintCard type="pet" onCtaPress={isPast ? undefined : () => setAddOpen(true)} />}
         header={(count) => (
           <div className="text-xs tracking-[1.5px] uppercase text-ink-3 font-numeric">
-            {t.assetDetail.timelineEntries.replace('{count}', String(count))}
+            {pickPlural(locale, count, t.assetDetail.timelineEntries).replace('{count}', String(count))}
           </div>
         )}
       />

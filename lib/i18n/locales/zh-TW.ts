@@ -459,7 +459,7 @@ export type Translations = {
       /** Aria label for the single-trip card link — `{name}` trip name. */
       singleAriaLabel: string
       /** Heading when N > 1 trips are active — `{count}` the count. */
-      multipleHeading: string
+      multipleHeading: { one: string; other: string }
       /** CTA line under the multi-trip heading. */
       multipleCta: string
       /** Aria label for the multi-trip card link — `{count}` the count. */
@@ -990,7 +990,7 @@ export type Translations = {
     /** Soft note shown beneath a non-base currency row when there are already
      *  TripExpenses recorded against it. `{n}` is the count. Reassures that
      *  rate edits only affect future records. */
-    usedCountNote: string
+    usedCountNote: { one: string; other: string }
     customRow: {
       /** Aria label on the custom-row code input. */
       codeAriaLabel: string
@@ -1476,7 +1476,7 @@ export type Translations = {
         subtitle: string
         sourceColumn: string
         targetColumn: string
-        rowCount: string
+        rowCount: { one: string; other: string }
         keepOriginal: string
       }
       step3: {
@@ -1507,14 +1507,15 @@ export type Translations = {
         }
         typeExpense: string
         typeIncome: string
-        moreRows: string
-        confirmCta: string
+        moreRows: { one: string; other: string }
+        confirmCta: { one: string; other: string }
         confirming: string
-        summary: string
+        summary: { one: string; other: string }
+        summaryInvalid: { one: string; other: string }
       }
       result: {
         successHeading: string
-        successBody: string
+        successBody: { one: string; other: string }
         rollbackHint: string
         rollbackCta: string
         rollbackConfirm: string
@@ -1778,7 +1779,7 @@ export type Translations = {
       timelineTarget: string
       summaryAnnualPremium: string
       /** #1173 — Template with `{count}` (rendered emphasised, so keep it a standalone token). */
-      summaryPolicyCount: string
+      summaryPolicyCount: { one: string; other: string }
       summaryNextRenewal: string
       /** #1173 — Template with `{days}`. */
       summaryDaysUntil: string
@@ -1799,7 +1800,7 @@ export type Translations = {
       intervalEveryHalfYear: string
       intervalEveryYear: string
       /** Template with `{n}` for non-standard intervals. */
-      intervalEveryNMonths: string
+      intervalEveryNMonths: { one: string; other: string }
       /** Template with `{day}` placeholder. */
       dayLabel: string
       /** #1187 — list row next-run date. Template with `{date}`. */
@@ -2221,7 +2222,7 @@ export type Translations = {
     notesSection: string
     recentExpenses: string
     /** Template with `{count}` placeholder. */
-    timelineEntries: string
+    timelineEntries: { one: string; other: string }
     addOtherExpense: string
     refuel: string
     relatedInsurance: string
@@ -2347,12 +2348,12 @@ export type Translations = {
       location: string
       waterEvery: string
       /** Template with `{n}` placeholder. */
-      waterEveryValue: string
+      waterEveryValue: { one: string; other: string }
       companionDays: string
       daysSuffix: string
       sproutedSuffix: string
       /** Template with `{n}` placeholder. */
-      waterEveryFooter: string
+      waterEveryFooter: { one: string; other: string }
     }
     house: {
       sectionInfo: string
@@ -2482,7 +2483,7 @@ export type Translations = {
       intervalEveryQuarter: string
       intervalEveryHalfYear: string
       intervalEveryYear: string
-      intervalEveryNMonths: string
+      intervalEveryNMonths: { one: string; other: string }
       dayLabel: string
       /** #1187 — list row next-run date. Template with `{date}`. */
       nextDate: string
@@ -3809,7 +3810,7 @@ export const zhTW: Translations = {
       singleStartedAt: '{date} 起 · 點開看這趟',
       singleStartedAtWithCurrency: '{date} 起 · {currency} · 點開看這趟',
       singleAriaLabel: '進入旅行：{name}',
-      multipleHeading: '{count} 段旅行進行中',
+      multipleHeading: { one: '{count} 段旅行進行中', other: '{count} 段旅行進行中' },
       multipleCta: '一起翻 ›',
       multipleAriaLabel: '查看 {count} 段進行中的旅行',
       emptyCta: '開始一段旅行',
@@ -4167,7 +4168,7 @@ export const zhTW: Translations = {
     rateInverseFormat: '≈ 1 {default} = {inverse} {code}',
     rateAriaLabel: '{code} 對 {baseCode} 的匯率',
     basePill: '基礎貨幣',
-    usedCountNote: '已記過 {n} 筆；改匯率不影響舊紀錄',
+    usedCountNote: { one: '已記過 {n} 筆；改匯率不影響舊紀錄', other: '已記過 {n} 筆；改匯率不影響舊紀錄' },
     customRow: {
       codeAriaLabel: '幣別代碼',
       codePlaceholder: 'VND',
@@ -4577,7 +4578,7 @@ export const zhTW: Translations = {
         subtitle: '把來源的類別，對應到家計簿裡的類別',
         sourceColumn: '來源類別',
         targetColumn: '對應到',
-        rowCount: '{count} 筆',
+        rowCount: { one: '{count} 筆', other: '{count} 筆' },
         keepOriginal: '其他',
       },
       step3: {
@@ -4606,14 +4607,15 @@ export const zhTW: Translations = {
         },
         typeExpense: '支出',
         typeIncome: '收入',
-        moreRows: '還有 {count} 筆未顯示',
-        confirmCta: '確認匯入 {count} 筆',
+        moreRows: { one: '還有 {count} 筆未顯示', other: '還有 {count} 筆未顯示' },
+        confirmCta: { one: '確認匯入 {count} 筆', other: '確認匯入 {count} 筆' },
         confirming: '匯入中…',
-        summary: '預計寫入 {count} 筆 · 失敗 {invalid} 筆會保留紀錄',
+        summary: { one: '預計寫入 {count} 筆 · {invalid}', other: '預計寫入 {count} 筆 · {invalid}' },
+        summaryInvalid: { one: '失敗 {n} 筆會保留紀錄', other: '失敗 {n} 筆會保留紀錄' },
       },
       result: {
         successHeading: '匯入完成',
-        successBody: '已寫入 {count} 筆紀錄',
+        successBody: { one: '已寫入 {count} 筆紀錄', other: '已寫入 {count} 筆紀錄' },
         rollbackHint: '24 小時內可一鍵復原這次匯入',
         rollbackCta: '復原這次匯入',
         rollbackConfirm: '確定要復原嗎？所有這次匯入的紀錄會一起撤回',
@@ -4790,7 +4792,7 @@ export const zhTW: Translations = {
       timelineInvested: '已投入',
       timelineTarget: '目標',
       summaryAnnualPremium: '年繳保費',
-      summaryPolicyCount: '共 {count} 張保單',
+      summaryPolicyCount: { one: '共 {count} 張保單', other: '共 {count} 張保單' },
       summaryNextRenewal: '下次續約',
       summaryDaysUntil: '{days} 天後',
     },
@@ -4809,7 +4811,7 @@ export const zhTW: Translations = {
       intervalEveryQuarter: '每季',
       intervalEveryHalfYear: '每半年',
       intervalEveryYear: '每年',
-      intervalEveryNMonths: '每 {n} 個月',
+      intervalEveryNMonths: { one: '每 {n} 個月', other: '每 {n} 個月' },
       dayLabel: '{day} 號',
       nextDate: '下次 {date}',
     },
@@ -5214,7 +5216,7 @@ export const zhTW: Translations = {
     },
     notesSection: '備註',
     recentExpenses: '近期支出',
-    timelineEntries: '時間軸 · {count} 筆',
+    timelineEntries: { one: '時間軸 · {count} 筆', other: '時間軸 · {count} 筆' },
     addOtherExpense: '其他支出',
     refuel: '加油',
     relatedInsurance: '相關保險',
@@ -5323,11 +5325,11 @@ export const zhTW: Translations = {
       cost: '入手金額',
       location: '位置',
       waterEvery: '澆水週期',
-      waterEveryValue: '每 {n} 天',
+      waterEveryValue: { one: '每 {n} 天', other: '每 {n} 天' },
       companionDays: '陪伴天數',
       daysSuffix: '天',
       sproutedSuffix: ' 入手',
-      waterEveryFooter: ' · 每 {n} 天澆水',
+      waterEveryFooter: { one: ' · 每 {n} 天澆水', other: ' · 每 {n} 天澆水' },
     },
     house: {
       sectionInfo: '房子資訊',
@@ -5434,7 +5436,7 @@ export const zhTW: Translations = {
       intervalEveryQuarter: '每季',
       intervalEveryHalfYear: '每半年',
       intervalEveryYear: '每年',
-      intervalEveryNMonths: '每 {n} 個月',
+      intervalEveryNMonths: { one: '每 {n} 個月', other: '每 {n} 個月' },
       dayLabel: '{day} 號',
       nextDate: '下次 {date}',
     },

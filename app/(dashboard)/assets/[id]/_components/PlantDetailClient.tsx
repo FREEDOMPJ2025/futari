@@ -12,7 +12,8 @@ import type { PlantDetailsRow } from '@/lib/db/queries/aibutsu'
 import type { PagedTxnRow } from '@/actions/transaction'
 import { loadMoreTransactionsForAsset } from '@/actions/transaction'
 import { AibutsuHintCard } from './AibutsuHintCard'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { daysSince } from '@/lib/age'
 import { useToday } from '@/app/(dashboard)/_components/TodayProvider'
 import type { Translations } from '@/lib/i18n/locales/zh-TW'
@@ -38,6 +39,7 @@ interface Props {
 }
 
 function CompanionDays({ days, sproutedAt, waterEvery, accent, td }: { days: number; sproutedAt: string; waterEvery: number | null; accent: string; td: Translations['assetDetail']['plant'] }) {
+  const locale = useLocale()
   return (
     <div className="text-center py-2">
       <div className="text-xs tracking-[1.5px] uppercase font-numeric" style={{ color: accent }}>{td.companionDays}</div>
@@ -46,7 +48,7 @@ function CompanionDays({ days, sproutedAt, waterEvery, accent, td }: { days: num
         <span className="text-sm font-medium" style={{ color: accent }}>{td.daysSuffix}</span>
       </div>
       <div className="text-xs mt-1.5 opacity-75 font-numeric" style={{ color: accent }}>
-        {sproutedAt}{td.sproutedSuffix}{waterEvery ? td.waterEveryFooter.replace('{n}', String(waterEvery)) : ''}
+        {sproutedAt}{td.sproutedSuffix}{waterEvery ? pickPlural(locale, waterEvery, td.waterEveryFooter).replace('{n}', String(waterEvery)) : ''}
       </div>
     </div>
   )
@@ -55,6 +57,7 @@ function CompanionDays({ days, sproutedAt, waterEvery, accent, td }: { days: num
 export function PlantDetailClient({ assetId, name, notes, details, summary, assetSheetInitial, initialTxns, pageSize, siblings }: Props) {
   const router = useRouter()
   const t = useTranslations()
+  const locale = useLocale()
   const td = t.assetDetail.plant
   const { isPast } = useMember()
   const baseCurrency = useBaseCurrency()
@@ -116,7 +119,7 @@ export function PlantDetailClient({ assetId, name, notes, details, summary, asse
         <InfoRow label={td.sproutedAt} value={details?.sproutedAt ?? ''} mono />
         <InfoRow label={td.cost} value={details?.cost ? formatLedgerAmountSpaced(details.cost, baseCurrency) : ''} mono />
         <InfoRow label={td.location} value={details?.location ?? ''} />
-        <InfoRow label={td.waterEvery} value={details?.waterEvery ? td.waterEveryValue.replace('{n}', String(details.waterEvery)) : ''} mono last />
+        <InfoRow label={td.waterEvery} value={details?.waterEvery ? pickPlural(locale, details.waterEvery, td.waterEveryValue).replace('{n}', String(details.waterEvery)) : ''} mono last />
       </InfoCard>
 
       {notes && (
@@ -140,7 +143,7 @@ export function PlantDetailClient({ assetId, name, notes, details, summary, asse
         emptyState={<AibutsuHintCard type="plant" onCtaPress={isPast ? undefined : () => setAddOpen(true)} />}
         header={(count) => (
           <div className="text-xs tracking-[1.5px] uppercase text-ink-3 font-numeric">
-            {t.assetDetail.timelineEntries.replace('{count}', String(count))}
+            {pickPlural(locale, count, t.assetDetail.timelineEntries).replace('{count}', String(count))}
           </div>
         )}
       />

@@ -3,6 +3,7 @@
 import { getCategory } from '@/lib/categories'
 import { getIncomeCategory } from '@/lib/incomeCategories'
 import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { ruleNextDateText } from '@/lib/recurringNextDate'
 import { useMember, useBaseCurrency, whoToMemberRole } from '@/app/(dashboard)/_components/MemberContext'
 import { Avatar } from '@/app/(dashboard)/_components/Avatar'
@@ -90,7 +91,7 @@ export function RuleListItem(props: Props) {
   }
   const intervalText =
     intervalLabel[rule.intervalMonths] ??
-    tRule.intervalEveryNMonths.replace('{n}', String(rule.intervalMonths))
+    pickPlural(locale, rule.intervalMonths, tRule.intervalEveryNMonths).replace('{n}', String(rule.intervalMonths))
   const dayText = tRule.dayLabel.replace('{day}', String(rule.dayOfMonth))
   const nextDateText = ruleNextDateText(rule, tRule.nextDate, locale)
 
