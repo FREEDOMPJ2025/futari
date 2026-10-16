@@ -698,7 +698,7 @@ export const en: Translations = {
     rateInverseFormat: '≈ 1 {default} = {inverse} {code}',
     rateAriaLabel: 'Exchange rate for {code} to {baseCode}',
     basePill: 'Base',
-    usedCountNote: { one: '{n} record so far; editing the rate keeps it unchanged', other: '{n} records so far; editing the rate keeps them unchanged' },
+    usedCountNote: { one: '{n} record so far; editing the rate keeps that record unchanged', other: '{n} records so far; editing the rate keeps them unchanged' },
     customRow: {
       codeAriaLabel: 'Currency code',
       codePlaceholder: 'VND',
