@@ -1,6 +1,7 @@
 'use client'
 
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { getCategory } from '@/lib/categories'
 import { getIncomeCategory } from '@/lib/incomeCategories'
 import type { ImportRow } from '@/lib/csvImport'
@@ -19,6 +20,7 @@ const PREVIEW_LIMIT = 20
 
 export function StepConfirm({ rows, invalidCount, onBack, onConfirm, submitting }: Props) {
   const t = useTranslations()
+  const locale = useLocale()
   const tImport = t.settings.import.step4
 
   const preview = rows.slice(0, PREVIEW_LIMIT)
@@ -84,7 +86,7 @@ export function StepConfirm({ rows, invalidCount, onBack, onConfirm, submitting 
 
         {remaining > 0 && (
           <div className="text-xs mt-3 text-center" style={{ color: 'var(--ink-3)' }}>
-            {tImport.moreRows.replace('{count}', String(remaining))}
+            {pickPlural(locale, remaining, tImport.moreRows).replace('{count}', String(remaining))}
           </div>
         )}
       </SectionCard>
@@ -96,7 +98,7 @@ export function StepConfirm({ rows, invalidCount, onBack, onConfirm, submitting 
         nextLabel={
           submitting
             ? tImport.confirming
-            : tImport.confirmCta.replace('{count}', String(rows.length))
+            : pickPlural(locale, rows.length, tImport.confirmCta).replace('{count}', String(rows.length))
         }
         loading={submitting}
         disabled={rows.length === 0}

@@ -7,7 +7,8 @@ import { SheetShell } from '@/app/(dashboard)/assets/_components/AssetSheet/shar
 import { TextInput } from '@/components/ui/TextInput'
 import { useDirtyCheck } from '@/app/(dashboard)/_components/useUnsavedChangesGuard'
 import type { TripCurrencyEntry, TripCurrencySnapshot } from '@/lib/trip-currency'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { describeError } from '@/lib/errors'
 import { unwrapAction } from '@/lib/action-errors'
 
@@ -372,6 +373,7 @@ function CurrencyRow(props: {
   onRateChange: (raw: string) => void
 }) {
   const t = useTranslations()
+  const locale = useLocale()
   const ts = t.tripSheet
   const { code, label, rate, baseCode, checked, isBase, usedCount } = props
   const rateInvalid = checked && !isBase && (!Number.isFinite(rate) || rate <= 0)
@@ -417,7 +419,7 @@ function CurrencyRow(props: {
           />
           {usedCount > 0 && (
             <p className="text-xs px-3 pb-3" style={{ color: 'var(--ink-3)' }} role="status">
-              {ts.usedCountNote.replace('{n}', String(usedCount))}
+              {pickPlural(locale, usedCount, ts.usedCountNote).replace('{n}', String(usedCount))}
             </p>
           )}
         </>
@@ -453,6 +455,7 @@ function CustomCurrencyRow(props: {
   onRemove: () => void
 }) {
   const t = useTranslations()
+  const locale = useLocale()
   const tsRow = t.tripSheet.customRow
   const ts = t.tripSheet
   const { code, label, rate, baseCode, usedCount } = props
@@ -509,7 +512,7 @@ function CustomCurrencyRow(props: {
       />
       {usedCount > 0 && (
         <p className="text-xs px-3 pb-3" style={{ color: 'var(--ink-3)' }} role="status">
-          {ts.usedCountNote.replace('{n}', String(usedCount))}
+          {pickPlural(locale, usedCount, ts.usedCountNote).replace('{n}', String(usedCount))}
         </p>
       )}
     </RowFrame>

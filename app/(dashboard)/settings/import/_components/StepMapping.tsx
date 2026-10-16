@@ -1,7 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { PICKABLE_CATEGORIES, isValidCategoryId, type CategoryId } from '@/lib/categories'
 import type { ImportRow } from '@/lib/csvImport'
 import { SectionCard } from './SectionCard'
@@ -17,6 +18,7 @@ interface Props {
 
 export function StepMapping({ rows, categoryMap, onChange, onBack, onNext }: Props) {
   const t = useTranslations()
+  const locale = useLocale()
   const tImport = t.settings.import.step2
 
   // Group source categories and count how many rows each one covers — gives
@@ -68,7 +70,7 @@ export function StepMapping({ rows, categoryMap, onChange, onBack, onNext }: Pro
                 <div className="text-sm" style={{ color: 'var(--ink)' }}>
                   <div>{sourceLabel(key)}</div>
                   <div className="text-xs" style={{ color: 'var(--ink-3)' }}>
-                    {tImport.rowCount.replace('{count}', String(count))}
+                    {pickPlural(locale, count, tImport.rowCount).replace('{count}', String(count))}
                   </div>
                 </div>
                 <div className="text-sm" style={{ color: 'var(--ink-3)' }} aria-hidden="true">›</div>
