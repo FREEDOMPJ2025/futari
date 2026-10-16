@@ -3,6 +3,7 @@ import { isLocale } from '@/lib/i18n/locales-meta'
 import { dictionaries } from '@/lib/i18n/t'
 import { resolveReader } from '@/lib/outing/access'
 import { getOutingFullView } from '@/lib/db/queries/outingPublic'
+import { getActiveGroupForUser } from '@/lib/db/queries/group'
 import { OutingMessage } from '../../_components/OutingPublicChrome'
 import { OutingParticipantView } from '../../_components/OutingParticipantView'
 import { LinkOpened } from '../../_components/LinkOpened'
@@ -45,6 +46,7 @@ export default async function OutingResumePage({
   // escape. The share token never goes into `next` (it would land in Supabase
   // auth logs and the OAuth round trip).
   const signInHref = `/${locale}/sign-in?next=${resume}&from=outing`
+  const ledgerInviteHref = await ledgerInviteHrefFor(reader.outing.status, actor.userId, locale)
 
   return (
     <OutingParticipantView
@@ -52,6 +54,21 @@ export default async function OutingResumePage({
       needsBind={actor.via === 'cookie' && actor.userId !== null}
       signedIn={actor.userId !== null}
       signInHref={signInHref}
+      ledgerInviteHref={ledgerInviteHref}
     />
   )
+}
+
+/**
+ * #1728 — the ledger invite card, offered only once the outing is over (never
+ * mid-outing) and never to a signed-in viewer who already has a ledger. The
+ * ledger check reads the viewer's own group row and only a yes/no reaches the
+ * client. Signed out: sign in tagged `from=outing` (signed_up then carries
+ * entry_source=outing), landing on onboarding. Signed in without a ledger:
+ * straight to onboarding.
+ */
+async function ledgerInviteHrefFor(status: string, userId: string | null, locale: string): Promise<string | null> {
+  if (status === 'active') return null
+  if (!userId) return `/${locale}/sign-in?next=/onboarding&from=outing`
+  return (await getActiveGroupForUser(userId)) ? null : '/onboarding'
 }

@@ -43,6 +43,48 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 _Nothing unreleased yet._
 
+## [1.7.4] - 2026-10-16
+
+主題：**被找到．出遊帶朋友進來**——出遊頁更容易被搜尋和 AI 找到；朋友能用分享面板或 QR 加入，結束後也看得到兩人帳本的邀請。
+完整 diff：[v1.7.3...v1.7.4](https://github.com/redtear1115/oikos/compare/v1.7.3...v1.7.4)
+
+### 使用者可見變化
+
+- **出遊相關文案改成審過的版本，en 的人數與名字數會依單複數顯示（#1731 #1734 #1736 #1738 #1740）**
+  使用者：出遊介紹頁、略過邀請、分享訊息、兩人帳本邀請卡的四語文案換成母語審閱後的版本；分攤範例的金額改成「約」；en 不再出現「1 people」「1 names」。
+  技術：新增 `lib/i18n/plural.ts` 的 `pickPlural`（`Intl.PluralRules`）；`outing.share.unpicked`、`outing.splitCountTag`、`outingList.countTag` 拆成 `one`／`other`，zh／ja 兩個值相同。
+
+- **出遊結束後，朋友的出遊頁多一張「兩人帳本」的邀請卡（#1728）**
+  使用者：出遊結束後，朋友在出遊頁看到一張卡片，說明 Futari 也能兩個人一起記平常的帳，可以點去建立帳本或關掉；關掉後同一個出遊不再出現，進行中的出遊與已經有帳本的人都不顯示。
+  技術：新增 `outing_ledger_invite_viewed`／`outing_ledger_invite_clicked`（無屬性）；未登入的連結帶 `from=outing`、`next=/onboarding`，`signed_up` 帶 `entry_source=outing`；server 只查看的人自己有沒有帳本。
+
+- **出遊連結可以用系統分享、QR code 送出，並看到還有幾個名字沒人選（#1727）**
+  使用者：出遊頁「分享給朋友」打開手機的分享面板並附上一句訊息，沒有分享面板時改複製訊息和連結；可以顯示 QR code 給旁邊的朋友掃；參與者清單下顯示還有幾個名字沒人選，並可再分享一次。
+  技術：`outing_link_shared` 新增 `method=share`／`qr`；有分享面板時連結在卡片出現與回到分頁時預先取得，讓分享在點擊內同步呼叫；QR 用既有的 `uqr`，沒有新增依賴或 Capacitor plugin。
+
+- **從出遊頁註冊的人，建好帳本就直接開出遊（#1726）**
+  使用者：從 `/features/outing` 按「用 Futari 開一個出遊」註冊後，略過理念卡直接取名，取名頁說明出遊會記在帳本裡；邀請伴侶可以「先去開出遊」，略過後直接打開建立出遊。其他入口的 onboarding 不變。
+  技術：CTA 的 `next` 改為 `/onboarding?intent=outing`；`intent` 是封閉集合（`lib/onboarding/intent.ts`），對應寫死的站內路徑，不從網址取轉址目標；`/outings?create=1` 開啟建立 sheet 後移除參數。
+
+- **出遊介紹頁開頭直接回答「怎麼分帳才不用每個人都裝 App」，並附一個算好的例子（#1725）**
+  使用者：`/features/outing` 四語在開頭多一段問答，介紹步驟之後多一個四人出遊的分帳例子（每筆支出、合計、每人分攤、結清要轉的幾筆）。
+  技術：例子的數字由 `OUTING_MOCK` 經產品自己的平分／結清函式算出；JSON-LD 加 `WebApplication`（免費、瀏覽器即可用）；`llms.txt`、`llms-full.txt` 加出遊段落與四語連結。
+
+- **首頁、使用情境總覽與 Splitwise 搬遷頁都能連到出遊頁（#1724）**
+  使用者：首頁功能區下方與頁尾多了「出遊分帳」連結，`/use-case` 總覽與 `/migrate/splitwise` 多一列出遊介紹；出遊連結列的標題改成帶「出遊分帳」的說法（四語）。
+  技術：`feature_outing_link_clicked` 新增 `source`（`landing_features`／`landing_footer`／`use_case_hub`／`migrate_splitwise`）；migrate registry 加 `featureLinks`；sitemap 的 `/`、`/use-case`、`/features/outing` lastModified 改為 2026-10-15。
+
+### 技術變更
+
+- **出遊漏斗補上建立與分享兩個事件（#1723）**
+  技術：`createOuting` 成功後 server 發 `outing_created`（與 `signed_up`／`setup_completed` 同一個 distinct_id），複製連結成功後 client 發 `outing_link_shared`（只帶 `method`），都不帶出遊 id、名稱、token 或網址；分享頁事件 0 筆查證為沒有訪客、不是沒送出。
+
+### Security
+
+- **分析網址清洗：出遊朋友頁的 id 一併遮蔽（#1742）**
+  使用者：無可見變化。
+  技術：`urlSanitizer` 把 `/outing/r/<outingId>` 改成 `/outing/r/:id`（原本是 `/outing/:token/<uuid>`，路徑標籤錯且 uuid 外流到 PostHog）；`/outing/<token>`、`/invite/<token>`、`/outings/<uuid>` 不變。
+
 ## [1.7.3] - 2026-10-15
 
 主題：**離開之後．章節完整、能回看**——離開或被移除的人、以及對方刪除帳號之後，兩人的那段章節都完整留下、只在那段章節裡看得到；匯出補上進帳與結算；網頁與 App 斷線時都有離線畫面，登出會把裝置上的帳本資料清乾淨。
@@ -1872,7 +1914,8 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 - **每頁 `generateMetadata` 接 OG image（#487）**：`public/og-image.png` 從 #282 ship 但未 wire 進 metadata，造成 prod HTML 缺 `og:image` / `twitter:image`；本版 4 個 public page 各加 `openGraph.images` + `twitter.images`，`alt` 用 `t.title` locale-aware，無需新增 i18n key。
 - **`settings.local.json` 列入 gitignore（#478）**：避免本地 hook / 權限設定外洩。
 
-[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.7.3...HEAD
+[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.7.4...HEAD
+[1.7.4]: https://github.com/redtear1115/oikos/compare/v1.7.3...v1.7.4
 [1.7.3]: https://github.com/redtear1115/oikos/compare/v1.7.2...v1.7.3
 [1.7.2]: https://github.com/redtear1115/oikos/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/redtear1115/oikos/compare/v1.7.0...v1.7.1

@@ -267,7 +267,7 @@ async function expectRefusedWithoutData(id: string, error: string | RegExp) {
 const expectNotFoundWithoutData = (id: string) => expectRefusedWithoutData(id, 'NEXT_NOT_FOUND')
 
 async function listedOutingIds() {
-  const el = (await OutingsPage()) as ReactElement<{ outings: Array<{ id: string }> }>
+  const el = (await OutingsPage({})) as ReactElement<{ outings: Array<{ id: string }> }>
   return el.props.outings.map((o) => o.id).sort()
 }
 

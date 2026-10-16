@@ -2,7 +2,8 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { formatAmount } from '@/lib/currency'
 import { unwrapAction } from '@/lib/action-errors'
 import { describeError } from '@/lib/errors'
@@ -16,6 +17,7 @@ import { SettlementList } from '@/app/(dashboard)/outings/_components/Settlement
 import { Card, OutingHeader, SectionTitle } from './OutingPublicChrome'
 import { FeatureOutingLink } from './FeatureOutingLink'
 import { AndroidBetaOutingLink } from './AndroidBetaOutingLink'
+import { LedgerInviteCard } from './LedgerInviteCard'
 
 interface Props {
   view: Omit<OutingFullView, 'isAdmin'>
@@ -24,6 +26,8 @@ interface Props {
   signedIn: boolean
   /** /<locale>/sign-in?next=/<locale>/outing/r/<id>&from=outing */
   signInHref: string
+  /** #1728 — where the ledger invite card leads, or null when it is not offered. */
+  ledgerInviteHref?: string | null
 }
 
 /**
@@ -33,8 +37,9 @@ interface Props {
  * sheet and repayment list are the dashboard's own components (S4), not
  * copies: the outing actions resolve the friend by session or claim cookie.
  */
-export function OutingParticipantView({ view, needsBind, signedIn, signInHref }: Props) {
+export function OutingParticipantView({ view, needsBind, signedIn, signInHref, ledgerInviteHref = null }: Props) {
   const t = useTranslations()
+  const locale = useLocale()
   const c = t.outingPublic
   const to = t.outing
   const router = useRouter()
@@ -148,7 +153,7 @@ export function OutingParticipantView({ view, needsBind, signedIn, signInHref }:
                     <span className="block text-xs mt-0.5 text-ink-3">
                       {to.paidByTag.replace('{name}', nameOf(e.paidByParticipantId))}
                       {' · '}
-                      {to.splitCountTag.replace('{count}', String(e.shares.length))}
+                      {pickPlural(locale, e.shares.length, to.splitCountTag).replace('{count}', String(e.shares.length))}
                     </span>
                   </span>
                   <span className="text-sm tabular-nums shrink-0 text-ink">{formatAmount(e.amount, outing.currency)}</span>
@@ -179,6 +184,8 @@ export function OutingParticipantView({ view, needsBind, signedIn, signInHref }:
         ) : (
           <p className="text-sm px-1 text-ink-3">{c.endedNote}</p>
         )}
+
+        {!active && ledgerInviteHref && <LedgerInviteCard outingId={outing.id} href={ledgerInviteHref} />}
 
         {!signedIn && (
           <Card>

@@ -8,12 +8,18 @@ import { oikosGroups } from '@/lib/db/schema'
 import { eq, or } from 'drizzle-orm'
 import { getTranslations } from '@/lib/i18n/t'
 import { hasClosedChapterForViewer } from '@/lib/db/queries/epoch'
+import { INTENT_EXISTING_USER_DESTINATION, parseOnboardingIntent } from '@/lib/onboarding/intent'
 import SetupForm from './SetupForm'
 import { PastTimesEntryLink } from '@/app/onboarding/PastTimesEntryLink'
 
-export default async function SetupPage() {
+export default async function SetupPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ intent?: string | string[] }>
+}) {
   const user = await getCurrentUser()
   if (!user) redirect('/sign-in')
+  const intent = parseOnboardingIntent((await searchParams)?.intent)
 
   const [group] = await db
     .select()
@@ -21,7 +27,7 @@ export default async function SetupPage() {
     .where(or(eq(oikosGroups.memberA, user.id), eq(oikosGroups.memberB, user.id)))
     .limit(1)
 
-  if (group) redirect('/dashboard')
+  if (group) redirect(intent ? INTENT_EXISTING_USER_DESTINATION[intent] : '/dashboard')
 
   // #1612 — /onboarding forwards anyone who has seen the cards straight here
   // (PhilosophyCards' localStorage check), so a removed partner with no
@@ -33,7 +39,7 @@ export default async function SetupPage() {
   return (
     <>
       {hasPastChapter && <PastTimesEntryLink label={t.pastTimes.title} corner="right" />}
-      <SetupForm t={t} />
+      <SetupForm t={t} intent={intent} />
     </>
   )
 }

@@ -18,6 +18,7 @@ import { MigrateHowToJsonLd } from '../_components/MigrateHowToJsonLd'
 import { MigrateFaq } from '../_components/MigrateFaq'
 import { MigrateComparison } from '../_components/MigrateComparison'
 import { MigrateOtherSources } from '../_components/MigrateOtherSources'
+import { FeatureLinkRow } from '../../use-case/_components/FeatureLinkRow'
 import { s } from '../../_components/brand-inner'
 import { LightRibbon } from '../../_components/LightRibbon'
 
@@ -186,6 +187,20 @@ export default async function MigrateSourcePage({ params }: { params: Params }) 
         otherLabel={def.name}
         rows={resolveComparisonRows(def.comparison.rows, t.comparisonText)}
       />
+
+      {def.featureLinks?.includes('outing') && (
+        <section className={s.band} aria-label={dictionaries[locale].featureOuting.crossLink.name}>
+          <ul className={s.rows}>
+            <FeatureLinkRow
+              href={localizedHref('/features/outing', locale)}
+              name={dictionaries[locale].featureOuting.crossLink.name}
+              description={dictionaries[locale].featureOuting.crossLink.description}
+              cta={dictionaries[locale].featureOuting.crossLink.cta}
+              source="migrate_splitwise"
+            />
+          </ul>
+        </section>
+      )}
 
       <MigrateFaq locale={locale} heading={t.faqHeading} items={page.faq} />
 

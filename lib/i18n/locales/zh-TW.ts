@@ -248,6 +248,10 @@ export type Translations = {
     }
     /** Footer trust note. */
     footerTrust: string
+    /** #1724 — quiet link under the feature list to /features/outing; anchor carries the outing search phrase. */
+    featuresOutingLink: string
+    /** #1724 — footer link to /features/outing. */
+    footerOutingLink: string
     /** schema.org `name` for WebSite + SoftwareApplication JSON-LD (#467). */
     jsonLdAppName: string
     /** schema.org `alternateName` array for WebSite + SoftwareApplication (#467). */
@@ -819,7 +823,7 @@ export type Translations = {
     sectionPast: string
     endedTag: string
     /** Participant count tag on a list row. `{count}` = number of participants. */
-    countTag: string
+    countTag: { one: string; other: string }
     addCta: string
     /** 我參與的出遊 (#1558): other ledgers' outings the user joined. */
     participating: { title: string; hint: string }
@@ -837,7 +841,7 @@ export type Translations = {
     /** "{name} 付" payer tag. */
     paidByTag: string
     /** "{count} 人" split-count tag. */
-    splitCountTag: string
+    splitCountTag: { one: string; other: string }
     untitledExpense: string
     emptyExpenses: string
     addExpense: string
@@ -878,6 +882,19 @@ export type Translations = {
       resetConfirmBody: string
       resetConfirm: string
       resetDone: string
+      /** #1727 — primary button: system share sheet, or copy message + link without one. */
+      shareCta: string
+      /** Prefilled share text; `{name}` = outing name. Goes into the friends' chat. */
+      message: string
+      /** No share sheet (Android shell, most desktops): message + link copied. */
+      messageCopied: string
+      qrShow: string
+      qrHide: string
+      qrHint: string
+      qrAlt: string
+      /** Under the participant list; `{n}` = friends' names nobody has picked. */
+      unpicked: { one: string; other: string }
+      reshare: string
     }
     participant: {
       /** Claim status under a participant's name (簡潔中性). */
@@ -1030,6 +1047,11 @@ export type Translations = {
     /** {name} = the viewer's slot. */
     signUpBody: string
     signUpCta: string
+    /** #1728 — after the outing ends (溫和的見證者). No partner or relationship assumed: the friend may be single. */
+    ledgerInviteTitle: string
+    ledgerInviteBody: string
+    ledgerInviteCta: string
+    ledgerInviteDismiss: string
   }
 
   /** Trip detail page (#42). */
@@ -1908,6 +1930,8 @@ export type Translations = {
       next: string
       required: string
       failed: string
+      /** Shown only to someone who came from /features/outing (#1726). */
+      outingReason: string
     }
     invite: {
       heading: string
@@ -1921,6 +1945,9 @@ export type Translations = {
       copy: string
       share: string
       skip: string
+      /** #1726 — the skip button and the line under it, for someone who came to split a trip. */
+      skipToOuting: string
+      outingHint: string
       copied: string
       shareFailed: string
       creating: string
@@ -3198,6 +3225,21 @@ export type Translations = {
     howHeading: string
     /** HowToStep name template, contains `{n}`. */
     howToStepName: string
+    /** Opening direct answer (#1725): a question heading plus a self-contained
+     *  answer an AI engine can quote as-is. Same fact limits as the rest. */
+    answerQuestion: string
+    answer: string
+    /** Worked example (#1725), rendered as text from OUTING_MOCK through the
+     *  product's split/settle functions. Placeholders: intro `{outing}` `{count}`
+     *  `{expenses}`; total `{total}` `{share}`; settleLead `{n}`; outcome `{share}`. */
+    example: {
+      heading: string
+      intro: string
+      cols: { item: string; paidBy: string; amount: string }
+      total: string
+      settleLead: string
+      outcome: string
+    }
     steps: readonly [
       { title: string; body: string },
       { title: string; body: string },
@@ -3243,7 +3285,7 @@ export type Translations = {
       { question: string; answer: string },
     ]
     closingHeading: string
-    /** Row on /use-case/travel and /use-case/aa-split. `cta` is the screen-reader text. */
+    /** Row on /use-case/travel, /use-case/aa-split, the /use-case hub and /migrate/splitwise (#1724). `name` carries the outing search phrase. `cta` is the screen-reader text. */
     crossLink: { name: string; description: string; cta: string }
     /** Quiet text links: outing share page (shareLink) and in-app empty state (emptyLink). */
     entries: { shareLink: string; emptyLink: string }
@@ -3527,6 +3569,8 @@ export const zhTW: Translations = {
       seeAll: '看全部搬遷指南',
     },
     footerTrust: '只開放給你們倆 · 資料只屬於你們兩個',
+    featuresOutingLink: '出遊分帳：丟一個連結，朋友不用下載 App',
+    footerOutingLink: '出遊分帳',
     jsonLdAppName: 'Futari · 雙人記帳',
     jsonLdAlternateNames: ['Futari 家計簿', '情侶記帳 app', '夫妻記帳', '兩個人的家計簿', 'ふたり 家計簿', "Futari · couple's ledger"],
     jsonLdAppDescription:
@@ -3941,7 +3985,7 @@ export const zhTW: Translations = {
     sectionActive: '進行中',
     sectionPast: '過去的出遊',
     endedTag: '已結束',
-    countTag: '{count} 人',
+    countTag: { one: '{count} 人', other: '{count} 人' },
     addCta: '開一個出遊',
     participating: {
       title: '我參與的出遊',
@@ -3960,7 +4004,7 @@ export const zhTW: Translations = {
     allSettled: '都結清了。',
     expensesLabel: '支出',
     paidByTag: '{name} 付',
-    splitCountTag: '{count} 人',
+    splitCountTag: { one: '{count} 人', other: '{count} 人' },
     untitledExpense: '一筆支出',
     emptyExpenses: '還沒有支出。',
     addExpense: '記一筆',
@@ -3993,6 +4037,15 @@ export const zhTW: Translations = {
       resetConfirmBody: '舊連結會立刻失效。已經加入的人不受影響，照常記帳。',
       resetConfirm: '重設',
       resetDone: '已換成新連結，舊連結不能再用了。',
+      shareCta: '分享給朋友',
+      message: '「{name}」的帳在這裡記，點開選你的名字，就能一起記。',
+      messageCopied: '已複製訊息和連結，貼到群組就好。',
+      qrShow: '顯示 QR code',
+      qrHide: '收起 QR code',
+      qrHint: '讓旁邊的朋友用手機相機掃，就能打開這次出遊。',
+      qrAlt: '這次出遊的 QR code',
+      unpicked: { one: '還有 {n} 個名字沒人選', other: '還有 {n} 個名字沒人選' },
+      reshare: '再分享一次',
     },
     participant: {
       claim: {
@@ -4098,6 +4151,10 @@ export const zhTW: Translations = {
     signUpTitle: '之後也想找得到這次出遊？',
     signUpBody: '登入後，「{name}」會連到你的帳號。不登入也能繼續記。',
     signUpCta: '登入',
+    ledgerInviteTitle: '這次的帳都在這裡了',
+    ledgerInviteBody: 'Futari 平常是兩個人一起記帳用的。如果你也有想一起記的人，可以開一本兩個人的帳本。',
+    ledgerInviteCta: '建立兩人帳本',
+    ledgerInviteDismiss: '不用了',
   },
 
   tripDetail: {
@@ -4828,6 +4885,7 @@ export const zhTW: Translations = {
       next: '下一步',
       required: '請輸入名稱',
       failed: '發生錯誤',
+      outingReason: '先建好你們的帳本，出遊會記在裡面。',
     },
     invite: {
       heading: '帳本準備好了，讓對方也進來',
@@ -4840,6 +4898,8 @@ export const zhTW: Translations = {
       copy: '複製',
       share: '分享連結',
       skip: '稍後再邀請 →',
+      skipToOuting: '先去開出遊 →',
+      outingHint: '對方之後隨時可以加入，出遊可以先開。',
       copied: '已複製連結',
       shareFailed: '分享失敗',
       creating: '建立中…',
@@ -7104,6 +7164,16 @@ export const zhTW: Translations = {
     breadcrumbLabel: '出遊分帳',
     howHeading: '從一個連結開始',
     howToStepName: '步驟 {n}',
+    answerQuestion: '出遊分帳，怎麼做才不用每個人都裝 App？',
+    answer: '在 Futari 開一個出遊，把連結丟到群組。朋友用手機瀏覽器點開、選自己的名字，就能記下自己付的錢，不用下載，也不用註冊。每筆支出照分到的人數平分；要結清時，Futari 列出誰該轉給誰，最多只要「人數減一」筆。',
+    example: {
+      heading: '一次出遊分帳的例子',
+      intro: '{outing}：{count} 個人、{expenses} 筆支出，每筆都由全部的人平分。',
+      cols: { item: '支出', paidBy: '誰付', amount: '金額' },
+      total: '合計 {total}，每人約分攤 {share}。',
+      settleLead: '結清時，Futari 列出這 {n} 筆轉帳：',
+      outcome: '轉完之後，每個人實際花的都差不多是 {share}。',
+    },
     steps: [
       { title: '開一個出遊', body: '在 Futari 的「旅行」頁點「出遊」那一列，開一個出遊，取個名字就好。你和伴侶會自動在裡面。' },
       { title: '把連結丟到群組', body: '複製出遊的連結，貼到 LINE 或任何聊天群組。' },
@@ -7149,7 +7219,7 @@ export const zhTW: Translations = {
     ],
     closingHeading: '下次出去玩，先開一個出遊',
     crossLink: {
-      name: '跟朋友一起出遊',
+      name: '出遊分帳，跟朋友一起記',
       description: '丟一個連結，朋友不用下載就能一起記這次的帳。',
       cta: '看出遊怎麼用',
     },

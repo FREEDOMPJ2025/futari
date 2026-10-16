@@ -151,6 +151,8 @@ export const zhCN: Translations = {
       seeAll: '看全部迁移指南',
     },
     footerTrust: '只开放给你们俩 · 数据只属于你们两个',
+    featuresOutingLink: '出游分账：发一个链接，朋友不用下载 App',
+    footerOutingLink: '出游分账',
     jsonLdAppName: 'Futari · 双人记账',
     jsonLdAlternateNames: ['Futari 家计簿', '两个人的家计簿', 'ふたり 家計簿', "Futari · couple's ledger"],
     jsonLdAppDescription:
@@ -565,7 +567,7 @@ export const zhCN: Translations = {
     sectionActive: '进行中',
     sectionPast: '过去的出游',
     endedTag: '已结束',
-    countTag: '{count} 人',
+    countTag: { one: '{count} 人', other: '{count} 人' },
     addCta: '开一个出游',
     participating: {
       title: '我参与的出游',
@@ -584,7 +586,7 @@ export const zhCN: Translations = {
     allSettled: '都结清了。',
     expensesLabel: '支出',
     paidByTag: '{name} 付',
-    splitCountTag: '{count} 人',
+    splitCountTag: { one: '{count} 人', other: '{count} 人' },
     untitledExpense: '一笔支出',
     emptyExpenses: '还没有支出。',
     addExpense: '记一笔',
@@ -617,6 +619,15 @@ export const zhCN: Translations = {
       resetConfirmBody: '旧链接会立刻失效。已经加入的人不受影响，照常记账。',
       resetConfirm: '重设',
       resetDone: '已换成新链接，旧链接不能再用了。',
+      shareCta: '分享给朋友',
+      message: '「{name}」的账在这里记，点开选你的名字，就能一起记。',
+      messageCopied: '已复制消息和链接，粘贴到群里就好。',
+      qrShow: '显示二维码',
+      qrHide: '收起二维码',
+      qrHint: '让旁边的朋友用手机相机扫，就能打开这次出游。',
+      qrAlt: '这次出游的二维码',
+      unpicked: { one: '还有 {n} 个名字没人选', other: '还有 {n} 个名字没人选' },
+      reshare: '再分享一次',
     },
     participant: {
       claim: {
@@ -722,6 +733,10 @@ export const zhCN: Translations = {
     signUpTitle: '之后也想找得到这次出游？',
     signUpBody: '登录后，「{name}」会连到你的账号。不登录也能继续记。',
     signUpCta: '登录',
+    ledgerInviteTitle: '这次的账都在这里了',
+    ledgerInviteBody: 'Futari 平常是两个人一起记账用的。如果你也有想一起记的人，可以开一本两个人的账本。',
+    ledgerInviteCta: '建立两人账本',
+    ledgerInviteDismiss: '不用了',
   },
 
   tripDetail: {
@@ -1453,6 +1468,7 @@ export const zhCN: Translations = {
       next: '下一步',
       required: '请输入名称',
       failed: '出错了',
+      outingReason: '先建好你们的账本，出游会记在里面。',
     },
     invite: {
       heading: '账本准备好了，让对方也进来',
@@ -1465,6 +1481,8 @@ export const zhCN: Translations = {
       copy: '复制',
       share: '分享链接',
       skip: '稍后再邀请 →',
+      skipToOuting: '先去开出游 →',
+      outingHint: '对方之后随时可以加入，出游可以先开。',
       copied: '已复制链接',
       shareFailed: '分享失败',
       creating: '创建中…',
@@ -3730,6 +3748,16 @@ export const zhCN: Translations = {
     breadcrumbLabel: '出游分账',
     howHeading: '从一个链接开始',
     howToStepName: '第 {n} 步',
+    answerQuestion: '出游分账，怎么做才不用每个人都装 App？',
+    answer: '在 Futari 开一个出游，把链接发到群里。朋友用手机浏览器点开、选自己的名字，就能记下自己付的钱，不用下载，也不用注册。每笔支出按分到的人数平分；要结清时，Futari 列出谁该转给谁，最多只要「人数减一」笔。',
+    example: {
+      heading: '一次出游分账的例子',
+      intro: '{outing}：{count} 个人、{expenses} 笔支出，每笔都由所有人平分。',
+      cols: { item: '支出', paidBy: '谁付', amount: '金额' },
+      total: '合计 {total}，每人约分摊 {share}。',
+      settleLead: '结清时，Futari 列出这 {n} 笔转账：',
+      outcome: '转完之后，每个人实际花的都差不多是 {share}。',
+    },
     steps: [
       { title: '开一个出游', body: '在 Futari 的「旅行」页点「出游」那一行，开一个出游，取个名字就行。你和伴侣会自动在里面。' },
       { title: '把链接发到群里', body: '复制出游的链接，粘贴到微信或任何聊天群。' },
@@ -3775,7 +3803,7 @@ export const zhCN: Translations = {
     ],
     closingHeading: '下次出去玩，先开一个出游',
     crossLink: {
-      name: '和朋友一起出游',
+      name: '出游分账，和朋友一起记',
       description: '发一个链接，朋友不用下载就能一起记这次的账。',
       cta: '看看出游怎么用',
     },
