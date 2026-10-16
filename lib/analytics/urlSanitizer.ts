@@ -26,7 +26,8 @@
  *   client, node and edge code.
  * - **Never throws.** On any internal failure it returns {@link REDACTED_URL} —
  *   never the input.
- * - Path: the segment after `invite` or `outing` becomes `:token`. Everything else in the
+ * - Path: the segment after `invite` or `outing` becomes `:token`; the one
+ *   after `outing/r` (friend view, #1742) becomes `:id`. Everything else in the
  *   path is kept, so events still group by route.
  * - `#hash` is dropped.
  * - Query: keys are kept; values survive only for the keys in
@@ -79,6 +80,17 @@ export const MASKED_VALUE = '<masked>'
 
 /** Replacement for the path segment after a {@link TOKEN_PATH_SEGMENTS} entry. */
 export const INVITE_TOKEN_PLACEHOLDER = ':token'
+
+/** Replacement for the outing id in the friend view `/outing/r/<outingId>` (#1742). */
+export const OUTING_ID_PLACEHOLDER = ':id'
+
+/**
+ * `/outing/r/<outingId>` is the friend's full-view route, not a share token.
+ * A real share token is 43 chars of base64url, so a bare one-character `r`
+ * segment is always this route and never a token. The outing id is masked
+ * because outing events carry no outing id (#1723).
+ */
+const OUTING_RESUME_SEGMENT = 'r'
 
 /**
  * Path segments whose follower is a bearer secret: `/invite/<token>` and the
@@ -160,7 +172,12 @@ function sanitizePath(pathname: string): string {
   // followers instead of skipping past the second `invite` (same for `outing`).
   const out = [...segments]
   for (let i = 0; i < segments.length - 1; i++) {
-    if (TOKEN_PATH_SEGMENTS.has(decodeLoose(segments[i]).toLowerCase()) && segments[i + 1] !== '') {
+    const name = decodeLoose(segments[i]).toLowerCase()
+    if (!TOKEN_PATH_SEGMENTS.has(name) || segments[i + 1] === '') continue
+    if (name === 'outing' && decodeLoose(segments[i + 1]).toLowerCase() === OUTING_RESUME_SEGMENT) {
+      // `/outing/r/<id>`: keep `r`, mask the id (if there is one).
+      if (i + 2 < segments.length && segments[i + 2] !== '') out[i + 2] = OUTING_ID_PLACEHOLDER
+    } else {
       out[i + 1] = INVITE_TOKEN_PLACEHOLDER
     }
   }

@@ -15,9 +15,9 @@ updates:
   - v1.7.0: 補「`invite_revoked` 只在真的讓一條有效連結失效時才發」這條邊界（#1546）
   - v1.7.0: 補「`android_beta_invite_*` 是新測量點、基準從部署日重算」這條邊界（#1553）
   - v1.7.2: 補「`android_beta_step_clicked`、`tester_feedback_clicked`、`android_beta_outing_link_clicked`、`android_beta_share_clicked` 是新測量點，`android_beta_invite_clicked` 的語意改變」這條邊界（#1648）
-  - v1.7.4: 補「`outing_created`、`outing_link_shared` 是新測量點；出遊分享頁事件 0 筆是沒有訪客、不是沒送出；出遊漏斗在分享那一步換人」這條邊界（#1723）；「`outing_ledger_invite_viewed`／`_clicked` 是新測量點，`entry_source=outing` 從此有兩個入口」（#1728）
+  - v1.7.4: 補「`outing_created`、`outing_link_shared` 是新測量點；出遊分享頁事件 0 筆是沒有訪客、不是沒送出；出遊漏斗在分享那一步換人」這條邊界（#1723）；「`outing_ledger_invite_viewed`／`_clicked` 是新測量點，`entry_source=outing` 從此有兩個入口」（#1728）；補「2026-10-16 起出遊朋友頁路徑讀作 `/outing/r/:id`」（#1742）
 related_specs: [conversion-analytics, product]
-related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", "#1415", "#1453", "#1552", "#1546", "#1553", "#1648", "#1723"]
+related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", "#1415", "#1453", "#1552", "#1546", "#1553", "#1648", "#1723", "#1742"]
 ---
 
 # 觀測的邊界與讀數據的紀律
@@ -112,6 +112,7 @@ related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", 
 - **`outing_created` 與 `outing_link_shared`（#1723）是出遊漏斗的新測量點，基準從部署日起算。** `outing_created` 由 server 在 `createOuting` 成功後發（`captureServer`，distinct_id 是使用者 id），沒有屬性；放 server 是為了跟同樣在 server、以使用者 id 為 key 的 `signed_up`、`setup_completed` 串成同一個人的漏斗。`outing_link_shared` 由 client 發，屬性只有 `method`：`copy`（剪貼簿真的寫入：「複製連結」，或沒有分享面板時「分享給朋友」改複製訊息＋連結）、`share`（系統分享面板，使用者沒取消）、`qr`（顯示 QR 給人掃）。`share`／`qr` 從 #1727 上線起才有。兩者都不帶出遊 id、名稱、分享 token 或任何 URL 內容；重設連結不算分享，剪貼簿失敗也不發。
   - **出遊分享頁的事件 0 筆，是沒有訪客，不是沒送出（2026-10-15 查證）。** v1.7.0（10-08）上線到 10-15，PostHog 在 `/<locale>/outing/*` 上連無條件發送的 `$pageview` 都是 0，但同期 `/outings` 儀表板頁有 18 筆 pageview（iOS 殼），代表 PostHog 本身正常。以 production build（`VERCEL_ENV=production`）接 DEV 資料庫、在 headless 瀏覽器開分享頁，`outing_link_opened` 與 `$pageview` 都有送出，token 在 `$current_url`／`$pathname`／`$session_entry_url` 都被換成 `:token`（請求在瀏覽器端攔下，沒有進 PostHog）。分享連結也沒有 universal link，一定是在瀏覽器開。所以 prod 那 2 次出遊的參與者沒有人是開分享頁進來的（推論自分享頁 0 個 pageview；沒有查 prod 資料庫）。
   - **`method` 的比例不是偏好（#1727）**：Android 殼的 WebView 和多數桌面瀏覽器沒有分享面板，「分享給朋友」在那裡會改走複製，記成 `copy`。`copy` 偏高可能只是 Android／桌面使用者多，不代表大家喜歡複製。`qr` 記的是 QR 顯示出來，不是有人掃了。
+  - **出遊朋友頁的路徑標籤在 2026-10-16 改了（#1742）。** 修正前 PostHog 的 `$current_url`／`$pathname` 上，`/<locale>/outing/:token/<uuid>` 是朋友的完整出遊頁（`/outing/r/<outingId>`，清洗器把 `r` 誤當 token，uuid 也沒遮）；修正後讀作 `/<locale>/outing/r/:id`。查這條路徑要兩種形狀都比對，且修正前的資料裡留有出遊 uuid，不回填。真正的分享連結 `/outing/<token>` 仍是 `/outing/:token`。
   - **失效的樣子**：漏斗在 `outing_link_shared` → `outing_joined` 這一步**換人**：前者是成員，後者是朋友，兩人沒有共同的 distinct_id，事件也刻意不帶出遊 id，所以這一步只能比次數、算不出逐人轉換率；用 PostHog funnel 硬串會靜默回 0。`outing_link_shared` 是 client 事件，每次載入頁面一個匿名 id，跟 server 的 `outing_created` 也串不起來（見本檔第一條）——`outing_created` → `outing_link_shared` 同樣只能比次數。`outing_link_shared` 只量到「連結離開了 App」，量不到有沒有真的貼給朋友；剪貼簿失敗時畫面上仍有網址可以手動選取，那種分享不會被記到。
 - **`outing_ledger_invite_viewed` 與 `outing_ledger_invite_clicked`（#1728）是新測量點，基準從部署日起算。** 出遊結束後，朋友的出遊頁顯示「兩人帳本」邀請卡時發 viewed、點連結時發 clicked，都沒有屬性。卡片只在出遊不是進行中時出現；已登入且有帳本的人看不到；關掉後同一個出遊在同一台裝置不再出現（localStorage）。
   - **失效的樣子**：`entry_source=outing` 現在有兩個入口：出遊頁原有的「登入」卡（`next` 回到出遊，用來把名字連到帳號）和這張邀請卡（`next=/onboarding`）。兩者帶同一個 `from=outing`，`signed_up` 分不出是哪一張；要分就看 `outing_ledger_invite_clicked` 的次數。viewed 是每次載入算一次，同一個人回來看會重複計；它在剛載入時就發，不代表有人讀了卡片。
