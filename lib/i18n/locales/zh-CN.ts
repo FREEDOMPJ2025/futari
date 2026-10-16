@@ -3921,7 +3921,7 @@ export const zhCN: Translations = {
       rows: [
         {
           symptom: '跳出来了，但金额是空的',
-          cause: '金额不是整数。通常是少了「舍入数字」那一步，或带了「元」「NT$」。',
+          cause: '金额不是整数。通常是少了「取整数」那一步，或带了「元」「NT$」。',
         },
         {
           symptom: '描述留空或只有一半',

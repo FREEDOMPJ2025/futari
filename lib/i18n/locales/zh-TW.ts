@@ -7412,7 +7412,7 @@ export const zhTW: Translations = {
       rows: [
         {
           symptom: '跳出來了，但金額是空的',
-          cause: '金額不是整數。通常是少了「四捨五入數字」那一步，或帶了「元」「NT$」。',
+          cause: '金額不是整數。通常是少了「取整數」那一步，或帶了「元」「NT$」。',
         },
         {
           symptom: '描述空白或只有一半',
