@@ -41,6 +41,13 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+_Nothing unreleased yet._
+
+## [1.7.4] - 2026-10-16
+
+主題：**被找到．出遊帶朋友進來**——出遊頁更容易被搜尋和 AI 找到；朋友能用分享面板或 QR 加入，結束後也看得到兩人帳本的邀請。
+完整 diff：[v1.7.3...v1.7.4](https://github.com/redtear1115/oikos/compare/v1.7.3...v1.7.4)
+
 ### 使用者可見變化
 
 - **出遊相關文案改成審過的版本，en 的人數與名字數會依單複數顯示（#1731 #1734 #1736 #1738 #1740）**
@@ -69,12 +76,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 技術變更
 
+- **出遊漏斗補上建立與分享兩個事件（#1723）**
+  技術：`createOuting` 成功後 server 發 `outing_created`（與 `signed_up`／`setup_completed` 同一個 distinct_id），複製連結成功後 client 發 `outing_link_shared`（只帶 `method`），都不帶出遊 id、名稱、token 或網址；分享頁事件 0 筆查證為沒有訪客、不是沒送出。
+
+### Security
+
 - **分析網址清洗：出遊朋友頁的 id 一併遮蔽（#1742）**
   使用者：無可見變化。
   技術：`urlSanitizer` 把 `/outing/r/<outingId>` 改成 `/outing/r/:id`（原本是 `/outing/:token/<uuid>`，路徑標籤錯且 uuid 外流到 PostHog）；`/outing/<token>`、`/invite/<token>`、`/outings/<uuid>` 不變。
-
-- **出遊漏斗補上建立與分享兩個事件（#1723）**
-  技術：`createOuting` 成功後 server 發 `outing_created`（與 `signed_up`／`setup_completed` 同一個 distinct_id），複製連結成功後 client 發 `outing_link_shared`（只帶 `method`），都不帶出遊 id、名稱、token 或網址；分享頁事件 0 筆查證為沒有訪客、不是沒送出。
 
 ## [1.7.3] - 2026-10-15
 
@@ -1905,7 +1914,8 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 - **每頁 `generateMetadata` 接 OG image（#487）**：`public/og-image.png` 從 #282 ship 但未 wire 進 metadata，造成 prod HTML 缺 `og:image` / `twitter:image`；本版 4 個 public page 各加 `openGraph.images` + `twitter.images`，`alt` 用 `t.title` locale-aware，無需新增 i18n key。
 - **`settings.local.json` 列入 gitignore（#478）**：避免本地 hook / 權限設定外洩。
 
-[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.7.3...HEAD
+[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.7.4...HEAD
+[1.7.4]: https://github.com/redtear1115/oikos/compare/v1.7.3...v1.7.4
 [1.7.3]: https://github.com/redtear1115/oikos/compare/v1.7.2...v1.7.3
 [1.7.2]: https://github.com/redtear1115/oikos/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/redtear1115/oikos/compare/v1.7.0...v1.7.1
