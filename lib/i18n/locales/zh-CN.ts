@@ -3888,7 +3888,7 @@ export const zhCN: Translations = {
         {
           param: 'category',
           rule: '下表其中一个 id，要全小写、完全一样。',
-          fallback: '用默认的“餐饮”',
+          fallback: '用默认的“饮食”',
         },
         {
           param: 'note',
@@ -3928,7 +3928,7 @@ export const zhCN: Translations = {
           cause: '商家名称没有先经过“URL 编码”。',
         },
         {
-          symptom: '分类变成“餐饮”，不是我写的',
+          symptom: '分类变成“饮食”，不是我写的',
           cause: 'category 的 id 拼错，或用了大写。',
         },
       ],

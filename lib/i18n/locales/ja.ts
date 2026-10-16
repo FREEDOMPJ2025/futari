@@ -3960,7 +3960,7 @@ I will upload the screenshots once you confirm.`,
         {
           param: 'category',
           rule: '下の表にある id のどれか。すべて小文字で、そのとおりに書きます。',
-          fallback: '既定の「食費」になります',
+          fallback: '既定の「食事」になります',
         },
         {
           param: 'note',
@@ -4000,7 +4000,7 @@ I will upload the screenshots once you confirm.`,
           cause: '店名が「URLエンコード」を通っていません。',
         },
         {
-          symptom: 'カテゴリが「食費」になる',
+          symptom: 'カテゴリが「食事」になる',
           cause: 'category の id の綴りが違うか、大文字が混ざっています。',
         },
       ],
