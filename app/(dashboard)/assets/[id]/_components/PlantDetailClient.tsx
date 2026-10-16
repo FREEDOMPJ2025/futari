@@ -39,6 +39,7 @@ interface Props {
 }
 
 function CompanionDays({ days, sproutedAt, waterEvery, accent, td }: { days: number; sproutedAt: string; waterEvery: number | null; accent: string; td: Translations['assetDetail']['plant'] }) {
+  const locale = useLocale()
   return (
     <div className="text-center py-2">
       <div className="text-xs tracking-[1.5px] uppercase font-numeric" style={{ color: accent }}>{td.companionDays}</div>
@@ -47,7 +48,7 @@ function CompanionDays({ days, sproutedAt, waterEvery, accent, td }: { days: num
         <span className="text-sm font-medium" style={{ color: accent }}>{td.daysSuffix}</span>
       </div>
       <div className="text-xs mt-1.5 opacity-75 font-numeric" style={{ color: accent }}>
-        {sproutedAt}{td.sproutedSuffix}{waterEvery ? td.waterEveryFooter.replace('{n}', String(waterEvery)) : ''}
+        {sproutedAt}{td.sproutedSuffix}{waterEvery ? pickPlural(locale, waterEvery, td.waterEveryFooter).replace('{n}', String(waterEvery)) : ''}
       </div>
     </div>
   )

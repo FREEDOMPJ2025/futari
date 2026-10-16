@@ -1510,7 +1510,8 @@ export type Translations = {
         moreRows: { one: string; other: string }
         confirmCta: { one: string; other: string }
         confirming: string
-        summary: string
+        summary: { one: string; other: string }
+        summaryInvalid: { one: string; other: string }
       }
       result: {
         successHeading: string
@@ -2352,7 +2353,7 @@ export type Translations = {
       daysSuffix: string
       sproutedSuffix: string
       /** Template with `{n}` placeholder. */
-      waterEveryFooter: string
+      waterEveryFooter: { one: string; other: string }
     }
     house: {
       sectionInfo: string
@@ -4609,7 +4610,8 @@ export const zhTW: Translations = {
         moreRows: { one: '還有 {count} 筆未顯示', other: '還有 {count} 筆未顯示' },
         confirmCta: { one: '確認匯入 {count} 筆', other: '確認匯入 {count} 筆' },
         confirming: '匯入中…',
-        summary: '預計寫入 {count} 筆 · 失敗 {invalid} 筆會保留紀錄',
+        summary: { one: '預計寫入 {count} 筆 · {invalid}', other: '預計寫入 {count} 筆 · {invalid}' },
+        summaryInvalid: { one: '失敗 {n} 筆會保留紀錄', other: '失敗 {n} 筆會保留紀錄' },
       },
       result: {
         successHeading: '匯入完成',
@@ -5327,7 +5329,7 @@ export const zhTW: Translations = {
       companionDays: '陪伴天數',
       daysSuffix: '天',
       sproutedSuffix: ' 入手',
-      waterEveryFooter: ' · 每 {n} 天澆水',
+      waterEveryFooter: { one: ' · 每 {n} 天澆水', other: ' · 每 {n} 天澆水' },
     },
     house: {
       sectionInfo: '房子資訊',

@@ -1133,7 +1133,8 @@ export const zhCN: Translations = {
         moreRows: { one: '还有 {count} 笔未显示', other: '还有 {count} 笔未显示' },
         confirmCta: { one: '确认导入 {count} 笔', other: '确认导入 {count} 笔' },
         confirming: '导入中…',
-        summary: '预计写入 {count} 笔 · 失败 {invalid} 笔会保留记录',
+        summary: { one: '预计写入 {count} 笔 · {invalid}', other: '预计写入 {count} 笔 · {invalid}' },
+        summaryInvalid: { one: '失败 {n} 笔会保留记录', other: '失败 {n} 笔会保留记录' },
       },
       result: {
         successHeading: '导入完成',
@@ -1854,7 +1855,7 @@ export const zhCN: Translations = {
       companionDays: '陪伴天数',
       daysSuffix: '天',
       sproutedSuffix: ' 入手',
-      waterEveryFooter: ' · 每 {n} 天浇水',
+      waterEveryFooter: { one: ' · 每 {n} 天浇水', other: ' · 每 {n} 天浇水' },
     },
     house: {
       sectionInfo: '房子信息',

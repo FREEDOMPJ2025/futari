@@ -1143,7 +1143,8 @@ export const en: Translations = {
         moreRows: { one: '{count} more row not shown', other: '{count} more rows not shown' },
         confirmCta: { one: 'Import {count} row', other: 'Import {count} rows' },
         confirming: 'Importing…',
-        summary: '{count} rows will be written · {invalid} failed rows are kept in the log',
+        summary: { one: '{count} row will be written · {invalid}', other: '{count} rows will be written · {invalid}' },
+        summaryInvalid: { one: '{n} failed row is kept in the log', other: '{n} failed rows are kept in the log' },
       },
       result: {
         successHeading: 'Import complete',
@@ -1867,7 +1868,7 @@ export const en: Translations = {
       companionDays: 'Days together',
       daysSuffix: 'days',
       sproutedSuffix: ' got',
-      waterEveryFooter: ' · water every {n} days',
+      waterEveryFooter: { one: ' · water every {n} day', other: ' · water every {n} days' },
     },
     house: {
       sectionInfo: 'House info',

@@ -1144,7 +1144,8 @@ export const ja: Translations = {
         moreRows: { one: '他 {count} 件は表示されていません', other: '他 {count} 件は表示されていません' },
         confirmCta: { one: '{count} 件を取り込む', other: '{count} 件を取り込む' },
         confirming: '取り込み中…',
-        summary: '{count} 件を保存します · 失敗 {invalid} 件はログに残ります',
+        summary: { one: '{count} 件を保存します · {invalid}', other: '{count} 件を保存します · {invalid}' },
+        summaryInvalid: { one: '失敗 {n} 件はログに残ります', other: '失敗 {n} 件はログに残ります' },
       },
       result: {
         successHeading: '取り込み完了',
@@ -1868,7 +1869,7 @@ export const ja: Translations = {
       companionDays: '一緒の日数',
       daysSuffix: '日',
       sproutedSuffix: ' に迎入',
-      waterEveryFooter: ' · {n} 日ごとに水やり',
+      waterEveryFooter: { one: ' · {n} 日ごとに水やり', other: ' · {n} 日ごとに水やり' },
     },
     house: {
       sectionInfo: '家の情報',

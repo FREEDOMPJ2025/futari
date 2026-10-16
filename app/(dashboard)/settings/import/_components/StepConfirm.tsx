@@ -30,9 +30,9 @@ export function StepConfirm({ rows, invalidCount, onBack, onConfirm, submitting 
     <div className="space-y-4">
       <SectionCard title={tImport.title} subtitle={tImport.subtitle}>
         <div className="text-xs mb-3" style={{ color: 'var(--ink-2)' }}>
-          {tImport.summary
+          {pickPlural(locale, rows.length, tImport.summary)
             .replace('{count}', String(rows.length))
-            .replace('{invalid}', String(invalidCount))}
+            .replace('{invalid}', pickPlural(locale, invalidCount, tImport.summaryInvalid).replace('{n}', String(invalidCount)))}
         </div>
 
         <div className="overflow-x-auto -mx-2">
