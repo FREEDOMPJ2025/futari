@@ -44,7 +44,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ### 使用者可見變化
 
 - **捷徑教學頁的四語文案換成審過的版本（#1751）**
-  使用者：觸發器名稱對齊 Apple 官方用語；備註欄統一稱「描述」（zh-CN／ja／en 同）；zh-CN 改用「」引號、ja 用「サインイン」；zh-TW 補上 LINE Pay 需要支援 Apple Intelligence 的 iPhone。
+  使用者：Apple Pay 步驟改成 iPhone 實機上的名稱（「錢包」自動化、「取整數」、「數量」，取整數改為建議）；新增畫面一律稱「新增紀錄」，未登入時改說要再執行一次；備註欄統一稱「描述」（zh-CN／ja／en 同）；zh-CN 改用「」引號、ja 用「サインイン」；zh-TW 補上 LINE Pay 需要支援 Apple Intelligence 的 iPhone。
   技術：只動 `featureShortcuts`、`seo.featureShortcuts`、`settings.shortcutsGuide` 的字串；禁用詞測試改為同時掃後兩組。
 - **新增公開的「捷徑記帳」教學頁，設定頁有連結（#1750）**
   使用者：`/features/shortcuts` 四語說明如何用 iPhone 的「捷徑」在 Apple Pay 付款後打開填好的「記一筆」（zh-TW 另有 LINE Pay 通知）；Futari 仍不連結付款帳戶，儲存由你按。
