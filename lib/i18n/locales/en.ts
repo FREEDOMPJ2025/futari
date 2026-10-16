@@ -3907,23 +3907,23 @@ I will upload the screenshots once you confirm.`,
     },
     applePay: {
       heading: 'Apple Pay: open New entry after you tap to pay',
-      intro: 'Before you start: Futari is installed on your iPhone and you are signed in. This uses the Wallet transaction automation, so each Apple Pay payment opens a filled-in New entry.',
+      intro: 'Before you start: Futari is installed on your iPhone and you are signed in. This uses a Wallet automation, so each Apple Pay payment opens a filled-in New entry.',
       steps: [
         {
-          title: 'Create a transaction automation',
-          body: 'Open the Shortcuts app, go to Automation, and create a Transaction automation (it comes from Wallet). Choose the cards you want to log and set it to Run Immediately, so you do not have to tap a notification first.',
+          title: 'Create a Wallet automation',
+          body: 'Open the Shortcuts app, go to Automation, tap + and choose Wallet. On the screen that follows, tick the cards you want to log; you can leave all the categories ticked. Tap Next, then New Shortcut. Finally, on the automation\'s settings row, choose Run Immediately, so you do not have to tap a notification first.',
         },
         {
-          title: 'Round the amount to a whole number',
-          body: 'Add a Round Number action and give it the transaction\'s Amount, rounded to the ones place. Do not skip this step. Futari accepts whole numbers only, so "120.00", "NT$120.00" and "120 dollars" leave the amount blank, while "120", "1,280" and full-width digits work.',
+          title: 'Round the amount (recommended)',
+          body: 'Recommended: add a Round Number action and set its input to Shortcut Input, then choose Amount. If the amount carries decimals (for example 120.00), Futari leaves the amount blank, so rounding first is safer. "120", "1,280" and full-width digits work; "120.00", "NT$120.00" and "120 dollars" leave it blank.',
         },
         {
           title: 'URL-encode the merchant name',
-          body: 'Add a URL Encode action and give it the transaction\'s Merchant. Without encoding, spaces and non-Latin characters break the link in the middle and the description comes out blank or cut short. The description is optional: to leave it out, skip this step and remove the whole &note=… part of the link.',
+          body: 'Add a URL Encode action and set its input to Shortcut Input, then choose Merchant. Without encoding, spaces and non-Latin characters break the link in the middle and the description comes out blank or cut short. The description is optional: to leave it out, skip this step and remove the whole &note=… part of the link.',
         },
         {
           title: 'Build the link with a Text action',
-          body: 'Add a Text action and paste the link below, replacing [Amount] with the result of step 2 and [Merchant] with the result of step 3. To use another category, change the id after category= (see the category table below).',
+          body: 'Add a Text action and paste the link below, replacing [Amount] with the result of step 2 and [Merchant] with the result of step 3 (if you skipped step 2, use Shortcut Input, then Amount). To use another category, change the id after category= (see the category table below).',
         },
         {
           title: 'Open the URL',
