@@ -199,6 +199,17 @@ export async function world(sql: Db, tag: string, opts: { xAlive?: boolean } = {
   await rec.ins('FuelLogs', 'fuelPost', {
     asset_id: carPre, liters: '31', fuel_type: '95', odometer: 200, logged_at: at('2026-08-10T00:00:00Z'), created_at: at('2026-08-10T00:00:00Z'),
   })
+  // #1706 — a fuel log older than E1 (written in E0) and a kept E1 transaction
+  // pointing at it (an edit of an older fuel record is a new row that keeps
+  // fuel_log_id): kept only by the FK closure. Without the closure the prune's
+  // DELETE FROM "FuelLogs" hits CashTransactions.fuel_log_id and raises.
+  const fuelPreRef = await rec.ins('FuelLogs', 'fuelPreRef', {
+    asset_id: carPre, liters: '29', fuel_type: '95', odometer: 50, logged_at: at('2026-01-18T00:00:00Z'), created_at: at('2026-01-18T00:00:00Z'),
+  })
+  // Older than E1 and referenced by nothing kept: the lower bound removes it.
+  await rec.ins('FuelLogs', 'fuelPre', {
+    asset_id: carPre, liters: '28', fuel_type: '95', odometer: 40, logged_at: at('2026-01-19T00:00:00Z'), created_at: at('2026-01-19T00:00:00Z'),
+  })
 
   // ── trips ──
   const trip = (label: string, epoch: string, created: string) => rec.ins('Trips', label, {
@@ -234,6 +245,7 @@ export async function world(sql: Db, tag: string, opts: { xAlive?: boolean } = {
   await cash(rec, G, 'cashInTripPre', D, '2026-05-01T00:00:00Z', { trip_id: tPre })
   await cash(rec, G, 'cashInTripIn', X, '2026-05-02T00:00:00Z', { trip_id: tIn })
   await cash(rec, G, 'cashInFuel', D, '2026-03-10T00:00:00Z', { asset_id: carPre, fuel_log_id: fuelIn })
+  await cash(rec, G, 'cashInFuelOld', D, '2026-03-12T00:00:00Z', { asset_id: carPre, fuel_log_id: fuelPreRef })
   const cashResIn = await cash(rec, G, 'cashResolvedIn', D, '2026-03-15T00:00:00Z')
   const cashResPost = await cash(rec, G, 'cashResolvedPost', D, '2026-08-15T00:00:00Z')
   await cash(rec, G, 'cashPost', D, '2026-08-01T00:00:00Z')
@@ -249,6 +261,7 @@ export async function world(sql: Db, tag: string, opts: { xAlive?: boolean } = {
   await income('incomeIn', X, '2026-03-20T00:00:00Z', { import_batch_id: batchIn })
   const incResIn = await income('incomeResolvedIn', D, '2026-03-21T00:00:00Z')
   await income('incomePost', D, '2026-08-20T00:00:00Z')
+  await income('incomePre', D, '2026-01-21T00:00:00Z') // E0: before E1, which is not the earliest chapter
 
   // ── settlements ──
   const settle = (label: string, created: string) => rec.ins('Settlements', label, {
@@ -256,6 +269,7 @@ export async function world(sql: Db, tag: string, opts: { xAlive?: boolean } = {
   })
   await settle('settleIn', '2026-05-10T00:00:00Z')
   await settle('settlePost', '2026-08-10T00:00:00Z')
+  await settle('settlePre', '2026-01-22T00:00:00Z') // E0, as incomePre
 
   // ── recurring rules + pendings ──
   const eRule = (label: string, created: string, extra: Record<string, unknown> = {}) => rec.ins('RecurringExpenseRules', label, {
@@ -322,6 +336,11 @@ export async function world(sql: Db, tag: string, opts: { xAlive?: boolean } = {
   await snap('snapApr', 2026, 4) // whole month inside E1
   await snap('snapJan', 2026, 1) // straddles E0 / nothing
   await snap('snapSep', 2026, 9) // inside E2
+  // #1706 — months that straddle E1's edges: a review shows a month only if it
+  // lies WHOLLY inside the chapter, so neither is kept (a rule widened by a
+  // month would keep both).
+  await snap('snapFeb', 2026, 2) // Feb 1 → Mar 1; E1 starts Feb 10
+  await snap('snapJul', 2026, 7) // Jul 1 → Aug 1; E1 ends Jul 20
   const msg = (label: string, who: string, year: number, month: number, created: string) =>
     rec.ins('MonthlyReviewMessages', label, { group_id: G, member_id: who, year, month, body: `b ${label}`, created_at: at(created) })
   await msg('msgAprX', X, 2026, 4, '2026-05-02T00:00:00Z')
@@ -329,6 +348,9 @@ export async function world(sql: Db, tag: string, opts: { xAlive?: boolean } = {
   await msg('msgMayDLate', D, 2026, 5, '2026-08-01T00:00:00Z') // written after E1 closed
   await msg('msgSepD', D, 2026, 9, '2026-10-01T00:00:00Z')
   await msg('msgJanX', X, 2026, 1, '2026-03-01T00:00:00Z') // month outside E1
+  // Right author, written inside E1, but for a month that straddles E1's end:
+  // only the month rule drops it.
+  await msg('msgJulX', X, 2026, 7, '2026-07-10T00:00:00Z')
 
   // ── things that never survive in an orphan ──
   const quiz = await rec.ins('PartnerQuizSessions', 'quizIn', { group_id: G, epoch_id: E1, question_keys: ['q1'] })
@@ -358,11 +380,11 @@ export const KEPT_AFTER_D: Record<string, string[]> = {
   OikosGroups: ['G', 'NX'],
   GroupEpochs: ['E0', 'E1', 'E2', 'NX0'],
   Assets: ['carPre', 'childPre', 'houseDelIn', 'insIn', 'itemRefByKeptTx', 'petIn'],
-  FuelLogs: ['fuelIn'],
+  FuelLogs: ['fuelIn', 'fuelPreRef'],
   Trips: ['tripIn', 'tripPre'],
   TripExpenses: ['teIn', 'teInLate'],
   CashTransactions: [
-    'cashInD', 'cashInDeleted', 'cashInFuel', 'cashInImported', 'cashInTripIn', 'cashInTripPre', 'cashInX',
+    'cashInD', 'cashInDeleted', 'cashInFuel', 'cashInFuelOld', 'cashInImported', 'cashInTripIn', 'cashInTripPre', 'cashInX',
     'cashResolvedIn', 'nxOwn',
   ],
   IncomeTransactions: ['incomeIn', 'incomeResolvedIn'],
