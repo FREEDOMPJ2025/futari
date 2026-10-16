@@ -43,6 +43,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **出遊相關文案改成審過的版本，en 的人數與名字數會依單複數顯示（#1731 #1734 #1736 #1738 #1740）**
+  使用者：出遊介紹頁、略過邀請、分享訊息、兩人帳本邀請卡的四語文案換成母語審閱後的版本；分攤範例的金額改成「約」；en 不再出現「1 people」「1 names」。
+  技術：新增 `lib/i18n/plural.ts` 的 `pickPlural`（`Intl.PluralRules`）；`outing.share.unpicked`、`outing.splitCountTag`、`outingList.countTag` 拆成 `one`／`other`，zh／ja 兩個值相同。
+
 - **出遊結束後，朋友的出遊頁多一張「兩人帳本」的邀請卡（#1728）**
   使用者：出遊結束後，朋友在出遊頁看到一張卡片，說明 Futari 也能兩個人一起記平常的帳，可以點去建立帳本或關掉；關掉後同一個出遊不再出現，進行中的出遊與已經有帳本的人都不顯示。
   技術：新增 `outing_ledger_invite_viewed`／`outing_ledger_invite_clicked`（無屬性）；未登入的連結帶 `from=outing`、`next=/onboarding`，`signed_up` 帶 `entry_source=outing`；server 只查看的人自己有沒有帳本。
