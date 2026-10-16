@@ -131,7 +131,7 @@ related_issues: ["#18", "#166", "#1243", "#1244", "#1262"]
 **狀態語意**：
 
 - `skipped_at IS NULL AND resolved_tx_id IS NULL` → **active pending**（顯示卡片）
-- `resolved_tx_id IS NOT NULL` → **已確認**（保留作為審計指標；卡片消失）
+- `resolved_tx_id IS NOT NULL` → **已確認**（保留作為審計指標；卡片消失）。該交易軟刪滿一年被物理清除時，指向它的已確認卡片由清理 cron 一併刪除（0097，#1689）；指標沒有對象了
 - `skipped_at IS NOT NULL` → **已跳過**（卡片消失；90 天後 pg_cron 物理刪）
 
 確認/跳過後不真的刪 row：留 audit trail，方便用戶問「我這個月是不是漏記薪水」時查得到。
@@ -267,7 +267,7 @@ related_issues: ["#18", "#166", "#1243", "#1244", "#1262"]
 | 用戶編輯規則 day_of_month / interval_months | 重算 next_occurrence_at；已產的 active pending 不動 |
 | 兩裝置同時點「就這樣」 | 第二個 server action 看到 pending 已有 resolved_tx_id，回「partner 剛剛已處理」，client refresh 卡片消失 |
 | Cron 失敗一天 | 隔天跑時 `next_occurrence_at <= 台北今天` 仍真，照樣產 pending |
-| 用戶 confirm 後想撤回 | 用既有 IncomeTransactions / CashTransactions soft-delete。pending.resolved_tx_id 保留（指向已軟刪除 tx），不還原 pending |
+| 用戶 confirm 後想撤回 | 用既有 IncomeTransactions / CashTransactions soft-delete。pending.resolved_tx_id 保留（指向已軟刪除 tx），不還原 pending；tx 滿一年被物理清除時卡片一併刪除（0097，#1689） |
 | Solo Mode 下建立規則 | recipient / paid_by 自動填本人；split_type 鎖 all_mine；PayerToggle / SplitTypeSelector 隱藏 |
 | Solo Mode → 雙人模式 | 既有規則 recipient / paid_by / split_type 不變動；用戶可手動編輯（[solo-mode](solo-mode-design.md) acceptance） |
 | recipient / paid_by 不在 group（partner 被踢出） | cron 前 join check；若 user 不在 group → 該規則自動 `paused_at`（settings 頁可改後 resume） |
