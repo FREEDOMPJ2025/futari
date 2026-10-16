@@ -954,6 +954,7 @@ export const zhCN: Translations = {
     recurringSettings: '定期支出/收入设置',
     sectionData: '数据',
     trust: '数据安全',
+    shortcutsGuide: '用快捷指令记账',
     exportData: '导出数据（CSV）',
     pastTimes: '过去的时光',
     trips: '旅行',
@@ -3320,6 +3321,11 @@ export const zhCN: Translations = {
       description: '和朋友出游，谁付了什么、谁该转给谁，记在同一个地方。开一个出游、把链接发到群里，朋友点开选自己的名字就能记，不用下载、不用注册，最多 20 人。',
       ogDescription: '开一个出游、把链接发到群里，朋友点开选自己的名字就能一起记账，不用下载、不用注册。',
     },
+    featureShortcuts: {
+      title: 'iPhone 快捷指令记账：Apple Pay 付款后打开“记一笔” | Futari',
+      description: '用 iPhone 的快捷指令，在 Apple Pay 付款后打开 Futari 的“记一笔”，金额先填好，由你确认后保存。Futari 不连接付款账户，也不读取付款数据。',
+      ogDescription: '付款后，iPhone 快捷指令打开 Futari 的“记一笔”，金额、分类和备注先填好，保存由你来按。',
+    },
   },
   useCase: {
     backToHome: '← 回 Futari 首页',
@@ -3810,6 +3816,122 @@ export const zhCN: Translations = {
     entries: {
       shareLink: '第一次用 Futari？看看出游怎么运作',
       emptyLink: '看看出游怎么用',
+    },
+  },
+
+  featureShortcuts: {
+    heroKicker: '快捷指令记账',
+    heroTitle: '付完款，让 iPhone 把“记一笔”打开',
+    heroSubtitle: '用 iPhone 的“快捷指令”，在付款后打开 Futari 的“记一笔”。金额、分类和备注先填好，你看过、需要就改，再按保存。',
+    breadcrumbLabel: '快捷指令记账',
+    howToStepName: '步骤 {n}',
+    answerQuestion: 'Apple Pay 付款后，怎么快速记到 Futari？',
+    answer: 'Futari 不连接任何付款账户，也不读取你的付款数据。做事的是 iPhone 的“快捷指令”：付款后它打开 Futari 的“记一笔”，把金额、分类和备注先填好，你确认后自己按保存，记录才会写进账本。这个做法只适用于 iPhone 的“快捷指令”App。',
+    vars: {
+      amount: '金额',
+      merchant: '商家',
+    },
+    applePay: {
+      heading: 'Apple Pay：刷完卡就跳出“记一笔”',
+      intro: '前提：iPhone 已安装 Futari 并登录。下面用“钱包”的交易自动化，每次用 Apple Pay 付款，就打开一次填好的“记一笔”。',
+      steps: [
+        {
+          title: '新建交易自动化',
+          body: '打开“快捷指令”App，进入“自动化”，新建一个“交易”自动化（来自“钱包”）。选择要记的卡片，运行方式选“立即运行”，这样不必每次先点通知。',
+        },
+        {
+          title: '把金额四舍五入成整数',
+          body: '加一个“舍入数字”动作，输入选交易的“金额”，舍入到个位数。这一步不能省：Futari 只收整数，“120.00”“NT$120.00”“120元”都会让金额栏留空；“120”“1,280”“１２０”可以。',
+        },
+        {
+          title: '把商家名称做 URL 编码',
+          body: '加一个“URL 编码”动作，输入选交易的“商家”。中文和空格不先编码，网址会在中间断开，备注会留空或只剩一半。备注可有可无，不想带就跳过这步，并把网址里的 &note=… 整段去掉。',
+        },
+        {
+          title: '用“文本”拼出网址',
+          body: '加一个“文本”动作，粘贴下面的网址，把 [金额] 换成第 2 步的结果、[商家] 换成第 3 步的结果。想换分类，就改 category= 后面的 id（见下方分类表）。',
+        },
+        {
+          title: '打开 URL',
+          body: '加一个“打开 URL”动作，输入选上一步的文本。之后每次用 Apple Pay 付款，Futari 会打开并跳出“记一笔”，确认后按保存。',
+        },
+      ],
+      urlLabel: '网址（App）',
+      platformNote: '这个流程只适用于 iPhone 的“快捷指令”App。',
+      foreignNote: '外币提醒：用 Apple Pay 付外币时，快捷指令给的是外币金额，Futari 会把它当成账本主币种的金额带入。请在“记一笔”里改成实际的金额。',
+    },
+    linePay: {
+      heading: '',
+      intro: '',
+      noteVar: '',
+      steps: [],
+    },
+    web: {
+      heading: '没有装 App：用网页网址',
+      body: '没有装 App、用浏览器或“添加到主屏幕”的人，把网址换成下面这条，“打开 URL”会在 Safari 打开。要先在 Safari 登录过 Futari。# 后面的内容只留在你的浏览器，不会发送到服务器。',
+      urlLabel: '网址（网页）',
+    },
+    params: {
+      heading: '网址可以带哪些值',
+      intro: '三个参数都可以省略；某个值不合格时，只有那一格不带入，其他照样带入。',
+      cols: {
+        param: '参数',
+        rule: '规则',
+        fallback: '不合格时',
+      },
+      rows: [
+        {
+          param: 'amount',
+          rule: '正整数，1 到 9,999,999。可以有千分位逗号（1,200），全角数字也可以。小数、负数、1e5 这类写法都不收。',
+          fallback: '金额留空，自己输入',
+        },
+        {
+          param: 'category',
+          rule: '下表其中一个 id，要全小写、完全一样。',
+          fallback: '用默认的“饮食”',
+        },
+        {
+          param: 'note',
+          rule: '会变成“备注”，最多 100 个字。',
+          fallback: '备注留空，保存前要自己填',
+        },
+      ],
+      categoriesHeading: '分类 id',
+      catCols: {
+        id: 'id',
+        name: '显示',
+      },
+      fixedNote: '网址只能带这三个值。日期（今天）、谁付的（你）、分摊方式与币种，都照“记一笔”平常的默认，写在网址里也不会采用；也不会自动归到进行中的旅行，要归到旅行请在界面上自己选。',
+    },
+    whenNot: {
+      heading: '什么时候不会跳出来',
+      intro: '快捷指令只负责打开。下面三种情况 Futari 会安静地略过，不动你的界面：',
+      items: [
+        '另一个窗口正开着（例如正在改某一笔）：快捷指令会被忽略，改到一半的内容不会被动到。关掉窗口后再运行一次。',
+        '正在看过去的章节：过去章节是只读的，先切回当前的章节。',
+        '还没登录：登录后，在 App 里通常会接着跳出填好的“记一笔”；在网页上会停在首页，要再触发一次。',
+      ],
+    },
+    trouble: {
+      heading: '常见状况',
+      cols: {
+        symptom: '状况',
+        cause: '原因',
+      },
+      rows: [
+        {
+          symptom: '跳出来了，但金额是空的',
+          cause: '金额不是整数。通常是少了“舍入数字”那一步，或带了“元”“NT$”。',
+        },
+        {
+          symptom: '备注留空或只有一半',
+          cause: '商家名称没有先经过“URL 编码”。',
+        },
+        {
+          symptom: '分类变成“饮食”，不是我写的',
+          cause: 'category 的 id 拼错，或用了大写。',
+        },
+      ],
     },
   },
 

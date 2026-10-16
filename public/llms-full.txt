@@ -156,6 +156,12 @@ An outing is a short-lived group split inside a couple's ledger, for the trips, 
 
 Pages: [zh-TW](https://futari.southern-light.dev/features/outing?utm_source=llms_txt&utm_medium=ai_agent), [zh-CN](https://futari.southern-light.dev/zh-CN/features/outing?utm_source=llms_txt&utm_medium=ai_agent), [en](https://futari.southern-light.dev/en/features/outing?utm_source=llms_txt&utm_medium=ai_agent), [ja](https://futari.southern-light.dev/ja/features/outing?utm_source=llms_txt&utm_medium=ai_agent)
 
+### 16. Shortcuts: opening Add Expense from an iPhone Shortcut
+
+Futari does not connect to any payment account and does not read payment data. An iPhone Shortcut (Shortcuts app, iOS only) can open Futari's Add Expense with the amount, category and note already filled in; the user checks it and taps save, and nothing is written until then. For Apple Pay, a Wallet transaction automation passes the amount (rounded to a whole number: the parser rejects "120.00", "NT$120.00" and "120元") and the merchant name (URL-encoded) into a link of the form `dev.southernlight.futari://add?amount=120&category=dining&note=...`. Web users use `https://futari.southern-light.dev/dashboard#add=expense&amount=120&category=dining&note=...`. Only amount, category and note can be set; the date, payer, split and currency use the usual defaults. A foreign-currency amount is filled in as the ledger's main currency and must be corrected by hand. The zh-TW page also covers LINE Pay payment notifications.
+
+Pages: [zh-TW](https://futari.southern-light.dev/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent), [zh-CN](https://futari.southern-light.dev/zh-CN/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent), [en](https://futari.southern-light.dev/en/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent), [ja](https://futari.southern-light.dev/ja/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent)
+
 ---
 
 ## Who Futari is for
@@ -339,6 +345,10 @@ This is reflected in the UI:
 - **Outings (zh-CN)**: https://futari.southern-light.dev/zh-CN/features/outing?utm_source=llms_txt&utm_medium=ai_agent
 - **Outings (en)**: https://futari.southern-light.dev/en/features/outing?utm_source=llms_txt&utm_medium=ai_agent
 - **Outings (ja)**: https://futari.southern-light.dev/ja/features/outing?utm_source=llms_txt&utm_medium=ai_agent
+- **Shortcuts guide (zh-TW)**: https://futari.southern-light.dev/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent
+- **Shortcuts guide (zh-CN)**: https://futari.southern-light.dev/zh-CN/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent
+- **Shortcuts guide (en)**: https://futari.southern-light.dev/en/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent
+- **Shortcuts guide (ja)**: https://futari.southern-light.dev/ja/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent
 - **Index (short version)**: https://futari.southern-light.dev/llms.txt
 - **Full description (this file)**: https://futari.southern-light.dev/llms-full.txt
 - **Sitemap**: https://futari.southern-light.dev/sitemap.xml

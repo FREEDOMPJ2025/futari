@@ -1335,6 +1335,8 @@ export type Translations = {
     recurringSettings: string
     sectionData: string
     trust: string
+    /** #1750 - settings row linking to the public shortcuts guide. */
+    shortcutsGuide: string
     exportData: string
     pastTimes: string
     trips: string
@@ -3151,6 +3153,11 @@ export type Translations = {
       description: string
       ogDescription: string
     }
+    featureShortcuts: {
+      title: string
+      description: string
+      ogDescription: string
+    }
   }
 
   /** Shared shell + per-slug copy for /use-case/* situational SEO pages (#851).
@@ -3289,6 +3296,57 @@ export type Translations = {
     crossLink: { name: string; description: string; cta: string }
     /** Quiet text links: outing share page (shareLink) and in-app empty state (emptyLink). */
     entries: { shareLink: string; emptyLink: string }
+  }
+
+  /** #1750 - public shortcuts guide /features/shortcuts. Copy facts are limited to
+   *  docs/shortcuts/linepay-quick-add.md and lib/quickAdd.ts. Never write 自動記帳 / 綁定 /
+   *  串接 or claim encryption: Futari reads no payment data, the Shortcut only opens
+   *  Add Expense. `applePay.platformNote` must not name another mobile platform
+   *  (Apple Guideline 2.3.10: the iOS shell opens this page). `linePay` is zh-TW only:
+   *  the other locales keep the same keys with empty values (the key-parity test needs
+   *  them) and the page omits the section when `heading` is empty. */
+  featureShortcuts: {
+    heroKicker: string
+    heroTitle: string
+    heroSubtitle: string
+    breadcrumbLabel: string
+    /** HowToStep name template, contains `{n}`. */
+    howToStepName: string
+    answerQuestion: string
+    answer: string
+    /** Names of the Shortcuts variables as the guide calls them; they go into the example URL. */
+    vars: { amount: string; merchant: string }
+    applePay: {
+      heading: string
+      intro: string
+      steps: readonly { title: string; body: string }[]
+      urlLabel: string
+      platformNote: string
+      foreignNote: string
+    }
+    linePay: {
+      heading: string
+      intro: string
+      /** Variable name of the optional description step. */
+      noteVar: string
+      steps: readonly { title: string; body: string }[]
+    }
+    web: { heading: string; body: string; urlLabel: string }
+    params: {
+      heading: string
+      intro: string
+      cols: { param: string; rule: string; fallback: string }
+      rows: readonly { param: string; rule: string; fallback: string }[]
+      categoriesHeading: string
+      catCols: { id: string; name: string }
+      fixedNote: string
+    }
+    whenNot: { heading: string; intro: string; items: readonly string[] }
+    trouble: {
+      heading: string
+      cols: { symptom: string; cause: string }
+      rows: readonly { symptom: string; cause: string }[]
+    }
   }
 
   /** #1156 — localized server-action errors, resolved by `describeError`.
@@ -4372,6 +4430,7 @@ export const zhTW: Translations = {
     recurringSettings: '定期支出/收入設定',
     sectionData: '資料',
     trust: '資料安全',
+    shortcutsGuide: '用捷徑記帳',
     exportData: '匯出資料（CSV）',
     pastTimes: '過去的時光',
     trips: '旅行',
@@ -6736,6 +6795,11 @@ export const zhTW: Translations = {
       description: '跟朋友出遊，誰付了什麼、誰該轉給誰，記在同一個地方。開一個出遊、把連結丟到群組，朋友點開選自己的名字就能記，不用下載、不用註冊，最多 20 人。',
       ogDescription: '開一個出遊、把連結丟到群組，朋友點開選自己的名字就能一起記帳，不用下載、不用註冊。',
     },
+    featureShortcuts: {
+      title: 'iPhone 捷徑記帳：Apple Pay、LINE Pay 付款後打開「記一筆」 | Futari',
+      description: '用 iPhone 的捷徑，在 Apple Pay 或 LINE Pay 付款後打開 Futari 的「記一筆」，金額先填好，由你確認後儲存。Futari 不連結付款帳戶，也不讀付款資料。',
+      ogDescription: '付款後，iPhone 捷徑打開 Futari 的「記一筆」，金額、分類和描述先填好，儲存由你按。',
+    },
   },
   useCase: {
     backToHome: '← 回 Futari 首頁',
@@ -7226,6 +7290,139 @@ export const zhTW: Translations = {
     entries: {
       shareLink: '第一次用 Futari？看看出遊怎麼運作',
       emptyLink: '看看出遊怎麼用',
+    },
+  },
+
+  featureShortcuts: {
+    heroKicker: '捷徑記帳',
+    heroTitle: '付完款，讓 iPhone 把「記一筆」打開',
+    heroSubtitle: '用 iPhone 的「捷徑」，在付款後打開 Futari 的「記一筆」。金額、分類和描述先填好，你看過、需要就改，再按儲存。',
+    breadcrumbLabel: '捷徑記帳',
+    howToStepName: '步驟 {n}',
+    answerQuestion: 'Apple Pay 或 LINE Pay 付款後，怎麼快速記到 Futari？',
+    answer: 'Futari 不連結任何付款帳戶，也不讀你的付款資料。做事的是 iPhone 的「捷徑」：付款後它打開 Futari 的「記一筆」，把金額、分類和描述先填好，你確認後自己按儲存，紀錄才會寫進帳本。這個做法只適用於 iPhone 的「捷徑」App。',
+    vars: {
+      amount: '金額',
+      merchant: '商家',
+    },
+    applePay: {
+      heading: 'Apple Pay：刷完卡就跳出「記一筆」',
+      intro: '前提：iPhone 已安裝 Futari 並登入。下面用「錢包」的交易自動化，每次用 Apple Pay 付款，就打開一次填好的「記一筆」。',
+      steps: [
+        {
+          title: '新增交易自動化',
+          body: '打開「捷徑」App，到「自動化」，新增一個「交易」自動化（來自「錢包」）。選擇要記的卡片，執行方式選「立即執行」，這樣不必每次先點通知。',
+        },
+        {
+          title: '把金額四捨五入成整數',
+          body: '加一個「四捨五入數字」動作，輸入選交易的「金額」，四捨五入到個位數。這一步不能省：Futari 只收整數，「120.00」「NT$120.00」「120元」都會讓金額欄空白；「120」「1,280」「１２０」可以。',
+        },
+        {
+          title: '把商家名稱做 URL 編碼',
+          body: '加一個「URL 編碼」動作，輸入選交易的「商家」。中文和空白不先編碼，網址會斷在中間，描述會空白或只剩一半。描述可有可無，不想帶就跳過這步，並把網址裡的 &note=… 整段拿掉。',
+        },
+        {
+          title: '用「文字」組出網址',
+          body: '加一個「文字」動作，貼上下面的網址，把 [金額] 換成第 2 步的結果、[商家] 換成第 3 步的結果。想換分類，就改 category= 後面的 id（見下方分類表）。',
+        },
+        {
+          title: '打開 URL',
+          body: '加一個「打開 URL」動作，輸入選上一步的文字。之後每次用 Apple Pay 付款，Futari 會打開並跳出「記一筆」，確認後按儲存。',
+        },
+      ],
+      urlLabel: '網址（App）',
+      platformNote: '這個流程只適用於 iPhone 的「捷徑」App。',
+      foreignNote: '外幣提醒：用 Apple Pay 付外幣時，捷徑給的是外幣金額，Futari 會把它當成帳本主幣別的金額帶入。請在「記一筆」裡改成實際的金額。',
+    },
+    linePay: {
+      heading: 'LINE Pay：用「付款完成」的通知觸發',
+      intro: 'LINE Pay 沒有交易自動化，但付款完成時 LINE 會送出通知，捷徑可以拿它當觸發條件。',
+      noteVar: '描述',
+      steps: [
+        {
+          title: '新增通知自動化',
+          body: '「捷徑」→「自動化」→ 新增「通知」。App 選 LINE，名稱包含「LINE錢包」，訊息包含「付款完成」，執行方式選「立即執行」。',
+        },
+        {
+          title: '只取出數字金額',
+          body: '用裝置端模型從通知內文取出付款金額，並要求只輸出數字（例如 120，不要帶「元」或「NT$」），把結果命名為「金額」。',
+        },
+        {
+          title: '準備描述（可選）',
+          body: '加一個「文字」動作，內容例如 LINE Pay，再接一個「URL 編碼」動作，把結果命名為「描述」。不想帶描述就跳過，並把網址裡的 &note=… 整段拿掉。',
+        },
+        {
+          title: '組出網址並打開',
+          body: '加一個「文字」動作，貼上下面的網址，把 [金額]、[描述] 換成上面的結果，再加一個「打開 URL」動作，輸入選這段文字。',
+        },
+      ],
+    },
+    web: {
+      heading: '沒有裝 App：用網頁網址',
+      body: '沒有裝 App、用瀏覽器或「加到主畫面」的人，把網址換成下面這條，「打開 URL」會在 Safari 打開。要先在 Safari 登入過 Futari。# 後面的內容只留在你的瀏覽器，不會送到伺服器。',
+      urlLabel: '網址（網頁）',
+    },
+    params: {
+      heading: '網址可以帶哪些值',
+      intro: '三個參數都可以省略；某個值不合格時，只有那一格不帶入，其他照樣帶入。',
+      cols: {
+        param: '參數',
+        rule: '規則',
+        fallback: '不合格時',
+      },
+      rows: [
+        {
+          param: 'amount',
+          rule: '正整數，1 到 9,999,999。可以有千分位逗號（1,200），全形數字也可以。小數、負數、1e5 這類寫法都不收。',
+          fallback: '金額空白，自己輸入',
+        },
+        {
+          param: 'category',
+          rule: '下表其中一個 id，要全小寫、完全一樣。',
+          fallback: '用預設的「飲食」',
+        },
+        {
+          param: 'note',
+          rule: '會變成「描述」，最多 100 個字。',
+          fallback: '描述空白，儲存前要自己填',
+        },
+      ],
+      categoriesHeading: '分類 id',
+      catCols: {
+        id: 'id',
+        name: '顯示',
+      },
+      fixedNote: '網址只能帶這三個值。日期（今天）、誰付的（你）、分攤方式與幣別，都照「記一筆」平常的預設，寫在網址裡也不會採用；也不會自動歸到進行中的旅行，要歸到旅行請在畫面上自己選。',
+    },
+    whenNot: {
+      heading: '什麼時候不會跳出來',
+      intro: '捷徑只負責打開。下面三種情況 Futari 會安靜地略過，不動你的畫面：',
+      items: [
+        '另一個視窗正開著（例如正在改某一筆）：捷徑會被忽略，改到一半的內容不會被動到。關掉視窗後再跑一次。',
+        '正在看過去的章節：過去章節是唯讀的，先切回目前的章節。',
+        '還沒登入：登入後，在 App 裡通常會接著跳出填好的「記一筆」；在網頁上會停在首頁，要再觸發一次。',
+      ],
+    },
+    trouble: {
+      heading: '常見狀況',
+      cols: {
+        symptom: '狀況',
+        cause: '原因',
+      },
+      rows: [
+        {
+          symptom: '跳出來了，但金額是空的',
+          cause: '金額不是整數。通常是少了「四捨五入數字」那一步，或帶了「元」「NT$」。',
+        },
+        {
+          symptom: '描述空白或只有一半',
+          cause: '商家名稱沒有先經過「URL 編碼」。',
+        },
+        {
+          symptom: '分類變成「飲食」，不是我寫的',
+          cause: 'category 的 id 拼錯，或用了大寫。',
+        },
+      ],
     },
   },
 

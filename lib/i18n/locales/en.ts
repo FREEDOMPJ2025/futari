@@ -963,6 +963,7 @@ export const en: Translations = {
     recurringSettings: 'Recurring Rules',
     sectionData: 'Data',
     trust: 'Your data',
+    shortcutsGuide: 'Log with Shortcuts',
     exportData: 'Export data (CSV)',
     pastTimes: 'Past chapters',
     trips: 'Trips',
@@ -3394,6 +3395,11 @@ I will upload the screenshots once you confirm.`,
       description: 'See who paid and who owes whom on a group trip. Start an outing, share the link, and friends join by name. No download, no sign-up, up to 20 people.',
       ogDescription: 'Start an outing, share the link, and friends pick their name to log expenses with you. No download, no sign-up.',
     },
+    featureShortcuts: {
+      title: 'Log spending with iPhone Shortcuts: open Add Expense after Apple Pay | Futari',
+      description: 'After an Apple Pay payment, an iPhone Shortcut opens Futari\'s Add Expense with the amount filled in. You tap save. No payment account is connected.',
+      ogDescription: 'After you pay, an iPhone Shortcut opens Futari\'s Add Expense with the amount, category and note filled in. You tap save.',
+    },
   },
   useCase: {
     backToHome: '← Back to Futari',
@@ -3884,6 +3890,122 @@ I will upload the screenshots once you confirm.`,
     entries: {
       shareLink: 'New to Futari? See how outings work',
       emptyLink: 'See how outings work',
+    },
+  },
+
+  featureShortcuts: {
+    heroKicker: 'Shortcuts',
+    heroTitle: 'After you pay, let your iPhone open Add Expense',
+    heroSubtitle: 'An iPhone Shortcut opens Futari\'s Add Expense once you have paid, with the amount, category and note already filled in. Look it over, change what you need, then tap save.',
+    breadcrumbLabel: 'Log with Shortcuts',
+    howToStepName: 'Step {n}',
+    answerQuestion: 'How do I quickly log an Apple Pay payment in Futari?',
+    answer: 'Futari does not connect to any payment account and does not read your payment data. The work is done by an iPhone Shortcut: after you pay, it opens Futari\'s Add Expense with the amount, category and note filled in. You check it and tap save yourself, and only then is anything written to your ledger. This works only with the Shortcuts app on iPhone.',
+    vars: {
+      amount: 'Amount',
+      merchant: 'Merchant',
+    },
+    applePay: {
+      heading: 'Apple Pay: open Add Expense after you tap to pay',
+      intro: 'Before you start: Futari is installed on your iPhone and you are signed in. This uses the Wallet transaction automation, so each Apple Pay payment opens a filled-in Add Expense.',
+      steps: [
+        {
+          title: 'Create a transaction automation',
+          body: 'Open the Shortcuts app, go to Automation, and create a Transaction automation (it comes from Wallet). Choose the cards you want to log and set it to Run Immediately, so you do not have to tap a notification first.',
+        },
+        {
+          title: 'Round the amount to a whole number',
+          body: 'Add a Round Number action and give it the transaction\'s Amount, rounded to the ones place. Do not skip this step. Futari accepts whole numbers only, so "120.00", "NT$120.00" and "120 dollars" leave the amount blank, while "120", "1,280" and full-width digits work.',
+        },
+        {
+          title: 'URL-encode the merchant name',
+          body: 'Add a URL Encode action and give it the transaction\'s Merchant. Without encoding, spaces and non-Latin characters break the link in the middle and the note comes out blank or cut short. A note is optional: to leave it out, skip this step and remove the whole &note=… part of the link.',
+        },
+        {
+          title: 'Build the link with a Text action',
+          body: 'Add a Text action and paste the link below, replacing [Amount] with the result of step 2 and [Merchant] with the result of step 3. To use another category, change the id after category= (see the category table below).',
+        },
+        {
+          title: 'Open the URL',
+          body: 'Add an Open URLs action and give it the text from the previous step. From then on, each Apple Pay payment opens Futari\'s Add Expense. Check it and tap save.',
+        },
+      ],
+      urlLabel: 'Link (app)',
+      platformNote: 'This works only with the Shortcuts app on iPhone.',
+      foreignNote: 'Foreign currency: when you pay in another currency, the Shortcut passes the foreign amount, and Futari fills it in as an amount in your ledger\'s main currency. Change it in Add Expense to the amount you were actually charged.',
+    },
+    linePay: {
+      heading: '',
+      intro: '',
+      noteVar: '',
+      steps: [],
+    },
+    web: {
+      heading: 'No app installed: use the web link',
+      body: 'If you use Futari in a browser or from your Home Screen instead of the app, swap the link for the one below. Open URLs then opens it in Safari. You need to have signed in to Futari in Safari first. Whatever follows the # stays in your browser and is not sent to the server.',
+      urlLabel: 'Link (web)',
+    },
+    params: {
+      heading: 'What the link can carry',
+      intro: 'All three parameters are optional. If one value is not valid, only that field is left empty and the others are still filled in.',
+      cols: {
+        param: 'Parameter',
+        rule: 'Rule',
+        fallback: 'If not valid',
+      },
+      rows: [
+        {
+          param: 'amount',
+          rule: 'A whole number from 1 to 9,999,999. Thousands commas (1,200) and full-width digits are fine. Decimals, negative numbers and forms like 1e5 are rejected.',
+          fallback: 'Amount stays empty; type it in',
+        },
+        {
+          param: 'category',
+          rule: 'One of the ids in the table below, all lowercase and spelled exactly.',
+          fallback: 'Falls back to Dining',
+        },
+        {
+          param: 'note',
+          rule: 'Becomes the description, up to 100 characters.',
+          fallback: 'Description stays empty; fill it in before saving',
+        },
+      ],
+      categoriesHeading: 'Category ids',
+      catCols: {
+        id: 'id',
+        name: 'Shown as',
+      },
+      fixedNote: 'The link carries only these three values. The date (today), who paid (you), the split and the currency follow the usual Add Expense defaults, and putting them in the link changes nothing. It also does not file the expense under a trip in progress; pick the trip on screen if you want that.',
+    },
+    whenNot: {
+      heading: 'When Add Expense does not appear',
+      intro: 'The Shortcut only opens Futari. In these three cases Futari quietly ignores it and leaves your screen alone:',
+      items: [
+        'Another window is open (for example, you are editing an entry): the Shortcut is ignored and your half-finished edit is untouched. Close the window and run the Shortcut again.',
+        'You are viewing a past chapter: past chapters are read-only, so switch back to the current chapter first.',
+        'You are not signed in: after you sign in, the app usually goes on to show the filled-in Add Expense. On the web you land on the home page and need to trigger it again.',
+      ],
+    },
+    trouble: {
+      heading: 'Common problems',
+      cols: {
+        symptom: 'What you see',
+        cause: 'Why',
+      },
+      rows: [
+        {
+          symptom: 'Add Expense opens but the amount is blank',
+          cause: 'The amount is not a whole number. Usually the Round Number step is missing, or the amount carries a currency symbol or unit.',
+        },
+        {
+          symptom: 'The description is blank or cut short',
+          cause: 'The merchant name was not passed through URL Encode.',
+        },
+        {
+          symptom: 'The category is Dining, not the one I wrote',
+          cause: 'The category id is misspelled or uses capital letters.',
+        },
+      ],
     },
   },
 
