@@ -41,7 +41,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
-_Nothing unreleased yet._
+### 使用者可見變化
+
+- **新增公開的「捷徑記帳」教學頁，設定頁有連結（#1750）**
+  使用者：`/features/shortcuts` 四語說明如何用 iPhone 的「捷徑」在 Apple Pay 付款後打開填好的「記一筆」（zh-TW 另有 LINE Pay 通知）；Futari 仍不連結付款帳戶，儲存由你按。
+  技術：新增頁面＋HowTo／Breadcrumb JSON-LD、sitemap 與 llms 條目、設定頁 `ShortcutsGuideRow`（Android 殼隱藏）；測試用 `lib/quickAdd.ts` 解析頁上範例網址。
 
 ## [1.7.4] - 2026-10-16
 

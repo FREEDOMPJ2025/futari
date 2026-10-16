@@ -43,6 +43,8 @@ const PATHS = [
   // Public outing feature page (#1633). Manual date: bump it when the page copy changes.
   // 2026-10-15 (#1724): new inbound links from /, /use-case and /migrate/splitwise.
   { path: '/features/outing', changeFrequency: 'monthly' as const, priority: 0.7, lastModified: '2026-10-15' },
+  // Public iPhone Shortcuts guide (#1750). Manual date: bump it when the page copy changes.
+  { path: '/features/shortcuts', changeFrequency: 'monthly' as const, priority: 0.6, lastModified: '2026-10-16' },
   // Legal pages
   { path: '/terms', changeFrequency: 'yearly' as const, priority: 0.3, lastModified: '2026-05-03' },
   { path: '/privacy', changeFrequency: 'yearly' as const, priority: 0.3, lastModified: '2026-05-03' },
