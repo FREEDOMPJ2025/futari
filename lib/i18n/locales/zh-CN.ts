@@ -3322,9 +3322,9 @@ export const zhCN: Translations = {
       ogDescription: '开一个出游、把链接发到群里，朋友点开选自己的名字就能一起记账，不用下载、不用注册。',
     },
     featureShortcuts: {
-      title: 'iPhone 快捷指令记账：Apple Pay 付款后打开“记一笔” | Futari',
-      description: '用 iPhone 的快捷指令，在 Apple Pay 付款后打开 Futari 的“记一笔”，金额先填好，由你确认后保存。Futari 不连接付款账户，也不读取付款数据。',
-      ogDescription: '付款后，iPhone 快捷指令打开 Futari 的“记一笔”，金额、分类和备注先填好，保存由你来按。',
+      title: 'iPhone 快捷指令记账：Apple Pay 付款后打开「新增记录」 | Futari',
+      description: '用 iPhone 的快捷指令，在 Apple Pay 付款后打开 Futari 的「新增记录」，金额先填好，由你确认后保存。Futari 不连接付款账户，也不读取付款数据。',
+      ogDescription: '付款后，iPhone 快捷指令打开 Futari 的「新增记录」，金额、分类和描述先填好，保存由你来按。',
     },
   },
   useCase: {
@@ -3821,44 +3821,44 @@ export const zhCN: Translations = {
 
   featureShortcuts: {
     heroKicker: '快捷指令记账',
-    heroTitle: '付完款，让 iPhone 把“记一笔”打开',
-    heroSubtitle: '用 iPhone 的“快捷指令”，在付款后打开 Futari 的“记一笔”。金额、分类和备注先填好，你看过、需要就改，再按保存。',
+    heroTitle: '付完款，让 iPhone 把「新增记录」打开',
+    heroSubtitle: '用 iPhone 的「快捷指令」，在付款后打开 Futari 的「新增记录」。金额、分类和描述先填好，你看过、需要就改，再按保存。',
     breadcrumbLabel: '快捷指令记账',
     howToStepName: '步骤 {n}',
     answerQuestion: 'Apple Pay 付款后，怎么快速记到 Futari？',
-    answer: 'Futari 不连接任何付款账户，也不读取你的付款数据。做事的是 iPhone 的“快捷指令”：付款后它打开 Futari 的“记一笔”，把金额、分类和备注先填好，你确认后自己按保存，记录才会写进账本。这个做法只适用于 iPhone 的“快捷指令”App。',
+    answer: 'Futari 不连接任何付款账户，也不读取你的付款数据。做事的是 iPhone 的「快捷指令」：付款后它打开 Futari 的「新增记录」，把金额、分类和描述先填好，你确认后自己按保存，记录才会写进账本。这个做法只适用于 iPhone 的「快捷指令」App。',
     vars: {
       amount: '金额',
       merchant: '商家',
     },
     applePay: {
-      heading: 'Apple Pay：刷完卡就跳出“记一笔”',
-      intro: '前提：iPhone 已安装 Futari 并登录。下面用“钱包”的交易自动化，每次用 Apple Pay 付款，就打开一次填好的“记一笔”。',
+      heading: 'Apple Pay：刷完卡就跳出「新增记录」',
+      intro: '前提：iPhone 已安装 Futari 并登录。下面用「钱包」的自动化，每次用 Apple Pay 付款，就打开一次填好的「新增记录」。',
       steps: [
         {
-          title: '新建交易自动化',
-          body: '打开“快捷指令”App，进入“自动化”，新建一个“交易”自动化（来自“钱包”）。选择要记的卡片，运行方式选“立即运行”，这样不必每次先点通知。',
+          title: '新建「钱包」自动化',
+          body: '打开「快捷指令」App，进入「自动化」，点 ＋ 选「钱包」。在「轻点时」画面勾选要记的卡片；类别可以保持全部勾选。点「下一步」→「新建快捷指令」。最后在这个自动化的设置行，运行方式选「立即运行」，这样不必每次先点通知。',
         },
         {
-          title: '把金额四舍五入成整数',
-          body: '加一个“舍入数字”动作，输入选交易的“金额”，舍入到个位数。这一步不能省：Futari 只收整数，“120.00”“NT$120.00”“120元”都会让金额栏留空；“120”“1,280”“１２０”可以。',
+          title: '把金额取整数（建议）',
+          body: '建议加上：加一个「取整数」动作，点「快捷指令输入」选「数量」。如果金额带小数（例如 120.00），Futari 会让金额栏留空；先取整数比较保险。「120」「1,280」「１２０」可以，「120.00」「NT$120.00」「120元」会让金额栏留空。',
         },
         {
           title: '把商家名称做 URL 编码',
-          body: '加一个“URL 编码”动作，输入选交易的“商家”。中文和空格不先编码，网址会在中间断开，备注会留空或只剩一半。备注可有可无，不想带就跳过这步，并把网址里的 &note=… 整段去掉。',
+          body: '加一个「URL 编码」动作，输入选「快捷指令输入」→「商家」。中文和空格不先编码，网址会在中间断开，描述会留空或只剩一半。描述可有可无，不想带就跳过这步，并把网址里的 &note=… 整段去掉。',
         },
         {
-          title: '用“文本”拼出网址',
-          body: '加一个“文本”动作，粘贴下面的网址，把 [金额] 换成第 2 步的结果、[商家] 换成第 3 步的结果。想换分类，就改 category= 后面的 id（见下方分类表）。',
+          title: '用「文本」拼出网址',
+          body: '加一个「文本」动作，粘贴下面的网址，把 [金额] 换成第 2 步的结果、[商家] 换成第 3 步的结果（没加第 2 步，就换成「快捷指令输入」→「数量」）。想换分类，就改 category= 后面的 id（见下方分类表）。',
         },
         {
           title: '打开 URL',
-          body: '加一个“打开 URL”动作，输入选上一步的文本。之后每次用 Apple Pay 付款，Futari 会打开并跳出“记一笔”，确认后按保存。',
+          body: '加一个「打开 URL」动作，输入选上一步的文本。之后每次用 Apple Pay 付款，Futari 会打开并跳出「新增记录」，确认后按保存。',
         },
       ],
       urlLabel: '网址（App）',
-      platformNote: '这个流程只适用于 iPhone 的“快捷指令”App。',
-      foreignNote: '外币提醒：用 Apple Pay 付外币时，快捷指令给的是外币金额，Futari 会把它当成账本主币种的金额带入。请在“记一笔”里改成实际的金额。',
+      platformNote: '这个流程只适用于 iPhone 的「快捷指令」App。',
+      foreignNote: '外币提醒：用 Apple Pay 付外币时，快捷指令给的是外币金额，Futari 会把它当成账本主币种的金额带入。请在「新增记录」里改成实际的金额。',
     },
     linePay: {
       heading: '',
@@ -3868,7 +3868,7 @@ export const zhCN: Translations = {
     },
     web: {
       heading: '没有装 App：用网页网址',
-      body: '没有装 App、用浏览器或“添加到主屏幕”的人，把网址换成下面这条，“打开 URL”会在 Safari 打开。要先在 Safari 登录过 Futari。# 后面的内容只留在你的浏览器，不会发送到服务器。',
+      body: '没有装 App、用浏览器或「添加到主屏幕」的人，把网址换成下面这条，「打开 URL」会在 Safari 打开。要先在 Safari 登录过 Futari。# 后面的内容只留在你的浏览器，不会发送到服务器。',
       urlLabel: '网址（网页）',
     },
     params: {
@@ -3888,12 +3888,12 @@ export const zhCN: Translations = {
         {
           param: 'category',
           rule: '下表其中一个 id，要全小写、完全一样。',
-          fallback: '用默认的“饮食”',
+          fallback: '用默认的「饮食」',
         },
         {
           param: 'note',
-          rule: '会变成“备注”，最多 100 个字。',
-          fallback: '备注留空，保存前要自己填',
+          rule: '会变成「描述」，最多 100 个字。',
+          fallback: '描述留空，保存前要自己填',
         },
       ],
       categoriesHeading: '分类 id',
@@ -3901,7 +3901,7 @@ export const zhCN: Translations = {
         id: 'id',
         name: '显示',
       },
-      fixedNote: '网址只能带这三个值。日期（今天）、谁付的（你）、分摊方式与币种，都照“记一笔”平常的默认，写在网址里也不会采用；也不会自动归到进行中的旅行，要归到旅行请在界面上自己选。',
+      fixedNote: '网址只能带这三个值。日期（今天）、谁付的（你）、分摊方式与币种，都照「新增记录」平常的默认，写在网址里也不会采用；也不会自动归到进行中的旅行，要归到旅行请在界面上自己选。',
     },
     whenNot: {
       heading: '什么时候不会跳出来',
@@ -3909,7 +3909,7 @@ export const zhCN: Translations = {
       items: [
         '另一个窗口正开着（例如正在改某一笔）：快捷指令会被忽略，改到一半的内容不会被动到。关掉窗口后再运行一次。',
         '正在看过去的章节：过去章节是只读的，先切回当前的章节。',
-        '还没登录：登录后，在 App 里通常会接着跳出填好的“记一笔”；在网页上会停在首页，要再触发一次。',
+        '还没登录：登录后会停在首页，填好的内容不会保留，再运行一次快捷指令就好。',
       ],
     },
     trouble: {
@@ -3921,14 +3921,14 @@ export const zhCN: Translations = {
       rows: [
         {
           symptom: '跳出来了，但金额是空的',
-          cause: '金额不是整数。通常是少了“舍入数字”那一步，或带了“元”“NT$”。',
+          cause: '金额不是整数。通常是少了「取整数」那一步，或带了「元」「NT$」。',
         },
         {
-          symptom: '备注留空或只有一半',
-          cause: '商家名称没有先经过“URL 编码”。',
+          symptom: '描述留空或只有一半',
+          cause: '商家名称没有先经过「URL 编码」。',
         },
         {
-          symptom: '分类变成“饮食”，不是我写的',
+          symptom: '分类变成「饮食」，不是我写的',
           cause: 'category 的 id 拼错，或用了大写。',
         },
       ],
