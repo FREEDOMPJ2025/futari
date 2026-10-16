@@ -2,7 +2,8 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { formatAmount } from '@/lib/currency'
 import { unwrapAction } from '@/lib/action-errors'
 import { describeError } from '@/lib/errors'
@@ -38,6 +39,7 @@ interface Props {
  */
 export function OutingParticipantView({ view, needsBind, signedIn, signInHref, ledgerInviteHref = null }: Props) {
   const t = useTranslations()
+  const locale = useLocale()
   const c = t.outingPublic
   const to = t.outing
   const router = useRouter()
@@ -151,7 +153,7 @@ export function OutingParticipantView({ view, needsBind, signedIn, signInHref, l
                     <span className="block text-xs mt-0.5 text-ink-3">
                       {to.paidByTag.replace('{name}', nameOf(e.paidByParticipantId))}
                       {' · '}
-                      {to.splitCountTag.replace('{count}', String(e.shares.length))}
+                      {pickPlural(locale, e.shares.length, to.splitCountTag).replace('{count}', String(e.shares.length))}
                     </span>
                   </span>
                   <span className="text-sm tabular-nums shrink-0 text-ink">{formatAmount(e.amount, outing.currency)}</span>

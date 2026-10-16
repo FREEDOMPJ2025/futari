@@ -197,7 +197,7 @@ const people = [
   P({ id: 'H', displayName: '阿明', claim: 'claimed', releasable: true }),
   P({ id: 'X', displayName: '老王', active: false }),
 ]
-const unpickedText = (n: number) => zhTW.outing.share.unpicked.replace('{n}', String(n))
+const unpickedText = (n: number) => zhTW.outing.share.unpicked.other.replace('{n}', String(n))
 
 describe('names nobody has picked yet', () => {
   it('counts active friends still unclaimed (not members, not removed) and offers a re-share', async () => {
@@ -230,8 +230,8 @@ describe('copy', () => {
   it.each([['zh-TW', zhTW], ['zh-CN', zhCN], ['en', en], ['ja', ja]] as const)('%s: message names the outing; no exclamation or banned words', (_l, d) => {
     const s = d.outing.share
     expect(s.message).toContain('{name}')
-    expect(s.unpicked).toContain('{n}')
-    for (const v of [s.shareCta, s.message, s.messageCopied, s.qrShow, s.qrHide, s.qrHint, s.qrAlt, s.unpicked, s.reshare]) {
+    expect(s.unpicked.other).toContain('{n}')
+    for (const v of [s.shareCta, s.message, s.messageCopied, s.qrShow, s.qrHide, s.qrHint, s.qrAlt, s.unpicked.one, s.unpicked.other, s.reshare]) {
       expect(v).not.toMatch(/[!！]|管理|追蹤|追踪|監控|监控/)
     }
   })

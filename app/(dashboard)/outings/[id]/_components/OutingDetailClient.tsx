@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { SubpageHeader } from '@/app/(dashboard)/_components/SubpageHeader'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { useRouter } from 'next/navigation'
 import { formatAmount } from '@/lib/currency'
 import type { OutingView } from '@/lib/outing/view'
@@ -69,6 +70,7 @@ const DOT_HUES = [
 
 export function OutingDetailClient({ outing, view, foldPreview, canManage, canEnd, expenses, participants, settlements = [] }: Props) {
   const t = useTranslations()
+  const locale = useLocale()
   const to = t.outing
   const router = useRouter()
   const [sheet, setSheet] = useState<SheetKey>(null)
@@ -138,7 +140,7 @@ export function OutingDetailClient({ outing, view, foldPreview, canManage, canEn
           </div>
           {editable && unpicked > 0 && (
             <div className="mt-2 pt-2.5 border-t border-hairline flex items-center justify-between gap-3">
-              <p className="m-0 text-xs text-ink-3">{to.share.unpicked.replace('{n}', String(unpicked))}</p>
+              <p className="m-0 text-xs text-ink-3">{pickPlural(locale, unpicked, to.share.unpicked).replace('{n}', String(unpicked))}</p>
               <button
                 type="button"
                 onClick={share.share}
@@ -197,7 +199,7 @@ export function OutingDetailClient({ outing, view, foldPreview, canManage, canEn
                     <span className="block text-xs mt-0.5 text-ink-3">
                       {to.paidByTag.replace('{name}', nameOf(e.paidByParticipantId))}
                       {' · '}
-                      {to.splitCountTag.replace('{count}', String(e.shares.length))}
+                      {pickPlural(locale, e.shares.length, to.splitCountTag).replace('{count}', String(e.shares.length))}
                     </span>
                   </span>
                   <span className="text-sm tabular-nums shrink-0 text-ink">

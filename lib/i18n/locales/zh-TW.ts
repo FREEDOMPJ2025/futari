@@ -823,7 +823,7 @@ export type Translations = {
     sectionPast: string
     endedTag: string
     /** Participant count tag on a list row. `{count}` = number of participants. */
-    countTag: string
+    countTag: { one: string; other: string }
     addCta: string
     /** 我參與的出遊 (#1558): other ledgers' outings the user joined. */
     participating: { title: string; hint: string }
@@ -841,7 +841,7 @@ export type Translations = {
     /** "{name} 付" payer tag. */
     paidByTag: string
     /** "{count} 人" split-count tag. */
-    splitCountTag: string
+    splitCountTag: { one: string; other: string }
     untitledExpense: string
     emptyExpenses: string
     addExpense: string
@@ -893,7 +893,7 @@ export type Translations = {
       qrHint: string
       qrAlt: string
       /** Under the participant list; `{n}` = friends' names nobody has picked. */
-      unpicked: string
+      unpicked: { one: string; other: string }
       reshare: string
     }
     participant: {
@@ -3985,7 +3985,7 @@ export const zhTW: Translations = {
     sectionActive: '進行中',
     sectionPast: '過去的出遊',
     endedTag: '已結束',
-    countTag: '{count} 人',
+    countTag: { one: '{count} 人', other: '{count} 人' },
     addCta: '開一個出遊',
     participating: {
       title: '我參與的出遊',
@@ -4004,7 +4004,7 @@ export const zhTW: Translations = {
     allSettled: '都結清了。',
     expensesLabel: '支出',
     paidByTag: '{name} 付',
-    splitCountTag: '{count} 人',
+    splitCountTag: { one: '{count} 人', other: '{count} 人' },
     untitledExpense: '一筆支出',
     emptyExpenses: '還沒有支出。',
     addExpense: '記一筆',
@@ -4038,13 +4038,13 @@ export const zhTW: Translations = {
       resetConfirm: '重設',
       resetDone: '已換成新連結，舊連結不能再用了。',
       shareCta: '分享給朋友',
-      message: '「{name}」的帳記這裡，點開選你的名字就能一起記。',
+      message: '「{name}」的帳在這裡記，點開選你的名字，就能一起記。',
       messageCopied: '已複製訊息和連結，貼到群組就好。',
       qrShow: '顯示 QR code',
       qrHide: '收起 QR code',
       qrHint: '讓旁邊的朋友用手機相機掃，就能打開這次出遊。',
       qrAlt: '這次出遊的 QR code',
-      unpicked: '還有 {n} 個名字沒人選',
+      unpicked: { one: '還有 {n} 個名字沒人選', other: '還有 {n} 個名字沒人選' },
       reshare: '再分享一次',
     },
     participant: {
@@ -4152,7 +4152,7 @@ export const zhTW: Translations = {
     signUpBody: '登入後，「{name}」會連到你的帳號。不登入也能繼續記。',
     signUpCta: '登入',
     ledgerInviteTitle: '這次的帳都在這裡了',
-    ledgerInviteBody: 'Futari 平常是兩個人一起記帳用的。如果你也有想一起記的人，可以開一本你們自己的帳本。',
+    ledgerInviteBody: 'Futari 平常是兩個人一起記帳用的。如果你也有想一起記的人，可以開一本兩個人的帳本。',
     ledgerInviteCta: '建立兩人帳本',
     ledgerInviteDismiss: '不用了',
   },
@@ -4899,7 +4899,7 @@ export const zhTW: Translations = {
       share: '分享連結',
       skip: '稍後再邀請 →',
       skipToOuting: '先去開出遊 →',
-      outingHint: '對方之後隨時可以加入，出遊現在就能開。',
+      outingHint: '對方之後隨時可以加入，出遊可以先開。',
       copied: '已複製連結',
       shareFailed: '分享失敗',
       creating: '建立中…',
@@ -7170,9 +7170,9 @@ export const zhTW: Translations = {
       heading: '一次出遊分帳的例子',
       intro: '{outing}：{count} 個人、{expenses} 筆支出，每筆都由全部的人平分。',
       cols: { item: '支出', paidBy: '誰付', amount: '金額' },
-      total: '合計 {total}，每人分攤 {share}。',
+      total: '合計 {total}，每人約分攤 {share}。',
       settleLead: '結清時，Futari 列出這 {n} 筆轉帳：',
-      outcome: '轉完之後，每個人實際花的都剛好是 {share}。',
+      outcome: '轉完之後，每個人實際花的都差不多是 {share}。',
     },
     steps: [
       { title: '開一個出遊', body: '在 Futari 的「旅行」頁點「出遊」那一列，開一個出遊，取個名字就好。你和伴侶會自動在裡面。' },

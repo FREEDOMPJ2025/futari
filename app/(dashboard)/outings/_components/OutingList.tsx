@@ -7,6 +7,7 @@ import { BottomNav } from '@/app/(dashboard)/_components/BottomNav'
 import { SubpageHeader } from '@/app/(dashboard)/_components/SubpageHeader'
 import { useMember } from '@/app/(dashboard)/_components/MemberContext'
 import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { track } from '@/lib/analytics/track'
 import { isLocale } from '@/lib/i18n/locales-meta'
 import { localizedHref } from '@/lib/i18n/path'
@@ -131,9 +132,10 @@ function OutingGroup({ outings, variant }: { outings: OutingListRow[]; variant: 
 
 function OutingRow({ outing, variant, isLast }: { outing: OutingListRow; variant: 'active' | 'past'; isLast: boolean }) {
   const t = useTranslations()
+  const locale = useLocale()
   const tl = t.outingList
   const isPast = variant === 'past'
-  const countLabel = tl.countTag.replace('{count}', String(outing.participantCount))
+  const countLabel = pickPlural(locale, outing.participantCount, tl.countTag).replace('{count}', String(outing.participantCount))
 
   return (
     <Link
