@@ -45,7 +45,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 - **en 的筆數與天數會依單複數顯示（#1745）**
   使用者：匯入（含確認頁摘要）、時間軸、保單數、旅行、澆水與定期間隔等英文不再出現「1 rows」「Every 1 days」；中文與日文不變。
-  技術：這些 key 改成 `{ one, other }`，呼叫端走 `pickPlural`（沿用 #1738）；`usedCountNote` 的 `record(s)` 一併拆開；匯入確認頁有兩個數字，拆成 `summary`＋`summaryInvalid`。
+  技術：這些 key 改成 `{ one, other }`，呼叫端走 `pickPlural`（沿用 #1738）；`usedCountNote` 的 `record(s)` 一併拆開；匯入確認頁有兩個數字，拆成 `summary`＋`summaryInvalid`；其餘數量罕為 1 的英文字串（植物陪伴天數、圓餅圖、保單年數與到期天數、匯入第一步摘要、匯出筆數、出遊摘要）改寫成 `(s)`。
 - **捷徑教學頁的四語文案換成審過的版本（#1751）**
   使用者：Apple Pay 步驟改成 iPhone 實機上的名稱（「錢包」自動化、「取整數」、「數量」，取整數改為建議）；新增畫面一律稱「新增紀錄」，未登入時改說要再執行一次；備註欄統一稱「描述」（zh-CN／ja／en 同）；zh-CN 改用「」引號、ja 用「サインイン」；zh-TW 補上 LINE Pay 需要支援 Apple Intelligence 的 iPhone。
   技術：只動 `featureShortcuts`、`seo.featureShortcuts`、`settings.shortcutsGuide` 的字串；禁用詞測試改為同時掃後兩組。
