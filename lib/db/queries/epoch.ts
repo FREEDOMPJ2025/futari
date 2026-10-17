@@ -650,8 +650,11 @@ export async function lockForEpochClose(
  * snapshot, taken before the wait, and say "live" for an account the job has
  * just deleted. Failure looks like: nothing errors; the deleted user's
  * tombstone is seated in the partner's ledger, or owns a new solo ledger.
+ *
+ * Exported for actions/shortcutKey.ts (#1536), which takes it first so two
+ * generate / revoke calls by the same person run one after the other.
  */
-async function lockProfileRow(tx: DbTransaction, userId: string): Promise<void> {
+export async function lockProfileRow(tx: DbTransaction, userId: string): Promise<void> {
   const [locked] = await tx
     .select({ id: profiles.id })
     .from(profiles)

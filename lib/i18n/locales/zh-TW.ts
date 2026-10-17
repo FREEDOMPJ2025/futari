@@ -1337,6 +1337,48 @@ export type Translations = {
     trust: string
     /** #1750 - settings row linking to the public shortcuts guide. */
     shortcutsGuide: string
+    /** #1536 — 捷徑金鑰 settings page (/settings/shortcut-key). */
+    shortcutKey: {
+      navLabel: string
+      title: string
+      back: string
+      pageHeading: string
+      pageSubtitle: string
+      empty: string
+      generate: string
+      failed: string
+      current: {
+        heading: string
+        hintLabel: string
+        createdLabel: string
+        lastUsedLabel: string
+        neverUsed: string
+      }
+      fresh: {
+        heading: string
+        body: string
+        inputLabel: string
+        copy: string
+        copied: string
+        copyFailed: string
+      }
+      shareWarning: {
+        heading: string
+        body: string
+      }
+      regenerate: {
+        cta: string
+        confirmTitle: string
+        confirmBody: string
+        confirmLabel: string
+      }
+      revoke: {
+        cta: string
+        confirmTitle: string
+        confirmBody: string
+        confirmLabel: string
+      }
+    }
     exportData: string
     pastTimes: string
     trips: string
@@ -4449,6 +4491,47 @@ export const zhTW: Translations = {
     sectionData: '資料',
     trust: '資料安全',
     shortcutsGuide: '用捷徑記帳',
+    shortcutKey: {
+      navLabel: '捷徑金鑰',
+      title: '捷徑金鑰',
+      back: '返回',
+      pageHeading: '捷徑金鑰',
+      pageSubtitle: 'iPhone 捷徑用這把金鑰把花費送進你的待確認，你確認後才會記進帳本。待確認只有你自己看得到。',
+      empty: '目前沒有金鑰。',
+      generate: '產生金鑰',
+      failed: '沒有成功，請稍後再試',
+      current: {
+        heading: '目前的金鑰',
+        hintLabel: '結尾',
+        createdLabel: '產生時間',
+        lastUsedLabel: '最後使用',
+        neverUsed: '還沒用過',
+      },
+      fresh: {
+        heading: '新的金鑰',
+        body: '金鑰只會顯示這一次，離開這頁就看不到了。現在複製，貼進捷徑裡。',
+        inputLabel: '新的捷徑金鑰',
+        copy: '複製',
+        copied: '已複製',
+        copyFailed: '沒辦法自動複製，請點一下金鑰，選取後手動複製',
+      },
+      shareWarning: {
+        heading: '不要分享含金鑰的捷徑',
+        body: '拿到金鑰的人，可以把花費送進你的待確認。如果你分享過含金鑰的捷徑，請重新產生一把。',
+      },
+      regenerate: {
+        cta: '重新產生',
+        confirmTitle: '重新產生金鑰？',
+        confirmBody: '目前的金鑰會立刻失效，用它的捷徑要換上新的金鑰才能送出。',
+        confirmLabel: '重新產生',
+      },
+      revoke: {
+        cta: '撤銷金鑰',
+        confirmTitle: '撤銷這把金鑰？',
+        confirmBody: '用這把金鑰的捷徑會立刻無法送出。之後可以再產生一把。',
+        confirmLabel: '撤銷',
+      },
+    },
     exportData: '匯出資料（CSV）',
     pastTimes: '過去的時光',
     trips: '旅行',
