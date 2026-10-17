@@ -55,6 +55,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 技術變更
 
+- **App Store 故事圖第 1、2 張對調（#1759）**
+  使用者：商店搜尋結果的第 1 張改成「誰先付的，不用再算。」＋餘額卡，品牌插畫移到第 2 張；要等下次送審換圖後才看得到。
+  技術：只改 `scripts/og/store-screens.html` 的 frame 順序並重新輸出 iPhone／iPad 兩組；圖片與舊版逐像素相同，只是對調。
 - **每週清理 cron 不再被已確認的定期卡片擋下（#1689）**
   技術：新 migration `0097` 重新排程 `cleanup-soft-deleted`，本體沿用 `0069`，最前面多刪「指向即將清除之交易」的已確認卡片；否則編輯過的定期交易滿一年後，外鍵讓整批清理每週失敗。prod 套用待 release。
 
