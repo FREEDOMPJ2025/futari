@@ -46,6 +46,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - **品牌頁加上「紀錄化成光點」的動態（#1527）**
   使用者：首頁手機畫面裡的紀錄各化成一個光點飄進插畫；「四種光」逐列亮起；信任、使用情境、搬遷段落進入畫面時亮燈。減少動態效果時直接呈現亮著的樣子。
   技術：純 CSS（`app/[locale]/_landing/landing-motion.css`），只動 transform／opacity，scroll-driven 包在 `@supports (animation-timeline: view())`；沿用 `about-fade-up` 的 easing；不碰 LCP 元素。
+- **「已離開的夥伴」依讀者語系顯示，且只有系統寫的才算（#1782）**
+  使用者：刪除帳號或選擇不留名字的人，在章節、月回顧、出遊名單、公開出遊頁與 CSV 裡以讀者語系顯示（a partner who left／退出したパートナー／已离开的伙伴），頭像改成不含字的中性圓；四語的這個字樣不能再拿來當暱稱或出遊名字。
+  技術：migration `0099` 加四個標記欄位（backfill 只標刪除帳號寫的形狀；`process_account_deletions` 以 0096 本體加賦值），讀取端只看標記（`lib/leftPartnerLabel.ts`），保留名字檢查在 `lib/reservedDisplayName.ts`＋`handle_new_user`（兩個 project 都要手動套）；prod 套用待 release。
+- **清掉標成機翻、尚未審的 en／ja 文案（#1280）**
+  使用者：單人月份改成 “Logged in September” 這類說法；問答揭曉後不再說成已經打開；邀請頁日文改成「被邀請」，不再像是在招人開始記帳；問答錯誤裡的帳本改回「帳本」。
 - **捷徑金鑰與待確認卡的四語文案換成審過的版本（#1777）**
   使用者：「略過」改「跳過」、展開與收合和定期待確認卡同一套說法；沒有內容的提示改說「描述」；ja「ショートカット用キー」、en「Key for Shortcuts」，避免被讀成鍵盤快捷鍵；ja 統一用「家計簿」。
   技術：只改 `settings.shortcutKey`、`dashboard.shortcutPending` 與 `errors.actions.shortcut_pending_*` 的字串（Grok 兩輪審稿）；主按鈕維持「記下」。

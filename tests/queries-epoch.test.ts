@@ -49,13 +49,18 @@ function epochRow(overrides: Partial<Record<string, unknown>> = {}) {
     memberAId: VIEWER,
     memberBId: null,
     createdAt: new Date('2026-01-01T00:00:00Z'),
+    memberANameIsLeftLabel: false,
+    memberBNameIsLeftLabel: false,
     ...overrides,
   }
 }
 
-function profileRow(id: string, displayName: string) {
-  return { id, displayName }
+function profileRow(id: string, displayName: string, isTombstone = false) {
+  return { id, displayName, isTombstone }
 }
+
+/** #1782 — a name slot as the queries return it. */
+const nm = (name: string | null, isLeftLabel = false) => ({ name, isLeftLabel })
 
 function groupRow(overrides: Partial<Record<string, unknown>> = {}) {
   return {
@@ -115,18 +120,18 @@ describe('listEpochsForViewer', () => {
     expect(rows.map((r) => r.id)).toEqual(['ep-x-3', 'ep-y-1', 'ep-x-1'])
     expect(rows[0]).toMatchObject({
       groupId: 'grp-x',
-      memberAName: 'Stayer',
-      memberBName: 'Leaver',
+      memberAName: nm('Stayer'),
+      memberBName: nm('Leaver'),
     })
     expect(rows[1]).toMatchObject({
       groupId: 'grp-y',
-      memberAName: 'Leaver',
-      memberBName: null,
+      memberAName: nm('Leaver'),
+      memberBName: nm(null),
     })
     expect(rows[2]).toMatchObject({
       groupId: 'grp-x',
-      memberAName: 'Stayer',
-      memberBName: 'Leaver',
+      memberAName: nm('Stayer'),
+      memberBName: nm('Leaver'),
     })
   })
 
@@ -422,7 +427,7 @@ describe('chapter names (#1604 part 2)', () => {
     const m = await getEpochMembers('ep-closed')
     expect(m).toEqual({
       memberAId: STAYER, memberBId: VIEWER,
-      memberAName: 'Stayer at close', memberBName: 'Leaver at close',
+      memberAName: nm('Stayer at close'), memberBName: nm('Leaver at close'),
     })
     // Only the GroupEpochs read: the live (later) names are never consulted.
     expect(mockDb.select).toHaveBeenCalledTimes(1)
@@ -435,7 +440,7 @@ describe('chapter names (#1604 part 2)', () => {
     queueDbResult([closedWith(null, null)])
     queueDbResult([profileRow(STAYER, 'Stayer live'), profileRow(VIEWER, 'Leaver live')])
     const m = await getEpochMembers('ep-closed')
-    expect(m).toMatchObject({ memberAName: null, memberBName: null })
+    expect(m).toMatchObject({ memberAName: nm(null), memberBName: nm(null) })
     expect(mockDb.select).toHaveBeenCalledTimes(1)
   })
 
@@ -443,7 +448,7 @@ describe('chapter names (#1604 part 2)', () => {
     queueDbResult([closedWith(null, 'Leaver at close')])
     queueDbResult([profileRow(STAYER, 'Stayer live')])
     const rows = await listEpochsForViewer(VIEWER)
-    expect(rows[0]).toMatchObject({ memberAName: null, memberBName: 'Leaver at close' })
+    expect(rows[0]).toMatchObject({ memberAName: nm(null), memberBName: nm('Leaver at close') })
     expect(mockDb.select).toHaveBeenCalledTimes(1)
   })
 
@@ -451,7 +456,7 @@ describe('chapter names (#1604 part 2)', () => {
     queueDbResult([epochRow({ id: 'ep-open', memberAId: STAYER, memberBId: VIEWER, endedAt: null, memberAName: 'stale', memberBName: null })])
     queueDbResult([profileRow(STAYER, 'Stayer live'), profileRow(VIEWER, 'Leaver live')])
     const m = await getEpochMembers('ep-open')
-    expect(m).toMatchObject({ memberAName: 'Stayer live', memberBName: 'Leaver live' })
+    expect(m).toMatchObject({ memberAName: nm('Stayer live'), memberBName: nm('Leaver live') })
   })
 
   it('listEpochsForViewer: closed rows carry their snapshot, the open row the live name', async () => {
@@ -462,16 +467,37 @@ describe('chapter names (#1604 part 2)', () => {
     queueDbResult([open, closedWith('Stayer at close', '已離開的夥伴')])
     queueDbResult([profileRow(STAYER, 'Stayer renamed')])
     const rows = await listEpochsForViewer(STAYER)
+    // #1782 — the literal without its marker is a name like any other.
     expect(rows.find((r) => r.id === 'ep-closed')).toMatchObject({
-      memberAName: 'Stayer at close', memberBName: '已離開的夥伴',
+      memberAName: nm('Stayer at close'), memberBName: nm('已離開的夥伴', false),
     })
-    expect(rows.find((r) => r.id === 'ep-open')).toMatchObject({ memberAName: 'Stayer renamed', memberBName: null })
+    expect(rows.find((r) => r.id === 'ep-open')).toMatchObject({ memberAName: nm('Stayer renamed'), memberBName: nm(null) })
   })
 
   it('listEpochsForViewer: only closed chapters with snapshots → no Profiles read', async () => {
     queueDbResult([closedWith('Stayer at close', 'Leaver at close')])
     const rows = await listEpochsForViewer(STAYER)
-    expect(rows[0]).toMatchObject({ memberAName: 'Stayer at close', memberBName: 'Leaver at close' })
+    expect(rows[0]).toMatchObject({ memberAName: nm('Stayer at close'), memberBName: nm('Leaver at close') })
     expect(mockDb.select).toHaveBeenCalledTimes(1)
+  })
+
+  // #1782 — the marker, not the text, is what comes back as the left label.
+  it('getEpochMembers: a marked closed slot is the left label; an unmarked literal is not', async () => {
+    queueDbResult([{
+      ...closedWith('已離開的夥伴', '已離開的夥伴'),
+      memberANameIsLeftLabel: true, memberBNameIsLeftLabel: false,
+    }])
+    const m = await getEpochMembers('ep-closed')
+    expect(m).toEqual({
+      memberAId: STAYER, memberBId: VIEWER,
+      memberAName: nm('已離開的夥伴', true), memberBName: nm('已離開的夥伴', false),
+    })
+  })
+
+  it('getEpochMembers: an open chapter takes the marker from the live profile (tombstone)', async () => {
+    queueDbResult([epochRow({ id: 'ep-open', memberAId: STAYER, memberBId: VIEWER, endedAt: null })])
+    queueDbResult([profileRow(STAYER, '已離開的夥伴', true), profileRow(VIEWER, '已離開的夥伴', false)])
+    const m = await getEpochMembers('ep-open')
+    expect(m).toMatchObject({ memberAName: nm('已離開的夥伴', true), memberBName: nm('已離開的夥伴', false) })
   })
 })

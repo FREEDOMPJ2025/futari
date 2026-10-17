@@ -26,7 +26,7 @@ export default async function OutingSharePage({
   if (!isLocale(locale)) notFound()
   const c = dictionaries[locale].outingPublic
 
-  const landing = await getOutingLanding(shareToken)
+  const landing = await getOutingLanding(shareToken, dictionaries[locale].common.leftPartnerLabel)
   if (!landing) {
     return (
       <>

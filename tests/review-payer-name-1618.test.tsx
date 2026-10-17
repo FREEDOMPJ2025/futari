@@ -76,10 +76,11 @@ const CH1 = { startedAt: TPE(2026, 3, 1), endedAt: TPE(2026, 6, 15), epochId: 'e
 const CH2 = { startedAt: TPE(2026, 6, 15), endedAt: null, epochId: 'e2', isPast: false }
 const GROUP = { id: 'g1', memberA: A, memberB: C }
 const EPOCH_MEMBERS: Record<string, {
-  memberAId: string; memberBId: string | null; memberAName: string | null; memberBName: string | null
+  memberAId: string; memberBId: string | null
+  memberAName: { name: string | null; isLeftLabel: boolean }; memberBName: { name: string | null; isLeftLabel: boolean }
 }> = {
-  e1: { memberAId: A, memberBId: B, memberAName: 'A at close', memberBName: 'B at close' },
-  e2: { memberAId: A, memberBId: C, memberAName: 'A', memberBName: 'C' },
+  e1: { memberAId: A, memberBId: B, memberAName: { name: 'A at close', isLeftLabel: false }, memberBName: { name: 'B at close', isLeftLabel: false } },
+  e2: { memberAId: A, memberBId: C, memberAName: { name: 'A', isLeftLabel: false }, memberBName: { name: 'C', isLeftLabel: false } },
 }
 // Live profiles carry later names; B's profile row exists (the leak would read it).
 const PROFILES = [

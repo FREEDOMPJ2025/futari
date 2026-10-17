@@ -1,4 +1,5 @@
 import { requireViewerOrRedirect } from '@/lib/auth/viewer'
+import { leftAwareName } from '@/lib/leftPartnerLabel'
 import { countMyNameInLeftLedgers, listEpochsForViewer } from '@/lib/db/queries/epoch'
 import { getPinnedEpochId } from '@/actions/epoch-view'
 import { getLocale, getTranslations } from '@/lib/i18n/t'
@@ -37,8 +38,10 @@ export default async function PastTimesPage() {
           id: e.id,
           startedAt: e.startedAt.toISOString(),
           endedAt: e.endedAt?.toISOString() ?? null,
-          memberAName: e.memberAName,
-          memberBName: e.memberBName,
+          // #1782 — translated on the server: a marked slot is the
+          // viewer's label, any other name as written.
+          memberAName: leftAwareName(e.memberAName, t.common.leftPartnerLabel),
+          memberBName: leftAwareName(e.memberBName, t.common.leftPartnerLabel),
           memberAId: e.memberAId,
           memberBId: e.memberBId,
         }))}

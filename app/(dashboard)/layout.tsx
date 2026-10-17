@@ -13,6 +13,7 @@ import { getTranslations, getLocale } from '@/lib/i18n/t'
 import { TranslationsProvider } from '@/lib/i18n/client'
 import { getEpochMembers, resolveViewerEpochContext } from '@/lib/db/queries/epoch'
 import { buildChapterIdentity } from '@/lib/chapterIdentity'
+import { localizeChapterMembers } from '@/lib/leftPartnerLabel'
 import { hasOpenInvite } from '@/lib/db/queries/invite'
 import { canAccessGuardian } from '@/lib/guardian'
 import { AvatarMenuProvider, type AvatarMenuData } from './_components/AvatarMenuProvider'
@@ -132,7 +133,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
     ? chapterMembers?.memberAId === user.id
     : group.memberA === user.id
   const chapterIdentity = epochWindow.isPast
-    ? buildChapterIdentity(chapterMembers, user.id, t.common.partner)
+    // #1782 — translated here, where the viewer's locale is known; a marked
+    // slot reads t.common.leftPartnerLabel and carries only `isLeftLabel`.
+    ? buildChapterIdentity(
+        chapterMembers ? localizeChapterMembers(chapterMembers, t.common.leftPartnerLabel) : null,
+        user.id,
+        t.common.partner,
+      )
     : null
 
   const value: MemberContextValue = {

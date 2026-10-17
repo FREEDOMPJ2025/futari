@@ -210,6 +210,7 @@ export const zhCN: Translations = {
     done: '完成',
     me: '我',
     partner: '对方',
+    leftPartnerLabel: '已离开的伙伴',
     you: '你',
     all: '全部',
     error: '发生错误',
@@ -2305,10 +2306,10 @@ export const zhCN: Translations = {
     soloFallback: '这 3 题是两个人一起答的。这个月的回顾，其他部分都在。',
     errorNotFound: '找不到这次的问答',
     errors: {
-      submitFailed: '送出失败，等一下再试',
+      submitFailed: '提交失败，稍后再试',
       alreadyAnswered: '你已经答完了',
       alreadyRevealed: '这次问答已经揭晓，答案不能再改了',
-      wrongGroup: '这次的问答不属于这个家计簿',
+      wrongGroup: '这次的问答不属于这个账本',
       solo: '这份问答是两个人一起答的',
     },
     questions: {
@@ -4045,6 +4046,7 @@ export const zhCN: Translations = {
       split_ratio_invalid: '分摊比例必须为 1–99 的整数',
       split_type_invalid: '分摊方式无效',
       profile_not_found: '找不到个人资料',
+      display_name_reserved: '这个名字是系统保留的，请换一个名字',
       fx_rate_not_set: '未设置 {from} → {to} 汇率',
       fx_rate_not_positive: '汇率必须是正数',
       currency_unsupported: '不支持的货币',

@@ -7,6 +7,7 @@ import { isUuid } from '@/lib/outing/validate'
 import { foldPreviewFor, memberPidsOf } from '@/lib/outing/foldback'
 import { adminChapterRefusal, currentEpochId, endChapterRefusal, resolveActor } from '@/lib/outing/access'
 import { db } from '@/lib/db/client'
+import { getTranslations } from '@/lib/i18n/t'
 import { participantClaim } from '../_components/participantClaim'
 import { OutingDetailClient } from './_components/OutingDetailClient'
 
@@ -26,7 +27,9 @@ export default async function OutingDetailPage(props: { params: Promise<{ id: st
   if (!epochWindow.epochId) notFound()
   const outing = await getOutingInChapter(id, group.id, epochWindow.epochId)
   if (!outing) notFound()
-  const detail = { outing, ...(await loadOutingDetailRows(outing.id)) }
+  // #1782 — a slot marked as the left label reads in the viewer's language.
+  const t = await getTranslations()
+  const detail = { outing, ...(await loadOutingDetailRows(outing.id, t.common.leftPartnerLabel)) }
 
   // The chapter's two people frame "member" vs friend: a past chapter's from
   // its GroupEpochs row (getEpochMembers via resolveViewedPair), never today's
@@ -82,6 +85,7 @@ export default async function OutingDetailPage(props: { params: Promise<{ id: st
       participants={detail.participants.map((p) => ({
         id: p.id,
         displayName: p.displayName,
+        isLeftLabel: p.isLeftLabel,
         active: p.deactivatedAt === null,
         ...participantClaim(p),
         isMember: p.profileId !== null && (p.profileId === pair.memberA || p.profileId === pair.memberB),

@@ -79,7 +79,7 @@ export function BrandHeader({ showTripButton, onTripClick }: BrandHeaderProps = 
             <Avatar memberRole={viewerRole} initial={viewer.initial} src={viewer.avatarUrl} size={26} />
             {partner && (
               <div className="-ml-2">
-                <Avatar memberRole={partnerRole} initial={partner.initial} src={partner.avatarUrl} size={26} ring />
+                <Avatar memberRole={partnerRole} initial={partner.initial} src={partner.avatarUrl} size={26} ring neutral={partner.isLeftLabel} />
               </div>
             )}
           </div>
@@ -93,7 +93,7 @@ export function BrandHeader({ showTripButton, onTripClick }: BrandHeaderProps = 
             <Avatar memberRole={viewerRole} initial={viewer.initial} src={viewer.avatarUrl} size={26} />
             {partner && (
               <div className="-ml-2">
-                <Avatar memberRole={partnerRole} initial={partner.initial} src={partner.avatarUrl} size={26} ring />
+                <Avatar memberRole={partnerRole} initial={partner.initial} src={partner.avatarUrl} size={26} ring neutral={partner.isLeftLabel} />
               </div>
             )}
           </button>

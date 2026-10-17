@@ -178,7 +178,7 @@ describe('past-times list (#1603)', () => {
     const s = await seedLeave()
     const rows = await listEpochsForViewer(s.a)
     expect(rows.map((r) => r.id)).toEqual([s.x.epochIds[2], s.x.epochIds[1]])
-    expect(rows[1]).toMatchObject({ groupId: s.x.groupId, memberAName: 'TEST_1603_1', memberBName: 'TEST_1603_0' })
+    expect(rows[1]).toMatchObject({ groupId: s.x.groupId, memberAName: { name: 'TEST_1603_1', isLeftLabel: false }, memberBName: { name: 'TEST_1603_0', isLeftLabel: false } })
   })
 
   it('an invite acceptor still sees the solo chapter on the ledger they kept', async () => {

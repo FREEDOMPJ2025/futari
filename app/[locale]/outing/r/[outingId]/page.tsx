@@ -40,7 +40,7 @@ export default async function OutingResumePage({
 
   const { actor } = reader
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- isAdmin is always false here; keep it off the client.
-  const { isAdmin, ...view } = await getOutingFullView(reader.outing, actor)
+  const { isAdmin, ...view } = await getOutingFullView(reader.outing, actor, dictionaries[locale].common.leftPartnerLabel)
   const resume = `/${locale}/outing/r/${reader.outing.id}`
   // Unencoded like /invite's: `resume` is a validated locale + uuid, nothing to
   // escape. The share token never goes into `next` (it would land in Supabase

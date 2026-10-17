@@ -67,6 +67,7 @@ const { leaveGroup, removePartner } = await import('@/actions/membership')
 const { createInvite, acceptInvite } = await import('@/actions/invite')
 const { getEpochMembers, listEpochsForViewer } = await import('@/lib/db/queries/epoch')
 const { buildChapterIdentity } = await import('@/lib/chapterIdentity')
+const { localizeChapterMembers } = await import('@/lib/leftPartnerLabel')
 const { unwrapAction } = await import('@/lib/action-errors')
 const { and, eq, inArray, or, isNull } = await import('drizzle-orm')
 
@@ -185,22 +186,22 @@ describe('every close path freezes the names of that moment (#1604 part 2)', () 
     expect(await snapshotOf(chAC)).toMatchObject({ a: 'TEST_1604S4_A2', b: 'TEST_1604S4_C' })
 
     // getEpochMembers — the one source — returns the frozen names.
-    expect(await getEpochMembers(chAB)).toMatchObject({ memberBId: B, memberBName: 'TEST_1604S4_B' })
-    expect(await getEpochMembers(chAC)).toMatchObject({ memberBId: C, memberBName: 'TEST_1604S4_C' })
+    expect(await getEpochMembers(chAB)).toMatchObject({ memberBId: B, memberBName: { name: 'TEST_1604S4_B', isLeftLabel: false } })
+    expect(await getEpochMembers(chAC)).toMatchObject({ memberBId: C, memberBName: { name: 'TEST_1604S4_C', isLeftLabel: false } })
 
     // The S3 chapter identity (dashboard rows, trips, filter, BrandHeader) for
     // A pinned to A+B: B as B was, no avatar.
-    const identity = buildChapterIdentity(await getEpochMembers(chAB), A, '對方')
+    const identity = buildChapterIdentity(localizeChapterMembers((await getEpochMembers(chAB))!, 'a partner who left'), A, '對方')
     expect(identity.partner).toMatchObject({ id: B, displayName: 'TEST_1604S4_B', avatarUrl: null })
 
     // 過去的時光: closed rows frozen, the open (solo) chapter live.
     const list = await listEpochsForViewer(A)
     const byId = new Map(list.map((r) => [r.id, r]))
-    expect(byId.get(chAB)).toMatchObject({ memberAName: 'TEST_1604S4_A', memberBName: 'TEST_1604S4_B' })
-    expect(byId.get(chASolo)).toMatchObject({ memberAName: 'TEST_1604S4_A2', memberBName: null })
-    expect(byId.get(chAC)).toMatchObject({ memberAName: 'TEST_1604S4_A2', memberBName: 'TEST_1604S4_C' })
+    expect(byId.get(chAB)).toMatchObject({ memberAName: { name: 'TEST_1604S4_A', isLeftLabel: false }, memberBName: { name: 'TEST_1604S4_B', isLeftLabel: false } })
+    expect(byId.get(chASolo)).toMatchObject({ memberAName: { name: 'TEST_1604S4_A2', isLeftLabel: false }, memberBName: { name: null, isLeftLabel: false } })
+    expect(byId.get(chAC)).toMatchObject({ memberAName: { name: 'TEST_1604S4_A2', isLeftLabel: false }, memberBName: { name: 'TEST_1604S4_C', isLeftLabel: false } })
     const open = list.find((r) => r.groupId === x && r.endedAt === null)!
-    expect(open).toMatchObject({ memberAId: A, memberAName: 'TEST_1604S4_A_later', memberBName: null })
+    expect(open).toMatchObject({ memberAId: A, memberAName: { name: 'TEST_1604S4_A_later', isLeftLabel: false }, memberBName: { name: null, isLeftLabel: false } })
     const [openRow] = await db.select({ a: groupEpochs.memberAName }).from(groupEpochs).where(eq(groupEpochs.id, open.id))
     expect(openRow.a).toBeNull() // an open chapter stores no snapshot
   }, 60000)
@@ -216,6 +217,6 @@ describe('every close path freezes the names of that moment (#1604 part 2)', () 
     const { getLatestPriorClosedEpoch } = await import('@/lib/db/queries/epoch')
     const prior = await getLatestPriorClosedEpoch(x)
     expect(prior).toMatchObject({ memberAId: A, memberBId: B })
-    expect((await getEpochMembers(prior!.id))!.memberBName).toBe('TEST_1604S4_P_B')
+    expect((await getEpochMembers(prior!.id))!.memberBName).toEqual({ name: 'TEST_1604S4_P_B', isLeftLabel: false })
   }, 60000)
 })

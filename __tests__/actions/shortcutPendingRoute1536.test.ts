@@ -1,6 +1,8 @@
 // @vitest-environment node
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest'
 import { randomUUID } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import type { Sql } from 'postgres'
 import { createStandInDb, dropStandInDb, isLocalUrl } from './_supabaseStandIn'
 import { person, requestDeletion } from './_deletionWorld1701'
@@ -62,7 +64,14 @@ const adminUrl = process.env.DATABASE_URL ?? ''
 const isLocalDb = isLocalUrl(adminUrl)
 let standInUrl = ''
 if (isLocalDb) {
-  standInUrl = await createStandInDb(adminUrl, '0098')
+  standInUrl = await createStandInDb(
+    adminUrl,
+    // #1782 — the app code under test names every column of today's schema
+    // (0099 added marker columns): a stand-in pinned to an older migration
+    // fails with "column does not exist". Always the latest.
+    (JSON.parse(readFileSync(resolve(__dirname, '../../drizzle/meta/_journal.json'), 'utf-8')) as { entries: { tag: string }[] })
+    .entries.at(-1)!.tag.slice(0, 4),
+  )
   process.env.DATABASE_URL = standInUrl
   process.env.DATABASE_URL_DIRECT = standInUrl
 }

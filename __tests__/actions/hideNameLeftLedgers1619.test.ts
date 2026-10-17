@@ -328,8 +328,8 @@ describe.skipIf(!isLocalDb)('#1619 hideMyNameInLeftLedgers — local stand-in DB
   it('the stayer now reads 「已離開的夥伴」 for B in the shared chapter (past-times list and CSV export)', async () => {
     const list = await listEpochsForViewer(w.A)
     const g1 = list.find((e) => e.id === w.e.G1)
-    expect(g1).toMatchObject({ memberAName: TOMB, memberBName: NAME.A })
-    const exp = await getLedgerExportForViewer(w.A)
+    expect(g1).toMatchObject({ memberAName: { name: TOMB, isLeftLabel: true }, memberBName: { name: NAME.A, isLeftLabel: false } })
+    const exp = await getLedgerExportForViewer(w.A, '已離開的夥伴')
     const ch = exp.chapters.find((c) => c.id === w.e.G1)
     expect(ch).toMatchObject({ memberAName: TOMB, memberBName: NAME.A })
   })

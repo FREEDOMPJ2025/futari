@@ -136,7 +136,7 @@ async function join(groupId: string, memberA: string, joiner: string, at: Date) 
 // there go through the route only).
 const exportedDescriptions = async (groupId: string, viewerId: string) => {
   const { getLedgerExportForViewer } = await import('@/lib/db/queries/export')
-  const { dbRows } = await getLedgerExportForViewer(viewerId)
+  const { dbRows } = await getLedgerExportForViewer(viewerId, '已離開的夥伴')
   const ids = dbRows.filter((r) => r.kind === 'expense' && r.groupId === groupId).map((r) => r.id)
   if (ids.length === 0) return []
   const rows = await db.select({ d: cashTransactions.description }).from(cashTransactions)
@@ -687,7 +687,7 @@ describe.skipIf(!isLocalDb)('#1460 export across ledgers', () => {
     it('for a current member, each ledger\'s expense rows are exactly viewerChaptersClause\'s', async () => {
       const { getLedgerExportForViewer } = await import('@/lib/db/queries/export')
       for (const [viewer, groupId] of [[people2.A1, w2.G1], [people2.C1, w2.G1], [people2.B1, w2.GB1], [people2.B3, w2.G3]]) {
-        const { dbRows } = await getLedgerExportForViewer(viewer)
+        const { dbRows } = await getLedgerExportForViewer(viewer, '已離開的夥伴')
         const mine = dbRows.filter((r) => r.kind === 'expense' && r.groupId === groupId).map((r) => r.id).sort()
         const byClause = (await db.select({ id: cashTransactions.id }).from(cashTransactions).where(and(
           eq(cashTransactions.groupId, groupId),

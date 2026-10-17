@@ -26,6 +26,7 @@ import {
   toClientReviewSnapshot,
 } from '@/lib/monthlyReview'
 import { getTranslations } from '@/lib/i18n/t'
+import { localizeChapterMembers } from '@/lib/leftPartnerLabel'
 import { ReviewClient } from './_components/ReviewClient'
 
 interface PageProps {
@@ -66,7 +67,11 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
   // #1612 — a partner who left (or was removed) reaches this page for a
   // closed chapter they were in (resolveViewerEpochContext's former-member
   // view). The chapter row, not the group row, names the two people.
-  const chapter = context.window.epochId ? await getEpochMembers(context.window.epochId) : null
+  // #1782 — translated for the viewer here: a marked slot reads
+  // t.common.leftPartnerLabel, everything below works on strings.
+  const t = await getTranslations()
+  const chapterSlots = context.window.epochId ? await getEpochMembers(context.window.epochId) : null
+  const chapter = chapterSlots ? localizeChapterMembers(chapterSlots, t.common.leftPartnerLabel) : null
   const memberA = chapter ? chapter.memberAId : group.memberA
   const memberB = chapter ? chapter.memberBId : group.memberB
   const memberIds = [memberA, memberB].filter((x): x is string => !!x)
@@ -106,14 +111,21 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
   // name and photo may be from long after the chapter ended. #1612 — with no
   // snapshot, the neutral 「對方」 stands in. The open chapter keeps the live
   // profile.
-  const neutralPartner = readOnly ? (await getTranslations()).common.partner : ''
+  const neutralPartner = readOnly ? t.common.partner : ''
   const chapterPartnerName = readOnly && chapter
     ? (chapter.memberAId === user.id ? chapter.memberBName : chapter.memberAName)
     : null
+  const chapterPartnerIsLeftLabel = readOnly && !!chapter
+    && (chapter.memberAId === user.id ? chapter.memberBIsLeftLabel : chapter.memberAIsLeftLabel)
   const partnerProfile = !otherMemberId
     ? null
     : readOnly
-      ? { id: otherMemberId, displayName: chapterPartnerName ?? neutralPartner, avatarUrl: null }
+      ? {
+          id: otherMemberId,
+          displayName: chapterPartnerName ?? neutralPartner,
+          avatarUrl: null,
+          isLeftLabel: chapterPartnerIsLeftLabel,
+        }
       : (profileRows.find((p) => p.id === otherMemberId) ?? null)
   const isSolo = !memberB
 
@@ -214,6 +226,8 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
         id: partnerProfile.id,
         displayName: partnerProfile.displayName,
         avatarUrl: partnerProfile.avatarUrl,
+        // #1782 — only a marked slot carries the flag.
+        ...('isLeftLabel' in partnerProfile && partnerProfile.isLeftLabel ? { isLeftLabel: true } : {}),
       } : null}
       isSolo={isSolo}
       readOnly={readOnly}

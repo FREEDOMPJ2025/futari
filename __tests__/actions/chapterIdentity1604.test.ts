@@ -148,7 +148,7 @@ describe.each(['paired', 'solo'] as const)('stayer now %s, pinned to the closed 
     const s = await seedStayer(now)
     const m = await getEpochMembers(s.closed)
     expect(m).toMatchObject({ memberAId: s.stayer, memberBId: s.ex })
-    expect(m!.memberBName).toBe(now === 'paired' ? 'TEST_1604_A_ex' : 'TEST_1604_D_ex')
+    expect(m!.memberBName).toEqual({ name: now === 'paired' ? 'TEST_1604_A_ex' : 'TEST_1604_D_ex', isLeftLabel: false })
   })
 
   it("resolveViewedPair is the chapter's pair when pinned", async () => {

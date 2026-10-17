@@ -305,6 +305,12 @@ export type Translations = {
     done: string
     me: string
     partner: string
+    /** #1782 — the system's label for a person whose name slot is marked
+     *  as left (account deletion, #1619 hide-my-name, a tombstone). Shown
+     *  only for a marked slot (lib/leftPartnerLabel.ts), never matched
+     *  against a name; the four values are also the reserved names
+     *  (lib/reservedDisplayName.ts). No gender, no "account deleted". */
+    leftPartnerLabel: string
     you: string
     all: string
     error: string
@@ -3473,6 +3479,9 @@ export type Translations = {
       split_ratio_invalid: string
       split_type_invalid: string
       profile_not_found: string
+      /** #1782 — a person or participant name that is the system's left
+       *  label (any language, after normalisation). */
+      display_name_reserved: string
       fx_rate_not_set: string
       fx_rate_not_positive: string
       currency_unsupported: string
@@ -3764,6 +3773,7 @@ export const zhTW: Translations = {
     done: '完成',
     me: '我',
     partner: '對方',
+    leftPartnerLabel: '已離開的夥伴',
     you: '你',
     all: '全部',
     error: '發生錯誤',
@@ -5859,7 +5869,7 @@ export const zhTW: Translations = {
       submitFailed: '送出失敗，等一下再試',
       alreadyAnswered: '你已經答完了',
       alreadyRevealed: '這次問答已經揭曉，答案不能再改了',
-      wrongGroup: '這次的問答不屬於這個家計簿',
+      wrongGroup: '這次的問答不屬於這個帳本',
       solo: '這份問答是兩個人一起答的',
     },
     questions: {
@@ -7614,6 +7624,7 @@ export const zhTW: Translations = {
       split_ratio_invalid: '分攤比例必須為 1–99 的整數',
       split_type_invalid: '分攤方式無效',
       profile_not_found: '找不到個人資料',
+      display_name_reserved: '這個名字是系統保留的，請換一個名字',
       fx_rate_not_set: '未設定 {from} → {to} 匯率',
       fx_rate_not_positive: '匯率必須是正數',
       currency_unsupported: '不支援的幣別',

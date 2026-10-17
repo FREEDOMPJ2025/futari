@@ -18,6 +18,7 @@ import { getActiveGroupForUser } from '@/lib/db/queries/group'
 import { epochClause } from '@/lib/db/queries/_predicates'
 import { nonMemberPinCutoff } from '@/lib/pinnedChapterScope'
 import { isUuid } from '@/lib/outing/validate'
+import type { ChapterName, ChapterNameSlots } from '@/lib/leftPartnerLabel'
 
 /** Cookie key the past-times feature uses to pin the viewer to a prior epoch. */
 export const PAST_EPOCH_COOKIE = 'futari_past_epoch'
@@ -39,8 +40,11 @@ export interface EpochListItem {
   endedAt: Date | null
   memberAId: string
   memberBId: string | null
-  memberAName: string | null
-  memberBName: string | null
+  /** #1782 — name + left-label marker. Translate with
+   *  `leftAwareName` / `localizeChapterMembers` (lib/leftPartnerLabel.ts)
+   *  before it reaches a client. */
+  memberAName: ChapterName
+  memberBName: ChapterName
 }
 
 /**
@@ -143,7 +147,12 @@ interface ChapterNameSource {
   memberBId: string | null
   memberAName: string | null
   memberBName: string | null
+  /** #1782 (0099) — the slot's left-label marker. */
+  memberANameIsLeftLabel: boolean
+  memberBNameIsLeftLabel: boolean
 }
+
+const NO_NAME: ChapterName = { name: null, isLeftLabel: false }
 
 /**
  * #1604 part 2 — the names a chapter shows for its two people.
@@ -161,6 +170,15 @@ interface ChapterNameSource {
  * member open a closed chapter of the ledger they left, a NULL snapshot that
  * fell back to `Profiles` would hand them the other person's current name.
  *
+ * #1782 — each name comes back with its left-label marker
+ * ({@link ChapterName}): a closed chapter's from the row
+ * (`member_*_name_is_left_label`), an open chapter's from the live profile
+ * (`is_tombstone`, which in practice is never set for an open chapter's
+ * member — a deletion closes every chapter the user is in). The marker, not
+ * the text, decides whether the viewer's label is shown; translate with
+ * lib/leftPartnerLabel.ts before anything reaches a client, and never pass
+ * the marker source (`is_tombstone`) on.
+ *
  * Caller contract (exported for the CSV export, #1460): like
  * {@link getEpochMembers}, no viewer check — pass only chapter rows the viewer
  * may already see.
@@ -170,7 +188,8 @@ export async function withChapterNames<R extends ChapterNameSource>(
   /** The CSV export (#1460) passes its read-only transaction so the names
    *  come from the same snapshot as the rows. */
   executor: typeof db | DbTransaction = db,
-): Promise<(R & { memberAName: string | null; memberBName: string | null })[]> {
+): Promise<(Omit<R, 'memberAName' | 'memberBName' | 'memberANameIsLeftLabel' | 'memberBNameIsLeftLabel'>
+  & { memberAName: ChapterName; memberBName: ChapterName })[]> {
   const isClosed = (r: R) => r.endedAt != null
   const needLive = new Set<string>()
   for (const r of rows) {
@@ -181,22 +200,31 @@ export async function withChapterNames<R extends ChapterNameSource>(
   const liveRows = needLive.size === 0
     ? []
     : await executor
-        .select({ id: profiles.id, displayName: profiles.displayName })
+        .select({ id: profiles.id, displayName: profiles.displayName, isTombstone: profiles.isTombstone })
         .from(profiles)
         .where(inArray(profiles.id, Array.from(needLive)))
-  const liveById = new Map(liveRows.map((p) => [p.id, p.displayName]))
+  const liveById = new Map<string, ChapterName>(
+    liveRows.map((p) => [p.id, { name: p.displayName, isLeftLabel: p.isTombstone }]),
+  )
 
-  return rows.map((r) => isClosed(r)
-    ? {
-        ...r,
-        memberAName: r.memberAName ?? null,
-        memberBName: r.memberBId ? (r.memberBName ?? null) : null,
-      }
-    : {
-        ...r,
-        memberAName: liveById.get(r.memberAId) ?? null,
-        memberBName: r.memberBId ? (liveById.get(r.memberBId) ?? null) : null,
-      })
+  return rows.map((r) => {
+    const {
+      memberAName, memberBName, memberANameIsLeftLabel, memberBNameIsLeftLabel, ...rest
+    } = r
+    return isClosed(r)
+      ? {
+          ...rest,
+          memberAName: { name: memberAName ?? null, isLeftLabel: memberANameIsLeftLabel },
+          memberBName: r.memberBId
+            ? { name: memberBName ?? null, isLeftLabel: memberBNameIsLeftLabel }
+            : NO_NAME,
+        }
+      : {
+          ...rest,
+          memberAName: liveById.get(r.memberAId) ?? NO_NAME,
+          memberBName: r.memberBId ? (liveById.get(r.memberBId) ?? NO_NAME) : NO_NAME,
+        }
+  })
 }
 
 /**
@@ -475,17 +503,14 @@ export const resolveViewerEpochContext = cache(async (
  * accepts a pin for a chapter the viewer is named on, in a group that still
  * exists, and (unless the chapter is closed) that they are still a member of.
  * Never pass an id taken straight from user input.
- * `memberAName` / `memberBName` are null when there is no snapshot (closed)
- * or no profile row (open).
+ * `memberAName` / `memberBName` hold a null name when there is no snapshot
+ * (closed) or no profile row (open). #1782 — each carries its left-label
+ * marker; translate with `localizeChapterMembers` (lib/leftPartnerLabel.ts)
+ * in the layer that has the viewer's locale.
  */
 export async function getEpochMembers(
   epochId: string,
-): Promise<{
-  memberAId: string
-  memberBId: string | null
-  memberAName: string | null
-  memberBName: string | null
-} | null> {
+): Promise<ChapterNameSlots | null> {
   const [row] = await db
     .select({
       endedAt: groupEpochs.endedAt,
@@ -493,6 +518,8 @@ export async function getEpochMembers(
       memberBId: groupEpochs.memberBId,
       memberAName: groupEpochs.memberAName,
       memberBName: groupEpochs.memberBName,
+      memberANameIsLeftLabel: groupEpochs.memberANameIsLeftLabel,
+      memberBNameIsLeftLabel: groupEpochs.memberBNameIsLeftLabel,
     })
     .from(groupEpochs)
     .where(eq(groupEpochs.id, epochId))
@@ -706,8 +733,14 @@ export async function lockProfileForGroupCreate(
 /**
  * #1619 — the label a person's name becomes in the chapters of a ledger they
  * left, when they ask for it. The same literal account deletion writes
- * (0096, `process_account_deletions`), so since #1619 「已離開的夥伴」 on a
- * chapter no longer means the account was deleted.
+ * (0096 / 0099, `process_account_deletions`), so since #1619 「已離開的夥伴」
+ * on a chapter no longer means the account was deleted.
+ *
+ * #1782 — written only as the fallback text. What marks the slot is the
+ * marker column set in the same statement (`member_*_name_is_left_label`,
+ * `display_name_is_left_label`); readers decide on the marker and show the
+ * viewer's translation. Never compare a name with this constant to decide
+ * anything: a person may have chosen that name before it was reserved.
  */
 export const LEFT_PARTNER_NAME = '已離開的夥伴'
 
@@ -728,10 +761,10 @@ function leftChapterClause(userId: string) {
     )`
 }
 
-/** #1619 — `userId`'s outing-participant rows in outings of those chapters, still showing another name. */
+/** #1619 — `userId`'s outing-participant rows in outings of those chapters, not yet marked as the left label (#1782). */
 function leftOutingParticipantClause(userId: string) {
   return sql`p.profile_id = ${userId}::uuid
-    AND p.display_name IS DISTINCT FROM ${LEFT_PARTNER_NAME}::text
+    AND NOT p.display_name_is_left_label
     AND p.outing_id IN (
       SELECT o.id FROM "Outings" o
       WHERE o.epoch_id IN (
@@ -751,17 +784,19 @@ export interface LeftLedgerNameCounts {
 
 /**
  * #1619 — how many places {@link hideNameInLeftLedgers} would change for
- * `userId` right now. Same predicates as the writes, including the
- * `IS DISTINCT FROM` that makes a second run a no-op, so the entry row hides
- * itself (0 / 0) once everything is done. The caller passes the viewer from
+ * `userId` right now. Same predicates as the writes, including the marker
+ * check (#1782: `NOT …_is_left_label`) that makes a second run a no-op, so
+ * the entry row hides itself (0 / 0) once everything is done. A slot that
+ * merely reads 「已離開的夥伴」 because the person named themself that is
+ * NOT done: it has no marker, so it is counted and changed (marked). The caller passes the viewer from
  * its own session gate; never an id from the client.
  */
 export async function countMyNameInLeftLedgers(userId: string): Promise<LeftLedgerNameCounts> {
   const [row] = await db.execute<{ chapters: number; outings: number }>(sql`
     SELECT
       (SELECT count(*)::int FROM "GroupEpochs" e
-        WHERE ((e.member_a_id = ${userId}::uuid AND e.member_a_name IS DISTINCT FROM ${LEFT_PARTNER_NAME}::text)
-            OR (e.member_b_id = ${userId}::uuid AND e.member_b_name IS DISTINCT FROM ${LEFT_PARTNER_NAME}::text))
+        WHERE ((e.member_a_id = ${userId}::uuid AND NOT e.member_a_name_is_left_label)
+            OR (e.member_b_id = ${userId}::uuid AND NOT e.member_b_name_is_left_label))
           AND ${leftChapterClause(userId)}) AS chapters,
       (SELECT count(*)::int FROM "OutingParticipants" p
         WHERE ${leftOutingParticipantClause(userId)}) AS outings`)
@@ -773,6 +808,9 @@ export async function countMyNameInLeftLedgers(userId: string): Promise<LeftLedg
  * user's name snapshot becomes {@link LEFT_PARTNER_NAME}, and so does their
  * name on the outing lists of those chapters. Only what is closed now; a
  * ledger left later needs another run. Returns how many rows changed.
+ *
+ * #1782 — each UPDATE sets the slot's marker in the same statement as the
+ * literal; the marker is what every reader shows the viewer's label for.
  *
  * - First statement: the user's own `Profiles` row (see {@link lockProfileRow}).
  *   `process_account_deletions` takes that row FOR UPDATE before it renames
@@ -794,19 +832,19 @@ export async function hideNameInLeftLedgers(userId: string): Promise<LeftLedgerN
     await lockProfileRow(tx, userId)
 
     const asA = await tx.execute<{ id: string }>(sql`
-      UPDATE "GroupEpochs" e SET member_a_name = ${LEFT_PARTNER_NAME}::text
+      UPDATE "GroupEpochs" e SET member_a_name = ${LEFT_PARTNER_NAME}::text, member_a_name_is_left_label = true
       WHERE e.member_a_id = ${userId}::uuid
-        AND e.member_a_name IS DISTINCT FROM ${LEFT_PARTNER_NAME}::text
+        AND NOT e.member_a_name_is_left_label
         AND ${leftChapterClause(userId)}
       RETURNING e.id`)
     const asB = await tx.execute<{ id: string }>(sql`
-      UPDATE "GroupEpochs" e SET member_b_name = ${LEFT_PARTNER_NAME}::text
+      UPDATE "GroupEpochs" e SET member_b_name = ${LEFT_PARTNER_NAME}::text, member_b_name_is_left_label = true
       WHERE e.member_b_id = ${userId}::uuid
-        AND e.member_b_name IS DISTINCT FROM ${LEFT_PARTNER_NAME}::text
+        AND NOT e.member_b_name_is_left_label
         AND ${leftChapterClause(userId)}
       RETURNING e.id`)
     const slots = await tx.execute<{ id: string }>(sql`
-      UPDATE "OutingParticipants" p SET display_name = ${LEFT_PARTNER_NAME}::text
+      UPDATE "OutingParticipants" p SET display_name = ${LEFT_PARTNER_NAME}::text, display_name_is_left_label = true
       WHERE ${leftOutingParticipantClause(userId)}
       RETURNING p.id`)
 

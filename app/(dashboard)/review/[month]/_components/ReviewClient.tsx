@@ -18,6 +18,9 @@ export interface ReviewMember {
   id: string
   displayName: string
   avatarUrl: string | null
+  /** #1782 — a closed chapter's slot marked as the system's left label:
+   *  `displayName` is the viewer's translation, shown with a neutral avatar. */
+  isLeftLabel?: boolean
 }
 
 export interface ReviewPastMessage {

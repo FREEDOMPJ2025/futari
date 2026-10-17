@@ -22,10 +22,11 @@ const GROUP = { id: 'g1', memberA: 'user-a', memberB: 'user-c' }
 // names frozen when it closed ('A at close' / 'B at close'); for the open e2,
 // the live names. The live profiles below carry later names and photos.
 const EPOCH_MEMBERS: Record<string, {
-  memberAId: string; memberBId: string | null; memberAName: string | null; memberBName: string | null
+  memberAId: string; memberBId: string | null
+  memberAName: { name: string | null; isLeftLabel: boolean }; memberBName: { name: string | null; isLeftLabel: boolean }
 }> = {
-  e1: { memberAId: 'user-a', memberBId: 'user-b', memberAName: 'A at close', memberBName: 'B at close' },
-  e2: { memberAId: 'user-a', memberBId: 'user-c', memberAName: 'A', memberBName: 'C' },
+  e1: { memberAId: 'user-a', memberBId: 'user-b', memberAName: { name: 'A at close', isLeftLabel: false }, memberBName: { name: 'B at close', isLeftLabel: false } },
+  e2: { memberAId: 'user-a', memberBId: 'user-c', memberAName: { name: 'A', isLeftLabel: false }, memberBName: { name: 'C', isLeftLabel: false } },
 }
 const PROFILES = [
   { id: 'user-a', displayName: 'A', avatarUrl: 'https://img.example/a-now.jpg' },

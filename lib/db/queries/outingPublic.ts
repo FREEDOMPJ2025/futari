@@ -6,6 +6,7 @@ import { and, desc, eq, inArray, isNull, ne, or, sql } from 'drizzle-orm'
 import { buildOutingView, type OutingView } from '@/lib/outing/view'
 import type { OutingActor, OutingRow } from '@/lib/outing/access'
 import { hashToken, isWellFormedToken } from '@/lib/outing/tokens'
+import { leftAwareName } from '@/lib/leftPartnerLabel'
 
 /**
  * Read side of 出遊．朋友從分享連結加入 (#1558). Who may see what (PLAN-1558
@@ -22,14 +23,29 @@ import { hashToken, isWellFormedToken } from '@/lib/outing/tokens'
  * public page's RSC payload is readable by anyone holding the link.
  * Failure looks like: nothing on screen changes; the value is only visible in
  * view-source / the RSC payload.
+ *
+ * #1782 — a slot marked as the left label is translated HERE, into the page's
+ * locale (`leftPartnerLabel` = that locale's `common.leftPartnerLabel`), and
+ * the only extra field is the `isLeftLabel` boolean for styling. The marker's
+ * sources (`display_name_is_left_label`, Profiles `is_tombstone`) are never
+ * returned.
  */
 
 export type SlotClaimState = 'unclaimed' | 'claimed' | 'bound'
 
 export interface OutingSlot {
   id: string
+  /** Already translated when `isLeftLabel`. */
   displayName: string
+  /** #1782 — the system's left label: render in the system style. Always
+   *  set by the queries below; optional only for fixtures. */
+  isLeftLabel?: boolean
   claim: SlotClaimState
+}
+
+/** The name a slot shows: the page locale's label when marked, the stored name otherwise. */
+function slotName(p: { displayName: string; isLeftLabel: boolean }, leftPartnerLabel: string): string {
+  return leftAwareName({ name: p.displayName, isLeftLabel: p.isLeftLabel }, leftPartnerLabel) ?? p.displayName
 }
 
 export interface OutingLanding {
@@ -45,7 +61,11 @@ function claimState(p: { profileId: string | null; claimedAt: Date | null }): Sl
 }
 
 /** Landing data for a share link, or null for a malformed / reset / deleted link. */
-export async function getOutingLanding(shareToken: unknown): Promise<OutingLanding | null> {
+export async function getOutingLanding(
+  shareToken: unknown,
+  /** #1782 — the page locale's `common.leftPartnerLabel`. */
+  leftPartnerLabel: string,
+): Promise<OutingLanding | null> {
   if (!isWellFormedToken(shareToken)) return null
   const [outing] = await db
     .select({ id: outings.id, name: outings.name, status: outings.status })
@@ -57,6 +77,7 @@ export async function getOutingLanding(shareToken: unknown): Promise<OutingLandi
     .select({
       id: outingParticipants.id,
       displayName: outingParticipants.displayName,
+      isLeftLabel: outingParticipants.displayNameIsLeftLabel,
       profileId: outingParticipants.profileId,
       claimedAt: outingParticipants.claimedAt,
     })
@@ -67,7 +88,12 @@ export async function getOutingLanding(shareToken: unknown): Promise<OutingLandi
     outingId: outing.id,
     name: outing.name,
     status: outing.status,
-    slots: slots.map((s) => ({ id: s.id, displayName: s.displayName, claim: claimState(s) })),
+    slots: slots.map((s) => ({
+      id: s.id,
+      displayName: slotName(s, leftPartnerLabel),
+      isLeftLabel: s.isLeftLabel,
+      claim: claimState(s),
+    })),
   }
 }
 
@@ -104,11 +130,17 @@ export interface OutingFullView {
  * tiers except `isAdmin`. Ended outings return the same shape; the page renders
  * it read-only.
  */
-export async function getOutingFullView(outing: OutingRow, actor: OutingActor): Promise<OutingFullView> {
-  const participants = await db
+export async function getOutingFullView(
+  outing: OutingRow,
+  actor: OutingActor,
+  /** #1782 — the page locale's `common.leftPartnerLabel`. */
+  leftPartnerLabel: string,
+): Promise<OutingFullView> {
+  const participantRows = await db
     .select({
       id: outingParticipants.id,
       displayName: outingParticipants.displayName,
+      isLeftLabel: outingParticipants.displayNameIsLeftLabel,
       profileId: outingParticipants.profileId,
       claimedAt: outingParticipants.claimedAt,
       deactivatedAt: outingParticipants.deactivatedAt,
@@ -116,6 +148,7 @@ export async function getOutingFullView(outing: OutingRow, actor: OutingActor): 
     .from(outingParticipants)
     .where(eq(outingParticipants.outingId, outing.id))
     .orderBy(outingParticipants.createdAt)
+  const participants = participantRows.map((p) => ({ ...p, displayName: slotName(p, leftPartnerLabel) }))
 
   const expenseRows = await db
     .select({
@@ -186,6 +219,7 @@ export async function getOutingFullView(outing: OutingRow, actor: OutingActor): 
     participants: participants.map((p) => ({
       id: p.id,
       displayName: p.displayName,
+      isLeftLabel: p.isLeftLabel,
       claim: claimState(p),
       active: p.deactivatedAt === null,
       net: netOf.get(p.id) ?? 0,

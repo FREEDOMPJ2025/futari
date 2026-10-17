@@ -23,6 +23,12 @@ export interface ChapterPartner {
   displayName: string
   initial: string
   avatarUrl: null
+  /** #1782 — the chapter's slot is the system's left label (account deleted,
+   *  or the person asked to hide their name): `displayName` is the viewer's
+   *  translation of it, `initial` is empty, and surfaces render it in the
+   *  system style (Avatar `neutral`, secondary ink). Never set for a name a
+   *  person chose, even one that reads the same. Absent = false. */
+  isLeftLabel?: boolean
 }
 
 /** #1604 — who the pinned past chapter was between. Built by the layout from
@@ -36,7 +42,10 @@ export interface ChapterIdentity {
 
 /** The partner as a surface that labels rows should show them: a live
  *  partner (with avatar) or a past chapter's partner (no avatar). */
-export type ViewedPartner = Pick<MemberInfo, 'id' | 'displayName' | 'initial' | 'avatarUrl'>
+export type ViewedPartner = Pick<MemberInfo, 'id' | 'displayName' | 'initial' | 'avatarUrl'> & {
+  /** #1782 — see {@link ChapterPartner.isLeftLabel}. Absent for a live partner. */
+  isLeftLabel?: boolean
+}
 
 export interface MemberContextValue {
   /** `baseCurrency` = OikosGroups.base_currency — the symbol / format for every
