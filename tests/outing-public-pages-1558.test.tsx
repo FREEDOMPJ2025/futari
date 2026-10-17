@@ -134,7 +134,7 @@ describe('/outing/r/<outingId>', () => {
     expect(el.props.needsBind).toBe(false)
     expect(el.props.signedIn).toBe(false)
     expect(el.props.view).not.toHaveProperty('isAdmin')
-    expect(m.getOutingFullView).toHaveBeenCalledWith(OUTING, actor)
+    expect(m.getOutingFullView).toHaveBeenCalledWith(OUTING, actor, expect.any(String))
   })
 
   it('signed in + unbound claim cookie → 「這是你嗎」 (render binds nothing)', async () => {

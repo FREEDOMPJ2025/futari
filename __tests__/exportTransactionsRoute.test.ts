@@ -80,7 +80,8 @@ describe('GET /api/export/transactions', () => {
     const res = await GET()
     expect(res.status).toBe(200)
     expect(getLedgerExportForViewer).toHaveBeenCalledTimes(1)
-    expect(getLedgerExportForViewer).toHaveBeenCalledWith(USER_ID)
+    // #1782 — the export locale's label (en here) for marked name slots.
+    expect(getLedgerExportForViewer).toHaveBeenCalledWith(USER_ID, 'a partner who left')
     expect(getActiveGroupForUser).not.toHaveBeenCalled()
   })
 

@@ -1,12 +1,8 @@
 import type { ChapterIdentity } from '@/app/(dashboard)/_components/MemberContext'
+import type { LocalizedChapterMembers } from '@/lib/leftPartnerLabel'
 
-/** The shape `getEpochMembers` returns (kept structural so this stays pure). */
-export interface ChapterMembers {
-  memberAId: string
-  memberBId: string | null
-  memberAName: string | null
-  memberBName: string | null
-}
+/** `getEpochMembers`' result after `localizeChapterMembers` (kept structural so this stays pure). */
+export type ChapterMembers = LocalizedChapterMembers
 
 /**
  * #1604 — the chapter identity the dashboard layout puts in MemberContext when
@@ -18,7 +14,11 @@ export interface ChapterMembers {
  *   rather than fall back to the live partner.
  * - A missing profile name falls back to `fallbackName` (the generic 「對方」),
  *   the same fallback CompactRow already uses. A deleted account is not this
- *   case: its tombstone row reads 「已離開的夥伴」 and comes through as a name.
+ *   case: its slot is marked as the left label and comes through as the
+ *   viewer's translation of it.
+ * - #1782 — a marked slot (`member*IsLeftLabel`) gets no initial: the avatar
+ *   shows the neutral system style instead of a letter (Avatar `neutral`), so
+ *   the label cannot be passed off by someone who named themself the same.
  */
 export function buildChapterIdentity(
   members: ChapterMembers | null,
@@ -30,12 +30,14 @@ export function buildChapterIdentity(
   const partnerId = viewerIsChapterA ? members.memberBId : members.memberAId
   if (!partnerId) return { partner: null, isSolo: true }
   const name = (viewerIsChapterA ? members.memberBName : members.memberAName) ?? fallbackName
+  const isLeftLabel = viewerIsChapterA ? members.memberBIsLeftLabel : members.memberAIsLeftLabel
   return {
     partner: {
       id: partnerId,
       displayName: name,
-      initial: (name[0] ?? '?').toUpperCase(),
+      initial: isLeftLabel ? '' : (name[0] ?? '?').toUpperCase(),
       avatarUrl: null,
+      isLeftLabel,
     },
     isSolo: false,
   }

@@ -286,6 +286,7 @@ export function TripDetailClient({ trip, records, baseCurrency, groupDefaultRati
                 memberRole={viewerIsA ? 'b' : 'a'}
                 avatarUrl={partner?.avatarUrl ?? null}
                 initial={(partner?.displayName?.[0] ?? '?').toUpperCase()}
+                neutral={!!partner?.isLeftLabel}
                 label={t.tripDetail.partnerPaid.replace('{name}', partner?.displayName ?? '')}
                 paid={perSideBase.partnerPaid}
                 share={perSideBase.partnerShare}
@@ -326,6 +327,7 @@ export function TripDetailClient({ trip, records, baseCurrency, groupDefaultRati
                   avatarUrl: partner.avatarUrl ?? null,
                   initial: (partner.displayName?.[0] ?? '?').toUpperCase(),
                   displayName: partner.displayName ?? '',
+                  neutral: !!partner.isLeftLabel,
                 } : null}
                 t={t.tripDetail}
               />
@@ -470,6 +472,8 @@ function PerSideMemberCard(props: {
   memberRole: 'a' | 'b'
   avatarUrl: string | null
   initial: string
+  /** #1782 — the system's left label: neutral avatar (Avatar `neutral`). */
+  neutral?: boolean
   label: string
   paid: number
   share: number
@@ -486,6 +490,7 @@ function PerSideMemberCard(props: {
         initial={props.initial}
         src={props.avatarUrl}
         size={28}
+        neutral={props.neutral}
       />
       <div className="min-w-0 flex-1">
         <div className="text-xs tracking-[0.5px] truncate" style={{ color: 'var(--ink-3)' }}>
@@ -524,7 +529,7 @@ export function CurrencyBreakdownCard(props: {
   baseCurrency: string
   showPerSide: boolean
   viewer: { avatarUrl: string | null; initial: string; isA: boolean }
-  partner: { avatarUrl: string | null; initial: string; displayName: string } | null
+  partner: { avatarUrl: string | null; initial: string; displayName: string; neutral: boolean } | null
   t: {
     youPaid: string
     partnerPaid: string
@@ -584,6 +589,7 @@ export function CurrencyBreakdownCard(props: {
             memberRole={viewer.isA ? 'b' : 'a'}
             avatarUrl={partner.avatarUrl}
             initial={partner.initial}
+            neutral={partner.neutral}
             label={ts.partnerPaid.replace('{name}', partner.displayName)}
             paid={round(viewer.isA ? row.bPaidNative : row.aPaidNative)}
             share={round(viewer.isA ? row.bShareNative : row.aShareNative)}

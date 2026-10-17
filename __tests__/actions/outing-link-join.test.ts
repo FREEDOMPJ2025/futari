@@ -245,9 +245,9 @@ describe('c. read tiers', () => {
     const o = await seedLinked()
     as(o.userId)
     ok(await addExpense(o.outingId, o.pA, [o.pA, o.f1]))
-    const landing = await getOutingLanding(o.share)
+    const landing = await getOutingLanding(o.share, '已離開的夥伴')
     expect(Object.keys(landing!).sort()).toEqual(['name', 'outingId', 'slots', 'status'])
-    for (const s of landing!.slots) expect(Object.keys(s).sort()).toEqual(['claim', 'displayName', 'id'])
+    for (const s of landing!.slots) expect(Object.keys(s).sort()).toEqual(['claim', 'displayName', 'id', 'isLeftLabel'])
   })
 
   it('participant and member get the full view; a cookie-less visitor gets nothing', async () => {
@@ -255,22 +255,22 @@ describe('c. read tiers', () => {
     const t = await claimAnon(o.share, o.f1, o.outingId)
     withCookie(o.outingId, t)
     const asFriend = await resolveReader(o.outingId)
-    const view = await getOutingFullView(asFriend!.outing, asFriend!.actor)
+    const view = await getOutingFullView(asFriend!.outing, asFriend!.actor, '已離開的夥伴')
     expect(view.isAdmin).toBe(false)
     expect(view.youParticipantId).toBe(o.f1)
     as(o.userId)
     const asMember = await resolveReader(o.outingId)
-    expect((await getOutingFullView(asMember!.outing, asMember!.actor)).isAdmin).toBe(true)
+    expect((await getOutingFullView(asMember!.outing, asMember!.actor, '已離開的夥伴')).isAdmin).toBe(true)
     anon()
     expect(await resolveReader(o.outingId)).toBeNull()
   })
 
   it('invalid and reset tokens → null', async () => {
     const o = await seedLinked()
-    expect(await getOutingLanding('x')).toBeNull()
+    expect(await getOutingLanding('x', '已離開的夥伴')).toBeNull()
     as(o.userId)
     ok(await A.resetOutingShareLink({ outingId: o.outingId }))
-    expect(await getOutingLanding(o.share)).toBeNull()
+    expect(await getOutingLanding(o.share, '已離開的夥伴')).toBeNull()
   })
 })
 

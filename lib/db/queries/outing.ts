@@ -3,6 +3,7 @@ import {
   outings, outingParticipants, outingExpenses, outingExpenseShares, outingSettlements,
 } from '@/lib/db/schema'
 import { and, eq, isNull, inArray, sql } from 'drizzle-orm'
+import { leftAwareName } from '@/lib/leftPartnerLabel'
 
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0]
 
@@ -81,6 +82,9 @@ export interface OutingDetailRow {
   participants: (Pick<typeof outingParticipants.$inferSelect, 'id' | 'displayName' | 'profileId' | 'deactivatedAt' | 'claimedAt'> & {
     /** Whether a claim token is set — the hash itself never leaves the query. */
     hasClaimToken: boolean
+    /** #1782 — the slot is the system's left label; `displayName` is then
+     *  already the caller's translation of it (see loadOutingDetailRows). */
+    isLeftLabel: boolean
   })[]
   expenses: OutingExpenseWithShares[]
   settlements: (typeof outingSettlements.$inferSelect)[]
@@ -102,14 +106,17 @@ const outingHeader = {
  * already authorised the outing some other way. A dashboard page must use
  * {@link getOutingInChapter} and then {@link loadOutingDetailRows}.
  */
-export async function getOutingDetail(outingId: string): Promise<OutingDetailRow | null> {
+export async function getOutingDetail(
+  outingId: string,
+  leftPartnerLabel: string,
+): Promise<OutingDetailRow | null> {
   const [outing] = await db
     .select(outingHeader)
     .from(outings)
     .where(and(eq(outings.id, outingId), isNull(outings.deletedAt)))
     .limit(1)
   if (!outing) return null
-  return { outing, ...(await loadOutingDetailRows(outing.id)) }
+  return { outing, ...(await loadOutingDetailRows(outing.id, leftPartnerLabel)) }
 }
 
 /**
@@ -144,12 +151,20 @@ export async function getOutingInChapter(
  * Participants, expenses (with shares) and settlements of one outing. No
  * access check: call only with an outing id the caller has already scoped
  * (getOutingInChapter, or an authorised actor).
+ *
+ * #1782 — `leftPartnerLabel` is `t.common.leftPartnerLabel` of the viewer: a
+ * participant slot marked as the left label comes back with that as its
+ * `displayName` and `isLeftLabel: true`; every other name as written.
  */
-export async function loadOutingDetailRows(outingId: string): Promise<Omit<OutingDetailRow, 'outing'>> {
-  const participants = await db
+export async function loadOutingDetailRows(
+  outingId: string,
+  leftPartnerLabel: string,
+): Promise<Omit<OutingDetailRow, 'outing'>> {
+  const participantRows = await db
     .select({
       id: outingParticipants.id,
       displayName: outingParticipants.displayName,
+      isLeftLabel: outingParticipants.displayNameIsLeftLabel,
       profileId: outingParticipants.profileId,
       deactivatedAt: outingParticipants.deactivatedAt,
       claimedAt: outingParticipants.claimedAt,
@@ -158,6 +173,10 @@ export async function loadOutingDetailRows(outingId: string): Promise<Omit<Outin
     .from(outingParticipants)
     .where(eq(outingParticipants.outingId, outingId))
     .orderBy(outingParticipants.createdAt)
+  const participants = participantRows.map((p) => ({
+    ...p,
+    displayName: leftAwareName({ name: p.displayName, isLeftLabel: p.isLeftLabel }, leftPartnerLabel) ?? p.displayName,
+  }))
 
   const expenseRows = await db
     .select()

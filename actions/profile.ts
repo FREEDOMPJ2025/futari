@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm'
 import { requireViewer } from '@/lib/auth/viewer'
 import { revalidateAfterProfileMutation } from '@/lib/revalidate'
 import { validateName } from '@/lib/validators'
+import { isReservedDisplayName } from '@/lib/reservedDisplayName'
 import type { SplitType } from '@/lib/balance'
 import { action, actionError } from '@/lib/action-errors'
 import { revalidatePath } from 'next/cache'
@@ -16,6 +17,10 @@ export const updateDisplayName = action(async (name: string): Promise<{ ok: true
   const { user } = await requireViewer()
 
   const trimmed = validateName(name, '顯示名稱')
+  // #1782 — the system's left label, in any language, is not a name a person
+  // can take (lib/reservedDisplayName.ts). Checked here, not in validateName:
+  // ledger and asset names share that one. The name is stored as typed.
+  if (isReservedDisplayName(trimmed)) throw actionError('display_name_reserved')
 
   const result = await db
     .update(profiles)

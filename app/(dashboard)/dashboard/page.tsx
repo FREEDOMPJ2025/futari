@@ -9,6 +9,7 @@ import { getGroupBalance, getGroupPendingBalanceDelta } from '@/lib/db/queries/b
 import { listTransactionsPaged, monthlyStatsByCategory } from '@/lib/db/queries/transactions'
 import { listIncomeMonthSummary, listIncomesPaged } from '@/lib/db/queries/incomes'
 import { resolveViewerEpochContext, getLatestPriorClosedEpoch, getEpochMembers } from '@/lib/db/queries/epoch'
+import { leftAwareName } from '@/lib/leftPartnerLabel'
 import { PartnerLeftCard } from './_components/PartnerLeftCard'
 import { WelcomeSoloCard } from './_components/WelcomeSoloCard'
 import { listExpensePendingsForViewer, listIncomePendingsForViewer } from '@/lib/db/queries/recurringView'
@@ -211,9 +212,12 @@ export default async function DashboardPage() {
     // snapshot), through the one chapter-name source; never today's profile
     // name. The chapter is this group's and the viewer is its member_a
     // (getEpochMembers' caller contract).
+    // #1782 — a marked slot reads in the viewer's language.
     const closedChapter = await getEpochMembers(priorClosedEpoch.id)
     partnerLeftProps = {
-      partnerName: closedChapter?.memberBName ?? '',
+      partnerName: closedChapter
+        ? (leftAwareName(closedChapter.memberBName, t.common.leftPartnerLabel) ?? '')
+        : '',
       currentEpochId: epochWindow.epochId,
     }
   }
