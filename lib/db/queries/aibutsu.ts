@@ -1,7 +1,7 @@
 import { db } from '@/lib/db/client'
 import { alias } from 'drizzle-orm/pg-core'
 import { childDetails, petDetails, plantDetails, insuranceDetails, houseDetails, assets, profiles } from '@/lib/db/schema'
-import { eq, and, isNull, inArray } from 'drizzle-orm'
+import { eq, and, isNull, inArray, sql } from 'drizzle-orm'
 import { frozenCopyVisibleClause } from './_predicates'
 import type { CurrencyCode } from '@/lib/currency'
 
@@ -237,7 +237,12 @@ export async function getInsuranceDetails(
       insuredChildId: insuranceDetails.insuredChildId,
       insuredChildName: insuredChildAsset.name,
       insuredUserId: insuranceDetails.insuredUserId,
-      insuredUserDisplayName: insuredUserProfile.displayName,
+      // #1788 / #1782 — a deleted account's Profiles row (is_tombstone) holds the
+      // zh-TW literal 已離開的夥伴 as a system marker, not a name. Never select it
+      // here: failure looks like nothing erroring while en / ja viewers read the
+      // zh-TW literal, unstyled. NULL = no name; callers already treat that as
+      // "no member name" (the former-member / 前伴侶 path), never an empty string.
+      insuredUserDisplayName: sql<string | null>`CASE WHEN ${insuredUserProfile.isTombstone} THEN NULL ELSE ${insuredUserProfile.displayName} END`,
       policyHolderUserId: insuranceDetails.policyHolderUserId,
       insurer: insuranceDetails.insurer,
       annualPremium: insuranceDetails.annualPremium,

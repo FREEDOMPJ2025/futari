@@ -122,9 +122,19 @@ export async function listAssetsForGroup(
       insuranceInsuredChildId: insuranceDetails.insuredChildId,
       insuranceInsuredChildName: insuredChildAsset.name,
       insuranceInsuredUserId: insuranceDetails.insuredUserId,
-      insuranceInsuredUserDisplayName: insuredUserProfile.displayName,
+      // #1788 / #1782 — a deleted account's Profiles row (is_tombstone) holds the
+      // zh-TW literal 已離開的夥伴 as a system marker, not a name. Never select it
+      // here: failure looks like nothing erroring while en / ja viewers read the
+      // zh-TW literal, unstyled. NULL = no name; callers already treat that as
+      // "no member name" (the former-member / 前伴侶 path), never an empty string.
+      insuranceInsuredUserDisplayName: sql<string | null>`CASE WHEN ${insuredUserProfile.isTombstone} THEN NULL ELSE ${insuredUserProfile.displayName} END`,
       insurancePolicyHolderUserId: insuranceDetails.policyHolderUserId,
-      insurancePolicyHolderDisplayName: policyHolderProfile.displayName,
+      // #1788 / #1782 — a deleted account's Profiles row (is_tombstone) holds the
+      // zh-TW literal 已離開的夥伴 as a system marker, not a name. Never select it
+      // here: failure looks like nothing erroring while en / ja viewers read the
+      // zh-TW literal, unstyled. NULL = no name; callers already treat that as
+      // "no member name" (the former-member / 前伴侶 path), never an empty string.
+      insurancePolicyHolderDisplayName: sql<string | null>`CASE WHEN ${policyHolderProfile.isTombstone} THEN NULL ELSE ${policyHolderProfile.displayName} END`,
       insurancePolicyHolderAvatarUrl: sql<string | null>`CASE WHEN ${policyHolderProfile.avatarHidden} THEN NULL ELSE ${policyHolderProfile.avatarUrl} END`,
       insuranceAnnualPremium: insuranceDetails.annualPremium,
       insuranceSumInsured: insuranceDetails.sumInsured,
@@ -277,9 +287,19 @@ export async function getAssetById(
       insuranceInsuredChildId: insuranceDetails.insuredChildId,
       insuranceInsuredChildName: insuredChildAsset.name,
       insuranceInsuredUserId: insuranceDetails.insuredUserId,
-      insuranceInsuredUserDisplayName: insuredUserProfile.displayName,
+      // #1788 / #1782 — a deleted account's Profiles row (is_tombstone) holds the
+      // zh-TW literal 已離開的夥伴 as a system marker, not a name. Never select it
+      // here: failure looks like nothing erroring while en / ja viewers read the
+      // zh-TW literal, unstyled. NULL = no name; callers already treat that as
+      // "no member name" (the former-member / 前伴侶 path), never an empty string.
+      insuranceInsuredUserDisplayName: sql<string | null>`CASE WHEN ${insuredUserProfile.isTombstone} THEN NULL ELSE ${insuredUserProfile.displayName} END`,
       insurancePolicyHolderUserId: insuranceDetails.policyHolderUserId,
-      insurancePolicyHolderDisplayName: policyHolderProfile.displayName,
+      // #1788 / #1782 — a deleted account's Profiles row (is_tombstone) holds the
+      // zh-TW literal 已離開的夥伴 as a system marker, not a name. Never select it
+      // here: failure looks like nothing erroring while en / ja viewers read the
+      // zh-TW literal, unstyled. NULL = no name; callers already treat that as
+      // "no member name" (the former-member / 前伴侶 path), never an empty string.
+      insurancePolicyHolderDisplayName: sql<string | null>`CASE WHEN ${policyHolderProfile.isTombstone} THEN NULL ELSE ${policyHolderProfile.displayName} END`,
       insurancePolicyHolderAvatarUrl: sql<string | null>`CASE WHEN ${policyHolderProfile.avatarHidden} THEN NULL ELSE ${policyHolderProfile.avatarUrl} END`,
       insuranceAnnualPremium: insuranceDetails.annualPremium,
       insuranceSumInsured: insuranceDetails.sumInsured,
