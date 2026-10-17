@@ -2,6 +2,7 @@ import { PushNotifications } from '@capacitor/push-notifications'
 import { Capacitor } from '@capacitor/core'
 import { createClient } from '@/lib/supabase/client'
 import { storePushToken } from '@/lib/pushTokenStorage'
+import { reportClientError } from '@/lib/observability/reportClientError'
 
 export async function registerPushToken(userId: string, groupId: string): Promise<void> {
   if (!Capacitor.isNativePlatform()) return
@@ -28,5 +29,11 @@ export async function registerPushToken(userId: string, groupId: string): Promis
 
   PushNotifications.addListener('registrationError', (error) => {
     console.error('[push] registration error', error)
+    // The plugin reports this through an event, not a rejection, so the
+    // registrar's catch never sees it. Message only (APNs text, no token).
+    reportClientError(new Error(`push registration error: ${error?.error ?? 'unknown'}`), {
+      area: 'push',
+      op: 'registration_event',
+    })
   })
 }

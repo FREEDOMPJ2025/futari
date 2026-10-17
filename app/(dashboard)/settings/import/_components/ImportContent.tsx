@@ -20,7 +20,8 @@ import { StepRules } from './StepRules'
 import { StepConfirm } from './StepConfirm'
 import { ImportResult } from './ImportResult'
 import { ImportHistory } from './ImportHistory'
-import { unwrapAction } from '@/lib/action-errors'
+import { toActionFailure, unwrapAction } from '@/lib/action-errors'
+import { reportClientError } from '@/lib/observability/reportClientError'
 
 interface Member {
   id: string
@@ -125,6 +126,9 @@ export function ImportContent({ viewer, partner, viewerIsMemberA, history }: Pro
       wizard.goTo('mapping')
     } catch (err) {
       console.error('CSV parse error', err)
+      // A malformed file yields rows/errors, not a throw (noValidRows above), so
+      // reaching here is unexpected. Never attach the file or its contents.
+      reportClientError(err, { area: 'import', op: 'parse' })
       setParseError(t.settings.import.errors.parseFailed)
     }
   }
@@ -184,6 +188,8 @@ export function ImportContent({ viewer, partner, viewerIsMemberA, history }: Pro
         router.refresh()
       } catch (err) {
         console.error('import submit failed', err)
+        // Expected action failures ({ ok:false, code }) are not Sentry material.
+        if (!toActionFailure(err)) reportClientError(err, { area: 'import', op: 'submit' })
         setSubmitError(t.settings.import.errors.submitFailed)
       }
     })
@@ -212,6 +218,7 @@ export function ImportContent({ viewer, partner, viewerIsMemberA, history }: Pro
         router.refresh()
       } catch (err) {
         console.error('rollback failed', err)
+        if (!toActionFailure(err)) reportClientError(err, { area: 'import', op: 'rollback' })
         setSubmitError(t.settings.import.errors.rollbackFailed)
       }
     })
