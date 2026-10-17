@@ -72,6 +72,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - **`record_created` 補齊所有記帳管道，server 事件帶 `group_id`（#1764）**
   技術：定期支出確認、加油、旅行結算、愛物購入、CSV 匯入（每次一筆、帶 `count`）也發 `record_created`，以 `via` 區分；`setup_completed`、`income_created`、`asset_created`、`import_completed` 同帶 `group_id`；2026-10-17 前後計數不可比，見 observability-design.md。
 
+### Security
+
+- **離開的人可以把自己在舊帳本裡的名字換成「已離開的夥伴」（#1619）**
+  使用者：「過去的時光」多一列（沒有帳本的人在 `/onboarding/past-times`），確認後已離開帳本的已結束章節與那些章節的出遊名單上，自己的名字改顯示「已離開的夥伴」；單向不能還原，只處理當下已結束的章節。
+  技術：`hideMyNameInLeftLedgers` 不收 id，先鎖自己的 `Profiles` 列再以單一 UPDATE 改 `GroupEpochs` 名字快照與 `OutingParticipants.display_name`（以章節篩，不動 `profile_id`）；無 migration；「已離開的夥伴」不再等於帳號已刪除。
+
 ## [1.7.4] - 2026-10-16
 
 主題：**被找到．出遊帶朋友進來**——出遊頁更容易被搜尋和 AI 找到；朋友能用分享面板或 QR 加入，結束後也看得到兩人帳本的邀請。

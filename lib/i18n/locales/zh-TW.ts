@@ -1634,6 +1634,23 @@ export type Translations = {
      *  what the file holds: expenses, income, settlements. */
     exportHint: string
     exportCta: string
+    /** #1619 — rename yourself to 「已離開的夥伴」 in the closed chapters (and
+     *  their outing lists) of ledgers you left. One-way. Name the scope only:
+     *  never 「移除」「徹底」「所有地方」, never the viewer's own name. */
+    hideName: {
+      title: string
+      hint: string
+      cta: string
+      confirmTitle: string
+      /** Scope sentence + 「這個改動無法還原。」. */
+      confirmBody: string
+      /** `{chapters}` / `{outings}` substituted. */
+      confirmCount: string
+      confirmLabel: string
+      pending: string
+      done: string
+      failed: string
+    }
   }
 
   csvExport: {
@@ -4690,6 +4707,18 @@ export const zhTW: Translations = {
     empty: '還沒有過去的時光。第一段才剛開始。',
     exportHint: '想留一份自己的紀錄，可以把這些章節裡的支出、進帳和結算匯出成 CSV。',
     exportCta: '匯出支出、進帳和結算',
+    hideName: {
+      title: '我在已離開帳本裡的名字',
+      hint: '已離開的帳本裡，已結束的那幾段時光與出遊名單上，你的名字可以改成顯示「已離開的夥伴」。',
+      cta: '改成「已離開的夥伴」',
+      confirmTitle: '改成「已離開的夥伴」？',
+      confirmBody: '已離開的帳本裡，已結束的那幾段時光與出遊名單上，你的名字會顯示為「已離開的夥伴」。這個改動無法還原。',
+      confirmCount: '這次會改到 {chapters} 段時光、{outings} 份出遊名單。',
+      confirmLabel: '確定更改',
+      pending: '處理中…',
+      done: '已改成「已離開的夥伴」。',
+      failed: '沒有改成，請稍後再試。',
+    },
   },
 
   csvExport: {

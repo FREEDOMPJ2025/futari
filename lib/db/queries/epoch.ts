@@ -701,6 +701,118 @@ export async function lockProfileForGroupCreate(
 }
 
 /**
+ * #1619 — the label a person's name becomes in the chapters of a ledger they
+ * left, when they ask for it. The same literal account deletion writes
+ * (0096, `process_account_deletions`), so since #1619 「已離開的夥伴」 on a
+ * chapter no longer means the account was deleted.
+ */
+export const LEFT_PARTNER_NAME = '已離開的夥伴'
+
+/**
+ * #1619 — "a closed chapter of a ledger `userId` has left", for a GroupEpochs
+ * row aliased `e`: the chapter is closed and `userId` is not a member of its
+ * ledger today. Membership is checked on the ledger itself, NOT as "not the
+ * viewer's active ledger": one person can be a current member of two ledgers
+ * (lib/db/queries/group.ts), and a person who rejoined the original ledger has
+ * left nothing. Failure looks like: nothing errors; the stayer, or someone who
+ * came back, renames themself in a chapter of a ledger they are still in.
+ */
+function leftChapterClause(userId: string) {
+  return sql`e.ended_at IS NOT NULL
+    AND NOT EXISTS (
+      SELECT 1 FROM "OikosGroups" g
+      WHERE g.id = e.group_id AND (g.member_a = ${userId}::uuid OR g.member_b = ${userId}::uuid)
+    )`
+}
+
+/** #1619 — `userId`'s outing-participant rows in outings of those chapters, still showing another name. */
+function leftOutingParticipantClause(userId: string) {
+  return sql`p.profile_id = ${userId}::uuid
+    AND p.display_name IS DISTINCT FROM ${LEFT_PARTNER_NAME}::text
+    AND p.outing_id IN (
+      SELECT o.id FROM "Outings" o
+      WHERE o.epoch_id IN (
+        SELECT e.id FROM "GroupEpochs" e
+        WHERE (e.member_a_id = ${userId}::uuid OR e.member_b_id = ${userId}::uuid)
+          AND ${leftChapterClause(userId)}
+      )
+    )`
+}
+
+export interface LeftLedgerNameCounts {
+  /** Chapter rows whose slot for the viewer would change. */
+  chapters: number
+  /** Outing-participant rows whose name would change. */
+  outings: number
+}
+
+/**
+ * #1619 — how many places {@link hideNameInLeftLedgers} would change for
+ * `userId` right now. Same predicates as the writes, including the
+ * `IS DISTINCT FROM` that makes a second run a no-op, so the entry row hides
+ * itself (0 / 0) once everything is done. The caller passes the viewer from
+ * its own session gate; never an id from the client.
+ */
+export async function countMyNameInLeftLedgers(userId: string): Promise<LeftLedgerNameCounts> {
+  const [row] = await db.execute<{ chapters: number; outings: number }>(sql`
+    SELECT
+      (SELECT count(*)::int FROM "GroupEpochs" e
+        WHERE ((e.member_a_id = ${userId}::uuid AND e.member_a_name IS DISTINCT FROM ${LEFT_PARTNER_NAME}::text)
+            OR (e.member_b_id = ${userId}::uuid AND e.member_b_name IS DISTINCT FROM ${LEFT_PARTNER_NAME}::text))
+          AND ${leftChapterClause(userId)}) AS chapters,
+      (SELECT count(*)::int FROM "OutingParticipants" p
+        WHERE ${leftOutingParticipantClause(userId)}) AS outings`)
+  return { chapters: Number(row?.chapters ?? 0), outings: Number(row?.outings ?? 0) }
+}
+
+/**
+ * #1619 — one-way: in every closed chapter of a ledger `userId` has left, the
+ * user's name snapshot becomes {@link LEFT_PARTNER_NAME}, and so does their
+ * name on the outing lists of those chapters. Only what is closed now; a
+ * ledger left later needs another run. Returns how many rows changed.
+ *
+ * - First statement: the user's own `Profiles` row (see {@link lockProfileRow}).
+ *   `process_account_deletions` takes that row FOR UPDATE before it renames
+ *   OutingParticipants then GroupEpochs (0096) — the opposite order to the
+ *   writes below — so without it the two can deadlock (40P01). acceptInvite
+ *   takes the same row, so "has left" cannot change between the check and
+ *   the write. A deleted account (or a tombstone) gets `profile_not_found`.
+ * - Every UPDATE is one statement with the whole predicate in its WHERE —
+ *   never "select the chapter ids, then update by id".
+ * - Never writes `ended_at` (the snapshot trigger fires on UPDATE OF
+ *   ended_at, 0088) and never touches an outing slot's profile_id or claim
+ *   columns: the person is still here, only the shown name changes.
+ * - Outings are picked by chapter (`epoch_id`), not by ledger: a leaver who
+ *   later joined a following chapter's outing through the share link, as a
+ *   friend, keeps that slot as it is.
+ */
+export async function hideNameInLeftLedgers(userId: string): Promise<LeftLedgerNameCounts> {
+  return db.transaction(async (tx) => {
+    await lockProfileRow(tx, userId)
+
+    const asA = await tx.execute<{ id: string }>(sql`
+      UPDATE "GroupEpochs" e SET member_a_name = ${LEFT_PARTNER_NAME}::text
+      WHERE e.member_a_id = ${userId}::uuid
+        AND e.member_a_name IS DISTINCT FROM ${LEFT_PARTNER_NAME}::text
+        AND ${leftChapterClause(userId)}
+      RETURNING e.id`)
+    const asB = await tx.execute<{ id: string }>(sql`
+      UPDATE "GroupEpochs" e SET member_b_name = ${LEFT_PARTNER_NAME}::text
+      WHERE e.member_b_id = ${userId}::uuid
+        AND e.member_b_name IS DISTINCT FROM ${LEFT_PARTNER_NAME}::text
+        AND ${leftChapterClause(userId)}
+      RETURNING e.id`)
+    const slots = await tx.execute<{ id: string }>(sql`
+      UPDATE "OutingParticipants" p SET display_name = ${LEFT_PARTNER_NAME}::text
+      WHERE ${leftOutingParticipantClause(userId)}
+      RETURNING p.id`)
+
+    const chapterIds = new Set([...asA, ...asB].map((r) => r.id))
+    return { chapters: chapterIds.size, outings: slots.length }
+  })
+}
+
+/**
  * The first statement of a transaction that edits or deletes an existing money
  * row (expense, income, settlement, fuel log): take the group's open chapter
  * row `FOR SHARE`, then re-read the group's two members. Returns `null` when
