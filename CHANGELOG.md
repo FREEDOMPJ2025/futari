@@ -43,6 +43,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **簡單記帳搬遷頁的搜尋標題回應「永久 VIP」（#1766）**
+  使用者：Google 搜尋結果上，`/migrate/simple-daily-money` 的標題與說明改成直接回答「買了永久 VIP，搬家會浪費嗎」（四語；en／ja 經 Grok 審）；頁面內文不變。
+  技術：只改 `seo.migrate['simple-daily-money']` 的 title／description；en description 為了 155 字上限（#702）把逗號改成分號。
 - **en 的筆數與天數會依單複數顯示（#1745）**
   使用者：匯入（含確認頁摘要）、時間軸、保單數、旅行、澆水與定期間隔等英文不再出現「1 rows」「Every 1 days」；中文與日文不變。
   技術：這些 key 改成 `{ one, other }`，呼叫端走 `pickPlural`（沿用 #1738）；`usedCountNote` 的 `record(s)` 一併拆開；匯入確認頁有兩個數字，拆成 `summary`＋`summaryInvalid`；其餘數量罕為 1 的英文字串（植物陪伴天數、圓餅圖、保單年數與到期天數、匯入第一步摘要、匯出筆數、出遊摘要）改寫成 `(s)`。

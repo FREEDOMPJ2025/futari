@@ -3292,8 +3292,8 @@ I will upload the screenshots once you confirm.`,
         ogDescription: 'Manebo ユーザーの次の住みか。CSV を書き出して Futari へ。',
       },
       'simple-daily-money': {
-        title: '簡単家計簿から Futari へ｜ふたりで同期・VIP 不要',
-        description: 'ふたりのスマホで同じ家計簿を同期したい？簡単家計簿の共有は閲覧のみ、CSV 書き出しは VIP 限定。スクショを ChatGPT で CSV に整えて、Futari へ無料でお引っ越し。ふたりとも追加・編集できます。',
+        title: '簡単家計簿の永久 VIP、引っ越しても大丈夫？｜Futari は無料',
+        description: '買った VIP は簡単家計簿に残りますが、記録は持っていけます。スクショを ChatGPT で CSV に整えて、Futari へ無料でお引っ越し。割り勘・同期・書き出しも追加料金なし。',
         ogDescription: '簡単家計簿からのお引っ越し——スクショ→ChatGPT→CSV→Futari。',
       },
       'fortune-city': {
