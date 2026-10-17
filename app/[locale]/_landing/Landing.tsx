@@ -76,7 +76,7 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
   return (
     <main
       id="main"
-      className="relative min-h-dvh overflow-hidden"
+      className="lp-root relative min-h-dvh overflow-hidden"
       style={{
         background: 'var(--bg-committed)',
         color: 'var(--ink)',

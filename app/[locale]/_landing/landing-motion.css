@@ -181,3 +181,16 @@
     }
   }
 }
+
+/* #1527 — `overflow: hidden` makes <main> a scroll container that never
+ * scrolls, so every `view()` timeline above binds to it and sits at progress 1:
+ * the halos and lamps never animate (they just rest lit). `clip` cuts the same
+ * horizontal overflow without creating a scroll container, so the timelines
+ * bind to the document scroller. Browsers without `clip` keep `hidden` — and
+ * they also lack `view()`, so they rest lit either way. Failure looks like:
+ * no error; the page looks exactly like reduced motion. */
+@supports (overflow: clip) {
+  main.lp-root {
+    overflow: clip;
+  }
+}
