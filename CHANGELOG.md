@@ -53,6 +53,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：`/features/shortcuts` 四語說明如何用 iPhone 的「捷徑」在 Apple Pay 付款後打開填好的「記一筆」（zh-TW 另有 LINE Pay 通知）；Futari 仍不連結付款帳戶，儲存由你按。
   技術：新增頁面＋HowTo／Breadcrumb JSON-LD、sitemap 與 llms 條目、設定頁 `ShortcutsGuideRow`（Android 殼隱藏）；測試用 `lib/quickAdd.ts` 解析頁上範例網址。
 
+### 技術變更
+
+- **每週清理 cron 不再被已確認的定期卡片擋下（#1689）**
+  技術：新 migration `0097` 重新排程 `cleanup-soft-deleted`，本體沿用 `0069`，最前面多刪「指向即將清除之交易」的已確認卡片；否則編輯過的定期交易滿一年後，外鍵讓整批清理每週失敗。prod 套用待 release。
+
 ## [1.7.4] - 2026-10-16
 
 主題：**被找到．出遊帶朋友進來**——出遊頁更容易被搜尋和 AI 找到；朋友能用分享面板或 QR 加入，結束後也看得到兩人帳本的邀請。
