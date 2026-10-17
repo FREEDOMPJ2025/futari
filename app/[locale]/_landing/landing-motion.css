@@ -1,0 +1,196 @@
+/* Landing — the point-of-light signature (#1527, prototype).
+ *
+ * Idea: every record is a point of light, and the points join into the two
+ * people's spectrum. Three beats carry it, all CSS, all transform + opacity:
+ *
+ *   1. Dots   — the phone mock's three feed rows (desktop) / the couple's own
+ *               phone (mobile band) each give off a point of light that drifts
+ *               up and dissolves into the illustration's ribbon. Time-based,
+ *               once, a beat after load.
+ *   2. Halos  — the four 「四種光」 rows: the glyph's halo comes on as its row
+ *               scrolls into view (scroll-driven, `view()`).
+ *   3. Lamps  — the trust / use-case / migrate sections: a warm glow behind the
+ *               section head comes on as the section scrolls into view.
+ *
+ * Degrades by construction. The REST state is the finished state: halos and
+ * lamps are drawn lit, dots are invisible. Everything that moves lives inside
+ * `prefers-reduced-motion: no-preference` (and, for beats 2-3, `@supports
+ * (animation-timeline: view())`), so reduced motion, Firefox, and Safari without
+ * scroll-driven animations get a complete, static page. Nothing here ever starts
+ * a piece of text or the LCP image at opacity 0: only decorative layers fade.
+ * (Dimming text for an entrance would also fail axe contrast in a no-scroll
+ * Lighthouse run, since the below-the-fold sections sit at progress 0.)
+ *
+ * One easing for all of it: the `cubic-bezier(0.22, 1, 0.36, 1)` already shipped
+ * by `.about-article` in globals.css and named in DESIGN.md §6. No new token.
+ * Longhands only below, so this one rule is never reset by a shorthand. */
+
+.lp-dot,
+.lp-halo::before,
+.lp-halo > svg,
+.lp-lamp::before {
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------- 1. dots ---------- */
+
+.lp-dot {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  opacity: 0;
+  pointer-events: none;
+  /* A tiny lamp: pale-warm core, a ring in the dot's own hue, a soft falloff.
+   * A gradient, not a blur or a shadow, so nothing needs a filter layer. */
+  background: radial-gradient(
+    circle,
+    var(--realtime-flash) 0 22%,
+    currentColor 30% 44%,
+    color-mix(in srgb, currentColor 50%, transparent) 58%,
+    transparent 74%
+  );
+}
+/* Three hues from the asset family, matching the ribbon's terracotta / sage /
+ * gold strands. */
+.lp-dot-1 { color: var(--accent); }
+.lp-dot-2 { color: var(--asset-color-plant); }
+.lp-dot-3 { color: var(--asset-color-pet); }
+
+/* Where each dot is born, and how far it drifts (--lp-dx/--lp-dy, in the
+ * element's own, i.e. pre-scale, pixels). Phone: the three CategoryChips in the
+ * feed card (the mock is fixed-size, 320x640, so these are fixed too). It is
+ * drawn at scale .78, so the page distance is .78x the number here. From xl up
+ * only: below that the illustration column is narrower than the drift and the
+ * dots would cross the headline and CTA. */
+.lp-dot-phone-1 { left: 40px; top: 239px; --lp-dx: -244px; --lp-dy: -44px; }
+.lp-dot-phone-2 { left: 40px; top: 286px; --lp-dx: -286px; --lp-dy: -63px; }
+.lp-dot-phone-3 { left: 40px; top: 334px; --lp-dx: -144px; --lp-dy: -50px; }
+@media (max-width: 1279px) {
+  .lp-dot-phone-1, .lp-dot-phone-2, .lp-dot-phone-3 { display: none; }
+}
+/* Mobile band: the phone the couple is holding in the illustration (about 50%
+ * across, 68% down the artwork), up into the ribbon above it. */
+.lp-dot-band-1 { left: calc(50% - 12px); top: calc(68% - 12px); width: 24px; height: 24px; --lp-dx: -64px; --lp-dy: -72px; }
+.lp-dot-band-2 { left: calc(50% - 12px); top: calc(68% - 12px); width: 24px; height: 24px; --lp-dx: 26px;  --lp-dy: -96px; }
+.lp-dot-band-3 { left: calc(50% - 12px); top: calc(68% - 12px); width: 24px; height: 24px; --lp-dx: 92px;  --lp-dy: -64px; }
+
+@keyframes lp-dot-drift {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  14%  { opacity: 1; transform: translate(0, 0) scale(1); }
+  52%  { opacity: 1; transform: translate(calc(var(--lp-dx) * 0.3), calc(var(--lp-dy) * 0.75 - 28px)) scale(1.1); }
+  82%  { opacity: 0.7; transform: translate(calc(var(--lp-dx) * 0.9), calc(var(--lp-dy) * 0.95)) scale(1.2); }
+  100% { opacity: 0; transform: translate(var(--lp-dx), var(--lp-dy)) scale(1.4); }
+}
+
+/* ---------- 2. halos behind the four glyphs ---------- */
+
+.lp-halo {
+  position: relative;
+  display: inline-flex;
+}
+.lp-halo::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, currentColor 24%, transparent) 0,
+    transparent 70%
+  );
+}
+
+@keyframes lp-halo-on {
+  from { opacity: 0; transform: scale(0.5); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes lp-glyph-on {
+  from { opacity: 0.3; }
+  to   { opacity: 1; }
+}
+
+/* ---------- 3. lamps behind the section heads ---------- */
+
+.lp-lamp {
+  position: relative;
+  isolation: isolate;
+}
+.lp-lamp::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -40px -10% auto;
+  height: 160px;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 50% 50% at 50% 50%,
+    color-mix(in srgb, var(--accent-soft) 70%, transparent),
+    transparent
+  );
+}
+
+@keyframes lp-lamp-on {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- motion ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .lp-dot {
+    animation-name: lp-dot-drift;
+    animation-duration: 2.6s;
+    animation-fill-mode: both;
+    animation-delay: 1.4s;
+  }
+  .lp-dot-2 { animation-delay: 1.9s; }
+  .lp-dot-3 { animation-delay: 2.4s; }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .lp-feature { view-timeline: --lp-feature block; }
+    .lp-lamp    { view-timeline: --lp-lamp block; }
+
+    .lp-halo::before {
+      animation-name: lp-halo-on;
+      animation-fill-mode: both;
+      animation-timeline: --lp-feature;
+      animation-range: entry 10% entry 90%;
+    }
+    .lp-halo > svg {
+      animation-name: lp-glyph-on;
+      animation-fill-mode: both;
+      animation-timeline: --lp-feature;
+      animation-range: entry 10% entry 90%;
+    }
+    .lp-lamp::before {
+      animation-name: lp-lamp-on;
+      animation-fill-mode: both;
+      animation-timeline: --lp-lamp;
+      animation-range: entry 0% entry 90%;
+    }
+
+    /* Two columns from md: 01/02 and 03/04 share a line, so a shared range
+     * would light them at the same instant. Hold the right-hand row back. */
+    @media (min-width: 768px) {
+      .lp-feature:nth-child(even) .lp-halo::before,
+      .lp-feature:nth-child(even) .lp-halo > svg {
+        animation-range: entry 35% entry 100%;
+      }
+    }
+  }
+}
+
+/* #1527 — `overflow: hidden` makes <main> a scroll container that never
+ * scrolls, so every `view()` timeline above binds to it and sits at progress 1:
+ * the halos and lamps never animate (they just rest lit). `clip` cuts the same
+ * horizontal overflow without creating a scroll container, so the timelines
+ * bind to the document scroller. Browsers without `clip` keep `hidden` — and
+ * they also lack `view()`, so they rest lit either way. Failure looks like:
+ * no error; the page looks exactly like reduced motion. */
+@supports (overflow: clip) {
+  main.lp-root {
+    overflow: clip;
+  }
+}
