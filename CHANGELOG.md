@@ -43,6 +43,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **捷徑金鑰與待確認卡的四語文案換成審過的版本（#1777）**
+  使用者：「略過」改「跳過」、展開與收合和定期待確認卡同一套說法；沒有內容的提示改說「描述」；ja「ショートカット用キー」、en「Key for Shortcuts」，避免被讀成鍵盤快捷鍵；ja 統一用「家計簿」。
+  技術：只改 `settings.shortcutKey`、`dashboard.shortcutPending` 與 `errors.actions.shortcut_pending_*` 的字串（Grok 兩輪審稿）；主按鈕維持「記下」。
 - **「已離開帳本裡的名字」確認視窗補上「之後才結束的時光不會跟著改」（#1775）**
   使用者：確認視窗說清楚只改目前已結束的章節；en／ja 的說明與筆數改成不用複數的寫法（Grok 審）。
   技術：只改 `pastTimes.hideName` 的 confirmBody（4 語）、en／ja 的 hint 與 confirmCount、en 的 done／failed 引號；測試多鎖住新的那一句。
