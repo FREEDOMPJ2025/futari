@@ -105,7 +105,10 @@ const { default: MonthlyReviewPage } = await import('@/app/(dashboard)/review/[m
 const A = randomUUID()
 const B = randomUUID()
 const C = randomUUID()
-const people = [A, B, C]
+// #1706 — a profile that is not a member of any chapter of the ledger, yet owns
+// a row inside the open chapter's window (the second fence's whole subject).
+const X = randomUUID()
+const people = [A, B, C, X]
 
 const T = currentYearMonthInTaipei()
 const M = previousMonth(previousMonth(T))
@@ -124,6 +127,9 @@ const MSG = {
   // This chapter's own words to month T (E2, both people).
   aToTInE2: 'TEST_1685_A_TO_T_IN_E2',
   cToTInE2: 'TEST_1685_C_TO_T_IN_E2',
+  // #1706 — written inside E2's window by someone E2 does not name.
+  xStrayToTInE2: 'TEST_1706_X_STRAY_TO_T_IN_E2',
+  xStrayToM1InE2: 'TEST_1706_X_STRAY_TO_M1_IN_E2',
 }
 
 const w = {} as { g: string; e1: string; e2: string }
@@ -136,6 +142,7 @@ beforeAll(async () => {
     { id: A, displayName: 'TEST_1685_A' },
     { id: B, displayName: 'TEST_1685_B' },
     { id: C, displayName: 'TEST_1685_C' },
+    { id: X, displayName: 'TEST_1706_X' },
   ])
   const [g] = await db.insert(oikosGroups).values({
     name: 'TEST_1685_LEDGER', memberA: A, memberB: C, currentEpochStartedAt: BOUNDARY,
@@ -158,7 +165,9 @@ beforeAll(async () => {
     { groupId: w.g, memberId: A, ...M1, body: MSG.aToM1InE1, createdAt: at(M, 2) },
     { groupId: w.g, memberId: B, ...T, body: MSG.bForgedToT, createdAt: new Date(E1_START.getTime() + 3 * DAY) },
     { groupId: w.g, memberId: A, ...T, body: MSG.aToTInE2, createdAt: at(M1, 20) },
-    { groupId: w.g, memberId: C, ...T, body: MSG.cToTInE2, createdAt: at(M1, 21) },
+    { groupId: w.g, memberId: C, ...T, body: MSG.cToTInE2, createdAt: at(M1, 22) },
+    { groupId: w.g, memberId: X, ...T, body: MSG.xStrayToTInE2, createdAt: at(M1, 21) },
+    { groupId: w.g, memberId: X, ...M1, body: MSG.xStrayToM1InE2, createdAt: at(M1, 5) },
   ])
 })
 
@@ -275,5 +284,43 @@ describe('the loader, run against Postgres', () => {
     const { loadChapterReviewMessages } = await import('@/lib/db/queries/monthlyReview')
     const e2Window = { startedAt: BOUNDARY, endedAt: null, epochId: w.e2, isPast: false }
     expect(await loadChapterReviewMessages(w.g, T, { memberIds: [], window: e2Window })).toEqual([])
+  })
+
+  // #1706 — the member filter is the window's second fence: in every state the
+  // writers can reach, the window alone already hides a stranger's row. Here
+  // X's row sits INSIDE E2's window, so only the filter keeps it out.
+  // Failure looks like: nothing errors; a /review page or banner quotes a row
+  // whose author the chapter does not name.
+  it('a row inside the window from someone the chapter does not name is not read', async () => {
+    const { loadChapterReviewMessages } = await import('@/lib/db/queries/monthlyReview')
+    const e2Window = { startedAt: BOUNDARY, endedAt: null, epochId: w.e2, isPast: false }
+    const t = await loadChapterReviewMessages(w.g, T, { memberIds: [A, C], window: e2Window })
+    expect(t.map((m) => m.body)).toEqual([MSG.aToTInE2, MSG.cToTInE2])
+    expect(t.map((m) => m.memberId)).not.toContain(X)
+  })
+
+  it('/review past-month list does not carry the stranger row either', async () => {
+    for (const viewer of [A, C]) {
+      as(viewer)
+      const p = await review(M1)
+      expect(p.pastMessages.map((m) => m.body)).not.toContain(MSG.xStrayToM1InE2)
+      expect(p.pastMessages).toEqual([])
+    }
+  })
+
+  // #1706 — empty `memberIds` is answered before the query is built. Drizzle's
+  // `inArray(col, [])` renders `false`, so dropping the early return changes no
+  // result; what it changes is that the query runs at all. Pin the contract:
+  // the fail-closed answer does not depend on the ORM's empty-array semantics.
+  it('no member ids → the database is not queried at all', async () => {
+    const { loadChapterReviewMessages } = await import('@/lib/db/queries/monthlyReview')
+    const e2Window = { startedAt: BOUNDARY, endedAt: null, epochId: w.e2, isPast: false }
+    const select = vi.spyOn(db, 'select')
+    try {
+      expect(await loadChapterReviewMessages(w.g, T, { memberIds: [], window: e2Window })).toEqual([])
+      expect(select).not.toHaveBeenCalled()
+    } finally {
+      select.mockRestore()
+    }
   })
 })

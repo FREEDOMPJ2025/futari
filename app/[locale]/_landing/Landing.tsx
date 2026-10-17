@@ -12,6 +12,7 @@ import {
 import { IllustrationSlot } from './IllustrationSlot'
 import { LandingCtaHint } from './LandingCtaHint'
 import { LandingCtaLink } from './LandingCtaLink'
+import { FeatureOutingTextLink } from '../_components/FeatureOutingTextLink'
 import { LandingPrimaryCta } from './LandingPrimaryCta'
 import { LandingSecondaryCta } from './LandingSecondaryCta'
 import { LandingStandaloneRedirect } from './LandingStandaloneRedirect'
@@ -61,6 +62,8 @@ type Props = {
     privacyHref: string
     privacyLabel: string
   }
+  /** Locale-aware /features/outing href (#1724): linked under the feature list and in the footer. */
+  featureOutingHref: string
   languageSwitcher?: ReactNode
 }
 
@@ -68,7 +71,7 @@ type Props = {
 // promoted to a two-column hero + 4-column feature row at md+ (>=768px).
 // All copy is i18n-driven via t.landing — see Translations type.
 
-export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkingLabel, useCaseHrefs, migrateHrefs, legalLinks, languageSwitcher }: Props) {
+export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkingLabel, useCaseHrefs, migrateHrefs, featureOutingHref, legalLinks, languageSwitcher }: Props) {
   return (
     <main
       id="main"
@@ -361,6 +364,19 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
               isLast
             />
           </div>
+
+          {/* #1724 — the outing page's way in from the home page. The anchor
+              carries the outing search phrase, not a generic "learn more". */}
+          <p className="m-0 mt-6 md:mt-8 px-1 text-sm">
+            <FeatureOutingTextLink
+              href={featureOutingHref}
+              source="landing_features"
+              className="inline-flex items-center min-h-11 underline text-ink-2"
+            >
+              {t.featuresOutingLink}
+              <span aria-hidden="true">&nbsp;→</span>
+            </FeatureOutingTextLink>
+          </p>
         </div>
       </section>
 
@@ -400,6 +416,8 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
             className="flex flex-wrap items-center justify-center gap-3 text-xs"
             style={{ color: 'var(--ink-2)', letterSpacing: '0.3px' }}
           >
+            <FeatureOutingTextLink href={featureOutingHref} source="landing_footer" className="inline-flex items-center min-h-11 underline whitespace-nowrap">{t.footerOutingLink}</FeatureOutingTextLink>
+            <span aria-hidden="true" style={{ color: 'var(--hairline)' }}>·</span>
             <Link href={migrateHrefs.hub} className="inline-flex items-center min-h-11 underline whitespace-nowrap">{t.migrateSection.seeAll}</Link>
             <span aria-hidden="true" style={{ color: 'var(--hairline)' }}>·</span>
             <Link href={legalLinks.termsHref} className="inline-flex items-center min-h-11 underline whitespace-nowrap">{legalLinks.termsLabel}</Link>

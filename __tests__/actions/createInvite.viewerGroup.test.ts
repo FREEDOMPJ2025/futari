@@ -42,6 +42,9 @@ function loadEnvLocal() {
   }
 }
 loadEnvLocal()
+// Each test seeds over the network (incl. an auth.users row); the default 5 s is
+// too tight against dev, and a timed-out test races its own afterEach (#1710).
+vi.setConfig({ testTimeout: 60_000 })
 
 let mockUserId = ''
 vi.mock('@/lib/supabase/server', () => ({

@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { SubpageHeader } from '@/app/(dashboard)/_components/SubpageHeader'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { useRouter } from 'next/navigation'
 import { formatAmount } from '@/lib/currency'
 import type { OutingView } from '@/lib/outing/view'
@@ -17,7 +18,7 @@ import type { ParticipantClaim } from '@/app/(dashboard)/outings/_components/par
 import { AddParticipantSheet } from './AddParticipantSheet'
 import { SettleSheet } from './SettleSheet'
 import { EndOutingSheet } from './EndOutingSheet'
-import { ShareLinkCard } from './ShareLinkCard'
+import { ShareLinkCardView, useOutingShare } from './ShareLinkCard'
 import { ParticipantActions } from './ParticipantActions'
 
 type SheetKey = 'expense' | 'participant' | 'settle' | 'end' | 'rename' | null
@@ -69,12 +70,16 @@ const DOT_HUES = [
 
 export function OutingDetailClient({ outing, view, foldPreview, canManage, canEnd, expenses, participants, settlements = [] }: Props) {
   const t = useTranslations()
+  const locale = useLocale()
   const to = t.outing
   const router = useRouter()
   const [sheet, setSheet] = useState<SheetKey>(null)
   const [editing, setEditing] = useState<OutingExpenseWithShares | null>(null)
   const active = outing.status === 'active'
   const editable = active && canManage
+  const share = useOutingShare(outing.id, outing.name, editable)
+  // #1727 — friends' names nobody has picked yet (members are always in).
+  const unpicked = participants.filter((p) => p.active && !p.isMember && p.claim === 'unclaimed').length
   const close = () => { setSheet(null); setEditing(null) }
   const byId = useMemo(() => new Map(participants.map((p) => [p.id, p])), [participants])
   // Settle / add-person sheets offer only people still in the outing.
@@ -133,6 +138,19 @@ export function OutingDetailClient({ outing, view, foldPreview, canManage, canEn
               )
             })}
           </div>
+          {editable && unpicked > 0 && (
+            <div className="mt-2 pt-2.5 border-t border-hairline flex items-center justify-between gap-3">
+              <p className="m-0 text-xs text-ink-3">{pickPlural(locale, unpicked, to.share.unpicked).replace('{n}', String(unpicked))}</p>
+              <button
+                type="button"
+                onClick={share.share}
+                disabled={share.pending}
+                className="shrink-0 min-h-11 px-2 bg-transparent border-0 cursor-pointer text-sm text-ink-2 underline disabled:opacity-50"
+              >
+                {to.share.reshare}
+              </button>
+            </div>
+          )}
         </Card>
 
         {/* Who pays whom */}
@@ -181,7 +199,7 @@ export function OutingDetailClient({ outing, view, foldPreview, canManage, canEn
                     <span className="block text-xs mt-0.5 text-ink-3">
                       {to.paidByTag.replace('{name}', nameOf(e.paidByParticipantId))}
                       {' · '}
-                      {to.splitCountTag.replace('{count}', String(e.shares.length))}
+                      {pickPlural(locale, e.shares.length, to.splitCountTag).replace('{count}', String(e.shares.length))}
                     </span>
                   </span>
                   <span className="text-sm tabular-nums shrink-0 text-ink">
@@ -206,7 +224,7 @@ export function OutingDetailClient({ outing, view, foldPreview, canManage, canEn
           </Card>
         )}
 
-        {editable && <ShareLinkCard outingId={outing.id} />}
+        {editable && <ShareLinkCardView share={share} />}
 
         {foldPreview !== 0 && (
           <p className="text-xs px-1 text-ink-3">

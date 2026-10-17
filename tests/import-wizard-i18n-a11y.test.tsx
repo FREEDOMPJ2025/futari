@@ -196,7 +196,7 @@ describe('import wizard — focus and announcements', () => {
     await uploadAndReachMapping(container)
     fireEvent.click(screen.getByRole('button', { name: en.common.navigation.next }))
     fireEvent.click(screen.getByRole('button', { name: en.common.navigation.next }))
-    const confirm = en.settings.import.step4.confirmCta.replace('{count}', '3')
+    const confirm = en.settings.import.step4.confirmCta.other.replace('{count}', '3')
     fireEvent.click(screen.getByRole('button', { name: confirm }))
     const alert = await screen.findByRole('alert')
     expect(alert.textContent).toBe(en.settings.import.errors.submitFailed)
@@ -209,12 +209,12 @@ describe('import wizard — focus and announcements', () => {
     fireEvent.click(screen.getByRole('button', { name: en.common.navigation.next }))
     fireEvent.click(screen.getByRole('button', { name: en.common.navigation.next }))
     fireEvent.click(
-      screen.getByRole('button', { name: en.settings.import.step4.confirmCta.replace('{count}', '3') }),
+      screen.getByRole('button', { name: en.settings.import.step4.confirmCta.other.replace('{count}', '3') }),
     )
     const heading = await screen.findByRole('heading', { name: en.settings.import.result.successHeading })
     await waitFor(() => expect(document.activeElement).toBe(heading))
     const desc = document.getElementById(heading.getAttribute('aria-describedby')!)
-    expect(desc?.textContent).toContain(en.settings.import.result.successBody.replace('{count}', '3'))
+    expect(desc?.textContent).toContain(en.settings.import.result.successBody.other.replace('{count}', '3'))
   })
 
   it('announces a parse failure from the upload widget with role="alert"', async () => {

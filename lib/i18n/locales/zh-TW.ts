@@ -248,6 +248,10 @@ export type Translations = {
     }
     /** Footer trust note. */
     footerTrust: string
+    /** #1724 — quiet link under the feature list to /features/outing; anchor carries the outing search phrase. */
+    featuresOutingLink: string
+    /** #1724 — footer link to /features/outing. */
+    footerOutingLink: string
     /** schema.org `name` for WebSite + SoftwareApplication JSON-LD (#467). */
     jsonLdAppName: string
     /** schema.org `alternateName` array for WebSite + SoftwareApplication (#467). */
@@ -455,7 +459,7 @@ export type Translations = {
       /** Aria label for the single-trip card link — `{name}` trip name. */
       singleAriaLabel: string
       /** Heading when N > 1 trips are active — `{count}` the count. */
-      multipleHeading: string
+      multipleHeading: { one: string; other: string }
       /** CTA line under the multi-trip heading. */
       multipleCta: string
       /** Aria label for the multi-trip card link — `{count}` the count. */
@@ -819,7 +823,7 @@ export type Translations = {
     sectionPast: string
     endedTag: string
     /** Participant count tag on a list row. `{count}` = number of participants. */
-    countTag: string
+    countTag: { one: string; other: string }
     addCta: string
     /** 我參與的出遊 (#1558): other ledgers' outings the user joined. */
     participating: { title: string; hint: string }
@@ -837,7 +841,7 @@ export type Translations = {
     /** "{name} 付" payer tag. */
     paidByTag: string
     /** "{count} 人" split-count tag. */
-    splitCountTag: string
+    splitCountTag: { one: string; other: string }
     untitledExpense: string
     emptyExpenses: string
     addExpense: string
@@ -878,6 +882,19 @@ export type Translations = {
       resetConfirmBody: string
       resetConfirm: string
       resetDone: string
+      /** #1727 — primary button: system share sheet, or copy message + link without one. */
+      shareCta: string
+      /** Prefilled share text; `{name}` = outing name. Goes into the friends' chat. */
+      message: string
+      /** No share sheet (Android shell, most desktops): message + link copied. */
+      messageCopied: string
+      qrShow: string
+      qrHide: string
+      qrHint: string
+      qrAlt: string
+      /** Under the participant list; `{n}` = friends' names nobody has picked. */
+      unpicked: { one: string; other: string }
+      reshare: string
     }
     participant: {
       /** Claim status under a participant's name (簡潔中性). */
@@ -973,7 +990,7 @@ export type Translations = {
     /** Soft note shown beneath a non-base currency row when there are already
      *  TripExpenses recorded against it. `{n}` is the count. Reassures that
      *  rate edits only affect future records. */
-    usedCountNote: string
+    usedCountNote: { one: string; other: string }
     customRow: {
       /** Aria label on the custom-row code input. */
       codeAriaLabel: string
@@ -1030,6 +1047,11 @@ export type Translations = {
     /** {name} = the viewer's slot. */
     signUpBody: string
     signUpCta: string
+    /** #1728 — after the outing ends (溫和的見證者). No partner or relationship assumed: the friend may be single. */
+    ledgerInviteTitle: string
+    ledgerInviteBody: string
+    ledgerInviteCta: string
+    ledgerInviteDismiss: string
   }
 
   /** Trip detail page (#42). */
@@ -1313,6 +1335,8 @@ export type Translations = {
     recurringSettings: string
     sectionData: string
     trust: string
+    /** #1750 - settings row linking to the public shortcuts guide. */
+    shortcutsGuide: string
     exportData: string
     pastTimes: string
     trips: string
@@ -1452,7 +1476,7 @@ export type Translations = {
         subtitle: string
         sourceColumn: string
         targetColumn: string
-        rowCount: string
+        rowCount: { one: string; other: string }
         keepOriginal: string
       }
       step3: {
@@ -1483,14 +1507,15 @@ export type Translations = {
         }
         typeExpense: string
         typeIncome: string
-        moreRows: string
-        confirmCta: string
+        moreRows: { one: string; other: string }
+        confirmCta: { one: string; other: string }
         confirming: string
-        summary: string
+        summary: { one: string; other: string }
+        summaryInvalid: { one: string; other: string }
       }
       result: {
         successHeading: string
-        successBody: string
+        successBody: { one: string; other: string }
         rollbackHint: string
         rollbackCta: string
         rollbackConfirm: string
@@ -1754,7 +1779,7 @@ export type Translations = {
       timelineTarget: string
       summaryAnnualPremium: string
       /** #1173 — Template with `{count}` (rendered emphasised, so keep it a standalone token). */
-      summaryPolicyCount: string
+      summaryPolicyCount: { one: string; other: string }
       summaryNextRenewal: string
       /** #1173 — Template with `{days}`. */
       summaryDaysUntil: string
@@ -1775,7 +1800,7 @@ export type Translations = {
       intervalEveryHalfYear: string
       intervalEveryYear: string
       /** Template with `{n}` for non-standard intervals. */
-      intervalEveryNMonths: string
+      intervalEveryNMonths: { one: string; other: string }
       /** Template with `{day}` placeholder. */
       dayLabel: string
       /** #1187 — list row next-run date. Template with `{date}`. */
@@ -1908,6 +1933,8 @@ export type Translations = {
       next: string
       required: string
       failed: string
+      /** Shown only to someone who came from /features/outing (#1726). */
+      outingReason: string
     }
     invite: {
       heading: string
@@ -1921,6 +1948,9 @@ export type Translations = {
       copy: string
       share: string
       skip: string
+      /** #1726 — the skip button and the line under it, for someone who came to split a trip. */
+      skipToOuting: string
+      outingHint: string
       copied: string
       shareFailed: string
       creating: string
@@ -2192,7 +2222,7 @@ export type Translations = {
     notesSection: string
     recentExpenses: string
     /** Template with `{count}` placeholder. */
-    timelineEntries: string
+    timelineEntries: { one: string; other: string }
     addOtherExpense: string
     refuel: string
     relatedInsurance: string
@@ -2318,12 +2348,12 @@ export type Translations = {
       location: string
       waterEvery: string
       /** Template with `{n}` placeholder. */
-      waterEveryValue: string
+      waterEveryValue: { one: string; other: string }
       companionDays: string
       daysSuffix: string
       sproutedSuffix: string
       /** Template with `{n}` placeholder. */
-      waterEveryFooter: string
+      waterEveryFooter: { one: string; other: string }
     }
     house: {
       sectionInfo: string
@@ -2453,7 +2483,7 @@ export type Translations = {
       intervalEveryQuarter: string
       intervalEveryHalfYear: string
       intervalEveryYear: string
-      intervalEveryNMonths: string
+      intervalEveryNMonths: { one: string; other: string }
       dayLabel: string
       /** #1187 — list row next-run date. Template with `{date}`. */
       nextDate: string
@@ -3124,6 +3154,11 @@ export type Translations = {
       description: string
       ogDescription: string
     }
+    featureShortcuts: {
+      title: string
+      description: string
+      ogDescription: string
+    }
   }
 
   /** Shared shell + per-slug copy for /use-case/* situational SEO pages (#851).
@@ -3198,6 +3233,21 @@ export type Translations = {
     howHeading: string
     /** HowToStep name template, contains `{n}`. */
     howToStepName: string
+    /** Opening direct answer (#1725): a question heading plus a self-contained
+     *  answer an AI engine can quote as-is. Same fact limits as the rest. */
+    answerQuestion: string
+    answer: string
+    /** Worked example (#1725), rendered as text from OUTING_MOCK through the
+     *  product's split/settle functions. Placeholders: intro `{outing}` `{count}`
+     *  `{expenses}`; total `{total}` `{share}`; settleLead `{n}`; outcome `{share}`. */
+    example: {
+      heading: string
+      intro: string
+      cols: { item: string; paidBy: string; amount: string }
+      total: string
+      settleLead: string
+      outcome: string
+    }
     steps: readonly [
       { title: string; body: string },
       { title: string; body: string },
@@ -3243,10 +3293,61 @@ export type Translations = {
       { question: string; answer: string },
     ]
     closingHeading: string
-    /** Row on /use-case/travel and /use-case/aa-split. `cta` is the screen-reader text. */
+    /** Row on /use-case/travel, /use-case/aa-split, the /use-case hub and /migrate/splitwise (#1724). `name` carries the outing search phrase. `cta` is the screen-reader text. */
     crossLink: { name: string; description: string; cta: string }
     /** Quiet text links: outing share page (shareLink) and in-app empty state (emptyLink). */
     entries: { shareLink: string; emptyLink: string }
+  }
+
+  /** #1750 - public shortcuts guide /features/shortcuts. Copy facts are limited to
+   *  docs/shortcuts/linepay-quick-add.md and lib/quickAdd.ts. Never write 自動記帳 / 綁定 /
+   *  串接 or claim encryption: Futari reads no payment data, the Shortcut only opens
+   *  Add Expense. `applePay.platformNote` must not name another mobile platform
+   *  (Apple Guideline 2.3.10: the iOS shell opens this page). `linePay` is zh-TW only:
+   *  the other locales keep the same keys with empty values (the key-parity test needs
+   *  them) and the page omits the section when `heading` is empty. */
+  featureShortcuts: {
+    heroKicker: string
+    heroTitle: string
+    heroSubtitle: string
+    breadcrumbLabel: string
+    /** HowToStep name template, contains `{n}`. */
+    howToStepName: string
+    answerQuestion: string
+    answer: string
+    /** Names of the Shortcuts variables as the guide calls them; they go into the example URL. */
+    vars: { amount: string; merchant: string }
+    applePay: {
+      heading: string
+      intro: string
+      steps: readonly { title: string; body: string }[]
+      urlLabel: string
+      platformNote: string
+      foreignNote: string
+    }
+    linePay: {
+      heading: string
+      intro: string
+      /** Variable name of the optional description step. */
+      noteVar: string
+      steps: readonly { title: string; body: string }[]
+    }
+    web: { heading: string; body: string; urlLabel: string }
+    params: {
+      heading: string
+      intro: string
+      cols: { param: string; rule: string; fallback: string }
+      rows: readonly { param: string; rule: string; fallback: string }[]
+      categoriesHeading: string
+      catCols: { id: string; name: string }
+      fixedNote: string
+    }
+    whenNot: { heading: string; intro: string; items: readonly string[] }
+    trouble: {
+      heading: string
+      cols: { symptom: string; cause: string }
+      rows: readonly { symptom: string; cause: string }[]
+    }
   }
 
   /** #1156 — localized server-action errors, resolved by `describeError`.
@@ -3527,6 +3628,8 @@ export const zhTW: Translations = {
       seeAll: '看全部搬遷指南',
     },
     footerTrust: '只開放給你們倆 · 資料只屬於你們兩個',
+    featuresOutingLink: '出遊分帳：丟一個連結，朋友不用下載 App',
+    footerOutingLink: '出遊分帳',
     jsonLdAppName: 'Futari · 雙人記帳',
     jsonLdAlternateNames: ['Futari 家計簿', '情侶記帳 app', '夫妻記帳', '兩個人的家計簿', 'ふたり 家計簿', "Futari · couple's ledger"],
     jsonLdAppDescription:
@@ -3707,7 +3810,7 @@ export const zhTW: Translations = {
       singleStartedAt: '{date} 起 · 點開看這趟',
       singleStartedAtWithCurrency: '{date} 起 · {currency} · 點開看這趟',
       singleAriaLabel: '進入旅行：{name}',
-      multipleHeading: '{count} 段旅行進行中',
+      multipleHeading: { one: '{count} 段旅行進行中', other: '{count} 段旅行進行中' },
       multipleCta: '一起翻 ›',
       multipleAriaLabel: '查看 {count} 段進行中的旅行',
       emptyCta: '開始一段旅行',
@@ -3941,7 +4044,7 @@ export const zhTW: Translations = {
     sectionActive: '進行中',
     sectionPast: '過去的出遊',
     endedTag: '已結束',
-    countTag: '{count} 人',
+    countTag: { one: '{count} 人', other: '{count} 人' },
     addCta: '開一個出遊',
     participating: {
       title: '我參與的出遊',
@@ -3960,7 +4063,7 @@ export const zhTW: Translations = {
     allSettled: '都結清了。',
     expensesLabel: '支出',
     paidByTag: '{name} 付',
-    splitCountTag: '{count} 人',
+    splitCountTag: { one: '{count} 人', other: '{count} 人' },
     untitledExpense: '一筆支出',
     emptyExpenses: '還沒有支出。',
     addExpense: '記一筆',
@@ -3993,6 +4096,15 @@ export const zhTW: Translations = {
       resetConfirmBody: '舊連結會立刻失效。已經加入的人不受影響，照常記帳。',
       resetConfirm: '重設',
       resetDone: '已換成新連結，舊連結不能再用了。',
+      shareCta: '分享給朋友',
+      message: '「{name}」的帳在這裡記，點開選你的名字，就能一起記。',
+      messageCopied: '已複製訊息和連結，貼到群組就好。',
+      qrShow: '顯示 QR code',
+      qrHide: '收起 QR code',
+      qrHint: '讓旁邊的朋友用手機相機掃，就能打開這次出遊。',
+      qrAlt: '這次出遊的 QR code',
+      unpicked: { one: '還有 {n} 個名字沒人選', other: '還有 {n} 個名字沒人選' },
+      reshare: '再分享一次',
     },
     participant: {
       claim: {
@@ -4056,7 +4168,7 @@ export const zhTW: Translations = {
     rateInverseFormat: '≈ 1 {default} = {inverse} {code}',
     rateAriaLabel: '{code} 對 {baseCode} 的匯率',
     basePill: '基礎貨幣',
-    usedCountNote: '已記過 {n} 筆；改匯率不影響舊紀錄',
+    usedCountNote: { one: '已記過 {n} 筆；改匯率不影響舊紀錄', other: '已記過 {n} 筆；改匯率不影響舊紀錄' },
     customRow: {
       codeAriaLabel: '幣別代碼',
       codePlaceholder: 'VND',
@@ -4098,6 +4210,10 @@ export const zhTW: Translations = {
     signUpTitle: '之後也想找得到這次出遊？',
     signUpBody: '登入後，「{name}」會連到你的帳號。不登入也能繼續記。',
     signUpCta: '登入',
+    ledgerInviteTitle: '這次的帳都在這裡了',
+    ledgerInviteBody: 'Futari 平常是兩個人一起記帳用的。如果你也有想一起記的人，可以開一本兩個人的帳本。',
+    ledgerInviteCta: '建立兩人帳本',
+    ledgerInviteDismiss: '不用了',
   },
 
   tripDetail: {
@@ -4315,6 +4431,7 @@ export const zhTW: Translations = {
     recurringSettings: '定期支出/收入設定',
     sectionData: '資料',
     trust: '資料安全',
+    shortcutsGuide: '用捷徑記帳',
     exportData: '匯出資料（CSV）',
     pastTimes: '過去的時光',
     trips: '旅行',
@@ -4461,7 +4578,7 @@ export const zhTW: Translations = {
         subtitle: '把來源的類別，對應到家計簿裡的類別',
         sourceColumn: '來源類別',
         targetColumn: '對應到',
-        rowCount: '{count} 筆',
+        rowCount: { one: '{count} 筆', other: '{count} 筆' },
         keepOriginal: '其他',
       },
       step3: {
@@ -4490,14 +4607,15 @@ export const zhTW: Translations = {
         },
         typeExpense: '支出',
         typeIncome: '收入',
-        moreRows: '還有 {count} 筆未顯示',
-        confirmCta: '確認匯入 {count} 筆',
+        moreRows: { one: '還有 {count} 筆未顯示', other: '還有 {count} 筆未顯示' },
+        confirmCta: { one: '確認匯入 {count} 筆', other: '確認匯入 {count} 筆' },
         confirming: '匯入中…',
-        summary: '預計寫入 {count} 筆 · 失敗 {invalid} 筆會保留紀錄',
+        summary: { one: '預計寫入 {count} 筆 · {invalid}', other: '預計寫入 {count} 筆 · {invalid}' },
+        summaryInvalid: { one: '失敗 {n} 筆會保留紀錄', other: '失敗 {n} 筆會保留紀錄' },
       },
       result: {
         successHeading: '匯入完成',
-        successBody: '已寫入 {count} 筆紀錄',
+        successBody: { one: '已寫入 {count} 筆紀錄', other: '已寫入 {count} 筆紀錄' },
         rollbackHint: '24 小時內可一鍵復原這次匯入',
         rollbackCta: '復原這次匯入',
         rollbackConfirm: '確定要復原嗎？所有這次匯入的紀錄會一起撤回',
@@ -4674,7 +4792,7 @@ export const zhTW: Translations = {
       timelineInvested: '已投入',
       timelineTarget: '目標',
       summaryAnnualPremium: '年繳保費',
-      summaryPolicyCount: '共 {count} 張保單',
+      summaryPolicyCount: { one: '共 {count} 張保單', other: '共 {count} 張保單' },
       summaryNextRenewal: '下次續約',
       summaryDaysUntil: '{days} 天後',
     },
@@ -4693,7 +4811,7 @@ export const zhTW: Translations = {
       intervalEveryQuarter: '每季',
       intervalEveryHalfYear: '每半年',
       intervalEveryYear: '每年',
-      intervalEveryNMonths: '每 {n} 個月',
+      intervalEveryNMonths: { one: '每 {n} 個月', other: '每 {n} 個月' },
       dayLabel: '{day} 號',
       nextDate: '下次 {date}',
     },
@@ -4828,6 +4946,7 @@ export const zhTW: Translations = {
       next: '下一步',
       required: '請輸入名稱',
       failed: '發生錯誤',
+      outingReason: '先建好你們的帳本，出遊會記在裡面。',
     },
     invite: {
       heading: '帳本準備好了，讓對方也進來',
@@ -4840,6 +4959,8 @@ export const zhTW: Translations = {
       copy: '複製',
       share: '分享連結',
       skip: '稍後再邀請 →',
+      skipToOuting: '先去開出遊 →',
+      outingHint: '對方之後隨時可以加入，出遊可以先開。',
       copied: '已複製連結',
       shareFailed: '分享失敗',
       creating: '建立中…',
@@ -5095,7 +5216,7 @@ export const zhTW: Translations = {
     },
     notesSection: '備註',
     recentExpenses: '近期支出',
-    timelineEntries: '時間軸 · {count} 筆',
+    timelineEntries: { one: '時間軸 · {count} 筆', other: '時間軸 · {count} 筆' },
     addOtherExpense: '其他支出',
     refuel: '加油',
     relatedInsurance: '相關保險',
@@ -5204,11 +5325,11 @@ export const zhTW: Translations = {
       cost: '入手金額',
       location: '位置',
       waterEvery: '澆水週期',
-      waterEveryValue: '每 {n} 天',
+      waterEveryValue: { one: '每 {n} 天', other: '每 {n} 天' },
       companionDays: '陪伴天數',
       daysSuffix: '天',
       sproutedSuffix: ' 入手',
-      waterEveryFooter: ' · 每 {n} 天澆水',
+      waterEveryFooter: { one: ' · 每 {n} 天澆水', other: ' · 每 {n} 天澆水' },
     },
     house: {
       sectionInfo: '房子資訊',
@@ -5315,7 +5436,7 @@ export const zhTW: Translations = {
       intervalEveryQuarter: '每季',
       intervalEveryHalfYear: '每半年',
       intervalEveryYear: '每年',
-      intervalEveryNMonths: '每 {n} 個月',
+      intervalEveryNMonths: { one: '每 {n} 個月', other: '每 {n} 個月' },
       dayLabel: '{day} 號',
       nextDate: '下次 {date}',
     },
@@ -6676,6 +6797,11 @@ export const zhTW: Translations = {
       description: '跟朋友出遊，誰付了什麼、誰該轉給誰，記在同一個地方。開一個出遊、把連結丟到群組，朋友點開選自己的名字就能記，不用下載、不用註冊，最多 20 人。',
       ogDescription: '開一個出遊、把連結丟到群組，朋友點開選自己的名字就能一起記帳，不用下載、不用註冊。',
     },
+    featureShortcuts: {
+      title: 'iPhone 捷徑記帳：Apple Pay、LINE Pay 付款後打開「新增紀錄」 | Futari',
+      description: '用 iPhone 的捷徑，在 Apple Pay 或 LINE Pay 付款後打開 Futari 的「新增紀錄」，金額先填好，由你確認後儲存。Futari 不連結付款帳戶，也不讀付款資料。',
+      ogDescription: '付款後，iPhone 捷徑打開 Futari 的「新增紀錄」，金額、分類和描述先填好，儲存由你按。',
+    },
   },
   useCase: {
     backToHome: '← 回 Futari 首頁',
@@ -7104,6 +7230,16 @@ export const zhTW: Translations = {
     breadcrumbLabel: '出遊分帳',
     howHeading: '從一個連結開始',
     howToStepName: '步驟 {n}',
+    answerQuestion: '出遊分帳，怎麼做才不用每個人都裝 App？',
+    answer: '在 Futari 開一個出遊，把連結丟到群組。朋友用手機瀏覽器點開、選自己的名字，就能記下自己付的錢，不用下載，也不用註冊。每筆支出照分到的人數平分；要結清時，Futari 列出誰該轉給誰，最多只要「人數減一」筆。',
+    example: {
+      heading: '一次出遊分帳的例子',
+      intro: '{outing}：{count} 個人、{expenses} 筆支出，每筆都由全部的人平分。',
+      cols: { item: '支出', paidBy: '誰付', amount: '金額' },
+      total: '合計 {total}，每人約分攤 {share}。',
+      settleLead: '結清時，Futari 列出這 {n} 筆轉帳：',
+      outcome: '轉完之後，每個人實際花的都差不多是 {share}。',
+    },
     steps: [
       { title: '開一個出遊', body: '在 Futari 的「旅行」頁點「出遊」那一列，開一個出遊，取個名字就好。你和伴侶會自動在裡面。' },
       { title: '把連結丟到群組', body: '複製出遊的連結，貼到 LINE 或任何聊天群組。' },
@@ -7149,13 +7285,146 @@ export const zhTW: Translations = {
     ],
     closingHeading: '下次出去玩，先開一個出遊',
     crossLink: {
-      name: '跟朋友一起出遊',
+      name: '出遊分帳，跟朋友一起記',
       description: '丟一個連結，朋友不用下載就能一起記這次的帳。',
       cta: '看出遊怎麼用',
     },
     entries: {
       shareLink: '第一次用 Futari？看看出遊怎麼運作',
       emptyLink: '看看出遊怎麼用',
+    },
+  },
+
+  featureShortcuts: {
+    heroKicker: '捷徑記帳',
+    heroTitle: '付完款，讓 iPhone 把「新增紀錄」打開',
+    heroSubtitle: '用 iPhone 的「捷徑」，在付款後打開 Futari 的「新增紀錄」。金額、分類和描述先填好，你看過、需要就改，再按儲存。',
+    breadcrumbLabel: '捷徑記帳',
+    howToStepName: '步驟 {n}',
+    answerQuestion: 'Apple Pay 或 LINE Pay 付款後，怎麼快速記到 Futari？',
+    answer: 'Futari 不連結任何付款帳戶，也不讀你的付款資料。做事的是 iPhone 的「捷徑」：付款後它打開 Futari 的「新增紀錄」，把金額、分類和描述先填好，你確認後自己按儲存，紀錄才會寫進帳本。這個做法只適用於 iPhone 的「捷徑」App。',
+    vars: {
+      amount: '金額',
+      merchant: '商家',
+    },
+    applePay: {
+      heading: 'Apple Pay：刷完卡就跳出「新增紀錄」',
+      intro: '前提：iPhone 已安裝 Futari 並登入。下面用「錢包」的自動化，每次用 Apple Pay 付款，就打開一次填好的「新增紀錄」。',
+      steps: [
+        {
+          title: '新增「錢包」自動化',
+          body: '打開「捷徑」App，到「自動化」，點 ＋ 選「錢包」（在我感應錢包卡片或票卡時）。在「感應時」畫面勾選要記的卡片；「類別」可以維持全部勾選。點「下一步」→「新增捷徑」。最後在這個自動化的設定列，執行方式選「立即執行」，這樣不必每次先點通知。',
+        },
+        {
+          title: '把金額取整數（建議）',
+          body: '建議加上：加一個「取整數」動作（將〔捷徑輸入〕取整數到〔整數〕），點「捷徑輸入」選「數量」（iOS 把錢包的金額叫「數量」）。如果金額帶小數（例如 120.00），Futari 會讓金額欄空白；先取整數比較保險。「120」「1,280」「１２０」可以，「120.00」「NT$120.00」「120元」會讓金額欄空白。',
+        },
+        {
+          title: '把商家名稱做 URL 編碼',
+          body: '加一個「URL 編碼」動作，輸入選「捷徑輸入」→「商家」。中文和空白不先編碼，網址會斷在中間，描述會空白或只剩一半。描述可有可無，不想帶就跳過這步，並把網址裡的 &note=… 整段拿掉。',
+        },
+        {
+          title: '用「文字」組出網址',
+          body: '加一個「文字」動作，貼上下面的網址，把 [金額] 換成第 2 步的結果、[商家] 換成第 3 步的結果（沒加第 2 步，就換成「捷徑輸入」→「數量」）。想換分類，就改 category= 後面的 id（見下方分類表）。',
+        },
+        {
+          title: '打開 URL',
+          body: '加一個「打開 URL」動作，輸入選上一步的文字。之後每次用 Apple Pay 付款，Futari 會打開並跳出「新增紀錄」，確認後按儲存。',
+        },
+      ],
+      urlLabel: '網址（App）',
+      platformNote: '這個流程只適用於 iPhone 的「捷徑」App。',
+      foreignNote: '外幣提醒：用 Apple Pay 付外幣時，捷徑給的是外幣金額，Futari 會把它當成帳本主幣別的金額帶入。請在「新增紀錄」裡改成實際的金額。',
+    },
+    linePay: {
+      heading: 'LINE Pay：用「付款完成」的通知觸發',
+      intro: 'LINE Pay 沒有交易自動化，但付款完成時 LINE 會送出通知，捷徑可以拿它當觸發條件。',
+      noteVar: '描述',
+      steps: [
+        {
+          title: '新增通知自動化',
+          body: '「捷徑」→「自動化」→ 新增「通知」。App 選 LINE，名稱包含「LINE錢包」，訊息包含「付款完成」，執行方式選「立即執行」。',
+        },
+        {
+          title: '只取出數字金額',
+          body: '用裝置端模型從通知內文取出付款金額，並要求只輸出數字（例如 120，不要帶「元」或「NT$」），把結果命名為「金額」。這一步要用到裝置端模型，需要支援 Apple Intelligence 的 iPhone。',
+        },
+        {
+          title: '準備描述（可選）',
+          body: '加一個「文字」動作，內容例如 LINE Pay，再接一個「URL 編碼」動作，把結果命名為「描述」。不想帶描述就跳過，並把網址裡的 &note=… 整段拿掉。',
+        },
+        {
+          title: '組出網址並打開',
+          body: '加一個「文字」動作，貼上下面的網址，把 [金額]、[描述] 換成上面的結果，再加一個「打開 URL」動作，輸入選這段文字。',
+        },
+      ],
+    },
+    web: {
+      heading: '沒有裝 App：用網頁網址',
+      body: '沒有裝 App、用瀏覽器或「加到主畫面」的人，把網址換成下面這條，「打開 URL」會在 Safari 打開。要先在 Safari 登入過 Futari。# 後面的內容只留在你的瀏覽器，不會送到伺服器。',
+      urlLabel: '網址（網頁）',
+    },
+    params: {
+      heading: '網址可以帶哪些值',
+      intro: '三個參數都可以省略；某個值不合格時，只有那一格不帶入，其他照樣帶入。',
+      cols: {
+        param: '參數',
+        rule: '規則',
+        fallback: '不合格時',
+      },
+      rows: [
+        {
+          param: 'amount',
+          rule: '正整數，1 到 9,999,999。可以有千分位逗號（1,200），全形數字也可以。小數、負數、1e5 這類寫法都不收。',
+          fallback: '金額空白，自己輸入',
+        },
+        {
+          param: 'category',
+          rule: '下表其中一個 id，要全小寫、完全一樣。',
+          fallback: '用預設的「飲食」',
+        },
+        {
+          param: 'note',
+          rule: '會變成「描述」，最多 100 個字。',
+          fallback: '描述空白，儲存前要自己填',
+        },
+      ],
+      categoriesHeading: '分類 id',
+      catCols: {
+        id: 'id',
+        name: '顯示',
+      },
+      fixedNote: '網址只能帶這三個值。日期（今天）、誰付的（你）、分攤方式與幣別，都照「新增紀錄」平常的預設，寫在網址裡也不會採用；也不會自動歸到進行中的旅行，要歸到旅行請在畫面上自己選。',
+    },
+    whenNot: {
+      heading: '什麼時候不會跳出來',
+      intro: '捷徑只負責打開。下面三種情況 Futari 會安靜地略過，不動你的畫面：',
+      items: [
+        '另一個視窗正開著（例如正在改某一筆）：捷徑會被忽略，改到一半的內容不會被動到。關掉視窗後再跑一次。',
+        '正在看過去的章節：過去章節是唯讀的，先切回目前的章節。',
+        '還沒登入：登入後會停在首頁，填好的內容不會留著，再執行一次捷徑就好。',
+      ],
+    },
+    trouble: {
+      heading: '常見狀況',
+      cols: {
+        symptom: '狀況',
+        cause: '原因',
+      },
+      rows: [
+        {
+          symptom: '跳出來了，但金額是空的',
+          cause: '金額不是整數。通常是少了「取整數」那一步，或帶了「元」「NT$」。',
+        },
+        {
+          symptom: '描述空白或只有一半',
+          cause: '商家名稱沒有先經過「URL 編碼」。',
+        },
+        {
+          symptom: '分類變成「飲食」，不是我寫的',
+          cause: 'category 的 id 拼錯，或用了大寫。',
+        },
+      ],
     },
   },
 

@@ -71,6 +71,17 @@ export default async function FeatureOutingPage({ params }: { params: Params }) 
   const { transfers } = deriveOutingMock(def)
   const name = (id: string) => def.names[id]
   const money = (n: number) => formatMockAmount(def, n)
+  // Worked example (#1725): the same example as text, so search engines and
+  // AI answers can read the numbers. Everyone's share is equal (every expense is
+  // split across everyone); tests/feature-outing-aeo-1725.test.tsx holds that.
+  const { expenses: splitExpenses } = deriveOutingMock(def)
+  const total = def.expenses.reduce((a, e) => a + e.amount, 0)
+  const share = splitExpenses.reduce(
+    (a, e) => a + (e.shares.find((sh) => sh.participantId === def.participantIds[0])?.shareAmount ?? 0),
+    0,
+  )
+  const fill = (tpl: string, vars: Record<string, string | number>) =>
+    tpl.replace(/\{(\w+)\}/g, (m, k: string) => (k in vars ? String(vars[k]) : m))
 
   const scenarioArt = [<CampingArt key="a" />, <BirthdayArt key="b" />, <CouplesArt key="c" />, <LatecomerArt key="d" />]
   const h2 = `${s.h2} m-0 text-xl md:text-title font-medium`
@@ -97,6 +108,13 @@ export default async function FeatureOutingPage({ params }: { params: Params }) 
         </div>
         <HeroMotif />
       </div>
+
+      <section id="answer" className={s.band}>
+        <h2 className={h2}>
+          <Phrase text={t.answerQuestion} />
+        </h2>
+        <p className="m-0 text-base leading-[1.7] text-ink-2">{t.answer}</p>
+      </section>
 
       <section id="how" className={s.band}>
         <h2 className={h2}>
@@ -141,6 +159,52 @@ export default async function FeatureOutingPage({ params }: { params: Params }) 
             })),
           }}
         />
+      </section>
+
+      <section id="example" className={s.band}>
+        <h2 className={h2}>
+          <Phrase text={t.example.heading} />
+        </h2>
+        <div className="flex flex-col gap-4 text-base leading-[1.7] text-ink-2">
+          <p className="m-0">
+            {fill(t.example.intro, {
+              outing: def.outingName,
+              count: def.participantIds.length,
+              expenses: def.expenses.length,
+            })}
+          </p>
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-hairline text-ink-3">
+                <th scope="col" className="py-2 pr-3 text-left font-normal">{t.example.cols.item}</th>
+                <th scope="col" className="py-2 pr-3 text-left font-normal">{t.example.cols.paidBy}</th>
+                <th scope="col" className="py-2 text-right font-normal">{t.example.cols.amount}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {def.expenses.map((e) => (
+                <tr key={e.id} className="border-b border-hairline">
+                  <th scope="row" className="py-2 pr-3 text-left font-normal text-ink">{e.label}</th>
+                  <td className="py-2 pr-3">{name(e.paidBy)}</td>
+                  <td className="py-2 text-right tabular-nums text-ink">{money(e.amount)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="m-0">{fill(t.example.total, { total: money(total), share: money(share) })}</p>
+          <p className="m-0">{fill(t.example.settleLead, { n: transfers.length })}</p>
+          <ul className="m-0 p-0 list-none flex flex-col gap-2 text-sm">
+            {transfers.map((tr, i) => (
+              <li key={i} className="flex justify-between gap-3 border-b border-hairline py-2">
+                <span className="text-ink">
+                  {name(tr.from)} → {name(tr.to)}
+                </span>
+                <span className="tabular-nums text-ink">{money(tr.amount)}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="m-0">{fill(t.example.outcome, { share: money(share) })}</p>
+        </div>
       </section>
 
       <section className={s.band}>

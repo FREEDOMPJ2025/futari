@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './actions/_authUser'
 
 // ─── Integration tests for lib/db/queries/fuelLog.ts (#1095) ──────────────
 //
@@ -89,6 +90,7 @@ const ids = {
 beforeAll(async () => {
   ids.user = randomUUID()
   await db.insert(profiles).values({ id: ids.user, displayName: 'TEST_1095_user' })
+  await seedAuthUsers([{ id: ids.user, displayName: 'TEST_1095_user' }])
 
   const [group] = await db.insert(oikosGroups)
     .values({ name: 'TEST_1095_group', memberA: ids.user })
@@ -155,7 +157,10 @@ afterAll(async () => {
       await db.delete(groupBalance).where(inArray(groupBalance.groupId, [ids.group]))
       await db.delete(oikosGroups).where(inArray(oikosGroups.id, [ids.group]))
     }
-    if (ids.user) await db.delete(profiles).where(inArray(profiles.id, [ids.user]))
+    if (ids.user) {
+      await deleteAuthUsers([ids.user])
+      await db.delete(profiles).where(inArray(profiles.id, [ids.user]))
+    }
   } catch (e) {
     console.error('cleanup failed', e)
   }

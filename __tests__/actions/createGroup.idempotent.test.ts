@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 
 // ─── Regression for #911 ──────────────────────────────────────────────────
 //
@@ -37,6 +38,9 @@ function loadEnvLocal() {
   }
 }
 loadEnvLocal()
+// Each test seeds over the network (incl. an auth.users row, #1710); the default
+// 5 s is too tight against dev.
+vi.setConfig({ testTimeout: 60_000 })
 
 let mockUserId: string = ''
 vi.mock('@/lib/supabase/server', () => ({
@@ -80,6 +84,7 @@ describe('createGroup — idempotent when viewer already has a group (#911)', ()
         await db.delete(groupBalance).where(eq(groupBalance.groupId, g.id))
         await db.delete(oikosGroups).where(eq(oikosGroups.id, g.id))
       }
+      await deleteAuthUsers([userId])
       await db.delete(profiles).where(eq(profiles.id, userId))
     } catch (e) {
       console.error('cleanup failed', e)
@@ -91,6 +96,7 @@ describe('createGroup — idempotent when viewer already has a group (#911)', ()
     const uid = randomUUID()
     userId = uid
     await db.insert(profiles).values({ id: uid, displayName: 'TEST_911_user' })
+    await seedAuthUsers([{ id: uid, displayName: 'TEST_911_user' }])
 
     const [existing] = await db
       .insert(oikosGroups)

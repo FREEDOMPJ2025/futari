@@ -17,7 +17,8 @@ import { AibutsuHintCard } from './AibutsuHintCard'
 import { resolveDisplayName } from '@/lib/display-name'
 import { computeAge } from '@/lib/age'
 import { useToday } from '@/app/(dashboard)/_components/TodayProvider'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { describeError } from '@/lib/errors'
 import { useMember } from '@/app/(dashboard)/_components/MemberContext'
 import { unwrapAction } from '@/lib/action-errors'
@@ -117,6 +118,7 @@ interface Props {
 export function ChildDetailClient({ assetId, name, nickname, notes, details, summary, assetSheetInitial, initialTxns, pageSize, siblings }: Props) {
   const router = useRouter()
   const t = useTranslations()
+  const locale = useLocale()
   const td = t.assetDetail.child
   const { isPast } = useMember()
   // #1339 — null for a missing, malformed, or future birthday (a due date
@@ -234,7 +236,7 @@ export function ChildDetailClient({ assetId, name, nickname, notes, details, sum
         emptyState={<AibutsuHintCard type="child" onCtaPress={isPast ? undefined : () => setAddOpen(true)} />}
         header={(count) => (
           <div className="text-xs tracking-[1.5px] uppercase text-ink-3 font-numeric">
-            {t.assetDetail.timelineEntries.replace('{count}', String(count))}
+            {pickPlural(locale, count, t.assetDetail.timelineEntries).replace('{count}', String(count))}
           </div>
         )}
       />

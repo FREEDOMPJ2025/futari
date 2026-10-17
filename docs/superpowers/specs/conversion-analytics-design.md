@@ -136,7 +136,9 @@ PostHog 目前刻意用 `persistence: 'memory'`（`app/providers.tsx`）以維�
 |---|---|---|
 | `$pageview` *(已存在)* | 每個路由 | `$current_url` |
 | `landing_cta_clicked` | 點 landing / migrate / use-case 的 CTA | `cta_location`（含 `use_case_primary`、`feature_primary`、`feature_closing`）、`target`（`sign_in` \| `migrate_*` \| `use_case_*`） |
-| `feature_outing_link_clicked` | 點到 `/features/outing` 的入口連結（use-case 旅行／AA 制連結列、出遊分享頁底部、App 內出遊空狀態；#1633） | `source`（`use_case_travel` \| `use_case_aa_split` \| `outing_share` \| `outings_empty`）。固定標籤，**不帶網址或 token** |
+| `feature_outing_link_clicked` | 點到 `/features/outing` 的入口連結（use-case 旅行／AA 制連結列、出遊分享頁底部、App 內出遊空狀態；#1633。首頁功能區與頁尾、`/use-case` 總覽、`/migrate/splitwise`；#1724） | `source`（`use_case_travel` \| `use_case_aa_split` \| `outing_share` \| `outings_empty` \| `landing_features` \| `landing_footer` \| `use_case_hub` \| `migrate_splitwise`）。固定標籤，**不帶網址或 token**。#1724 的四個 source 是新測量點，基準從部署日起算 |
+| `outing_ledger_invite_viewed` | 出遊結束後，朋友在出遊頁（`/<locale>/outing/r/<id>`）看到「兩人帳本」邀請卡（#1728）；每次載入、卡片未被關掉時一次 | 無屬性。**不帶出遊 id、名稱、token 或網址**。新測量點，基準從部署日起算 |
+| `outing_ledger_invite_clicked` | 點邀請卡的連結（未登入 → sign-in `from=outing`，之後的 `signed_up` 帶 `entry_source=outing`；已登入但沒有帳本 → `/onboarding`） | 無屬性 |
 | `migrate_file_selected` | 在 `/migrate/*` 選了 CSV | `migrate_source` |
 | `migrate_preview_shown` | 解析成功、預覽渲染 | `migrate_source`、`detected_source`、`row_count` |
 | `migrate_preview_failed` | 解析失敗 | `migrate_source`、`reason` |

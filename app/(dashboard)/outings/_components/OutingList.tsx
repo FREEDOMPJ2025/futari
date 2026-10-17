@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BottomNav } from '@/app/(dashboard)/_components/BottomNav'
 import { SubpageHeader } from '@/app/(dashboard)/_components/SubpageHeader'
 import { useMember } from '@/app/(dashboard)/_components/MemberContext'
 import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { track } from '@/lib/analytics/track'
 import { isLocale } from '@/lib/i18n/locales-meta'
 import { localizedHref } from '@/lib/i18n/path'
@@ -22,12 +23,25 @@ export interface ParticipatingOuting {
   href: string
 }
 
-export function OutingList({ outings, participating = [] }: { outings: OutingListRow[]; participating?: ParticipatingOuting[] }) {
+export function OutingList({
+  outings,
+  participating = [],
+  openCreate = false,
+}: {
+  outings: OutingListRow[]
+  participating?: ParticipatingOuting[]
+  /** Open the new-outing sheet on arrival (`/outings?create=1`, #1726). Never in a past chapter. */
+  openCreate?: boolean
+}) {
   const router = useRouter()
   const t = useTranslations()
   const tl = t.outingList
   const { isPast } = useMember()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(openCreate && !isPast)
+  // Drop `?create=1` so a refresh or back navigation doesn't reopen the sheet.
+  useEffect(() => {
+    if (openCreate) router.replace('/outings')
+  }, [openCreate, router])
   const active = outings.filter((o) => o.status === 'active')
   const past = outings.filter((o) => o.status !== 'active')
 
@@ -118,9 +132,10 @@ function OutingGroup({ outings, variant }: { outings: OutingListRow[]; variant: 
 
 function OutingRow({ outing, variant, isLast }: { outing: OutingListRow; variant: 'active' | 'past'; isLast: boolean }) {
   const t = useTranslations()
+  const locale = useLocale()
   const tl = t.outingList
   const isPast = variant === 'past'
-  const countLabel = tl.countTag.replace('{count}', String(outing.participantCount))
+  const countLabel = pickPlural(locale, outing.participantCount, tl.countTag).replace('{count}', String(outing.participantCount))
 
   return (
     <Link

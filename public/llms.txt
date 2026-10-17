@@ -11,6 +11,16 @@ Futari (codebase name: Oikos) is a Traditional-Chinese-first expense tracker des
 - **Chapters (epochs)**: Relationships have phases. When a partner joins, leaves, or is swapped, the ledger marks a new chapter. Past chapters become read-only history; current activity always lives in the current chapter.
 - **Income, recurring rules, settlements**: Income is tracked per recipient and does not affect the shared balance. Recurring income/expense rules generate pending occurrences that each partner confirms before they land. Settlements record real money transferred between the two partners.
 
+## Outings: splitting a trip with friends
+
+Futari also covers the one time money involves more than the two of you. A ledger member starts an **outing** (出遊 / 出游 / おでかけ) and drops its link in the group chat. Friends open it in a phone browser and pick their name: no app to download, no sign-up. Each expense is split evenly between the people chosen for it; to settle up, Futari lists who pays whom in at most one fewer transfer than there are people. Up to 20 people, one currency per outing. Friends settle up inside the outing; when it ends, the couple's part goes back to their own ledger as one settlement.
+
+Worked example (4 people, NT$): you pay NT$8,000 for the guesthouse, your partner NT$4,000 for food, a friend NT$800 for fuel. Total NT$12,800, NT$3,200 each. Settlement: friend A sends you NT$3,200, friend B sends you NT$1,600 and your partner NT$800. Three transfers, and everyone has paid exactly NT$3,200.
+
+## Shortcuts: logging a payment from an iPhone Shortcut
+
+Futari does not connect to payment accounts or read payment data. An iPhone Shortcut can open Futari's Add Expense with the amount, category and note filled in after an Apple Pay payment; the user reviews it and taps save. The amount must be a whole number (round it in the Shortcut). Guide in four languages: see the Links section. (The zh-TW guide also covers LINE Pay notifications.)
+
 ## Who it is for
 
 - Couples and long-term partners managing shared expenses in Traditional Chinese, Simplified Chinese, English, or Japanese.
@@ -34,6 +44,14 @@ Futari belongs to the "Freedom Project" family — a brand built on the metaphor
 - [Use case: Cohabitation](https://futari.southern-light.dev/zh-TW/use-case/cohabitation?utm_source=llms_txt&utm_medium=ai_agent)
 - [Use case: Newlyweds](https://futari.southern-light.dev/zh-TW/use-case/newlyweds?utm_source=llms_txt&utm_medium=ai_agent)
 - [Use case: Pet owners](https://futari.southern-light.dev/zh-TW/use-case/pet-owners?utm_source=llms_txt&utm_medium=ai_agent)
+- [Outings: split trip costs with friends (zh-TW)](https://futari.southern-light.dev/features/outing?utm_source=llms_txt&utm_medium=ai_agent)
+- [Outings: split trip costs with friends (zh-CN)](https://futari.southern-light.dev/zh-CN/features/outing?utm_source=llms_txt&utm_medium=ai_agent)
+- [Outings: split trip costs with friends (en)](https://futari.southern-light.dev/en/features/outing?utm_source=llms_txt&utm_medium=ai_agent)
+- [Outings: split trip costs with friends (ja)](https://futari.southern-light.dev/ja/features/outing?utm_source=llms_txt&utm_medium=ai_agent)
+- [Shortcuts: open Add Expense after an Apple Pay payment (zh-TW)](https://futari.southern-light.dev/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent)
+- [Shortcuts: open Add Expense after an Apple Pay payment (zh-CN)](https://futari.southern-light.dev/zh-CN/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent)
+- [Shortcuts: open Add Expense after an Apple Pay payment (en)](https://futari.southern-light.dev/en/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent)
+- [Shortcuts: open Add Expense after an Apple Pay payment (ja)](https://futari.southern-light.dev/ja/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent)
 - [Privacy policy](https://futari.southern-light.dev/zh-TW/privacy?utm_source=llms_txt&utm_medium=ai_agent)
 - [Terms of service](https://futari.southern-light.dev/zh-TW/terms?utm_source=llms_txt&utm_medium=ai_agent)
 - [Full LLM context](https://futari.southern-light.dev/llms-full.txt)

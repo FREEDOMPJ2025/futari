@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
 import { randomUUID } from 'node:crypto'
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { Sql } from 'postgres'
 import { loadEnvLocal } from '../outing/_setup'
@@ -9,13 +9,22 @@ import { loadEnvLocal } from '../outing/_setup'
 // ─── 0074: …and takes the user's Profiles row before that re-read (#1449) ────
 //
 // LOCAL THROWAWAY DATABASE ONLY. This file commits the current function
-// (0074's), swaps in 0069's or 0071's for the control runs, and lets the
-// deletion job process every pending user. It skips itself unless
-// DATABASE_URL points at localhost — never run it against dev or prod.
+// (the newest migration's body), swaps in 0069's or 0071's for the control
+// runs, and lets the deletion job process every pending user. It skips itself
+// unless DATABASE_URL points at localhost — never run it against dev or prod.
+//
+// Why the swap is committed, not rolled back (#1710): the cases need the job
+// on its own connection to run the swapped body while the app holds locks on
+// another, and an uncommitted CREATE OR REPLACE FUNCTION is invisible to every
+// other session. So the file puts the function back itself: afterAll installs
+// the body of the NEWEST migration that defines it (FN_CURRENT), never an
+// older copy. Failure looks like: nothing errors; the database's deletion
+// processor is quietly an old version until the next migrate (a later suite
+// then sees e.g. a stayer's deletion cascade the whole ledger again).
 //
 // Database: postgres:17 plus the Supabase stand-ins (see PR #1445's
-// description), then `drizzle-kit migrate` through 0074 (the app code calls
-// 0074's profile_is_live).
+// description or createStandInDb in _supabaseStandIn.ts), migrated through the
+// latest migration, so the helpers FN_CURRENT calls exist.
 //
 //   DATABASE_URL=postgres://postgres:<pw>@localhost:<port>/postgres \
 //     npx vitest run __tests__/actions/accountDeletionRescan0071.test.ts
@@ -100,13 +109,23 @@ vi.mock('@/lib/db/queries/epoch', async (importOriginal) => {
 
 const postgres = (await import('postgres')).default
 
-const fnSection = (file: string) => readFileSync(resolve(__dirname, '../../drizzle', file), 'utf-8')
+const MIGRATIONS = resolve(__dirname, '../../drizzle')
+const fnSectionOrNull = (file: string) => readFileSync(resolve(MIGRATIONS, file), 'utf-8')
   .split('--> statement-breakpoint')
-  .find((s) => s.includes('CREATE OR REPLACE FUNCTION public.process_account_deletions'))!
+  .find((s) => s.includes('CREATE OR REPLACE FUNCTION public.process_account_deletions')) ?? null
+const fnSection = (file: string) => fnSectionOrNull(file)!
 const FN_0069 = fnSection('0069_invoice_credential_retention.sql')
 const FN_0071 = fnSection('0071_account_deletion_rescan.sql')
-// The current definition; every control run restores it.
-const FN_0074 = fnSection('0074_account_deletion_profile_lock.sql')
+// The current definition: the newest migration that (re)defines the function.
+// Every control run restores it, and so does afterAll.
+const FN_CURRENT = (() => {
+  const files = readdirSync(MIGRATIONS).filter((f) => /^\d{4}_.+\.sql$/.test(f)).sort().reverse()
+  for (const f of files) {
+    const section = fnSectionOrNull(f)
+    if (section) return section
+  }
+  throw new Error('no migration defines process_account_deletions')
+})()
 
 const TOMBSTONE = '已離開的夥伴'
 const notices: string[] = []
@@ -218,11 +237,11 @@ const profileRow = async (id: string) =>
 describe.skipIf(!isLocalDb)('0071/0074 process_account_deletions re-reads after its locks (#1433, #1449) — local throwaway DB', () => {
   beforeAll(async () => {
     pg = postgres(databaseUrl, { max: 1, prepare: false, connection: { application_name: 'main_1433' } })
-    await pg.unsafe(FN_0074)
+    await pg.unsafe(FN_CURRENT)
   })
 
   afterAll(async () => {
-    await pg?.unsafe(FN_0074)
+    await pg?.unsafe(FN_CURRENT)
     await pg?.end()
   })
 
@@ -254,7 +273,7 @@ describe.skipIf(!isLocalDb)('0071/0074 process_account_deletions re-reads after 
       expect(await groupRow(out.newGroupId)).toEqual({ member_a: out.u, member_b: null })
       expect((await profileRow(out.u))?.display_name).toBe(TOMBSTONE)
     } finally {
-      await pg.unsafe(FN_0074)
+      await pg.unsafe(FN_CURRENT)
     }
   })
 
@@ -297,7 +316,7 @@ describe.skipIf(!isLocalDb)('0071/0074 process_account_deletions re-reads after 
       expect(await authExists(out.u)).toBe(false)
       expect(await groupRow(out.h.groupId)).toEqual({ member_a: out.p, member_b: out.u })
     } finally {
-      await pg.unsafe(FN_0074)
+      await pg.unsafe(FN_CURRENT)
     }
   })
 
@@ -485,12 +504,12 @@ describe.skipIf(!isLocalDb)('0071/0074 process_account_deletions re-reads after 
         expect(await groupRow(out.h.groupId)).toEqual({ member_a: out.p, member_b: out.u })
         expect((await profileRow(out.u))?.display_name).toBe(TOMBSTONE)
       } finally {
-        await pg.unsafe(FN_0074)
+        await pg.unsafe(FN_CURRENT)
       }
     })
 
     it('1. accept first: the job waits on the Profiles row, then removes the user from the ledger they joined', async () => {
-      await pg.unsafe(FN_0074)
+      await pg.unsafe(FN_CURRENT)
       const out = await acceptHoldingProfile('accept_hold_0074')
       expect(out.appResult.ok).toBe(true)
       expect(out.jobOut).toEqual({ ok: true, value: 1 })
@@ -530,12 +549,12 @@ describe.skipIf(!isLocalDb)('0071/0074 process_account_deletions re-reads after 
         expect(await groupRow(out.newGroupId)).toEqual({ member_a: out.u, member_b: null })
         expect((await profileRow(out.u))?.display_name).toBe(TOMBSTONE)
       } finally {
-        await pg.unsafe(FN_0074)
+        await pg.unsafe(FN_CURRENT)
       }
     })
 
     it('2. createGroup first: the job waits on the Profiles row, then deletes the new ledger with the user', async () => {
-      await pg.unsafe(FN_0074)
+      await pg.unsafe(FN_CURRENT)
       const out = await createHoldingProfile('create_hold_0074')
       expect(out.appResult.ok).toBe(true)
       expect(out.jobOut).toEqual({ ok: true, value: 1 })
@@ -571,7 +590,7 @@ describe.skipIf(!isLocalDb)('0071/0074 process_account_deletions re-reads after 
     }
 
     it('3a. job first vs acceptInvite (user with history): the accept waits, then fails profile_not_found', async () => {
-      await pg.unsafe(FN_0074)
+      await pg.unsafe(FN_CURRENT)
       const { acceptInvite } = await import('@/actions/invite')
       const { p, u, g } = await removedPartner()
       const token = await invite(p)
@@ -588,7 +607,7 @@ describe.skipIf(!isLocalDb)('0071/0074 process_account_deletions re-reads after 
     })
 
     it('3b. job first vs createGroup (user with history): createGroup waits, then fails profile_not_found', async () => {
-      await pg.unsafe(FN_0074)
+      await pg.unsafe(FN_CURRENT)
       const { createGroup } = await import('@/actions/group')
       const { u } = await removedPartner()
       const out = await runAppWhileJobHoldsProfile('create_jobfirst_history', u,

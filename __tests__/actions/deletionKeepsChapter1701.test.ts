@@ -375,6 +375,56 @@ describe.skipIf(!isLocalDb)('0096 — the stayer\'s deletion keeps the shared ch
     }
   })
 
+  // #1706 — every other case keeps a chapter that has an earlier one (E0), so
+  // "created before the kept chapter" always meant "not visible to it". The
+  // ledger's EARLIEST chapter is different: rows older than it belong to it
+  // (viewer_in_chapter, 0080 — the first chapter has no lower bound), and the
+  // prune must keep them. Failure looks like: nothing errors; X opens the first
+  // chapter they shared and the records dated before it are gone.
+  describe('(l) the kept chapter is the ledger\'s earliest: no lower bound', () => {
+    it('rows older than it stay (cash, income, settlements, fuel logs); rows after it go', async () => {
+      const t = tag()
+      const rec = new Recorder(pg)
+      const D = await person(pg, `${t} D`)
+      const X = await person(pg, `${t} X`)
+      const { g: G } = await ledger(rec, pg, 'G', `${t} G`, [
+        { label: 'F1', start: '2026-02-10T00:00:00Z', end: '2026-07-20T00:00:00Z', a: D, b: X },
+        { label: 'F2', start: '2026-07-20T00:00:00Z', end: null, a: D, b: null },
+      ])
+      const car = await rec.ins('Assets', 'car', { group_id: G, type: 'car', name: 'car', created_at: new Date('2026-01-01T00:00:00Z') })
+      const income = (label: string, created: string) => rec.ins('IncomeTransactions', label, {
+        group_id: G, recipient_id: D, amount: 700, category: 'salary', source: `s ${label}`,
+        occurred_at: created.slice(0, 10), created_at: new Date(created),
+      })
+      const settle = (label: string, created: string) => rec.ins('Settlements', label, {
+        group_id: G, paid_by: X, amount: 300, settled_at: new Date(created), created_at: new Date(created), note: label,
+      })
+      const fuel = (label: string, created: string) => rec.ins('FuelLogs', label, {
+        asset_id: car, liters: '30', fuel_type: '95', odometer: 100, logged_at: new Date(created), created_at: new Date(created),
+      })
+      await cash(rec, G, 'cashBeforeFirst', D, '2026-01-05T00:00:00Z')
+      await cash(rec, G, 'cashInFirst', X, '2026-03-05T00:00:00Z')
+      await cash(rec, G, 'cashAfter', D, '2026-08-01T00:00:00Z')
+      await income('incomeBeforeFirst', '2026-01-06T00:00:00Z')
+      await income('incomeAfter', '2026-08-02T00:00:00Z')
+      await settle('settleBeforeFirst', '2026-01-07T00:00:00Z')
+      await settle('settleAfter', '2026-08-03T00:00:00Z')
+      await fuel('fuelBeforeFirst', '2026-01-08T00:00:00Z')
+      await fuel('fuelAfter', '2026-08-04T00:00:00Z')
+
+      await requestDeletion(pg, D)
+      expect(await runJob()).toEqual({ n: 1, warnings: [] })
+      const left = Object.values(await rec.surviving()).flat().sort()
+      expect(left).toEqual([
+        'F1', 'F2', 'G', 'car', 'cashBeforeFirst', 'cashInFirst', 'fuelBeforeFirst', 'incomeBeforeFirst', 'settleBeforeFirst',
+      ])
+
+      await requestDeletion(pg, X)
+      expect(await runJob()).toEqual({ n: 1, warnings: [] })
+      expect(await rec.surviving()).toEqual({})
+    })
+  })
+
   describe('(h) a prune that fails', () => {
     it('X\'s deletion still completes (WARNING); the sweep purges once the fault is gone', async () => {
       const w = await afterD()
@@ -422,6 +472,41 @@ describe.skipIf(!isLocalDb)('0096 — the stayer\'s deletion keeps the shared ch
         await pg`DROP TABLE public.fault_1701`
       }
       // Next run (fault gone) completes.
+      expect(await runJob()).toEqual({ n: 1, warnings: [] })
+      expect(await w.rec.surviving(Object.keys(KEPT_AFTER_D))).toEqual(KEPT_AFTER_D)
+      await requestDeletion(pg, w.X)
+      expect(await runJob()).toEqual({ n: 1, warnings: [] })
+    })
+
+    // #1706 — the test above injects its fault with an FK into "Trips", which
+    // blocks the prune AND `_delete_group_cascade` (both delete the trip). A
+    // regression that catches the prune's error and falls back to the cascade
+    // would hit the same wall there, roll D back all the same, and pass. This
+    // fault is one only the prune can reach: a trigger on UPDATE "Assets" (the
+    // prune scrubs the kept assets' notes; the cascade only deletes them). A
+    // fallback to the cascade would succeed here, delete D, and destroy the
+    // chapter X can still look back on.
+    it('D\'s prune failing on an error only the prune hits still rolls D back; the cascade is not a fallback (#1706)', async () => {
+      const w = await world(pg, tag())
+      await pg`CREATE FUNCTION public.fault_1706() RETURNS trigger LANGUAGE plpgsql
+        AS $f$ BEGIN RAISE EXCEPTION 'fault_1706 injected'; END $f$`
+      await pg`CREATE TRIGGER fault_1706 BEFORE UPDATE ON "Assets" FOR EACH ROW EXECUTE FUNCTION public.fault_1706()`
+      try {
+        const before = await w.rec.fingerprint()
+        await requestDeletion(pg, w.D)
+        const r = await runJob()
+        expect(r.n).toBe(0)
+        expect(r.warnings).toEqual([expect.stringMatching(new RegExp(`^process_account_deletions: failed for ${w.D}: .*fault_1706 injected`))])
+        expect(await authExists(w.D)).toBe(true)
+        // Not one row of the ledger moved: X's chapter and everything else.
+        expect(await w.rec.fingerprint()).toEqual(before)
+        expect(await w.rec.surviving(Object.keys(KEPT_AFTER_D))).not.toEqual({})
+        expect(await ledgerRowCounts(pg, w.G)).not.toEqual({})
+      } finally {
+        await pg`DROP TRIGGER fault_1706 ON "Assets"`
+        await pg`DROP FUNCTION public.fault_1706()`
+      }
+      // Next run (fault gone) completes, keeping X's chapter.
       expect(await runJob()).toEqual({ n: 1, warnings: [] })
       expect(await w.rec.surviving(Object.keys(KEPT_AFTER_D))).toEqual(KEPT_AFTER_D)
       await requestDeletion(pg, w.X)

@@ -3,6 +3,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vites
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './actions/_authUser'
 import type { ReactElement } from 'react'
 
 // ─── Integration: a former member's read-only look-back (#1612) ─────────────
@@ -172,12 +173,14 @@ beforeAll(async () => {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL not set; cannot run integration test. Ensure .env.local has DATABASE_URL.')
   }
-  await db.insert(profiles).values([
+  const rows = [
     { id: A, displayName: LIVE.aName, avatarUrl: LIVE.aAvatar },
     { id: B, displayName: 'TEST_1612_B_LIVE' },
     { id: B2, displayName: 'TEST_1612_B2_LIVE' },
     { id: C, displayName: LIVE.cName, avatarUrl: 'https://img.example/test-1612-c.jpg' },
-  ])
+  ]
+  await db.insert(profiles).values(rows)
+  await seedAuthUsers(rows)
 
   const [g] = await db.insert(oikosGroups).values({
     name: LIVE.ledgerName, memberA: A, memberB: C, currentEpochStartedAt: d('2026-06-01'),
@@ -282,6 +285,7 @@ afterAll(async () => {
       await db.delete(groupEpochs).where(inArray(groupEpochs.groupId, groupIds))
       await db.delete(oikosGroups).where(inArray(oikosGroups.id, groupIds))
     }
+    await deleteAuthUsers(people)
     await db.delete(profiles).where(inArray(profiles.id, people))
   } catch (e) {
     console.error('cleanup failed', e)
@@ -461,7 +465,7 @@ describe('#1612 — 3. the chapter\'s own rows are served', () => {
 describe('#1612 — 4. the way in and out', () => {
   it('B2 (no ledger): /onboarding offers the list → enter → /dashboard; exit → /onboarding', async () => {
     as(B2)
-    const onboarding = await payloadOf(await OnboardingPage())
+    const onboarding = await payloadOf(await OnboardingPage({}))
     expect(onboarding).toContain('"el":"PastTimesEntryLink"')
 
     const list = await StandalonePastTimesPage() as ReactElement<{ props: unknown }>
@@ -480,7 +484,7 @@ describe('#1612 — 4. the way in and out', () => {
 
   it('B (own ledger): /onboarding sends them to /dashboard; exit returns to LB', async () => {
     as(B)
-    await expect(OnboardingPage()).rejects.toThrow('NEXT_REDIRECT /dashboard')
+    await expect(OnboardingPage({})).rejects.toThrow('NEXT_REDIRECT /dashboard')
     await expect(StandalonePastTimesPage()).rejects.toThrow('NEXT_REDIRECT /settings/past-times')
     as(B, w.e1)
     expect((await exitPastEpoch()).ok).toBe(true)
@@ -494,7 +498,7 @@ describe('#1612 — 4. the way in and out', () => {
     await db.insert(profiles).values({ id: lonely, displayName: 'TEST_1612_LONELY' })
     try {
       as(lonely)
-      expect(await payloadOf(await OnboardingPage())).not.toContain('PastTimesEntryLink')
+      expect(await payloadOf(await OnboardingPage({}))).not.toContain('PastTimesEntryLink')
     } finally {
       await db.delete(profiles).where(eq(profiles.id, lonely))
     }

@@ -3,6 +3,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vites
 import { randomUUID } from 'node:crypto'
 import type { ReactElement } from 'react'
 import { loadEnvLocal } from './outing/_setup'
+import { seedAuthUsers, deleteAuthUsers } from './actions/_authUser'
 
 // ─── Integration: an outing belongs to its own chapter (#1682) ───────────────
 //
@@ -125,13 +126,15 @@ beforeAll(async () => {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL not set; cannot run integration test. Ensure .env.local has DATABASE_URL.')
   }
-  await db.insert(profiles).values([
+  const rows = [
     { id: S, displayName: 'TEST_OUTING_PAGE_S' },
     { id: C, displayName: 'TEST_OUTING_PAGE_C' },
     { id: X, displayName: 'TEST_OUTING_PAGE_X' },
     { id: Y, displayName: 'TEST_OUTING_PAGE_Y' },
     { id: F, displayName: 'TEST_OUTING_PAGE_F' },
-  ])
+  ]
+  await db.insert(profiles).values(rows)
+  await seedAuthUsers(rows)
 
   const [g] = await db.insert(oikosGroups).values({
     name: 'TEST_OUTING_PAGE_G', memberA: S, memberB: C, currentEpochStartedAt: d('2026-04-01'), baseCurrency: 'twd',
@@ -220,6 +223,7 @@ afterAll(async () => {
     await db.delete(groupBalance).where(inArray(groupBalance.groupId, groupIds))
     await db.delete(groupEpochs).where(inArray(groupEpochs.groupId, groupIds))
     await db.delete(oikosGroups).where(inArray(oikosGroups.id, groupIds))
+    await deleteAuthUsers(people)
     await db.delete(profiles).where(inArray(profiles.id, people))
   } catch (e) {
     console.error('cleanup failed', e)
@@ -267,7 +271,7 @@ async function expectRefusedWithoutData(id: string, error: string | RegExp) {
 const expectNotFoundWithoutData = (id: string) => expectRefusedWithoutData(id, 'NEXT_NOT_FOUND')
 
 async function listedOutingIds() {
-  const el = (await OutingsPage()) as ReactElement<{ outings: Array<{ id: string }> }>
+  const el = (await OutingsPage({})) as ReactElement<{ outings: Array<{ id: string }> }>
   return el.props.outings.map((o) => o.id).sort()
 }
 

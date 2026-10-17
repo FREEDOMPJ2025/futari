@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 
 // ─── #1588 S3 — removePartner pauses the ex's recurring rules ─────────────
 //
@@ -37,6 +38,9 @@ function loadEnvLocal() {
   }
 }
 loadEnvLocal()
+// Each test seeds over the network (incl. an auth.users row, #1710); the default
+// 5 s is too tight against dev.
+vi.setConfig({ testTimeout: 60_000 })
 
 let mockUserId = ''
 vi.mock('@/lib/supabase/server', () => ({
@@ -81,7 +85,9 @@ let seeded: Seed | null = null
 
 async function seed(): Promise<Seed> {
   const a = randomUUID(); const b = randomUUID()
-  await db.insert(profiles).values([{ id: a, displayName: 'TEST_1588S3_A' }, { id: b, displayName: 'TEST_1588S3_B' }])
+  const people = [{ id: a, displayName: 'TEST_1588S3_A' }, { id: b, displayName: 'TEST_1588S3_B' }]
+  await db.insert(profiles).values(people)
+  await seedAuthUsers(people)
   const [g] = await db.insert(oikosGroups).values({ name: 'TEST_1588S3', memberA: a, memberB: b }).returning({ id: oikosGroups.id })
   await db.insert(groupBalance).values({ groupId: g.id, balance: 0, version: 0 })
   await db.insert(groupEpochs).values({ groupId: g.id, startedAt: new Date('2026-05-10T00:00:00Z'), memberAId: a, memberBId: b })
@@ -124,6 +130,7 @@ async function cleanup(s: Seed) {
   await db.delete(groupEpochs).where(eq(groupEpochs.groupId, s.groupId))
   await db.delete(groupBalance).where(eq(groupBalance.groupId, s.groupId))
   await db.delete(oikosGroups).where(eq(oikosGroups.id, s.groupId))
+  await deleteAuthUsers([s.a, s.b])
   await db.delete(profiles).where(inArray(profiles.id, [s.a, s.b]))
 }
 

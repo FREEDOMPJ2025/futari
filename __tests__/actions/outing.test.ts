@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import { randomUUID } from 'node:crypto'
-import { loadEnvLocal, seedGroup as seedGroupRow } from '../outing/_setup'
+import { loadEnvLocal, seedGroup as seedGroupRow, deleteSeededAuthUsers } from '../outing/_setup'
 
 // ─── 出遊 v1.6.0 against the real dev database (#943, plan v2.1 S-C / S-D / S-E) ──
 //
@@ -72,6 +72,9 @@ async function seedGroup(opts?: Parameters<typeof seedGroupRow>[0]) {
   seededGroups.add(seed.groupId)
   return seed
 }
+
+// Its own hook so a failing purge below cannot leave the auth rows behind.
+afterAll(async () => { await deleteSeededAuthUsers() })
 
 afterAll(async () => {
   const ids = [...seededGroups]

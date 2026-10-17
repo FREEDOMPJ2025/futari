@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 
 // ─── Load .env.local so tests connect to the real dev Supabase Postgres ────
 // vitest does not auto-load .env files. We do it manually before any module
@@ -111,6 +112,10 @@ beforeAll(async () => {
     { id: fixture.userAId, displayName: 'TEST_userA_phase2' },
     { id: fixture.userBId, displayName: 'TEST_userB_phase2' },
   ])
+  await seedAuthUsers([
+    { id: fixture.userAId, displayName: 'TEST_userA_phase2' },
+    { id: fixture.userBId, displayName: 'TEST_userB_phase2' },
+  ])
 
   const [groupA] = await db.insert(oikosGroups).values({
     name: 'TEST_groupA_phase2', memberA: fixture.userAId, memberB: null,
@@ -189,9 +194,11 @@ afterAll(async () => {
     await db.delete(oikosGroups).where(eq(oikosGroups.id, fixture.groupBId))
   }
   if (fixture.userAId) {
+    await deleteAuthUsers([fixture.userAId])
     await db.delete(profiles).where(eq(profiles.id, fixture.userAId))
   }
   if (fixture.userBId) {
+    await deleteAuthUsers([fixture.userBId])
     await db.delete(profiles).where(eq(profiles.id, fixture.userBId))
   }
 })

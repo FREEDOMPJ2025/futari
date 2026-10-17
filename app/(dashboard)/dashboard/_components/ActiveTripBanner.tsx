@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { currencySymbol, type CurrencyCode } from '@/lib/currency'
 
 // TripSheet only mounts when the user taps a trip row — lazy-load to keep the
@@ -50,6 +51,7 @@ const COLLAPSED_KEY = 'trip-banner-collapsed'
  */
 export function ActiveTripBanner({ trips, baseCurrency }: Props) {
   const t = useTranslations()
+  const locale = useLocale()
   const router = useRouter()
   const tr = t.dashboard.activeTripBanner
 
@@ -100,7 +102,7 @@ export function ActiveTripBanner({ trips, baseCurrency }: Props) {
     // === Collapsed: single row, buttons inline on the right ===
     const collapsedText = single
       ? single.name
-      : tr.multipleHeading.replace('{count}', String(trips.length))
+      : pickPlural(locale, trips.length, tr.multipleHeading).replace('{count}', String(trips.length))
     return (
       <>
         <div className="px-4 pt-2">
@@ -172,7 +174,7 @@ export function ActiveTripBanner({ trips, baseCurrency }: Props) {
                 className="mt-1.5 text-sm leading-relaxed truncate"
                 style={{ color: 'var(--ink)', fontFamily: 'var(--font-fraunces)', fontWeight: 500 }}
               >
-                {single ? single.name : tr.multipleHeading.replace('{count}', String(trips.length))}
+                {single ? single.name : pickPlural(locale, trips.length, tr.multipleHeading).replace('{count}', String(trips.length))}
               </div>
               <div className="mt-1.5 text-xs truncate" style={{ color: 'var(--ink-3)' }}>
                 {single ? formatSingleMeta(single, tr) : tr.multipleCta}

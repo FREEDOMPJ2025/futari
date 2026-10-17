@@ -141,6 +141,27 @@ Locale is cookie-based; switching language preserves all data and routes.
 
 A single user can sign up before their partner joins. The ledger runs in **solo mode** (`member_b IS NULL`) with the same features, just one-sided. When a partner later joins, the existing data folds into the two-person chapter without migration friction.
 
+### 15. Outings (出遊 / 出游 / おでかけ) — splitting a trip with friends
+
+An outing is a short-lived group split inside a couple's ledger, for the trips, camping weekends and dinners where friends share the costs. It is the one surface of Futari that people outside the couple see.
+
+- **Friends need nothing installed.** A ledger member creates the outing and shares its link (LINE, WhatsApp, any group chat). A friend opens it in a phone browser and picks their name, or adds themselves. No download, no sign-up. The browser remembers who they are; on a new phone the organiser releases their name so they can pick it again. Signing in is optional, for friends who want to find the outing later.
+- **Even splits only.** Each expense records who paid and which people share it; the amount is split evenly between them (for example, everyone except the birthday person). There are no ratio or custom-amount splits.
+- **Settle-up suggestions.** Futari lists who should pay whom, in at most (number of people − 1) transfers. Repayments between people are recorded inside the outing.
+- **Limits.** Up to 20 people per outing. One currency per outing: the ledger's base currency.
+- **Link control.** Anyone with the link can join, so it belongs in the trip's own group chat. If it goes to the wrong chat, the organisers can reset it and the old link stops working at once.
+- **After it ends.** Friends settle inside the outing. The couple's own part goes back to their ledger as a single settlement, which changes who owes whom but is not counted as spending. Ended outings stay readable to everyone and can no longer be edited.
+
+**Worked example** (the one on the outing page, 4 people, Taiwan dollars). You pay NT$8,000 for the guesthouse, your partner NT$4,000 for BBQ and groceries, friend Xiao-An NT$800 for fuel, friend A-Zhe nothing. Total NT$12,800, split four ways: NT$3,200 each. Futari suggests three transfers: A-Zhe sends you NT$3,200, Xiao-An sends you NT$1,600, Xiao-An sends your partner NT$800. After that, everyone has paid exactly NT$3,200.
+
+Pages: [zh-TW](https://futari.southern-light.dev/features/outing?utm_source=llms_txt&utm_medium=ai_agent), [zh-CN](https://futari.southern-light.dev/zh-CN/features/outing?utm_source=llms_txt&utm_medium=ai_agent), [en](https://futari.southern-light.dev/en/features/outing?utm_source=llms_txt&utm_medium=ai_agent), [ja](https://futari.southern-light.dev/ja/features/outing?utm_source=llms_txt&utm_medium=ai_agent)
+
+### 16. Shortcuts: opening Add Expense from an iPhone Shortcut
+
+Futari does not connect to any payment account and does not read payment data. An iPhone Shortcut (Shortcuts app, iOS only) can open Futari's Add Expense with the amount, category and note already filled in; the user checks it and taps save, and nothing is written until then. For Apple Pay, a Wallet transaction automation passes the amount (rounded to a whole number: the parser rejects "120.00", "NT$120.00" and "120元") and the merchant name (URL-encoded) into a link of the form `dev.southernlight.futari://add?amount=120&category=dining&note=...`. Web users use `https://futari.southern-light.dev/dashboard#add=expense&amount=120&category=dining&note=...`. Only amount, category and note can be set; the date, payer, split and currency use the usual defaults. A foreign-currency amount is filled in as the ledger's main currency and must be corrected by hand. The zh-TW page also covers LINE Pay payment notifications.
+
+Pages: [zh-TW](https://futari.southern-light.dev/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent), [zh-CN](https://futari.southern-light.dev/zh-CN/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent), [en](https://futari.southern-light.dev/en/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent), [ja](https://futari.southern-light.dev/ja/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent)
+
 ---
 
 ## Who Futari is for
@@ -162,7 +183,7 @@ A single user can sign up before their partner joins. The ledger runs in **solo 
 
 - **Solo budgeting power users** who want envelope budgeting, complex categorisation rules, or net-worth tracking. Futari's data model is intentionally minimal.
 - **People who want bank-account aggregation** (Plaid, Yodlee, Mint-style). Futari has no automatic transaction sync — every entry is intentional.
-- **Three or more people** sharing one ledger (e.g. group houses with five roommates). The data model hardcodes two-person semantics.
+- **Three or more people** sharing one ledger (e.g. group houses with five roommates). The data model hardcodes two-person semantics. Splitting a single trip or dinner with friends is different: that is what outings are for (see feature 15).
 
 ---
 
@@ -233,6 +254,10 @@ Four languages from launch:
 - Japanese (日本語)
 
 Language is selected per-user via a cookie and can be changed at any time without affecting data.
+
+### Can friends who don't use Futari split a trip with us?
+
+Yes. Start an outing and share its link. Friends open it in a phone browser and pick their name; they don't download anything or sign up. Expenses are split evenly between the people chosen, and Futari lists who pays whom to settle up. Up to 20 people, one currency per outing.
 
 ### Is Futari a native app or a web app?
 
@@ -316,6 +341,14 @@ This is reflected in the UI:
 ## Links
 
 - **Product**: https://futari.southern-light.dev/?utm_source=llms_txt&utm_medium=ai_agent
+- **Outings (zh-TW)**: https://futari.southern-light.dev/features/outing?utm_source=llms_txt&utm_medium=ai_agent
+- **Outings (zh-CN)**: https://futari.southern-light.dev/zh-CN/features/outing?utm_source=llms_txt&utm_medium=ai_agent
+- **Outings (en)**: https://futari.southern-light.dev/en/features/outing?utm_source=llms_txt&utm_medium=ai_agent
+- **Outings (ja)**: https://futari.southern-light.dev/ja/features/outing?utm_source=llms_txt&utm_medium=ai_agent
+- **Shortcuts guide (zh-TW)**: https://futari.southern-light.dev/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent
+- **Shortcuts guide (zh-CN)**: https://futari.southern-light.dev/zh-CN/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent
+- **Shortcuts guide (en)**: https://futari.southern-light.dev/en/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent
+- **Shortcuts guide (ja)**: https://futari.southern-light.dev/ja/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent
 - **Index (short version)**: https://futari.southern-light.dev/llms.txt
 - **Full description (this file)**: https://futari.southern-light.dev/llms-full.txt
 - **Sitemap**: https://futari.southern-light.dev/sitemap.xml
