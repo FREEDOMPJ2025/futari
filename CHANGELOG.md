@@ -44,8 +44,8 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ### 使用者可見變化
 
 - **使用情境頁與搬遷頁的問答、步驟、差異點各頁改寫成各頁自己的內容（#1676）**
-  使用者：9 個使用情境頁不再共用同一句「Futari 要收費嗎？」與換名詞的範本句，改回答該情境真的會問的事（定期支出、結算、出遊、愛物頁累計）；14 個搬遷頁的步驟、問答與差異點改成該來源自己的說法（匯出格式、分類對應、哪些帶得走），en／ja 補回 zh-TW 的細節（四語；en／ja／zh-CN 待確認）。
-  技術：只改 `useCase.pages`、`migrate.pages` 的字串與 `contentUpdatedAt`（2026-10-18）；已移除「匯入時可對照調整欄位」「重複的同一筆會自動去掉」這兩句與程式不符的說法。
+  使用者：9 個使用情境頁不再共用同一句「Futari 要收費嗎？」與換名詞的範本句，改回答該情境真的會問的事（定期支出、結算、出遊、愛物頁的本月花費）；14 個搬遷頁的步驟、問答與差異點改成該來源自己的說法（匯出格式、分類對應、哪些帶得走），en／ja 補回 zh-TW 的細節（四語；en／ja／zh-CN 待確認）。
+  技術：改 `useCase.pages`、`migrate.pages` 的字串與 `contentUpdatedAt`（2026-10-18），並改共用的 `migrate.chatgptWorkflow.note`；已移除「匯入時可對照調整欄位」「重複的同一筆會自動去掉」「愛物頁有累計」這幾句與程式不符的說法，Splitwise 不再描述目前走不通的匯入步驟（#1791）。
 - **品牌頁加上「紀錄化成光點」的動態（#1527）**
   使用者：首頁手機畫面裡的紀錄各化成一個光點飄進插畫；「四種光」逐列亮起；信任、使用情境、搬遷段落進入畫面時亮燈。減少動態效果時直接呈現亮著的樣子。
   技術：純 CSS（`app/[locale]/_landing/landing-motion.css`），只動 transform／opacity，scroll-driven 包在 `@supports (animation-timeline: view())`；沿用 `about-fade-up` 的 easing；不碰 LCP 元素。

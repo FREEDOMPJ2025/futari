@@ -6188,7 +6188,7 @@ export const zhTW: Translations = {
       formatExample: `date,category,amount,description,currency,kind
 2026-05-30,飲食,150,星巴克,TWD,expense
 2026-05-30,薪水,50000,五月,TWD,income`,
-      note: 'currency 不是 TWD 的會照原數字先匯入，換算可以在匯入後逐筆調整。重複出現的同一筆（相同日期＋金額＋描述）會自動去掉。',
+      note: 'currency 不是 TWD 的會照原數字先匯入，換算可以在匯入後逐筆調整。提示詞已請 ChatGPT 把重複出現的同一筆（相同日期＋金額＋描述）只留一筆；匯入時 Futari 不會再去重，同一份檔案請只匯入一次。',
       settingsHint: '不急著現在弄也沒關係——登入後在設定裡一樣能匯入 CSV。',
     },
     pages: {
@@ -6218,7 +6218,7 @@ export const zhTW: Translations = {
         faq: [
           {
             question: 'Honeydue 的分類會對得上嗎？',
-            answer: 'Food & Dining、Home、Transportation 這類常見的英文分類名稱，會自動對到 Futari 的飲食、居住、交通；對不上的先歸到「其他」，匯入前可以逐一調整。',
+            answer: 'Food & Dining、Home、Transportation 這類常見的英文分類名稱，會自動歸到 Futari 的飲食、居住、交通；對不上的全部歸在「其他」一組，匯入前可以整組改選別的類別。',
           },
           {
             question: 'Honeydue 轉手了，搬過來要付費嗎？',
@@ -6255,7 +6255,7 @@ export const zhTW: Translations = {
         stepsHeading: 'Spendee 搬遷三步',
         step1: '在 Spendee → More → Export Data，下載 CSV。',
         step2: '把 CSV 上傳到這裡預覽，Type 欄會用來分出支出與進帳。',
-        step3: '建立 Futari 帳號，在類別對照那一步，把 Food & Drinks 這類 Spendee 分類對到 Futari 的類別。',
+        step3: '建立 Futari 帳號。類別對照那一步，Spendee 的分類會先自動歸到 Futari 的類別（例如 Food & Drinks 歸到飲食），對不上的歸在「其他」，可以整組改選。',
         formatHintLabel: 'Spendee CSV 的欄位長這樣',
         formatHintHeaders: 'Date,Wallet,Type,Category name,Amount,Currency,Note',
         formatHintNote: 'Type 欄位是「Expense / Income / Transfer」。Transfer（帳戶間轉帳）匯入時會被標記為錯誤——Futari 不存轉帳，請在預覽階段刪除這幾列。',
@@ -6310,7 +6310,7 @@ export const zhTW: Translations = {
           },
           {
             question: 'CWMoney 的分類會對得上嗎？',
-            answer: 'CWMoney 裡的飲食、交通、居住、娛樂、醫療這幾類，會自動對到 Futari 的同名類別；對不上的先歸到「其他」，匯入前可以逐一調整。',
+            answer: 'CWMoney 裡的飲食、交通、居住、娛樂、醫療這幾類，會自動歸到 Futari 的同名類別；對不上的全部歸在「其他」一組，匯入前可以整組改選別的類別。',
           },
           {
             question: 'CWMoney 的共同帳本是付費功能，搬過來要付費嗎？',
@@ -6343,7 +6343,7 @@ export const zhTW: Translations = {
         ],
         stepsHeading: '麻布記帳搬遷三步',
         step1: '在麻布記帳（訂閱會員）用「明細匯出」把交易輸出成 CSV。',
-        step2: '把 CSV 上傳到這裡預覽，確認日期、金額和分類都讀得到。',
+        step2: '把 CSV 上傳到這裡預覽，先確認交易明細的日期範圍和筆數沒有缺一段。',
         step3: '建立 Futari 帳號，匯入時對照類別、指定付款人，之後和伴侶一起接著記。',
         faq: [
           {
@@ -6352,7 +6352,7 @@ export const zhTW: Translations = {
           },
           {
             question: '匯出的 CSV 和 Futari 的格式對得起來嗎？',
-            answer: '不完全一樣。上傳到這頁會先在瀏覽器預覽，看得到檔案被讀成什麼樣；正式匯入時，類別可以逐一對照，付款人與分攤方式整批指定，讀不出來的列會被略過並留下紀錄。',
+            answer: '不完全一樣。上傳到這頁會先在瀏覽器預覽，看得到筆數、日期範圍和常出現的分類；正式匯入時，付款人與分攤方式整批指定，讀不出來的列會被略過並留下紀錄。',
           },
           {
             question: '搬過來之後要訂閱嗎？',
@@ -6509,7 +6509,7 @@ export const zhTW: Translations = {
         ],
         stepsHeading: '簡單記帳搬遷三步',
         step1: '在簡單記帳把要搬的交易一頁一頁截圖，VIP 才有的匯出不必碰（下方有完整做法）。',
-        step2: '用 ChatGPT 把截圖整理成 CSV，免費版就夠；簡單記帳的分類文字會原樣帶過來，之後再對到 Futari 的類別。',
+        step2: '用 ChatGPT 把截圖整理成 CSV，免費版就夠；分類文字會原樣寫進 CSV，匯入時對得上的會歸到 Futari 的類別，其餘歸在「其他」。',
         step3: '把 CSV 上傳到這裡預覽，確認筆數和日期範圍對得上，再建立帳號完成匯入。',
         faq: [
           {
@@ -6638,7 +6638,7 @@ export const zhTW: Translations = {
         stepsHeading: '1Money 搬遷三步',
         step1: '在 1Money 把要搬的交易截圖，讓金額旁的幣別一起入鏡（下方有完整做法）。',
         step2: '用 ChatGPT 把截圖整理成 CSV；每筆的幣別會寫進 currency 欄，一起帶過來。',
-        step3: '把 CSV 上傳到這裡預覽，確認金額和幣別沒跑掉，再建立帳號完成匯入。',
+        step3: '把 CSV 上傳到這裡預覽，筆數和日期範圍對得上，就建立帳號完成匯入；非台幣的列會照原數字先匯入，換算之後再調。',
         faq: [
           {
             question: '1Money 沒有完整匯出，資料真的搬得過來嗎？',
@@ -6721,7 +6721,7 @@ export const zhTW: Translations = {
         stepsHeading: 'Splitwise 搬遷三步',
         step1: '在 Splitwise 打開群組或好友頁，用「Export spreadsheet」下載試算表。',
         step2: '把 CSV 上傳到這裡，預覽你們的分帳歷史。',
-        step3: '建立 Futari 帳號。匯入時付款人與分攤方式是整批指定，不會逐筆沿用 Splitwise 的分帳比例；之後兩個人的日常也能接著記。',
+        step3: '建立 Futari 帳號，兩個人的日常從這裡開始記。Splitwise 的試算表留著當備份，隨時可以回頭查。',
         faq: [
           {
             question: 'Splitwise 的資料怎麼搬到 Futari？',
@@ -6729,7 +6729,7 @@ export const zhTW: Translations = {
           },
           {
             question: '匯出的欄位和 Futari 一樣嗎？',
-            answer: '不完全一樣。Splitwise 的匯出每筆交易一列，除了總金額（Cost）還有每個人各自的分攤欄位。上傳後會先預覽，讀不出來的列會被略過並留下紀錄，不會直接寫進帳本。',
+            answer: '不完全一樣。Splitwise 的匯出每筆交易一列，除了總金額（Cost）還有每個人各自的分攤欄位，和 Futari 的欄位並不對應，所以不是丟進去就能一對一搬過來。',
           },
           {
             question: 'Splitwise 免費版每天只能記 4 筆，Futari 呢？',
@@ -7113,7 +7113,7 @@ export const zhTW: Translations = {
         painPoints: [
           {
             heading: '「這個月在貓咪身上花了多少？」',
-            body: '醫療費、疫苗、零食、玩具、美容分散在不同分類，要知道貓咪這個月花多少，得自己加總。把這些支出記在牠的名下，牠的頁面就直接顯示本月與累計的數字。',
+            body: '醫療費、疫苗、零食、玩具、美容分散在不同分類，要知道貓咪這個月花多少，得自己加總。把這些支出記在牠的名下，牠的頁面就直接顯示本月的數字；想回頭看更早的，用篩選器挑這隻，就只剩牠的支出。',
           },
           {
             heading: '「我付了大部分，對方記得嗎？」',
@@ -7131,7 +7131,7 @@ export const zhTW: Translations = {
           },
           {
             question: '貓咪、狗狗的醫療費要怎麼記才清楚？',
-            answer: '新增一隻寵物，設好名字和圖示就能用。之後每次回診、買藥、洗澡美容，記帳時選這隻毛孩；想看牠的全部醫療費，打開牠的頁面，或在篩選器挑這隻就看得到。',
+            answer: '新增一隻寵物，填上名字和種類就能用。之後每次回診、買藥、洗澡美容，記帳時選這隻毛孩；想看牠的全部醫療費，打開牠的頁面，或在篩選器挑這隻就看得到。',
           },
           {
             question: '飼料、貓砂這種固定要買的，可以設成定期嗎？',
@@ -7263,7 +7263,7 @@ export const zhTW: Translations = {
           },
           {
             question: '購車費用怎麼在 Futari 記？',
-            answer: '把車子建成一個愛物，購車金、保險、保養、加油都記在這輛車下面。車輛有加油紀錄，油耗與油費看得到；車輛頁面也會顯示本月與累計的花費。',
+            answer: '把車子建成一個愛物，購車金、保險、保養、加油都記在這輛車下面。車輛有加油紀錄，油耗與油費看得到；車輛頁面也會顯示本月和這個章節的花費。',
           },
           {
             question: '一個人先付了大額，之後怎麼還？',
@@ -7300,7 +7300,7 @@ export const zhTW: Translations = {
           },
           {
             question: '想知道外食是不是花太多，Futari 會提醒嗎？',
-            answer: '不會。日常的帳不設預算上限，也不會跳出超支提醒，只把飲食類的累計金額列出來；要不要調整，由你們兩個人討論。',
+            answer: '不會。日常的帳不設預算上限，也不會跳出超支提醒，只把飲食類這個月的金額列出來；要不要調整，由你們兩個人討論。',
           },
         ],
       },
@@ -7311,7 +7311,7 @@ export const zhTW: Translations = {
         painPoints: [
           {
             heading: '「這個月在孩子身上花了多少？我要想一下。」',
-            body: '醫療費、食品、衣物、課程——育兒支出分散在各個類別，很難有整體感。把每筆支出記在孩子名下，想知道到現在花了多少，看累計就有答案。',
+            body: '醫療費、食品、衣物、課程——育兒支出分散在各個類別，很難有整體感。把每筆支出記在孩子名下，孩子的頁面會顯示本月的花費；想回頭看更早的，用篩選器挑這個孩子，就只剩孩子的支出。',
           },
           {
             heading: '「帶孩子看診都是我付的，對方記得嗎？」',
@@ -7366,7 +7366,7 @@ export const zhTW: Translations = {
           },
           {
             question: '朋友一起的 AA 聚餐，也能記嗎？',
-            answer: '可以。兩個人之間的 AA 記在主帳本；多人聚餐可以開一個「出遊」，把連結丟到群組，朋友不用下載就能加入記帳，結束時會算出最少筆數的轉帳建議。',
+            answer: '可以。兩個人之間的 AA 記在主帳本；多人聚餐可以開一個「出遊」，把連結丟到群組，朋友不用下載就能加入記帳，結束時會算出誰該轉給誰，筆數最多是人數減一。',
           },
         ],
       },

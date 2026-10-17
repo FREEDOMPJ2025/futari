@@ -2637,7 +2637,7 @@ I will upload the screenshots once you confirm.`,
       formatExample: `date,category,amount,description,currency,kind
 2026-05-30,Food,150,Starbucks,TWD,expense
 2026-05-30,Salary,50000,May,TWD,income`,
-      note: 'Non-TWD rows import at their raw number first; you can adjust the conversion per row after import. Duplicates of the same entry (same date + amount + description) are dropped automatically.',
+      note: "Non-TWD rows import at their raw number first; you can adjust the conversion per row after import. The prompt asks ChatGPT to keep just one copy of any entry that appears twice (same date + amount + description); Futari doesn't remove duplicates on import, so import each file only once.",
       settingsHint: 'No rush — you can import the CSV from settings any time after you sign in.',
     },
     pages: {
@@ -2668,7 +2668,7 @@ I will upload the screenshots once you confirm.`,
         faq: [
           {
             question: "Will Honeydue's categories line up?",
-            answer: 'Common English names like Food & Dining, Home and Transportation map to Futari\'s Dining, Housing and Transit automatically. Anything unmatched goes to "Other", and you can adjust each one before importing.',
+            answer: 'Common English names like Food & Dining, Home and Transportation are matched automatically to Futari\'s Dining, Housing and Transit. Everything unmatched is grouped under "Other", and before importing you can switch that whole group to another category.',
           },
           {
             question: 'Honeydue changed hands. Does moving over cost anything?',
@@ -2705,7 +2705,7 @@ I will upload the screenshots once you confirm.`,
         stepsHeading: 'Moving from Spendee in three steps',
         step1: 'In Spendee → More → Export Data, download the CSV.',
         step2: 'Upload the CSV here to preview it; the Type column is what tells expenses from income.',
-        step3: "Create a Futari account and, at the category-mapping step, match Spendee categories such as Food & Drinks to Futari's.",
+        step3: 'Create a Futari account. At the category-mapping step, Spendee categories are matched to Futari\'s first (Food & Drinks goes to Dining, for example); anything unmatched sits under "Other", and you can switch that group as a whole.',
         formatHintLabel: "What Spendee's CSV looks like",
         formatHintHeaders: 'Date,Wallet,Type,Category name,Amount,Currency,Note',
         formatHintNote: 'The Type column is Expense / Income / Transfer. Transfer rows (inter-wallet moves) are flagged as errors on import, because Futari has no transfer concept; drop them in the preview.',
@@ -2762,7 +2762,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             question: "Will CWMoney's categories line up?",
-            answer: 'The common Chinese names for food, transport, housing, entertainment and medical map automatically to Futari\'s matching categories. Anything unmatched goes to "Other", and you can adjust each one before importing.',
+            answer: 'The common Chinese names for food, transport, housing, entertainment and medical are matched automatically to Futari\'s matching categories. Everything unmatched is grouped under "Other", and before importing you can switch that whole group to another category.',
           },
           {
             question: "CWMoney's shared ledger is a paid feature. Is Futari's?",
@@ -2797,7 +2797,7 @@ I will upload the screenshots once you confirm.`,
         ],
         stepsHeading: 'Moving from Moneybook in three steps',
         step1: 'In Moneybook (subscriber account), use "Export details" to output your transactions as CSV.',
-        step2: 'Upload the CSV here to preview it and check that the dates, amounts and categories are read.',
+        step2: 'Upload the CSV here to preview it and check that the date range and row count of your transaction details have no gap.',
         step3: 'Create a Futari account, map categories and set a payer during import, then keep logging together.',
         faq: [
           {
@@ -2807,7 +2807,7 @@ I will upload the screenshots once you confirm.`,
           {
             question: "Does the exported CSV match Futari's format?",
             answer:
-              "Not exactly. Uploading here shows a preview in your browser, so you can see how the file is read. In the actual import you map categories one by one, set the payer and split for the whole batch, and any row that can't be read is skipped and logged.",
+              "Not exactly. Uploading here shows a preview in your browser with the row count, date range and most common categories. In the actual import you set the payer and split for the whole batch, and any row that can't be read is skipped and logged.",
           },
           {
             question: 'Do I have to subscribe after moving?',
@@ -2977,7 +2977,7 @@ I will upload the screenshots once you confirm.`,
         ],
         stepsHeading: 'Moving from Simple Daily Money in three steps',
         step1: "Screenshot the transactions you want to move in Simple Daily Money, page by page; you don't need the VIP export (full how-to below).",
-        step2: "Turn the screenshots into a CSV with ChatGPT; the free plan is enough. Category text comes across as-is and you map it to Futari's categories afterwards.",
+        step2: 'Turn the screenshots into a CSV with ChatGPT; the free plan is enough. Category text is written into the CSV as it appears, and on import the ones that match land in Futari\'s categories while the rest go to "Other".',
         step3: 'Upload the CSV here and preview it to check the row count and date range, then create an account to finish the import.',
         faq: [
           {
@@ -3119,7 +3119,7 @@ I will upload the screenshots once you confirm.`,
         stepsHeading: 'Moving from 1Money in three steps',
         step1: 'In 1Money, screenshot the transactions you want to move, keeping the currency next to each amount in the frame (full how-to below).',
         step2: "Turn the screenshots into a CSV with ChatGPT; each entry's currency goes into the currency column and comes along.",
-        step3: 'Upload the CSV here and preview it to check the amounts and currencies, then create an account to finish the import.',
+        step3: 'Upload the CSV here and preview it; if the row count and date range match, create an account to finish the import. Rows in a currency other than TWD import at their raw number first, and you can adjust the conversion afterwards.',
         faq: [
           {
             question: '1Money has no full export — can my data really move?',
@@ -3209,7 +3209,7 @@ I will upload the screenshots once you confirm.`,
         stepsHeading: 'Moving from Splitwise in three steps',
         step1: 'Open the group or friendship in Splitwise and use “Export spreadsheet” to download it.',
         step2: 'Upload the CSV here and preview your history.',
-        step3: 'Create a Futari account. Payer and split are set once for the whole batch during import, not carried over row by row from Splitwise; after that, your everyday spending can go in the same ledger.',
+        step3: 'Create a Futari account and start logging your everyday spending together here. Keep your Splitwise spreadsheet as a backup you can look things up in.',
         faq: [
           {
             question: 'How do I move my Splitwise data to Futari?',
@@ -3219,7 +3219,7 @@ I will upload the screenshots once you confirm.`,
           {
             question: 'Are the columns the same as Futari’s?',
             answer:
-              "Not exactly. Splitwise exports one row per transaction, with the total (Cost) plus a column for each person's share. After uploading you get a preview; rows that can't be read are skipped and logged, and nothing is written to your ledger directly.",
+              "Not exactly. Splitwise exports one row per transaction, with the total (Cost) plus a column for each person's share. Those columns don't line up one-to-one with Futari's, so the file can't simply be dropped in and moved across as it is.",
           },
           {
             question: "Splitwise's free plan allows 4 entries a day. What about Futari?",
@@ -3564,7 +3564,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             question: 'Do both of us have to pay?',
-            answer: "No. The shared ledger, the split modes and real-time sync are all free, and inviting your partner doesn't unlock anything extra.",
+            answer: "No. The shared ledger, the split modes and real-time sync are all free, and inviting your partner doesn't require anything extra to be switched on.",
           },
         ],
       },
@@ -3608,7 +3608,7 @@ I will upload the screenshots once you confirm.`,
         painPoints: [
           {
             heading: '"How much have we spent on the cat this month?"',
-            body: "Vet bills, vaccines, treats, toys and grooming land in different categories, so finding out what the cat cost this month means adding it up yourself. Record them under your pet and its page shows this month's total and the running total.",
+            body: "Vet bills, vaccines, treats, toys and grooming land in different categories, so finding out what the cat cost this month means adding it up yourself. Record them under your pet and its page shows this month's number; to look further back, filter by that pet and only its expenses are left.",
           },
           {
             heading: '"I\'ve been covering most of it — does my partner even notice?"',
@@ -3626,7 +3626,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             question: 'How do I log vet bills in Futari?',
-            answer: "Add a pet with a name and an icon and you're set. Then, for every checkup, medicine or grooming, pick that pet when you log the expense. To see all its vet costs, open its page or filter by that pet.",
+            answer: "Add a pet with a name and a species and you're set. Then, for every checkup, medicine or grooming, pick that pet when you log the expense. To see all its vet costs, open its page or filter by that pet.",
           },
           {
             question: 'Food and litter are bought on repeat. Can I set that up?',
@@ -3758,7 +3758,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             question: 'How do I log car costs in Futari?',
-            answer: "Set the car up as an asset and log the purchase, insurance, maintenance and fuel under it. Cars have a fuel log, so fuel economy and fuel spend are visible, and the car's page shows this month's and the running total.",
+            answer: "Set the car up as an asset and log the purchase, insurance, maintenance and fuel under it. Cars have a fuel log, so fuel economy and fuel spend are visible, and the car's page shows this month's and this chapter's spend.",
           },
           {
             question: 'One of us paid for something big. How do we square up?',
@@ -3787,7 +3787,7 @@ I will upload the screenshots once you confirm.`,
         faq: [
           {
             question: 'How do we log dining costs as a couple?',
-            answer: 'Log it right after you eat: amount, who paid, how the meal is split. If you take turns treating each other, choose the option where the payer covers the whole thing; if you split it, choose half each. At month-end, filter by the dining category to see the running total.',
+            answer: "Log it right after you eat: amount, who paid, how the meal is split. If you take turns treating each other, choose the option where the payer covers the whole thing; if you split it, choose half each. At month-end, filter by the dining category to see this month's total.",
           },
           {
             question: 'Can I log takeout and delivery in Futari?',
@@ -3795,7 +3795,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             question: "Will Futari warn us if we're eating out too much?",
-            answer: 'No. Everyday spending has no budget cap and no overspend alerts. Futari just lists the running dining total, and whether to change anything is a conversation for the two of you.',
+            answer: "No. Everyday spending has no budget cap and no overspend alerts. Futari just lists the month's dining total, and whether to change anything is a conversation for the two of you.",
           },
         ],
       },
@@ -3806,7 +3806,7 @@ I will upload the screenshots once you confirm.`,
         painPoints: [
           {
             heading: '"What did the baby cost us this month? Give me a minute to add it up."',
-            body: "Medical bills, food, clothing, classes: parenting costs spread across categories and are hard to see as a whole. Record each expense under your child, and the running total tells you what's been spent so far.",
+            body: "Medical bills, food, clothing, classes: parenting costs spread across categories and are hard to see as a whole. Record each expense under your child and their page shows this month's spend; to look further back, filter by that child and only their expenses are left.",
           },
           {
             heading: '"I handle most of the checkups — does my partner know the cost?"',
@@ -3861,7 +3861,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             question: 'Can we log AA dinners with friends too?',
-            answer: 'Yes. Your own AA split lives in the main ledger; for a dinner with several people, open an outing and send the link to your group. Friends join without installing anything, and when it ends you get the fewest transfers needed to settle up.',
+            answer: 'Yes. Your own AA split lives in the main ledger; for a dinner with several people, open an outing and send the link to your group. Friends join without installing anything, and when it ends you get suggested transfers, at most one fewer than the number of people.',
           },
         ],
       },
