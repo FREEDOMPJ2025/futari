@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { DEFAULT_LOCALE } from '@/lib/i18n/locales-meta'
 import { globalErrorCopy, pickGlobalErrorLocale } from '@/lib/i18n/globalErrorCopy'
+import { reportClientError } from '@/lib/observability/reportClientError'
+import { sanitizeAnalyticsUrl } from '@/lib/analytics/urlSanitizer'
 import './globals.css'
 // 根 layout 被整個取代，Fraunces 的 @font-face 與 `.font-fraunces`（定義 --font-fraunces）
 // 也要自己帶；少了它 `font-serif` 會靜默退回內文字體，不會報錯。
@@ -26,17 +28,22 @@ export default function GlobalError({
   const [locale, setLocale] = useState(DEFAULT_LOCALE)
 
   useEffect(() => {
-    // Dynamic (#1520): Next lists this entry in every page's HTML, so a static
-    // Sentry import here put the whole SDK back in the public pages' first load.
-    // The module is the same one instrumentation-client loads, so it is not
-    // initialised twice.
-    import('@/lib/observability/sentryClient')
-      .then((m) => m.captureException(error))
-      .catch(() => {
-        // Sentry chunk unavailable (the usual reason this page is showing may be
-        // a failed chunk load). The error page must still render and stay usable;
-        // the report is lost, with no other symptom.
-      })
+    // reportClientError loads Sentry through a dynamic import (#1520): Next
+    // lists this entry in every page's HTML, so a static Sentry import here put
+    // the whole SDK back in the public pages' first load. The module is the same
+    // one instrumentation-client loads, so it is not initialised twice. If the
+    // Sentry chunk is unavailable (the usual reason this page is showing may be
+    // a failed chunk load) the report is lost with no other symptom; the error
+    // page still renders and stays usable.
+    //
+    // route (#1768): pathname only, never search or hash, and with invite /
+    // outing tokens masked (`/invite/:token`). This page can render on a public
+    // token route, and the Sentry scrub does not rewrite a tag named `route`.
+    reportClientError(error, {
+      area: 'global-error',
+      route: sanitizeAnalyticsUrl(window.location.pathname) || undefined,
+      digest: error.digest,
+    })
     setLocale(pickGlobalErrorLocale())
   }, [error])
 

@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // every sign-in, so the happy path is asserted alongside the failures.
 
 interface ExchangeResult {
-  error: { name: string; status?: number } | null
+  error: { name: string; status?: number; code?: unknown } | null
   data: {
     user: {
       id: string
@@ -140,6 +140,53 @@ describe('/auth/callback — exchange failure', () => {
 
     const serialized = JSON.stringify(captureException.mock.calls)
     expect(serialized).not.toContain('super-secret-code')
+  })
+
+  // #1768: the Supabase error code says *why* the exchange failed. Shape-checked
+  // (lowercase snake_case, <= 64), not allowlisted, so codes outside the SDK's
+  // ErrorCode union survive; anything else collapses to 'other'. The tag key is
+  // error_code, never `code` (the secret OAuth query param of this route).
+  const tagsOf = () =>
+    (captureException.mock.calls[0]?.[1] as { tags?: Record<string, unknown> } | undefined)?.tags
+
+  it.each(['flow_state_not_found', 'pkce_code_verifier_not_found'])(
+    'keeps the Supabase error code %s in both Sentry and PostHog',
+    async (code) => {
+      state.exchange = { error: { name: 'AuthApiError', status: 400, code }, data: { user: null } }
+      await call('?code=abc123')
+
+      expect(tagsOf()).toMatchObject({ area: 'auth', op: 'exchange_code', error_code: code })
+      expect(tagsOf()).not.toHaveProperty('code')
+      expect(propsOf()).toMatchObject({ reason: 'exchange_error', error_code: code })
+      expect(propsOf()).not.toHaveProperty('code')
+    },
+  )
+
+  it.each(['super-secret-code with spaces', 'FLOW_STATE_NOT_FOUND', 'x'.repeat(65)])(
+    "collapses a non-identifier code to 'other' without leaking it: %s",
+    async (code) => {
+      state.exchange = { error: { name: 'AuthApiError', status: 400, code }, data: { user: null } }
+      await call('?code=abc123')
+
+      expect(tagsOf()).toMatchObject({ error_code: 'other' })
+      expect(propsOf()).toMatchObject({ error_code: 'other' })
+      expect(JSON.stringify(captureException.mock.calls)).not.toContain(code)
+      expect(JSON.stringify(captureServer.mock.calls)).not.toContain(code)
+    },
+  )
+
+  it("collapses a non-string code to 'other'", async () => {
+    state.exchange = { error: { name: 'AuthApiError', status: 400, code: 42 }, data: { user: null } }
+    await call('?code=abc123')
+
+    expect(tagsOf()).toMatchObject({ error_code: 'other' })
+  })
+
+  it("records 'none' when Supabase gives no code", async () => {
+    await call('?code=abc123')
+
+    expect(tagsOf()).toMatchObject({ error_code: 'none' })
+    expect(propsOf()).toMatchObject({ error_code: 'none' })
   })
 })
 
