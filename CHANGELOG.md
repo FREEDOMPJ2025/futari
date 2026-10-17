@@ -43,6 +43,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **iPhone 捷徑可以把花費送進「待確認」，確認後才記進帳本（#1536）**
+  使用者：設定頁產生「捷徑金鑰」（只顯示一次、可重新產生或撤銷），捷徑帶著金鑰送出金額與分類；dashboard 出現只有自己看得到的待確認卡，可記下、改一下或略過，30 天沒處理會消失。
+  技術：migration `0098`（`ShortcutKeys` 只存 SHA-256、`ShortcutPendingExpenses`，外鍵指向 `auth.users`、RLS＋REVOKE、每日 cron `cleanup-shortcut-pending`）；`POST /api/shortcut/pending`（Bearer、一律 401、2 KB、限流）；確認走與手動記帳共用的 `lib/transactionWriteEffects.ts`，`record_created via=shortcut`。prod 套用待 release。
 - **簡單記帳搬遷頁的搜尋標題回應「永久 VIP」（#1766）**
   使用者：Google 搜尋結果上，`/migrate/simple-daily-money` 的標題與說明改成直接回答「買了永久 VIP，搬家會浪費嗎」（四語；en／ja 經 Grok 審）；頁面內文不變。
   技術：只改 `seo.migrate['simple-daily-money']` 的 title／description；en description 為了 155 字上限（#702）把逗號改成分號。
