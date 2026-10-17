@@ -60,7 +60,7 @@ describe('HideNameInLeftLedgers (#1619)', () => {
     expect(within(dialog).getByText(copy.confirmTitle)).toBeTruthy()
     expect(within(dialog).getByText(copy.confirmBody)).toBeTruthy()
     expect(copy.confirmBody).toBe(
-      '已離開的帳本裡，已結束的那幾段時光與出遊名單上，你的名字會顯示為「已離開的夥伴」。這個改動無法還原。',
+      '已離開的帳本裡，目前已結束的那幾段時光與出遊名單上，你的名字會顯示為「已離開的夥伴」。之後才結束的時光不會跟著改。這個改動無法還原。',
     )
     expect(within(dialog).getByText('這次會改到 3 段時光、2 份出遊名單。')).toBeTruthy()
     expect(dialog.textContent).not.toMatch(/[{}]/)
@@ -93,13 +93,22 @@ describe('hideName copy, all four locales (#1619)', () => {
   const undo: Record<keyof typeof locales, string> = {
     'zh-TW': '這個改動無法還原。',
     'zh-CN': '这个改动无法还原。',
-    en: 'This change can’t be undone.',
+    en: "This can't be undone.",
     ja: 'この変更は元に戻せません。',
+  }
+  // #1775: the dialog also says chapters that end later are not changed, so
+  // nobody reads the one-shot action as a standing setting.
+  const laterNotChanged: Record<keyof typeof locales, string> = {
+    'zh-TW': '之後才結束的時光不會跟著改。',
+    'zh-CN': '之后才结束的时光不会跟着改。',
+    en: "Chapters that end later won't change.",
+    ja: 'このあと終わる時間は変わりません。',
   }
   for (const [name, dict] of Object.entries(locales) as [keyof typeof locales, typeof zhTW][]) {
     it(`${name}: says it cannot be undone, keeps both placeholders, no banned or overclaiming words`, () => {
       const c = dict.pastTimes.hideName
       expect(c.confirmBody.endsWith(undo[name])).toBe(true)
+      expect(c.confirmBody).toContain(laterNotChanged[name])
       expect(c.confirmCount).toContain('{chapters}')
       expect(c.confirmCount).toContain('{outings}')
       const all = Object.values(c).join('\n')

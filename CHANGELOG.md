@@ -43,6 +43,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **「已離開帳本裡的名字」確認視窗補上「之後才結束的時光不會跟著改」（#1775）**
+  使用者：確認視窗說清楚只改目前已結束的章節；en／ja 的說明與筆數改成不用複數的寫法（Grok 審）。
+  技術：只改 `pastTimes.hideName` 的 confirmBody（4 語）、en／ja 的 hint 與 confirmCount、en 的 done／failed 引號；測試多鎖住新的那一句。
 - **iPhone 捷徑可以把花費送進「待確認」，確認後才記進帳本（#1536）**
   使用者：設定頁產生「捷徑金鑰」（只顯示一次、可重新產生或撤銷），捷徑帶著金鑰送出金額與分類；dashboard 出現只有自己看得到的待確認卡，可記下、改一下或略過，30 天沒處理會消失。
   技術：migration `0098`（`ShortcutKeys` 只存 SHA-256、`ShortcutPendingExpenses`，外鍵指向 `auth.users`、RLS＋REVOKE、每日 cron `cleanup-shortcut-pending`）；`POST /api/shortcut/pending`（Bearer、一律 401、2 KB、限流）；確認走與手動記帳共用的 `lib/transactionWriteEffects.ts`，`record_created via=shortcut`。prod 套用待 release。

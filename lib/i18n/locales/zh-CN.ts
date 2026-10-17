@@ -1272,7 +1272,7 @@ export const zhCN: Translations = {
       hint: '已离开的账本里，已结束的那几段时光与出游名单上，你的名字可以改成显示「已离开的伙伴」。',
       cta: '改成「已离开的伙伴」',
       confirmTitle: '改成「已离开的伙伴」？',
-      confirmBody: '已离开的账本里，已结束的那几段时光与出游名单上，你的名字会显示为「已离开的伙伴」。这个改动无法还原。',
+      confirmBody: '已离开的账本里，目前已结束的那几段时光与出游名单上，你的名字会显示为「已离开的伙伴」。之后才结束的时光不会跟着改。这个改动无法还原。',
       confirmCount: '这次会改到 {chapters} 段时光、{outings} 份出游名单。',
       confirmLabel: '确定更改',
       pending: '处理中…',
