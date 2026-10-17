@@ -8,6 +8,9 @@ import { revalidateAfterProfileMutation } from '@/lib/revalidate'
 import { validateName } from '@/lib/validators'
 import type { SplitType } from '@/lib/balance'
 import { action, actionError } from '@/lib/action-errors'
+import { revalidatePath } from 'next/cache'
+import { captureServer } from '@/lib/analytics/server'
+import { hideNameInLeftLedgers, type LeftLedgerNameCounts } from '@/lib/db/queries/epoch'
 
 export const updateDisplayName = action(async (name: string): Promise<{ ok: true }> => {
   const { user } = await requireViewer()
@@ -68,4 +71,27 @@ export const updateAvatarHidden = action(async (hidden: boolean): Promise<{ ok: 
 
   revalidateAfterProfileMutation()
   return { ok: true }
+})
+
+/**
+ * #1619 — one-way, on request: in the ledgers the viewer has left, their name
+ * in the closed chapters and on those chapters' outing lists becomes
+ * 「已離開的夥伴」. Takes no id — the session decides whose name changes
+ * (`requireViewer()` re-validates it), so there is no way to rename anyone
+ * else. Only chapters closed now; a second run changes nothing (0 / 0).
+ * See `hideNameInLeftLedgers` for the locking and the predicates.
+ */
+export const hideMyNameInLeftLedgers = action(async (): Promise<LeftLedgerNameCounts> => {
+  const { user } = await requireViewer()
+
+  const counts = await hideNameInLeftLedgers(user.id)
+
+  // Counts only: never a ledger, chapter or name.
+  await captureServer(user.id, 'left_ledger_name_hidden', {
+    chapters: counts.chapters,
+    outings: counts.outings,
+  })
+  revalidatePath('/settings/past-times')
+  revalidatePath('/onboarding/past-times')
+  return counts
 })

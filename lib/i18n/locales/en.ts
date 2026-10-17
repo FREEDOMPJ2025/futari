@@ -1225,6 +1225,20 @@ export const en: Translations = {
     empty: "No past chapters yet. The first one is just beginning.",
     exportHint: 'To keep a copy of your own, you can export the expenses, income and settlements from these chapters as a CSV.',
     exportCta: 'Export expenses, income and settlements',
+    hideName: {
+      // The stored label is the Chinese literal 「已離開的夥伴」 for every
+      // locale (same as account deletion), so the copy shows it with a gloss.
+      title: 'My name in ledgers I left',
+      hint: 'In ledgers you have left, your name in the chapters that have ended and on their outing lists can show as “已離開的夥伴” (a partner who left).',
+      cta: 'Change my name',
+      confirmTitle: 'Change your name in ledgers you left?',
+      confirmBody: 'In ledgers you have left, your name in the chapters that have ended and on their outing lists will show as “已離開的夥伴” (a partner who left). This change can’t be undone.',
+      confirmCount: 'This changes {chapters} chapter(s) and {outings} outing list(s).',
+      confirmLabel: 'Change',
+      pending: 'Working…',
+      done: 'Your name now shows as “已離開的夥伴”.',
+      failed: 'Couldn’t change it. Please try again later.',
+    },
   },
 
   csvExport: {

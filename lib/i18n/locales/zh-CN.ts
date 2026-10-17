@@ -1214,6 +1214,18 @@ export const zhCN: Translations = {
     empty: '还没有过去的时光。第一段才刚开始。',
     exportHint: '想自己留一份记录，可以把这些章节里的支出、进账和结算导出成 CSV。',
     exportCta: '导出支出、进账和结算',
+    hideName: {
+      title: '我在已离开账本里的名字',
+      hint: '已离开的账本里，已结束的那几段时光与出游名单上，你的名字可以改成显示「已离开的伙伴」。',
+      cta: '改成「已离开的伙伴」',
+      confirmTitle: '改成「已离开的伙伴」？',
+      confirmBody: '已离开的账本里，已结束的那几段时光与出游名单上，你的名字会显示为「已离开的伙伴」。这个改动无法还原。',
+      confirmCount: '这次会改到 {chapters} 段时光、{outings} 份出游名单。',
+      confirmLabel: '确定更改',
+      pending: '处理中…',
+      done: '已改成「已离开的伙伴」。',
+      failed: '没有改成，请稍后再试。',
+    },
   },
 
   csvExport: {
