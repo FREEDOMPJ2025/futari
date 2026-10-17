@@ -29,7 +29,9 @@ import { Recorder, TOMB, ledger, person, requestDeletion } from './_deletionWorl
 //       look-back after A also left a ledger whose remaining owner is a
 //       tombstone (solo ledger kept for A alone).
 //
-// Verdict recorded here: NOT REPRODUCIBLE through any page. A tombstone is
+// Verdict recorded here: NOT REPRODUCIBLE through any page. The readers were
+// hardened anyway (the three Profiles joins return NULL for a tombstone), and
+// the 'readers' block below pins that. A tombstone is
 // never a current member, so `memberLinkScope` drops them (name and id never
 // leave the server; the card shows 「前伴侶」); the one scope that DOES list a
 // departed chapter member (a pinned non-member viewer) belongs to the
@@ -422,14 +424,18 @@ d('guardian beta gate does not open another route', () => {
 // return, so a future change that lets a former-member view load policy
 // members (or a new caller of listAssetsForGroup / getAssetById) is caught.
 
-d('readers: what the SELECTs return for a tombstone (not reachable from a page today)', () => {
-  it('raw row: asset.ts joins the live Profiles name — the zh-TW literal, no marker', async () => {
+d('readers: a tombstone has no name at the SELECT (hardening; not reachable from a page today)', () => {
+  it('raw rows: the Profiles joins return NULL for a tombstone, never the zh-TW literal', async () => {
     const rows = await listAssetsForGroup(w1.group, w1.A)
     const row = rows.find((r) => r.id === w1.policies.bothB)!
-    expect(row.insurancePolicyHolderDisplayName).toBe(TOMB)
-    expect(row.insuranceInsuredUserDisplayName).toBe(TOMB)
+    expect(row.insurancePolicyHolderDisplayName).toBeNull()
+    expect(row.insuranceInsuredUserDisplayName).toBeNull()
     const one = await getAssetById(w1.policies.bothB, w1.group, w1.A)
-    expect(one?.insurancePolicyHolderDisplayName).toBe(TOMB)
+    expect(one?.insurancePolicyHolderDisplayName).toBeNull()
+    expect(one?.insuranceInsuredUserDisplayName).toBeNull()
+    // control: a live member still resolves by name
+    const control = rows.find((r) => r.id === w1.policies.control)!
+    expect(control.insurancePolicyHolderDisplayName).toBe('W1 A')
   })
 
   it('current member scope: the tombstone is not in it, so the view drops B', async () => {
@@ -441,25 +447,18 @@ d('readers: what the SELECTs return for a tombstone (not reachable from a page t
     expect(view).toMatchObject({ policyHolderUserId: null, insuredUserDisplayName: null, policyHolderIsFormer: true, insuredIsFormer: true })
   })
 
-  it('pinned non-member scope DOES allow the tombstone (chapter member) — and the reader then returns the raw literal', async () => {
+  it('pinned non-member scope allows the tombstone (chapter member), and the reader still returns no name', async () => {
     setView(w2.A, 'en', w2.closedEpoch)
     const ctx = (await resolveViewerEpochContext(w2.A))!
     expect(ctx.isFormerMemberView).toBe(true)
     const scope = await loadMemberLinkScope(ctx, w2.A)
     expect(scope.allowed.has(w2.B)).toBe(true)
     const view = await getInsuranceDetailsForViewer(w2.policies.bothB, w2.group, w2.A, scope)
-    expect(view?.insuredUserDisplayName).toBe(TOMB)
-  })
-
-  // The latent defect, marked so it flips the day a reader is fixed: at the
-  // reader layer a chapter-member tombstone comes out as the literal. Remove
-  // `.fails` (and assert on the marker) when #1788's fix lands.
-  it.fails('LATENT: the pinned non-member reader should not return the zh-TW literal as a name', async () => {
-    setView(w2.A, 'en', w2.closedEpoch)
-    const ctx = (await resolveViewerEpochContext(w2.A))!
-    const scope = await loadMemberLinkScope(ctx, w2.A)
-    const view = await getInsuranceDetailsForViewer(w2.policies.bothB, w2.group, w2.A, scope)
-    expect(view?.insuredUserDisplayName).not.toBe(TOMB)
+    expect(view?.insuredUserDisplayName).toBeNull()
+    expect(JSON.stringify(view)).not.toContain(TOMB)
+    // a live member next to the tombstone keeps their name
+    const mixed = await getInsuranceDetailsForViewer(w2.policies.holderB, w2.group, w2.A, scope)
+    expect(mixed?.insuredUserDisplayName).toBe('W2 A')
   })
 })
 
