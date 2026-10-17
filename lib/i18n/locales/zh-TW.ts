@@ -1699,7 +1699,7 @@ export type Translations = {
       hint: string
       cta: string
       confirmTitle: string
-      /** Scope sentence + 「這個改動無法還原。」. */
+      /** Scope sentence + 「之後才結束的時光不會跟著改。」 + 「這個改動無法還原。」（#1775）. */
       confirmBody: string
       /** `{chapters}` / `{outings}` substituted. */
       confirmCount: string
@@ -4825,7 +4825,7 @@ export const zhTW: Translations = {
       hint: '已離開的帳本裡，已結束的那幾段時光與出遊名單上，你的名字可以改成顯示「已離開的夥伴」。',
       cta: '改成「已離開的夥伴」',
       confirmTitle: '改成「已離開的夥伴」？',
-      confirmBody: '已離開的帳本裡，已結束的那幾段時光與出遊名單上，你的名字會顯示為「已離開的夥伴」。這個改動無法還原。',
+      confirmBody: '已離開的帳本裡，目前已結束的那幾段時光與出遊名單上，你的名字會顯示為「已離開的夥伴」。之後才結束的時光不會跟著改。這個改動無法還原。',
       confirmCount: '這次會改到 {chapters} 段時光、{outings} 份出遊名單。',
       confirmLabel: '確定更改',
       pending: '處理中…',
