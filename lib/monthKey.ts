@@ -64,3 +64,23 @@ export function clampMonthKey(monthKey: string, min: string, max: string): strin
   if (monthKey > max) return max
   return monthKey
 }
+
+/**
+ * Format a Date as 'YYYY-MM-DD' — the calendar day in Asia/Taipei. The product
+ * files every record under the Taipei day (see monthKeyOf above), so a card
+ * created at 23:30 Taipei on the last day of a month is still that day, though
+ * its UTC instant is 15:30 of the same day and a naive `toISOString().slice(0,10)`
+ * on a 00:30 Taipei instant gives the day before.
+ */
+export function taipeiDayOf(date: Date): string {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: TZ,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date)
+  const year = parts.find((p) => p.type === 'year')?.value ?? '1970'
+  const month = parts.find((p) => p.type === 'month')?.value ?? '01'
+  const day = parts.find((p) => p.type === 'day')?.value ?? '01'
+  return `${year}-${month}-${day}`
+}

@@ -25,9 +25,9 @@ import { resolve } from 'node:path'
 // touches rows that other test files are using at the same time.
 //
 // Local throwaway database only (it creates and drops a schema):
-//   docker run -d --name pg-1288 -e POSTGRES_PASSWORD=pg -p 127.0.0.1:55288:5432 postgres:17
-//   DATABASE_URL_DIRECT=postgres://postgres:pg@127.0.0.1:55288/postgres npx drizzle-kit push --force
-//   DATABASE_URL=postgres://postgres:pg@127.0.0.1:55288/postgres npx vitest run __tests__/actions/invite.oneOpenPerGroup.test.ts
+//   DATABASE_URL=<stand-in url> npx vitest run __tests__/actions/invite.oneOpenPerGroup.test.ts
+// The Postgres + Supabase stand-in recipe lives in __tests__/actions/_standinCli.mts
+// (drizzle-kit push is not enough: no auth schema, no SQL functions).
 // ──────────────────────────────────────────────────────────────────────────
 
 function loadEnvLocal() {

@@ -88,8 +88,9 @@ export async function captureServer(
  * using the product": someone who only ever records their partner's spending
  * never fires it. Over 90 days, 17 people had `record_created` and 11 had
  * `first_record_created` — the 6 in between are active users the narrow
- * reading drops. Activation is `record_created >= 1`; this event stays for the
- * milestone card and its `via` breakdown (#734). See
+ * reading drops. Activation is `record_created >= 1`, which since 2026-10-17
+ * (#1764) fires on every record path, not just the manual sheet; this event
+ * stays for the milestone card and its `via` breakdown (#734). See
  * docs/superpowers/specs/observability-design.md (#1127).
  *
  * Call inside the same DB transaction, AFTER the insert. Fire the event

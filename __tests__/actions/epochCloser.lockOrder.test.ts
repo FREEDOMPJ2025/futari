@@ -27,10 +27,10 @@ import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 //
 // Local throwaway database only. These tests hold row locks across several
 // connections; they refuse to run against anything that is not localhost.
-// Start one with (see the PR for the exact commands):
-//   docker run -d --name pg-1290s0 -e POSTGRES_PASSWORD=pg -p 127.0.0.1:55440:5432 postgres:17
-//   DATABASE_URL_DIRECT=postgres://postgres:pg@127.0.0.1:55440/postgres npx drizzle-kit push --force
-//   DATABASE_URL=postgres://postgres:pg@127.0.0.1:55440/postgres npx vitest run __tests__/actions/epochCloser.lockOrder.test.ts
+// Start one with (recipe):
+//   DATABASE_URL=<stand-in url> npx vitest run __tests__/actions/epochCloser.lockOrder.test.ts
+// The Postgres + Supabase stand-in recipe lives in __tests__/actions/_standinCli.mts
+// (drizzle-kit push is not enough: no auth schema, no SQL functions).
 // ──────────────────────────────────────────────────────────────────────────
 
 function loadEnvLocal() {

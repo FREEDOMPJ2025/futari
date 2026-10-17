@@ -22,10 +22,10 @@ import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 // the pattern already used in lib/db/queries/asset.ts and _predicates.ts.
 //
 // Local throwaway database only; refuses to run against anything that is not
-// localhost. Start one with:
-//   docker run -d --name pg-1440 -e POSTGRES_PASSWORD=pg -p 127.0.0.1:55610:5432 postgres:17
-//   DATABASE_URL_DIRECT=postgres://postgres:pg@127.0.0.1:55610/postgres npx drizzle-kit push --force
-//   DATABASE_URL=postgres://postgres:pg@127.0.0.1:55610/postgres npx vitest run __tests__/actions/leaveGroup.ownedAssets.test.ts
+// localhost. Run it with:
+//   DATABASE_URL=<stand-in url> npx vitest run __tests__/actions/leaveGroup.ownedAssets.test.ts
+// The Postgres + Supabase stand-in recipe lives in __tests__/actions/_standinCli.mts
+// (drizzle-kit push is not enough: no auth schema, no SQL functions).
 // ──────────────────────────────────────────────────────────────────────────
 
 function loadEnvLocal() {

@@ -14,6 +14,8 @@ export type ModalState =
   | { kind: 'edit-income'; data: IncomeSheetInitial }
   | { kind: 'edit-pending'; pendingId: string; data: IncomeSheetInitial }
   | { kind: 'edit-pending-expense'; pendingId: string; data: AddSheetInitial }
+  /** #1536 — 改一下 on a card an iOS Shortcut left; save confirms it (confirmShortcutPending). */
+  | { kind: 'edit-shortcut-pending'; pendingId: string; data: AddSheetInitial }
   | { kind: 'edit-tx'; data: AddSheetInitial }
   | { kind: 'edit-settlement'; data: SettlementSheetInitial }
 

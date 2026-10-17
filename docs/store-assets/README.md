@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-09-20
+last_updated: 2026-10-17
 ---
 
 # Store assets — Futari
@@ -21,8 +21,8 @@ last_updated: 2026-09-20
 | `screenshots/*-play.png` | 1080×1920、無 alpha | Play 手機截圖（必填 ≥2），4 張 | ✅ |
 | `screenshots/*-tablet.png` | 1080×1920、無 alpha | Play 平板截圖（7 吋 / 10 吋），4 張 | ✅ |
 | `screenshots/*-ipad-13.png` | 2064×2752、無 alpha | App Store 13" iPad（必填），4 張 | ✅ |
-| `story/0N-zh-ios-6.7.png` | 1290×2796、無 alpha | **插畫故事圖**（zh-TW），5 張 | ✅ 待上傳 |
-| `story/0N-zh-ipad-13.png` | 2064×2752、無 alpha | 同上，13" iPad | ✅ 待上傳 |
+| `story/0N-zh-ios-6.7.png` | 1290×2796、無 alpha | **插畫故事圖**（zh-TW），5 張 | ✅ ASC 上是舊順序，新順序待上傳（#1759） |
+| `story/0N-zh-ipad-13.png` | 2064×2752、無 alpha | 同上，13" iPad | ✅ 同上 |
 
 ## 怎麼重新產生
 
@@ -135,6 +135,12 @@ node render-store-screens.mjs                      # zh-TW、iPhone 6.7"
 node render-store-screens.mjs --format=ipad-13     # 13" iPad
 node render-store-screens.mjs --frames=2,4         # 只補某幾張
 ```
+
+**順序（#1759，2026-10-17）**：1 誰先付的，不用再算 → 2 兩個人，一本帳（品牌插畫）→ 3 一起記下的，都是日子 → 4 小仙子 → 5 大阪。
+App Store 搜尋結果卡片只保證看得到第 1 張，而且多數人在卡片上就決定要不要下載，所以第 1 張要直接說 App 做什麼，品牌插畫放第 2 張。
+2026-10-17 從公開商店頁確認，ASC 上掛的是這套故事圖的**舊順序**（品牌插畫在第 1 張）。新順序要等下一次 ship-native 有 `PREPARE_FOR_SUBMISSION` 版本時，用 `asc-screenshots.mjs --apply` 換上去。
+- **失效的樣子**：repo 的檔案已經是新順序，商店卻還是舊的，兩邊不會互相提醒。上傳後要打開 apps.apple.com 的商店頁，確認第 1 張是「誰先付的」。
+- 量測方式見 #1759：上線後看 4 週的「下載 ÷ 曝光」和基準指標百分位。
 
 版型在 `scripts/og/store-screens.html`：構圖固定在 430×932，再等比縮放置中到目標尺寸，所以 iPad 是兩側留奶油底，不是把手機版拉寬。插畫在 `docs/store-assets/illustrations/`。
 

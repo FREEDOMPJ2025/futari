@@ -45,6 +45,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 - **清掉標成機翻、尚未審的 en／ja 文案（#1280）**
   使用者：單人月份改成 “Logged in September” 這類說法；問答揭曉後不再說成已經打開；邀請頁日文改成「被邀請」，不再像是在招人開始記帳；問答錯誤裡的帳本改回「帳本」。
+- **捷徑金鑰與待確認卡的四語文案換成審過的版本（#1777）**
+  使用者：「略過」改「跳過」、展開與收合和定期待確認卡同一套說法；沒有內容的提示改說「描述」；ja「ショートカット用キー」、en「Key for Shortcuts」，避免被讀成鍵盤快捷鍵；ja 統一用「家計簿」。
+  技術：只改 `settings.shortcutKey`、`dashboard.shortcutPending` 與 `errors.actions.shortcut_pending_*` 的字串（Grok 兩輪審稿）；主按鈕維持「記下」。
+- **「已離開帳本裡的名字」確認視窗補上「之後才結束的時光不會跟著改」（#1775）**
+  使用者：確認視窗說清楚只改目前已結束的章節；en／ja 的說明與筆數改成不用複數的寫法（Grok 審）。
+  技術：只改 `pastTimes.hideName` 的 confirmBody（4 語）、en／ja 的 hint 與 confirmCount、en 的 done／failed 引號；測試多鎖住新的那一句。
+- **iPhone 捷徑可以把花費送進「待確認」，確認後才記進帳本（#1536）**
+  使用者：設定頁產生「捷徑金鑰」（只顯示一次、可重新產生或撤銷），捷徑帶著金鑰送出金額與分類；dashboard 出現只有自己看得到的待確認卡，可記下、改一下或略過，30 天沒處理會消失。
+  技術：migration `0098`（`ShortcutKeys` 只存 SHA-256、`ShortcutPendingExpenses`，外鍵指向 `auth.users`、RLS＋REVOKE、每日 cron `cleanup-shortcut-pending`）；`POST /api/shortcut/pending`（Bearer、一律 401、2 KB、限流）；確認走與手動記帳共用的 `lib/transactionWriteEffects.ts`，`record_created via=shortcut`。prod 套用待 release。
+- **簡單記帳搬遷頁的搜尋標題回應「永久 VIP」（#1766）**
+  使用者：Google 搜尋結果上，`/migrate/simple-daily-money` 的標題與說明改成直接回答「買了永久 VIP，搬家會浪費嗎」（四語；en／ja 經 Grok 審）；頁面內文不變。
+  技術：只改 `seo.migrate['simple-daily-money']` 的 title／description；en description 為了 155 字上限（#702）把逗號改成分號。
 - **en 的筆數與天數會依單複數顯示（#1745）**
   使用者：匯入（含確認頁摘要）、時間軸、保單數、旅行、澆水與定期間隔等英文不再出現「1 rows」「Every 1 days」；中文與日文不變。
   技術：這些 key 改成 `{ one, other }`，呼叫端走 `pickPlural`（沿用 #1738）；`usedCountNote` 的 `record(s)` 一併拆開；匯入確認頁有兩個數字，拆成 `summary`＋`summaryInvalid`；其餘數量罕為 1 的英文字串（植物陪伴天數、圓餅圖、保單年數與到期天數、匯入第一步摘要、匯出筆數、出遊摘要）改寫成 `(s)`。
@@ -57,8 +69,25 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 技術變更
 
+- **全站錯誤頁與登入回呼失敗在 Sentry 帶上 tag（#1768）**
+  使用者：無畫面變化；全站錯誤頁與登入失敗時，我們看得出是哪一頁、Supabase 回了哪個錯誤碼。
+  技術：`global-error` 經 `reportClientError` 帶 `area`／`route`（只取 pathname，邀請與出遊 token 遮成 `:token`）／`digest`，`reportClientError` 對 `/` 開頭的 `route` 一律再過 `sanitizeAnalyticsUrl`；`/auth/callback` 交換失敗在 Sentry tag 與 `sign_in_failed` 加 `error_code`（只收小寫 snake_case，其餘記 `other`／`none`）。
+- **dashboard 錯誤頁、CSV 匯入與推播註冊失敗送進 Sentry Issues（#1767）**
+  使用者：無畫面變化；使用者看到錯誤頁或匯入失敗時，我們才收得到訊號。
+  技術：六個路由 `error.tsx`、匯入的 parse／submit／rollback、iOS 推播註冊經 `reportClientError`（動態 import，帶 `area` tag）送出；預期內的 `{ ok: false, code }` 不送。
+- **App Store 故事圖第 1、2 張對調（#1759）**
+  使用者：商店搜尋結果的第 1 張改成「誰先付的，不用再算。」＋餘額卡，品牌插畫移到第 2 張；要等下次送審換圖後才看得到。
+  技術：只改 `scripts/og/store-screens.html` 的 frame 順序並重新輸出 iPhone／iPad 兩組；圖片與舊版逐像素相同，只是對調。
 - **每週清理 cron 不再被已確認的定期卡片擋下（#1689）**
   技術：新 migration `0097` 重新排程 `cleanup-soft-deleted`，本體沿用 `0069`，最前面多刪「指向即將清除之交易」的已確認卡片；否則編輯過的定期交易滿一年後，外鍵讓整批清理每週失敗。prod 套用待 release。
+- **`record_created` 補齊所有記帳管道，server 事件帶 `group_id`（#1764）**
+  技術：定期支出確認、加油、旅行結算、愛物購入、CSV 匯入（每次一筆、帶 `count`）也發 `record_created`，以 `via` 區分；`setup_completed`、`income_created`、`asset_created`、`import_completed` 同帶 `group_id`；2026-10-17 前後計數不可比，見 observability-design.md。
+
+### Security
+
+- **離開的人可以把自己在舊帳本裡的名字換成「已離開的夥伴」（#1619）**
+  使用者：「過去的時光」多一列（沒有帳本的人在 `/onboarding/past-times`），確認後已離開帳本的已結束章節與那些章節的出遊名單上，自己的名字改顯示「已離開的夥伴」；單向不能還原，只處理當下已結束的章節。
+  技術：`hideMyNameInLeftLedgers` 不收 id，先鎖自己的 `Profiles` 列再以單一 UPDATE 改 `GroupEpochs` 名字快照與 `OutingParticipants.display_name`（以章節篩，不動 `profile_id`）；無 migration；「已離開的夥伴」不再等於帳號已刪除。
 
 ## [1.7.4] - 2026-10-16
 

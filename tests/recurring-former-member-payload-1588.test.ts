@@ -94,6 +94,7 @@ vi.mock('@/lib/i18n/t', () => ({
   }),
   getLocale: async () => 'zh-TW',
 }))
+vi.mock('@/lib/db/queries/shortcutPending', () => ({ listShortcutPendingsForViewer: async () => [] }))
 vi.mock('@/lib/db/client', () => ({ db: {} }))
 // Raw readers — the rows exactly as the tables hold them (B's id included).
 vi.mock('@/lib/db/queries/recurringIncome', () => ({

@@ -24,7 +24,6 @@ import {
   type RecurringExpenseRuleInput,
   type ConfirmPendingExpenseOverrides,
 } from '@/lib/validators'
-import { recalcGroupBalance } from '@/lib/db/queries/balance'
 import { firstAnchorFromStart, snapToFuture } from '@/lib/recurring'
 import { previousDay } from '@/lib/local-date'
 import {
@@ -35,11 +34,11 @@ import { requireViewerGroup } from '@/lib/auth/viewer'
 import { getViewerWriteContext } from '@/lib/actionContext'
 import {
   revalidateAfterRecurringExpenseRuleMutation,
-  revalidateAfterTransactionMutation,
 } from '@/lib/revalidate'
 import { and, count, eq, isNull } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
-import { captureServer, isUserFirstNonDeletedRecord } from '@/lib/analytics/server'
+import { captureServer } from '@/lib/analytics/server'
+import { settleInsertedRecord, announceRecordCreated } from '@/lib/transactionWriteEffects'
 import { action, actionError } from '@/lib/action-errors'
 
 function assertPaidByInGroup(
@@ -382,16 +381,18 @@ export const confirmPending = action(async (pendingId: string): Promise<{ txId: 
       .returning({ id: pendingExpenseOccurrences.id })
     if (!resolved) throw actionError('pending_expense_handled_elsewhere')
 
-    await recalcGroupBalance(group.id, tx)
-    const firstRecord = await isUserFirstNonDeletedRecord(tx, user.id, group.id)
-    return { txId: created.id, firstRecord }
+    const { isFirstRecord } = await settleInsertedRecord(tx, user.id, group.id)
+    return { txId: created.id, firstRecord: isFirstRecord }
   })
 
-  revalidateAfterTransactionMutation({ assetId: row.assetId })
   // Milestone signal (#891, not the activation metric — see #1127): cron-confirmed occurrence may be viewer's first record.
-  if (result.firstRecord) {
-    await captureServer(user.id, 'first_record_created', { via: 'recurring_confirm' })
-  }
+  await announceRecordCreated({
+    userId: user.id,
+    isFirstRecord: result.firstRecord,
+    via: 'recurring_confirm',
+    revalidate: { assetId: row.assetId },
+    recordProps: { group_id: group.id },
+  })
   return { txId: result.txId }
 })
 
@@ -475,16 +476,18 @@ export const editAndConfirmPending = action(async (
       .returning({ id: pendingExpenseOccurrences.id })
     if (!resolved) throw actionError('pending_expense_handled_elsewhere')
 
-    await recalcGroupBalance(group.id, tx)
-    const firstRecord = await isUserFirstNonDeletedRecord(tx, user.id, group.id)
-    return { txId: created.id, firstRecord }
+    const { isFirstRecord } = await settleInsertedRecord(tx, user.id, group.id)
+    return { txId: created.id, firstRecord: isFirstRecord }
   })
 
-  revalidateAfterTransactionMutation({ assetId: finalAssetId })
   // Milestone signal (#891, not the activation metric — see #1127): edited-and-confirmed occurrence may be viewer's first record.
-  if (result.firstRecord) {
-    await captureServer(user.id, 'first_record_created', { via: 'recurring_confirm' })
-  }
+  await announceRecordCreated({
+    userId: user.id,
+    isFirstRecord: result.firstRecord,
+    via: 'recurring_confirm',
+    revalidate: { assetId: finalAssetId },
+    recordProps: { group_id: group.id },
+  })
   return { txId: result.txId }
 })
 

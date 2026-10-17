@@ -5,6 +5,7 @@ import {
   monthRangeIso,
   isMonthKey,
   clampMonthKey,
+  taipeiDayOf,
 } from '@/lib/monthKey'
 
 describe('monthKeyOf (Asia/Taipei)', () => {
@@ -80,5 +81,18 @@ describe('clampMonthKey', () => {
 
   it('clamps above max', () => {
     expect(clampMonthKey('2027-01', '2024-01', '2026-12')).toBe('2026-12')
+  })
+})
+describe('taipeiDayOf (#1536)', () => {
+  it('is the Asia/Taipei calendar day, not the UTC day', () => {
+    // 23:30 Taipei on the last day of a month: still that day, same month key.
+    const late = new Date('2026-10-31T15:30:00Z')
+    expect(taipeiDayOf(late)).toBe('2026-10-31')
+    expect(monthKeyOf(late)).toBe('2026-10')
+    // 00:30 Taipei the next day is 16:30 UTC the day before.
+    const early = new Date('2026-10-31T16:30:00Z')
+    expect(taipeiDayOf(early)).toBe('2026-11-01')
+    expect(monthKeyOf(early)).toBe('2026-11')
+    expect(taipeiDayOf(new Date('2026-12-31T16:00:00Z'))).toBe('2027-01-01')
   })
 })

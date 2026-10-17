@@ -410,6 +410,21 @@ export type Translations = {
   }
 
   dashboard: {
+    /** #1536 — cards an iOS Shortcut left in 待確認; only their owner sees them. */
+    shortcutPending: {
+      sectionLabel: string
+      primaryAction: string
+      editAction: string
+      /** The only action on a card with no note: edit first, then record. */
+      editOnlyAction: string
+      skipAction: string
+      noNoteHint: string
+      skipConfirmTitle: string
+      skipConfirmDescription: string
+      /** Template with `{n}` placeholder. */
+      expandAll: string
+      collapse: string
+    }
     /** ContinuityRow under the hero (#1364): the always-there ways into
      *  月回顧 and 旅行. `{month}` is an Intl month name ('8月' / 'August'). */
     continuity: {
@@ -1337,6 +1352,48 @@ export type Translations = {
     trust: string
     /** #1750 - settings row linking to the public shortcuts guide. */
     shortcutsGuide: string
+    /** #1536 — 捷徑金鑰 settings page (/settings/shortcut-key). */
+    shortcutKey: {
+      navLabel: string
+      title: string
+      back: string
+      pageHeading: string
+      pageSubtitle: string
+      empty: string
+      generate: string
+      failed: string
+      current: {
+        heading: string
+        hintLabel: string
+        createdLabel: string
+        lastUsedLabel: string
+        neverUsed: string
+      }
+      fresh: {
+        heading: string
+        body: string
+        inputLabel: string
+        copy: string
+        copied: string
+        copyFailed: string
+      }
+      shareWarning: {
+        heading: string
+        body: string
+      }
+      regenerate: {
+        cta: string
+        confirmTitle: string
+        confirmBody: string
+        confirmLabel: string
+      }
+      revoke: {
+        cta: string
+        confirmTitle: string
+        confirmBody: string
+        confirmLabel: string
+      }
+    }
     exportData: string
     pastTimes: string
     trips: string
@@ -1634,6 +1691,23 @@ export type Translations = {
      *  what the file holds: expenses, income, settlements. */
     exportHint: string
     exportCta: string
+    /** #1619 — rename yourself to 「已離開的夥伴」 in the closed chapters (and
+     *  their outing lists) of ledgers you left. One-way. Name the scope only:
+     *  never 「移除」「徹底」「所有地方」, never the viewer's own name. */
+    hideName: {
+      title: string
+      hint: string
+      cta: string
+      confirmTitle: string
+      /** Scope sentence + 「之後才結束的時光不會跟著改。」 + 「這個改動無法還原。」（#1775）. */
+      confirmBody: string
+      /** `{chapters}` / `{outings}` substituted. */
+      confirmCount: string
+      confirmLabel: string
+      pending: string
+      done: string
+      failed: string
+    }
   }
 
   csvExport: {
@@ -3426,6 +3500,9 @@ export type Translations = {
       rule_recipient_not_member: string
       pending_income_not_found: string
       pending_income_handled_elsewhere: string
+      shortcut_pending_handled_elsewhere: string
+      shortcut_pending_needs_note: string
+      shortcut_pending_invalid: string
       review_month_locked: string
       review_message_locked: string
       asset_not_found: string
@@ -3778,6 +3855,18 @@ export const zhTW: Translations = {
   },
 
   dashboard: {
+    shortcutPending: {
+      sectionLabel: '捷徑送來的待確認',
+      primaryAction: '記下',
+      editAction: '改一下',
+      editOnlyAction: '編輯後記下',
+      skipAction: '跳過',
+      noNoteHint: '沒有描述，請先編輯再記下',
+      skipConfirmTitle: '跳過這張待確認？',
+      skipConfirmDescription: '跳過後不會記進帳本，卡片也會消失。',
+      expandAll: '展開全部（還有 {n} 筆）',
+      collapse: '收合',
+    },
     continuity: {
       reviewTitle: '月回顧',
       reviewLatest: '{month}的回顧 · 看一看',
@@ -4432,6 +4521,47 @@ export const zhTW: Translations = {
     sectionData: '資料',
     trust: '資料安全',
     shortcutsGuide: '用捷徑記帳',
+    shortcutKey: {
+      navLabel: '捷徑金鑰',
+      title: '捷徑金鑰',
+      back: '返回',
+      pageHeading: '捷徑金鑰',
+      pageSubtitle: 'iPhone 捷徑用這把金鑰把花費送進你的待確認，你確認後才會記進帳本。待確認只有你自己看得到。',
+      empty: '目前沒有金鑰。',
+      generate: '產生金鑰',
+      failed: '沒有成功，請稍後再試',
+      current: {
+        heading: '目前的金鑰',
+        hintLabel: '結尾',
+        createdLabel: '產生時間',
+        lastUsedLabel: '最後使用',
+        neverUsed: '還沒用過',
+      },
+      fresh: {
+        heading: '新的金鑰',
+        body: '金鑰只會顯示這一次，離開這頁就看不到了。現在複製，貼進捷徑裡。',
+        inputLabel: '新的捷徑金鑰',
+        copy: '複製',
+        copied: '已複製',
+        copyFailed: '沒辦法自動複製，請點一下金鑰，選取後手動複製',
+      },
+      shareWarning: {
+        heading: '不要分享含金鑰的捷徑',
+        body: '拿到金鑰的人，可以把花費送進你的待確認。如果你分享過含金鑰的捷徑，請重新產生一把。',
+      },
+      regenerate: {
+        cta: '重新產生',
+        confirmTitle: '重新產生金鑰？',
+        confirmBody: '目前的金鑰會立刻失效，用它的捷徑要換上新的金鑰才能送出。',
+        confirmLabel: '重新產生',
+      },
+      revoke: {
+        cta: '撤銷金鑰',
+        confirmTitle: '撤銷這把金鑰？',
+        confirmBody: '用這把金鑰的捷徑會立刻無法送出。之後可以再產生一把。',
+        confirmLabel: '撤銷',
+      },
+    },
     exportData: '匯出資料（CSV）',
     pastTimes: '過去的時光',
     trips: '旅行',
@@ -4690,6 +4820,18 @@ export const zhTW: Translations = {
     empty: '還沒有過去的時光。第一段才剛開始。',
     exportHint: '想留一份自己的紀錄，可以把這些章節裡的支出、進帳和結算匯出成 CSV。',
     exportCta: '匯出支出、進帳和結算',
+    hideName: {
+      title: '我在已離開帳本裡的名字',
+      hint: '已離開的帳本裡，已結束的那幾段時光與出遊名單上，你的名字可以改成顯示「已離開的夥伴」。',
+      cta: '改成「已離開的夥伴」',
+      confirmTitle: '改成「已離開的夥伴」？',
+      confirmBody: '已離開的帳本裡，目前已結束的那幾段時光與出遊名單上，你的名字會顯示為「已離開的夥伴」。之後才結束的時光不會跟著改。這個改動無法還原。',
+      confirmCount: '這次會改到 {chapters} 段時光、{outings} 份出遊名單。',
+      confirmLabel: '確定更改',
+      pending: '處理中…',
+      done: '已改成「已離開的夥伴」。',
+      failed: '沒有改成，請稍後再試。',
+    },
   },
 
   csvExport: {
@@ -6695,8 +6837,8 @@ export const zhTW: Translations = {
         ogDescription: 'Manebo 用戶的下一站：匯出 CSV，搬進 Futari 情侶共同記帳。',
       },
       'simple-daily-money': {
-        title: '從簡單記帳搬到 Futari｜兩人同步記帳、不用 VIP',
-        description: '想和伴侶兩支手機同步記同一本帳？簡單記帳的共享只能看、CSV 匯出要 VIP。截圖請 ChatGPT 整理成 CSV，免費搬進 Futari，兩個人都能記、都能改。',
+        title: '簡單記帳買了永久 VIP，搬家會浪費嗎？｜Futari 免費雙人記帳',
+        description: '買過的 VIP 留在簡單記帳，記錄可以帶走：截圖請 ChatGPT 整理成 CSV，免費搬進 Futari。記帳、雙人分攤、同步、匯出都不用另外解鎖，兩個人都能記、都能改。',
         ogDescription: '簡單記帳用戶搬家指南：截圖→ChatGPT→CSV，搬進 Futari 雙人記帳。',
       },
       'fortune-city': {
@@ -7498,6 +7640,9 @@ export const zhTW: Translations = {
       rule_recipient_not_member: '這條規則的收入歸屬已離開這本帳本，請先修改再恢復。',
       pending_income_not_found: '待確認收入已被處理或找不到',
       pending_income_handled_elsewhere: '待確認收入已被其他裝置處理',
+      shortcut_pending_handled_elsewhere: '這張待確認已在其他裝置處理或已過期',
+      shortcut_pending_needs_note: '這張待確認沒有描述，請先編輯再記下',
+      shortcut_pending_invalid: '內容無法記下，請檢查金額與日期',
       review_month_locked: '這個月的留言已鎖定，無法再修改',
       review_message_locked: '留言已鎖定，無法再修改',
       asset_not_found: '找不到該資產',

@@ -596,7 +596,9 @@ where n.nspname in ('public', 'drizzle') and c.relkind in ('r', 'p')
      - (3) 不是 0：多半是 solo 分支的 `_prune_ledger` raise，整個區塊 rollback，每天一筆 `process_account_deletions: failed for <uid>` WARNING，帳號過了 14 天還在（#1377 的樣子）。**不要**為了讓它過去把該帳本改成直接 cascade：那會毀掉離開的人的章節。先修 `_prune_ledger` 失敗的原因。
 9. **角色登入**：`futari_app`、`futari_backup` 照各自的步驟重設密碼、`LOGIN`，更新 env。
 10. **加密金鑰**：manifest 的 `## encrypted_kids` 列出這份備份需要哪些 kid；目標環境的 `ENCRYPTION_KEYS` 必須都有。
-11. 備份之後到壞掉之間的資料（最多約一天）沒有了；要不要通知使用者，是使用者的決定。
+11. **撤銷所有捷徑金鑰（#1536）**：`UPDATE "ShortcutKeys" SET revoked_at = now() WHERE revoked_at IS NULL;`，並請使用者到設定頁重新產生。
+   - 漏掉：備份早於某次撤銷時，那把已撤銷的金鑰會跟著還原、重新有效；拿到它的人又能把卡片送進主人的待確認，沒有任何錯誤。
+12. 備份之後到壞掉之間的資料（最多約一天）沒有了；要不要通知使用者，是使用者的決定。
 
 ### 事故處理
 

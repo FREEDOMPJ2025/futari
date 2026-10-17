@@ -44,6 +44,7 @@ vi.mock('@/lib/db/queries/recurringView', () => ({
   listIncomePendingsForViewer: async () => [],
   listExpensePendingsForViewer: async () => [],
 }))
+vi.mock('@/lib/db/queries/shortcutPending', () => ({ listShortcutPendingsForViewer: async () => [] }))
 vi.mock('@/lib/i18n/t', () => ({ getTranslations: async () => ({}), getLocale: async () => 'zh-TW' }))
 vi.mock('@/lib/db/client', () => ({ db: {} }))
 vi.mock('@/lib/db/queries/balance', () => ({ getGroupBalance: async () => 0, getGroupPendingBalanceDelta: async () => 0 }))

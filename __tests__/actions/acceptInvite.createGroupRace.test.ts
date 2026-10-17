@@ -21,9 +21,9 @@ import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 //
 // Interleavings are forced with a holder connection and pg_blocking_pids
 // polling — no sleeps. Local throwaway database only:
-//   docker run -d --name pg-1432 -e POSTGRES_PASSWORD=pg -p 127.0.0.1:55660:5432 postgres:17
-//   DATABASE_URL_DIRECT=postgres://postgres:pg@127.0.0.1:55660/postgres npx drizzle-kit push --force
-//   DATABASE_URL=postgres://postgres:pg@127.0.0.1:55660/postgres npx vitest run __tests__/actions/acceptInvite.createGroupRace.test.ts
+//   DATABASE_URL=<stand-in url> npx vitest run __tests__/actions/acceptInvite.createGroupRace.test.ts
+// The Postgres + Supabase stand-in recipe lives in __tests__/actions/_standinCli.mts
+// (drizzle-kit push is not enough: no auth schema, no SQL functions).
 // ──────────────────────────────────────────────────────────────────────────
 
 function loadEnvLocal() {

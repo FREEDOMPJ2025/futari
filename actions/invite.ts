@@ -336,7 +336,7 @@ export const acceptInvite = action(async (token: string): Promise<string> => {
     expenseCount: number
   }
 
-  const acceptOnce = () => db.transaction(async (tx): Promise<{ endedTrips: EndedTrip[]; inviterFirstRecord: boolean }> => {
+  const acceptOnce = () => db.transaction(async (tx): Promise<{ endedTrips: EndedTrip[]; inviterFirstRecord: boolean; inviterSummaryRecords: boolean }> => {
     // Read before the locks; they are locked with the invite's group below,
     // and re-read once the locks are held.
     const otherGroupIds = await otherSoloGroupIds(tx)
@@ -508,6 +508,7 @@ export const acceptInvite = action(async (token: string): Promise<string> => {
     // computes "today"). Never before the start date.
     const endedTrips: EndedTrip[] = []
     let inviterFirstRecord = false
+    let inviterSummaryRecords = false
     if (inviterTrips.length > 0 && inviterGroup) {
       const endedAt = sql`(${boundary} - interval '1 microsecond')`
       const endDay = sql`((${endedAt}) AT TIME ZONE 'UTC')::date`
@@ -540,6 +541,7 @@ export const acceptInvite = action(async (token: string): Promise<string> => {
         })
       }
       if (summaryCount > 0) {
+        inviterSummaryRecords = true
         inviterFirstRecord = await isUserFirstNonDeletedRecord(tx, invite.invitedBy, invite.groupId)
       }
     }
@@ -624,7 +626,7 @@ export const acceptInvite = action(async (token: string): Promise<string> => {
       memberBId: user.id,
     })
 
-    return { endedTrips, inviterFirstRecord }
+    return { endedTrips, inviterFirstRecord, inviterSummaryRecords }
   })
 
   let outcome: Awaited<ReturnType<typeof acceptOnce>>
@@ -649,6 +651,9 @@ export const acceptInvite = action(async (token: string): Promise<string> => {
   // ids — the same properties endTrip sends, plus that one.
   if (outcome.inviterFirstRecord) {
     await captureServer(invite.invitedBy, 'first_record_created', { via: 'trip_summary' })
+  }
+  if (outcome.inviterSummaryRecords) {
+    await captureServer(invite.invitedBy, 'record_created', { via: 'trip_summary', group_id: invite.groupId })
   }
   for (const t of outcome.endedTrips) {
     const startMs = new Date(t.startDate).getTime()

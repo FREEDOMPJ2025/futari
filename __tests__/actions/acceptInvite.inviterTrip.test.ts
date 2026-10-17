@@ -33,9 +33,9 @@ import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 //
 // Local throwaway database only; refuses to run against anything that is not
 // localhost:
-//   docker run -d --name pg-1438 -e POSTGRES_PASSWORD=pg -p 127.0.0.1:55830:5432 postgres:17
-//   DATABASE_URL_DIRECT=postgres://postgres:pg@127.0.0.1:55830/postgres npx drizzle-kit push --force
-//   DATABASE_URL=postgres://postgres:pg@127.0.0.1:55830/postgres npx vitest run __tests__/actions/acceptInvite.inviterTrip.test.ts
+//   DATABASE_URL=<stand-in url> npx vitest run __tests__/actions/acceptInvite.inviterTrip.test.ts
+// The Postgres + Supabase stand-in recipe lives in __tests__/actions/_standinCli.mts
+// (drizzle-kit push is not enough: no auth schema, no SQL functions).
 // ──────────────────────────────────────────────────────────────────────────
 
 function loadEnvLocal() {
@@ -377,6 +377,9 @@ describe.skipIf(!isLocalDb)('acceptInvite ends the inviter\'s active trip (#1438
     expect(captured.find((c) => c.event === 'first_record_created')).toEqual({
       distinctId: s.inviter, event: 'first_record_created', props: { via: 'trip_summary' },
     })
+    expect(captured.find((c) => c.event === 'record_created')).toEqual({
+      distinctId: s.inviter, event: 'record_created', props: { via: 'trip_summary', group_id: s.g.id },
+    })
     expect(captured.filter((c) => c.event === 'partner_joined')).toHaveLength(1)
 
     // Back in the new chapter the trip is read-only, as any past trip.
@@ -433,6 +436,7 @@ describe.skipIf(!isLocalDb)('acceptInvite ends the inviter\'s active trip (#1438
     await expectNothingInNewChapter(s.g.id)
     expect(tripEndedEvents().map((e) => e.props.expense_count)).toEqual([0])
     expect(captured.find((c) => c.event === 'first_record_created')).toBeUndefined()
+    expect(captured.find((c) => c.event === 'record_created')).toBeUndefined()
   })
 
   it('a planned end date is kept; one after the accept is brought back to the accept day', async () => {
