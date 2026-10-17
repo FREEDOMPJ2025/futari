@@ -3,6 +3,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vites
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './actions/_authUser'
 import type { ReactElement } from 'react'
 
 // ─── Integration: a trip is readable only inside its own chapter (#1614) ─────
@@ -126,12 +127,14 @@ beforeAll(async () => {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL not set; cannot run integration test. Ensure .env.local has DATABASE_URL.')
   }
-  await db.insert(profiles).values([
+  const rows = [
     { id: S, displayName: 'TEST_TRIP_PAGE_S' },
     { id: C, displayName: 'TEST_TRIP_PAGE_C' },
     { id: X, displayName: 'TEST_TRIP_PAGE_X' },
     { id: Y, displayName: 'TEST_TRIP_PAGE_Y' },
-  ])
+  ]
+  await db.insert(profiles).values(rows)
+  await seedAuthUsers(rows)
 
   const [g] = await db.insert(oikosGroups).values({
     name: 'TEST_TRIP_PAGE_G', memberA: S, memberB: C, currentEpochStartedAt: d('2026-04-01'),
@@ -198,6 +201,7 @@ afterAll(async () => {
       await db.delete(groupEpochs).where(inArray(groupEpochs.groupId, groupIds))
       await db.delete(oikosGroups).where(inArray(oikosGroups.id, groupIds))
     }
+    await deleteAuthUsers(people)
     await db.delete(profiles).where(inArray(profiles.id, people))
   } catch (e) {
     console.error('cleanup failed', e)

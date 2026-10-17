@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 
 // ─── Integration test for createTransaction multi-currency + trip wiring ────
 //
@@ -31,6 +32,9 @@ function loadEnvLocal() {
   }
 }
 loadEnvLocal()
+// Each test seeds over the network (incl. an auth.users row, #1710); the default
+// 5 s is too tight against dev.
+vi.setConfig({ testTimeout: 60_000 })
 
 let mockUserId: string = ''
 vi.mock('@/lib/supabase/server', () => ({
@@ -95,6 +99,7 @@ async function seedGroup(): Promise<SeedRefs> {
   const epochStartedAt = new Date('2026-05-14T00:00:00Z')
 
   await db.insert(profiles).values({ id: userId, displayName: 'TEST_MC_user' })
+  await seedAuthUsers([{ id: userId, displayName: 'TEST_MC_user' }])
 
   const [group] = await db.insert(oikosGroups).values({
     name: 'TEST_MC_group',
@@ -133,6 +138,7 @@ async function cleanup(refs: SeedRefs) {
   await db.delete(groupEpochs).where(eq(groupEpochs.groupId, refs.groupId))
   await db.delete(groupBalance).where(eq(groupBalance.groupId, refs.groupId))
   await db.delete(oikosGroups).where(eq(oikosGroups.id, refs.groupId))
+  await deleteAuthUsers([refs.userId])
   await db.delete(profiles).where(eq(profiles.id, refs.userId))
 }
 
@@ -319,6 +325,7 @@ describe('createTransaction — multi-currency + trip wiring (#68 #42)', () => {
     // Create a second group and trip in it
     const userId2 = randomUUID()
     await db.insert(profiles).values({ id: userId2, displayName: 'TEST_MC_user2' })
+    await seedAuthUsers([{ id: userId2, displayName: 'TEST_MC_user2' }])
     const [group2] = await db.insert(oikosGroups).values({
       name: 'TEST_MC_group2',
       memberA: userId2,
@@ -353,6 +360,7 @@ describe('createTransaction — multi-currency + trip wiring (#68 #42)', () => {
     await db.delete(groupEpochs).where(eq(groupEpochs.groupId, group2.id))
     await db.delete(groupBalance).where(eq(groupBalance.groupId, group2.id))
     await db.delete(oikosGroups).where(eq(oikosGroups.id, group2.id))
+    await deleteAuthUsers([userId2])
     await db.delete(profiles).where(eq(profiles.id, userId2))
 
     expect(result).toEqual({ ok: false, code: 'trip_missing' })

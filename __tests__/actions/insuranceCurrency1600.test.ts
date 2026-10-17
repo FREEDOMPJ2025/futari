@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 
 // ─── #1600 — each policy records its own currency ─────────────────────────
 // Ledger base is USD. create without a currency stores the ledger's; create with
@@ -61,6 +62,7 @@ beforeAll(async () => {
     throw new Error('DATABASE_URL not set; cannot run integration test. Ensure .env.local has DATABASE_URL.')
   }
   await db.insert(profiles).values([{ id: ids.A, displayName: `${T}_A` }])
+  await seedAuthUsers([{ id: ids.A, displayName: `${T}_A` }])
   const [g] = await db.insert(oikosGroups)
     .values({ name: `${T}_ledger`, memberA: ids.A, memberB: null, guardianBetaEnabled: true, baseCurrency: 'usd' })
     .returning({ id: oikosGroups.id })
@@ -84,6 +86,7 @@ afterAll(async () => {
       await db.delete(groupBalance).where(eq(groupBalance.groupId, ids.group))
       await db.delete(oikosGroups).where(eq(oikosGroups.id, ids.group))
     }
+    await deleteAuthUsers([ids.A])
     await db.delete(profiles).where(eq(profiles.id, ids.A))
   } catch (err) {
     console.error('cleanup failed', err)

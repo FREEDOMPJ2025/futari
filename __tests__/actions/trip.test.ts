@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 
 // ─── Integration tests for actions/trip.ts ────────────────────────────────
 //
@@ -26,6 +27,9 @@ function loadEnvLocal() {
   }
 }
 loadEnvLocal()
+// Each test seeds over the network (incl. an auth.users row, #1710); the default
+// 5 s is too tight against dev.
+vi.setConfig({ testTimeout: 60_000 })
 
 let mockUserId: string = ''
 vi.mock('@/lib/supabase/server', () => ({
@@ -92,6 +96,7 @@ async function seedGroup(): Promise<SeedRefs> {
   const epochStartedAt = new Date('2026-05-10T00:00:00Z')
 
   await db.insert(profiles).values({ id: userId, displayName: 'TEST_TRIP_ACTION_user' })
+  await seedAuthUsers([{ id: userId, displayName: 'TEST_TRIP_ACTION_user' }])
 
   const [group] = await db.insert(oikosGroups).values({
     name: 'TEST_TRIP_ACTION_group',
@@ -128,6 +133,7 @@ async function cleanup(refs: SeedRefs) {
   await db.delete(groupBalance).where(eq(groupBalance.groupId, refs.groupId))
   await db.delete(oikosGroups).where(eq(oikosGroups.id, refs.groupId))
   const profileIds = refs.partnerId ? [refs.userId, refs.partnerId] : [refs.userId]
+  await deleteAuthUsers(profileIds)
   await db.delete(profiles).where(inArray(profiles.id, profileIds))
 }
 
