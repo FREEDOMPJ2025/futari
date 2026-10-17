@@ -5859,7 +5859,7 @@ export const zhTW: Translations = {
       submitFailed: '送出失敗，等一下再試',
       alreadyAnswered: '你已經答完了',
       alreadyRevealed: '這次問答已經揭曉，答案不能再改了',
-      wrongGroup: '這次的問答不屬於這個家計簿',
+      wrongGroup: '這次的問答不屬於這個帳本',
       solo: '這份問答是兩個人一起答的',
     },
     questions: {

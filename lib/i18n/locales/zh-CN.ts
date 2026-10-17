@@ -2305,10 +2305,10 @@ export const zhCN: Translations = {
     soloFallback: '这 3 题是两个人一起答的。这个月的回顾，其他部分都在。',
     errorNotFound: '找不到这次的问答',
     errors: {
-      submitFailed: '送出失败，等一下再试',
+      submitFailed: '提交失败，稍后再试',
       alreadyAnswered: '你已经答完了',
       alreadyRevealed: '这次问答已经揭晓，答案不能再改了',
-      wrongGroup: '这次的问答不属于这个家计簿',
+      wrongGroup: '这次的问答不属于这个账本',
       solo: '这份问答是两个人一起答的',
     },
     questions: {
