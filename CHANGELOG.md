@@ -55,6 +55,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 技術變更
 
+- **dashboard 錯誤頁、CSV 匯入與推播註冊失敗送進 Sentry Issues（#1767）**
+  使用者：無畫面變化；使用者看到錯誤頁或匯入失敗時，我們才收得到訊號。
+  技術：六個路由 `error.tsx`、匯入的 parse／submit／rollback、推播註冊經 `reportClientError`（動態 import，帶 `area` tag）送出；預期內的 `{ ok: false, code }` 不送。
 - **App Store 故事圖第 1、2 張對調（#1759）**
   使用者：商店搜尋結果的第 1 張改成「誰先付的，不用再算。」＋餘額卡，品牌插畫移到第 2 張；要等下次送審換圖後才看得到。
   技術：只改 `scripts/og/store-screens.html` 的 frame 順序並重新輸出 iPhone／iPad 兩組；圖片與舊版逐像素相同，只是對調。
