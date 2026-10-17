@@ -301,6 +301,18 @@ export const zhCN: Translations = {
   },
 
   dashboard: {
+    shortcutPending: {
+      sectionLabel: '快捷指令送来的待确认',
+      primaryAction: '记下',
+      editAction: '改一下',
+      editOnlyAction: '编辑后记下',
+      skipAction: '略过',
+      noNoteHint: '没有备注，请先编辑再记下',
+      skipConfirmTitle: '略过这张待确认？',
+      skipConfirmDescription: '略过后不会记进账本，卡片也会消失。',
+      expandAll: '展开全部（还有 {n} 笔）',
+      collapse: '收起',
+    },
     continuity: {
       reviewTitle: '月回顾',
       reviewLatest: '{month}的回顾 · 看一看',
@@ -4059,6 +4071,9 @@ export const zhCN: Translations = {
       rule_recipient_not_member: '这条规则的收入归属已离开这本账本，请先修改再恢复。',
       pending_income_not_found: '待确认收入已被处理或找不到',
       pending_income_handled_elsewhere: '待确认收入已被其他设备处理',
+      shortcut_pending_handled_elsewhere: '这张待确认已在其他设备处理或已过期',
+      shortcut_pending_needs_note: '这张待确认没有备注，请先编辑再记下',
+      shortcut_pending_invalid: '内容无法记下，请检查金额与日期',
       review_month_locked: '这个月的留言已锁定，无法再修改',
       review_message_locked: '留言已锁定，无法再修改',
       asset_not_found: '找不到该资产',

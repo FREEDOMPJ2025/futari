@@ -303,6 +303,18 @@ export const en: Translations = {
   },
 
   dashboard: {
+    shortcutPending: {
+      sectionLabel: 'Waiting from your Shortcut',
+      primaryAction: 'Record',
+      editAction: 'Edit',
+      editOnlyAction: 'Edit and record',
+      skipAction: 'Skip',
+      noNoteHint: 'No note yet. Edit it before recording.',
+      skipConfirmTitle: 'Skip this one?',
+      skipConfirmDescription: 'It will not be added to your ledger, and the card goes away.',
+      expandAll: 'Show all ({n} more)',
+      collapse: 'Show less',
+    },
     continuity: {
       reviewTitle: 'Monthly review',
       reviewLatest: '{month} review · take a look',
@@ -4135,6 +4147,9 @@ I will upload the screenshots once you confirm.`,
       rule_recipient_not_member: 'The income recipient on this rule has left this ledger. Edit the rule to choose a new recipient, then resume.',
       pending_income_not_found: 'This pending income was already handled or can\'t be found',
       pending_income_handled_elsewhere: 'This pending income was handled on another device',
+      shortcut_pending_handled_elsewhere: 'This one was handled on another device or has expired',
+      shortcut_pending_needs_note: 'This one has no note. Edit it before recording.',
+      shortcut_pending_invalid: 'This could not be recorded. Check the amount and date.',
       review_month_locked: 'This month\'s note is locked and can\'t be changed',
       review_message_locked: 'This note is locked and can\'t be changed',
       asset_not_found: 'Aibutsu not found',

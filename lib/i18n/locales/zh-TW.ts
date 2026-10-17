@@ -410,6 +410,21 @@ export type Translations = {
   }
 
   dashboard: {
+    /** #1536 — cards an iOS Shortcut left in 待確認; only their owner sees them. */
+    shortcutPending: {
+      sectionLabel: string
+      primaryAction: string
+      editAction: string
+      /** The only action on a card with no note: edit first, then record. */
+      editOnlyAction: string
+      skipAction: string
+      noNoteHint: string
+      skipConfirmTitle: string
+      skipConfirmDescription: string
+      /** Template with `{n}` placeholder. */
+      expandAll: string
+      collapse: string
+    }
     /** ContinuityRow under the hero (#1364): the always-there ways into
      *  月回顧 and 旅行. `{month}` is an Intl month name ('8月' / 'August'). */
     continuity: {
@@ -3485,6 +3500,9 @@ export type Translations = {
       rule_recipient_not_member: string
       pending_income_not_found: string
       pending_income_handled_elsewhere: string
+      shortcut_pending_handled_elsewhere: string
+      shortcut_pending_needs_note: string
+      shortcut_pending_invalid: string
       review_month_locked: string
       review_message_locked: string
       asset_not_found: string
@@ -3837,6 +3855,18 @@ export const zhTW: Translations = {
   },
 
   dashboard: {
+    shortcutPending: {
+      sectionLabel: '捷徑送來的待確認',
+      primaryAction: '記下',
+      editAction: '改一下',
+      editOnlyAction: '編輯後記下',
+      skipAction: '略過',
+      noNoteHint: '沒有備註，請先編輯再記下',
+      skipConfirmTitle: '略過這張待確認？',
+      skipConfirmDescription: '略過後不會記進帳本，卡片也會消失。',
+      expandAll: '展開全部（還有 {n} 筆）',
+      collapse: '收合',
+    },
     continuity: {
       reviewTitle: '月回顧',
       reviewLatest: '{month}的回顧 · 看一看',
@@ -7610,6 +7640,9 @@ export const zhTW: Translations = {
       rule_recipient_not_member: '這條規則的收入歸屬已離開這本帳本，請先修改再恢復。',
       pending_income_not_found: '待確認收入已被處理或找不到',
       pending_income_handled_elsewhere: '待確認收入已被其他裝置處理',
+      shortcut_pending_handled_elsewhere: '這張待確認已在其他裝置處理或已過期',
+      shortcut_pending_needs_note: '這張待確認沒有備註，請先編輯再記下',
+      shortcut_pending_invalid: '內容無法記下，請檢查金額與日期',
       review_month_locked: '這個月的留言已鎖定，無法再修改',
       review_message_locked: '留言已鎖定，無法再修改',
       asset_not_found: '找不到該資產',
