@@ -43,6 +43,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **使用情境頁與搬遷頁的問答、步驟、差異點各頁改寫成各頁自己的內容（#1676）**
+  使用者：9 個使用情境頁不再共用同一句「Futari 要收費嗎？」與換名詞的範本句，改回答該情境真的會問的事（定期支出、結算、出遊、愛物頁累計）；14 個搬遷頁的步驟、問答與差異點改成該來源自己的說法（匯出格式、分類對應、哪些帶得走），en／ja 補回 zh-TW 的細節（四語；en／ja／zh-CN 待確認）。
+  技術：只改 `useCase.pages`、`migrate.pages` 的字串與 `contentUpdatedAt`（2026-10-18）；已移除「匯入時可對照調整欄位」「重複的同一筆會自動去掉」這兩句與程式不符的說法。
 - **「已離開的夥伴」依讀者語系顯示，且只有系統寫的才算（#1782）**
   使用者：刪除帳號或選擇不留名字的人，在章節、月回顧、出遊名單、公開出遊頁與 CSV 裡以讀者語系顯示（a partner who left／退出したパートナー／已离开的伙伴），頭像改成不含字的中性圓；四語的這個字樣不能再拿來當暱稱或出遊名字。
   技術：migration `0099` 加四個標記欄位（backfill 只標刪除帳號寫的形狀；`process_account_deletions` 以 0096 本體加賦值），讀取端只看標記（`lib/leftPartnerLabel.ts`），保留名字檢查在 `lib/reservedDisplayName.ts`＋`handle_new_user`（兩個 project 都要手動套）；prod 套用待 release。

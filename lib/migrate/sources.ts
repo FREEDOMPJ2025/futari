@@ -144,7 +144,7 @@ export const MIGRATE_SOURCES = {
   honeydue: {
     slug: 'honeydue',
     name: 'Honeydue',
-    contentUpdatedAt: '2026-10-03',
+    contentUpdatedAt: '2026-10-18',
     comparison: {
       rows: [
         { feature: { i18n: 'featSharedLedger' },   futari: { label: { i18n: 'verdictSupported' },      tone: 'yes'     }, other: { label: { i18n: 'verdictSupported' },      tone: 'yes'     } },
@@ -157,7 +157,7 @@ export const MIGRATE_SOURCES = {
   spendee: {
     slug: 'spendee',
     name: 'Spendee',
-    contentUpdatedAt: '2026-10-03',
+    contentUpdatedAt: '2026-10-18',
     comparison: {
       rows: [
         { feature: { i18n: 'featSharedLedger' }, futari: { label: { i18n: 'verdictFreeBuiltIn' },   tone: 'yes'     }, other: { label: { i18n: 'paidUnlock' },   tone: 'partial' } },
@@ -171,7 +171,7 @@ export const MIGRATE_SOURCES = {
   cwmoney: {
     slug: 'cwmoney',
     name: 'CWMoney',
-    contentUpdatedAt: '2026-10-03',
+    contentUpdatedAt: '2026-10-18',
     templateDownload: { href: '/cwmoney-template.xlsx' },
     comparison: {
       rows: [
@@ -186,7 +186,7 @@ export const MIGRATE_SOURCES = {
   moneybook: {
     slug: 'moneybook',
     name: 'Moneybook',
-    contentUpdatedAt: '2026-10-03',
+    contentUpdatedAt: '2026-10-18',
     comparison: {
       rows: [
         { feature: { i18n: 'featSharedLedger' },   futari: { label: { i18n: 'verdictDefaultMode' }, tone: 'yes'     }, other: { label: { i18n: 'verdictSingleUser' },   tone: 'no'      } },
@@ -199,7 +199,7 @@ export const MIGRATE_SOURCES = {
   andromoney: {
     slug: 'andromoney',
     name: 'AndroMoney',
-    contentUpdatedAt: '2026-10-03',
+    contentUpdatedAt: '2026-10-18',
     comparison: {
       rows: [
         { feature: { i18n: 'featSharedLedger' }, futari: { label: { i18n: 'verdictDefaultMode' }, tone: 'yes'     }, other: { label: { i18n: 'verdictSingleUser' },       tone: 'no'      } },
@@ -213,7 +213,7 @@ export const MIGRATE_SOURCES = {
   mobills: {
     slug: 'mobills',
     name: 'Mobills',
-    contentUpdatedAt: '2026-10-03',
+    contentUpdatedAt: '2026-10-18',
     comparison: {
       rows: [
         { feature: { i18n: 'featSharedLedger' }, futari: { label: { i18n: 'verdictDefaultMode' },  tone: 'yes'     }, other: { label: { i18n: 'verdictSingleUser' },   tone: 'no'      } },
@@ -227,7 +227,7 @@ export const MIGRATE_SOURCES = {
   manebo: {
     slug: 'manebo',
     name: 'Manebo',
-    contentUpdatedAt: '2026-10-15',
+    contentUpdatedAt: '2026-10-18',
     comparison: {
       rows: [
         { feature: { i18n: 'featSharedLedger' },   futari: { label: { i18n: 'verdictDefaultMode' }, tone: 'yes'     }, other: { label: { i18n: 'sharingSetupRequired' },      tone: 'partial' } },
@@ -240,7 +240,7 @@ export const MIGRATE_SOURCES = {
   'simple-daily-money': {
     slug: 'simple-daily-money',
     name: '簡單記帳',
-    contentUpdatedAt: '2026-10-15',
+    contentUpdatedAt: '2026-10-18',
     screenshotWorkflow: true,
     comparison: {
       rows: [
@@ -255,7 +255,7 @@ export const MIGRATE_SOURCES = {
   'fortune-city': {
     slug: 'fortune-city',
     name: '記帳城市',
-    contentUpdatedAt: '2026-10-15',
+    contentUpdatedAt: '2026-10-18',
     screenshotWorkflow: true,
     comparison: {
       rows: [
@@ -270,7 +270,7 @@ export const MIGRATE_SOURCES = {
   cashman: {
     slug: 'cashman',
     name: 'CashMan',
-    contentUpdatedAt: '2026-10-15',
+    contentUpdatedAt: '2026-10-18',
     screenshotWorkflow: true,
     comparison: {
       rows: [
@@ -285,7 +285,7 @@ export const MIGRATE_SOURCES = {
   '1money': {
     slug: '1money',
     name: '1Money',
-    contentUpdatedAt: '2026-10-15',
+    contentUpdatedAt: '2026-10-18',
     screenshotWorkflow: true,
     comparison: {
       rows: [
@@ -300,7 +300,7 @@ export const MIGRATE_SOURCES = {
   icost: {
     slug: 'icost',
     name: 'iCost',
-    contentUpdatedAt: '2026-10-15',
+    contentUpdatedAt: '2026-10-18',
     screenshotWorkflow: true,
     comparison: {
       rows: [
@@ -315,7 +315,7 @@ export const MIGRATE_SOURCES = {
   splitwise: {
     slug: 'splitwise',
     name: 'Splitwise',
-    contentUpdatedAt: '2026-10-15',
+    contentUpdatedAt: '2026-10-18',
     // No screenshotWorkflow: Splitwise exports a spreadsheet per group /
     // friendship (kb.splitwise.com "How can I double check my balances?"),
     // so users arrive holding a real CSV. Headers don't match any dedicated
@@ -334,7 +334,7 @@ export const MIGRATE_SOURCES = {
   suishouji: {
     slug: 'suishouji',
     name: '隨手記',
-    contentUpdatedAt: '2026-10-15',
+    contentUpdatedAt: '2026-10-18',
     screenshotWorkflow: true,
     comparison: {
       rows: [
