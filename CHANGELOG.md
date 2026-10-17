@@ -43,6 +43,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **品牌頁加上「紀錄化成光點」的動態（#1527）**
+  使用者：首頁手機畫面裡的紀錄各化成一個光點飄進插畫；「四種光」逐列亮起；信任、使用情境、搬遷段落進入畫面時亮燈。減少動態效果時直接呈現亮著的樣子。
+  技術：純 CSS（`app/[locale]/_landing/landing-motion.css`），只動 transform／opacity，scroll-driven 包在 `@supports (animation-timeline: view())`；沿用 `about-fade-up` 的 easing；不碰 LCP 元素。
 - **捷徑金鑰與待確認卡的四語文案換成審過的版本（#1777）**
   使用者：「略過」改「跳過」、展開與收合和定期待確認卡同一套說法；沒有內容的提示改說「描述」；ja「ショートカット用キー」、en「Key for Shortcuts」，避免被讀成鍵盤快捷鍵；ja 統一用「家計簿」。
   技術：只改 `settings.shortcutKey`、`dashboard.shortcutPending` 與 `errors.actions.shortcut_pending_*` 的字串（Grok 兩輪審稿）；主按鈕維持「記下」。
