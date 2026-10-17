@@ -69,8 +69,15 @@ const loadSnapshot = vi.fn(async () => null)
 const loadMessages = vi.fn(async (..._args: unknown[]) => [])
 vi.mock('next/navigation', () => ({ notFound, redirect: vi.fn(() => { throw new Error('NEXT_REDIRECT') }) }))
 vi.mock('@/lib/supabase/server', () => ({ getCurrentUser: async () => ({ id: 'user-c' }) }))
+vi.mock('@/lib/i18n/t', async () => {
+  const { zhTW } = await import('@/lib/i18n/locales/zh-TW')
+  return { getTranslations: async () => zhTW }
+})
 vi.mock('@/lib/db/queries/epoch', () => ({
-  getEpochMembers: async () => ({ memberAId: 'user-a', memberBId: 'user-c' }),
+  getEpochMembers: async () => ({
+    memberAId: 'user-a', memberBId: 'user-c',
+    memberAName: { name: 'A', isLeftLabel: false }, memberBName: { name: 'C', isLeftLabel: false },
+  }),
   resolveViewerEpochContext: async () => ({
     group: { id: 'g1', memberA: 'user-a', memberB: 'user-c' },
     window: { ...CH2, epochId: 'e2', isPast: false },

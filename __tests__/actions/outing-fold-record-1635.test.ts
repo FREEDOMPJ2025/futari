@@ -132,7 +132,7 @@ const isMemberLine = (o: Seeded) => (t: { from: string; to: string }) =>
 
 /** What the member page (page.tsx) renders. */
 async function memberViewTransfers(o: Seeded) {
-  const detail = (await getOutingDetail(o.outingId))!
+  const detail = (await getOutingDetail(o.outingId, '已離開的夥伴'))!
   const [g] = await db.select().from(oikosGroups).where(eq(oikosGroups.id, o.groupId))
   const { a, b } = memberPidsOf(detail.participants, g.memberA, g.memberB)
   return buildOutingView({
@@ -152,6 +152,7 @@ async function publicView(o: Seeded) {
   return getOutingFullView(
     { id: row.id, groupId: row.groupId, epochId: row.epochId, status: row.status, name: row.name, currency: row.currency },
     { kind: 'participant', participantId: o.pF } as never,
+    '已離開的夥伴',
   )
 }
 

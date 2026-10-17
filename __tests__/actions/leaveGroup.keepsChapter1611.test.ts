@@ -512,6 +512,9 @@ describe.skipIf(!isLocalDb)('#1611 — leave keeps the chapter; stayer renames n
     const [after] = await db.select().from(groupEpochs).where(eq(groupEpochs.id, f.duoEpoch))
     expect(after.memberAName).toBe('已離開的夥伴')
     expect(after.memberBName).toBe(`${f.tag}_B`)
+    // #1782 — the marker, set in the same statement as the literal.
+    expect(after.memberANameIsLeftLabel).toBe(true)
+    expect(after.memberBNameIsLeftLabel).toBe(false)
     expect(await db.select().from(groupEpochs).where(and(eq(groupEpochs.groupId, f.G), isNull(groupEpochs.endedAt)))).toHaveLength(0)
     // The leaver's ledger is untouched by it.
     expect(await db.select().from(recurringExpenseRules).where(eq(recurringExpenseRules.id, f.reB))).toHaveLength(1)

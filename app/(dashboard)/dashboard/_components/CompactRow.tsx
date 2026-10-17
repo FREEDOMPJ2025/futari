@@ -62,6 +62,8 @@ export function CompactRow({ tx, isLast, onClick }: CompactRowProps) {
   const payerRole = whoToMemberRole(payerIsViewer ? 'M' : 'T', viewerIsA)
   const payerInitial = payerIsViewer ? viewer.initial : (partner?.initial ?? '?')
   const payerAvatar = payerIsViewer ? viewer.avatarUrl : (partner?.avatarUrl ?? null)
+  // #1782 — a past chapter's partner shown as the system's left label.
+  const payerNeutral = !payerIsViewer && !!partner?.isLeftLabel
   const partnerName = partner?.displayName ?? t.common.partner
   // An ended outing's fold-back reads as a repayment under the generic label,
   // but it's really "I covered your share on the trip" — say where it came from.
@@ -130,7 +132,7 @@ export function CompactRow({ tx, isLast, onClick }: CompactRowProps) {
           className="text-sm flex items-center flex-wrap gap-x-1.5"
           style={{ color: 'var(--ink-3)' }}
         >
-          {dateLabel} · <Avatar memberRole={payerRole} initial={payerInitial} src={payerAvatar} size={16} /> {payerLabel}
+          {dateLabel} · <Avatar memberRole={payerRole} initial={payerInitial} src={payerAvatar} size={16} neutral={payerNeutral} /> {payerLabel}
         </div>
         {noteText && (
           <div

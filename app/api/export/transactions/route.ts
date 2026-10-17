@@ -20,10 +20,10 @@ export async function GET() {
   // in any ledger. Nothing from the request widens it, and no active ledger is
   // required: a removed partner with no ledger exports the closed chapters
   // they were in, and someone with none gets a header-only file.
-  const [ledger, t] = await Promise.all([
-    getLedgerExportForViewer(user.id),
-    getTranslations(),
-  ])
+  // #1782 — a name slot marked as the left label is written in the export's
+  // language (the same locale as the column headers).
+  const t = await getTranslations()
+  const ledger = await getLedgerExportForViewer(user.id, t.common.leftPartnerLabel)
 
   const csv = buildTransactionsCsv(ledger.rows, exportLabelsFor(t))
   const filename = buildExportFilename(t.csvExport.filenamePrefix)

@@ -33,6 +33,8 @@ export interface OutingDetailOuting {
 export interface OutingDetailParticipant {
   id: string
   displayName: string
+  /** #1782 — the system's left label (already translated): secondary ink. Absent = false. */
+  isLeftLabel?: boolean
   /** False once removed (deactivated): history kept, out of new expenses. */
   active: boolean
   claim: ParticipantClaim
@@ -115,7 +117,7 @@ export function OutingDetailClient({ outing, view, foldPreview, canManage, canEn
                   <div className="flex items-center gap-2.5 min-w-0">
                     <span aria-hidden="true" className="inline-block rounded-full shrink-0" style={{ width: 9, height: 9, background: dotOf(p.id) }} />
                     <div className="min-w-0">
-                      <div className={`text-sm truncate ${removed ? 'text-ink-3' : 'text-ink'}`}>{p.displayName}</div>
+                      <div className={`text-sm truncate ${removed ? 'text-ink-3' : info?.isLeftLabel ? 'text-ink-2' : 'text-ink'}`}>{p.displayName}</div>
                       {info && (
                         <div className="text-xs mt-0.5 text-ink-3" data-testid={`claim-${p.id}`}>
                           {removed ? to.participant.removedTag : to.participant.claim[info.claim]}

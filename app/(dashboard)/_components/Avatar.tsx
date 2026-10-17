@@ -14,16 +14,21 @@ interface Props {
   src?: string | null
   size?: number
   ring?: boolean
+  /** #1782 — the system's left label (a name slot marked as 「已離開的夥伴」):
+   *  an empty disc in the neutral fill (`--ink-3`) instead of a member colour,
+   *  with no letter and no photo. Only a marker can set it, so a person who
+   *  names themself the same still gets their own letter and colour. */
+  neutral?: boolean
 }
 
-export function Avatar({ memberRole, initial, src, size = 28, ring = false }: Props) {
-  const bg = memberRole === 'b' ? 'var(--accent)' : 'var(--ink)'
+export function Avatar({ memberRole, initial, src, size = 28, ring = false, neutral = false }: Props) {
+  const bg = neutral ? 'var(--ink-3)' : memberRole === 'b' ? 'var(--accent)' : 'var(--ink)'
   const [imgFailed, setImgFailed] = useState(false)
 
   // Reset failure state when src changes (e.g. after profile pic refresh).
   useEffect(() => { setImgFailed(false) }, [src])
 
-  const showImage = !!src && !imgFailed
+  const showImage = !neutral && !!src && !imgFailed
   // Ring thickness scales with size — ~6%, min 1.5px so it's visible on small avatars.
   const ringPx = Math.max(1.5, size * 0.06)
   // next/image needs integer width/height to build a clean srcset; round once here.
@@ -59,7 +64,7 @@ export function Avatar({ memberRole, initial, src, size = 28, ring = false }: Pr
           className="w-full h-full rounded-full object-cover"
         />
       ) : (
-        initial
+        neutral ? null : initial
       )}
     </div>
   )

@@ -120,10 +120,11 @@ export function isMonthInChapter(ym: YearMonth, chapter: { startedAt: Date; ende
  * #1618 — the name card 2 (largest expense) shows for its payer, resolved on
  * the server and only against the two people of the chapter being viewed.
  *
- * - `chapter` (from getEpochMembers): the payer must be one of its two member
- *   ids, and the name is that chapter's name for them — frozen at the close
- *   for a closed chapter (「已離開的夥伴」 once the account is deleted), live for
- *   the open one. This applies to the viewer too.
+ * - `chapter` (getEpochMembers, translated by `localizeChapterMembers`): the
+ *   payer must be one of its two member ids, and the name is that chapter's
+ *   name for them — frozen at the close for a closed chapter (the viewer's
+ *   left label once the slot is marked, #1782), live for the open one. This
+ *   applies to the viewer too.
  * - No chapter row (legacy group without epochs): `members` — the page's
  *   Profiles rows, which only ever hold the chapter's member ids.
  * - Anyone else → null: the card shows no name. Since 0093 (#1621) a month

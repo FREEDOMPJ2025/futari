@@ -43,6 +43,7 @@ export function PastMessages({
                 memberRole={whoToMemberRole(author?.id === viewer.id ? 'M' : 'T', viewerIsA)}
                 initial={(author?.displayName?.[0] ?? '?').toUpperCase()}
                 src={author?.avatarUrl ?? null}
+                neutral={!!author?.isLeftLabel}
               />
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-medium" style={{ color: 'var(--ink-2)' }}>
