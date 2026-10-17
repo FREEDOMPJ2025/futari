@@ -58,6 +58,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 技術變更
 
+- **全站錯誤頁與登入回呼失敗在 Sentry 帶上 tag（#1768）**
+  使用者：無畫面變化；全站錯誤頁與登入失敗時，我們看得出是哪一頁、Supabase 回了哪個錯誤碼。
+  技術：`global-error` 經 `reportClientError` 帶 `area`／`route`（只取 pathname，邀請與出遊 token 遮成 `:token`）／`digest`，`reportClientError` 對 `/` 開頭的 `route` 一律再過 `sanitizeAnalyticsUrl`；`/auth/callback` 交換失敗在 Sentry tag 與 `sign_in_failed` 加 `error_code`（只收小寫 snake_case，其餘記 `other`／`none`）。
 - **dashboard 錯誤頁、CSV 匯入與推播註冊失敗送進 Sentry Issues（#1767）**
   使用者：無畫面變化；使用者看到錯誤頁或匯入失敗時，我們才收得到訊號。
   技術：六個路由 `error.tsx`、匯入的 parse／submit／rollback、iOS 推播註冊經 `reportClientError`（動態 import，帶 `area` tag）送出；預期內的 `{ ok: false, code }` 不送。
