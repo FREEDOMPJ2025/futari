@@ -81,6 +81,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 技術變更
 
+- **保單的要保人／被保人讀取端不再回傳已刪帳號的標記名字（#1788）**
+  使用者：目前畫面沒有變化（這條路徑今天走不到）；守住日後不會有 en／ja 讀者在保單上看到未翻譯的「已離開的夥伴」。
+  技術：`lib/db/queries/asset.ts`、`aibutsu.ts` 的兩個 Profiles join 對 `is_tombstone` 回 NULL，不再回傳標記字樣；`insuranceTombstone1788` 整合測試涵蓋頁面層與讀取層。
 - **全站錯誤頁與登入回呼失敗在 Sentry 帶上 tag（#1768）**
   使用者：無畫面變化；全站錯誤頁與登入失敗時，我們看得出是哪一頁、Supabase 回了哪個錯誤碼。
   技術：`global-error` 經 `reportClientError` 帶 `area`／`route`（只取 pathname，邀請與出遊 token 遮成 `:token`）／`digest`，`reportClientError` 對 `/` 開頭的 `route` 一律再過 `sanitizeAnalyticsUrl`；`/auth/callback` 交換失敗在 Sentry tag 與 `sign_in_failed` 加 `error_code`（只收小寫 snake_case，其餘記 `other`／`none`）。
