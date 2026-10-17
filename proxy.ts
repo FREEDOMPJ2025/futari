@@ -174,6 +174,14 @@ export async function proxy(request: NextRequest) {
     // getUser(): it must answer 204 while the session is dead or Supabase is
     // down, and no prefix may ride along (`/api/ping/x` stays protected).
     || pathname === '/api/ping'
+    // #1536: the Shortcut endpoint authenticates with its own bearer key
+    // (app/api/shortcut/pending/route.ts) and never reads the session; a
+    // Shortcut has no cookie, so the auth gate would only 307 it to sign-in.
+    // Exact match: `/api/shortcut`, `/api/shortcut/pending/x`, `…/pendingx`,
+    // encoded or differently-cased variants all stay protected. A trailing
+    // slash is 308'd by Next to the exact path before it gets here, and that
+    // path still needs the key.
+    || pathname === '/api/shortcut/pending'
 
   if (isPublic && isOutingPublicPath(pathname)) {
     // #1558: the outing share pages are public but read the session (a

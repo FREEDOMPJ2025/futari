@@ -38,7 +38,7 @@ const FULLWIDTH_DIGIT_RE = /[０-９]/g
 // stores (e.g. RLO flipping "500" into "005" on screen).
 const STRIP_FROM_NOTE_RE = /[\u0000-\u001F\u007F-\u009F؜‎‏‪-‮⁦-⁩]/g
 
-function parseAmount(raw: string | null): number | undefined {
+export function parseAmount(raw: string | null): number | undefined {
   if (raw === null) return undefined
   const normalised = raw
     .trim()
@@ -51,14 +51,14 @@ function parseAmount(raw: string | null): number | undefined {
   return n
 }
 
-function parseCategory(raw: string | null): CategoryId | undefined {
+export function parseCategory(raw: string | null): CategoryId | undefined {
   if (raw === null) return undefined
   // Exact match against the pickable ids — never an `in` / index lookup, so
   // `__proto__` / `constructor` cannot match, and `settle` is not pickable.
   return PICKABLE_CATEGORIES.find((c) => c.id === raw)?.id
 }
 
-function parseNote(raw: string | null): string | undefined {
+export function parseNote(raw: string | null): string | undefined {
   if (raw === null) return undefined
   const cleaned = raw.replace(STRIP_FROM_NOTE_RE, '').trim()
   if (!cleaned) return undefined
@@ -109,4 +109,53 @@ export function parseQuickAddHash(hash: string): QuickAddPrefill | null {
   const params = new URLSearchParams(body)
   if (params.get('add') !== 'expense') return null
   return prefillFromParams(params)
+}
+
+/**
+ * #1536 — the JSON body of `POST /api/shortcut/pending` → prefill, through the
+ * same three parsers the URL entry points use (one set of rules for "what an
+ * outside amount / category / note may be").
+ *
+ * Stricter than the URL parsers on purpose, because a caller here gets an
+ * answer and can fix its request:
+ *   - the body must be a plain JSON object; only `amount`, `category` and
+ *     `note` are read (any other key is ignored, never stored);
+ *   - `amount` is required: a safe integer, or a string `parseAmount`
+ *     accepts (full-width digits and thousands commas included). Anything
+ *     else (missing, 0, negative, fractional, over MAX_AMOUNT, an array such
+ *     as `["120"]`, an object, a boolean, null) → invalid;
+ *   - `category` / `note`, when present, must be strings; any other type
+ *     (null included) → invalid. A string that is not a pickable category id
+ *     is dropped, like in a URL (the card falls back to 「其他」 later); a note
+ *     that is empty after cleaning is dropped.
+ *
+ * Failure look if the type gate goes: nothing errors; `["120"]` is coerced
+ * by `String()` to "120" and accepted, or `{"toString": …}` reaches a parser.
+ */
+export function parseQuickAddJson(
+  body: unknown,
+): { ok: true; prefill: QuickAddPrefill & { amount: number } } | { ok: false } {
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) return { ok: false }
+  const rec = body as Record<string, unknown>
+  const own = (k: string) => (Object.prototype.hasOwnProperty.call(rec, k) ? rec[k] : undefined)
+  const rawAmount = own('amount')
+  const rawCategory = own('category')
+  const rawNote = own('note')
+
+  let amount: number | undefined
+  if (typeof rawAmount === 'number') {
+    amount = Number.isSafeInteger(rawAmount) ? parseAmount(String(rawAmount)) : undefined
+  } else if (typeof rawAmount === 'string') {
+    amount = parseAmount(rawAmount)
+  }
+  if (amount === undefined) return { ok: false }
+  if (rawCategory !== undefined && typeof rawCategory !== 'string') return { ok: false }
+  if (rawNote !== undefined && typeof rawNote !== 'string') return { ok: false }
+
+  const prefill: QuickAddPrefill & { amount: number } = { amount }
+  const category = rawCategory === undefined ? undefined : parseCategory(rawCategory)
+  if (category !== undefined) prefill.category = category
+  const description = rawNote === undefined ? undefined : parseNote(rawNote)
+  if (description !== undefined) prefill.description = description
+  return { ok: true, prefill }
 }

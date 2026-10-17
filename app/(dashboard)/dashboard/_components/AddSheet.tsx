@@ -25,6 +25,7 @@ import {
   softDeleteTripExpense,
 } from '@/actions/tripExpense'
 import { editAndConfirmPending } from '@/actions/recurringExpense'
+import { confirmShortcutPending } from '@/actions/shortcutPending'
 import { PICKABLE_CATEGORIES } from '@/lib/categories'
 import type { CategoryId } from '@/lib/categories'
 import type { SplitType } from '@/lib/balance'
@@ -130,6 +131,13 @@ interface Props {
    * override contract).
    */
   pendingExpenseId?: string
+  /**
+   * #1536 — a card an iOS Shortcut left in 待確認. Like `pendingExpenseId`
+   * (`initial` is the prefill; delete / notes hidden) but submit goes to
+   * confirmShortcutPending, which claims the card and writes the record in one
+   * transaction, so a second tap or another device cannot record it twice.
+   */
+  shortcutPendingId?: string
   /** Called when an edit-pending submit loses to a partner race. */
   onRaceResolved?: (message: string) => void
   groupDefaultRatioA?: number | null
@@ -141,7 +149,7 @@ interface Props {
   rates?: RateEntry[]
 }
 
-export function AddSheet({ open, onClose, initial, onMutated, prefilledAssetId, prefilledCategory, prefilledAmount, prefilledDescription, skipTripAutoDetect, prefilledTripId, pendingExpenseId, onRaceResolved, groupDefaultRatioA, baseCurrency = 'twd', activeTrips = [], rates = [] }: Props) {
+export function AddSheet({ open, onClose, initial, onMutated, prefilledAssetId, prefilledCategory, prefilledAmount, prefilledDescription, skipTripAutoDetect, prefilledTripId, pendingExpenseId, shortcutPendingId, onRaceResolved, groupDefaultRatioA, baseCurrency = 'twd', activeTrips = [], rates = [] }: Props) {
   const { viewer, partner, isSolo, viewerIsA } = useMember()
   const t = useTranslations()
   const [amount, setAmount] = useState('')
@@ -290,7 +298,7 @@ export function AddSheet({ open, onClose, initial, onMutated, prefilledAssetId, 
     amount, desc, category, split, splitRatioA, payerWho, payerUnresolved, date, notes, status, assetId, tripId, currency,
   })
 
-  const isPending = !!pendingExpenseId
+  const isPending = !!pendingExpenseId || !!shortcutPendingId
   // Edit affordance (delete button + editTransaction path) only for real tx.
   // Pending occurrences are not yet real tx → no delete; submit goes to
   // editAndConfirmPending instead.
@@ -355,7 +363,17 @@ export function AddSheet({ open, onClose, initial, onMutated, prefilledAssetId, 
 
     runMutation(
       async () => {
-        if (isPending) {
+        if (shortcutPendingId) {
+          return confirmShortcutPending(shortcutPendingId, {
+            amount: n,
+            description: desc,
+            category,
+            splitType,
+            splitRatioA: deriveCashSplitRatioA(),
+            paidBy: payerId,
+            transactedAt: date,
+          })
+        } else if (isPending) {
           return editAndConfirmPending({
             pendingId: pendingExpenseId!,
             overrides: {
@@ -456,6 +474,12 @@ export function AddSheet({ open, onClose, initial, onMutated, prefilledAssetId, 
           // `ActionFailure` the action returned, so the code is matched on the
           // wire value — not on the localized message (#1156), and not on a
           // thrown message production would have stripped to a digest (#1223).
+          if (shortcutPendingId && isActionError(e, 'shortcut_pending_handled_elsewhere')) {
+            onMutated?.()
+            onClose()
+            onRaceResolved?.(t.errors.actions.shortcut_pending_handled_elsewhere)
+            return true
+          }
           if (isPending && isActionError(e, 'pending_expense_not_found', 'pending_expense_handled_elsewhere')) {
             onMutated?.()
             onClose()

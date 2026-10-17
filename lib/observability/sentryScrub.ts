@@ -237,9 +237,18 @@ const URL_IN_TEXT_RE = new RegExp(
 /** Test-only: lets tests/sentry-scrub-edges.test.ts check the rewrite matches the old pattern. */
 export const _URL_IN_TEXT_RE_FOR_TESTS = URL_IN_TEXT_RE
 
+/**
+ * #1536 — a personal shortcut key (`fts_sk_` + 43 base64url, lib/shortcutKey.ts)
+ * anywhere in text. The prefix is kept so the event still says "a key was
+ * here". Matched on the prefix alone (no length), so a truncated or padded
+ * copy is masked too. Failure look if this goes: nothing errors; a key pasted
+ * into a log line or an error message sits in Sentry, usable until revoked.
+ */
+const SHORTCUT_KEY_IN_TEXT_RE = /fts_sk_[A-Za-z0-9_-]+/g
+
 function scrubText(value: unknown): unknown {
   if (typeof value !== 'string' || value === '') return value
-  return value.replace(
+  return value.replace(SHORTCUT_KEY_IN_TEXT_RE, 'fts_sk_[Filtered]').replace(
     URL_IN_TEXT_RE,
     (match, lead: string, path: string | undefined, absLead: string, absDigits: string, abs: string | undefined) => {
       if (abs) return `${absLead}${absDigits}${sanitizeUrl(abs)}`
