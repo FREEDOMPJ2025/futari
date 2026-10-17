@@ -14,7 +14,8 @@ import { getViewerWriteContext } from '@/lib/actionContext'
 import { revalidateAfterImportMutation } from '@/lib/revalidate'
 import { isWritableExpenseCategory } from '@/lib/categories'
 import { isValidIncomeCategoryId } from '@/lib/incomeCategories'
-import { MAX_AMOUNT } from '@/lib/validators'
+import { MAX_AMOUNT, parseDateString } from '@/lib/validators'
+import { ymdToUTCNoon } from '@/lib/local-date'
 import { DETECTED_SOURCES, type DetectedSource } from '@/lib/csvImport/detector'
 import { captureServer } from '@/lib/analytics/server'
 import { action, actionError } from '@/lib/action-errors'
@@ -135,9 +136,10 @@ function validateRow(row: ImportBatchInputRow, index: number): void {
   if (hasCurrency !== hasOrigAmount) {
     throw actionError('import_row_incomplete_fx', { row: index + 1 })
   }
-  // Date format: YYYY-MM-DD or any string Date can parse
-  const parsed = new Date(row.date)
-  if (Number.isNaN(parsed.getTime())) {
+  // A real calendar day, 'YYYY-MM-DD'. Anything looser (`new Date(row.date)`
+  // accepts '9/15/2026' and ISO timestamps) would be read in the server's
+  // zone and could move the day (#1793).
+  if (!parseDateString(row.date)) {
     throw actionError('import_row_invalid_date', { row: index + 1 })
   }
 }
@@ -231,7 +233,10 @@ export const importCsvBatch = action(async (
           splitRatioA: r.splitType === 'weighted' ? (r.splitRatioA ?? null) : null,
           description: r.description || '匯入紀錄',
           category: normaliseCategory(r.category, 'expense'),
-          transactedAt: new Date(r.date),
+          // UTC noon, like every manual entry (validateTransactionInput), so the
+          // calendar day is the same in every zone and imported rows sort with
+          // manual ones (#1793).
+          transactedAt: ymdToUTCNoon(r.date),
           importBatchId: batch.id,
         })),
       )

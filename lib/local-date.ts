@@ -1,7 +1,23 @@
+/**
+ * A Date's calendar day as YYYY-MM-DD in the runtime's LOCAL timezone.
+ *
+ * Use this, never `d.toISOString().slice(0, 10)`, for a Date that stands for a
+ * calendar day the user sees (a local-midnight Date from `new Date(y, m, d)`,
+ * or an instant such as a Unix-ms timestamp). `toISOString` reads the UTC day,
+ * and for local midnight east of UTC that is the day before.
+ *
+ * **失效的樣子**: nothing throws. In UTC+8, `new Date(2026, 8, 15)` is
+ * 2026-09-14T16:00Z, so `toISOString().slice(0, 10)` says 2026-09-14: every
+ * imported row lands a day early, and the first of a month lands in the
+ * previous month (#1793).
+ */
+export function localYmd(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 /** Today as YYYY-MM-DD in the runtime's LOCAL timezone (not UTC). */
 export function localTodayISO(): string {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  return localYmd(new Date())
 }
 
 /**

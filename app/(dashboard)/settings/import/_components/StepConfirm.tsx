@@ -5,6 +5,7 @@ import { pickPlural } from '@/lib/i18n/plural'
 import { getCategory } from '@/lib/categories'
 import { getIncomeCategory } from '@/lib/incomeCategories'
 import type { ImportRow } from '@/lib/csvImport'
+import { localYmd } from '@/lib/local-date'
 import { SectionCard } from './SectionCard'
 import { WizardNavButtons } from './WizardNavButtons'
 
@@ -60,7 +61,7 @@ export function StepConfirm({ rows, invalidCount, onBack, onConfirm, submitting 
                     style={{ borderTop: '1px solid var(--hairline)' }}
                   >
                     <td className="py-2 px-2 whitespace-nowrap" style={{ color: 'var(--ink-2)' }}>
-                      {row.date.toISOString().slice(0, 10)}
+                      {localYmd(row.date)}
                     </td>
                     <td className="py-2 px-2 max-w-[140px] truncate">{row.description || '—'}</td>
                     <td className="py-2 px-2 whitespace-nowrap">

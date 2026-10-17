@@ -22,6 +22,7 @@ import { ImportResult } from './ImportResult'
 import { ImportHistory } from './ImportHistory'
 import { toActionFailure, unwrapAction } from '@/lib/action-errors'
 import { reportClientError } from '@/lib/observability/reportClientError'
+import { localYmd } from '@/lib/local-date'
 
 interface Member {
   id: string
@@ -153,7 +154,7 @@ export function ImportContent({ viewer, partner, viewerIsMemberA, history }: Pro
       rows: remappedRows.map((r) => ({
         type: r.type,
         amount: r.amount,
-        date: r.date.toISOString().slice(0, 10),
+        date: localYmd(r.date), // local calendar day; toISOString() is the UTC day (#1793)
         category: r.category,
         description: r.description,
         paidBy: rules.payer,
