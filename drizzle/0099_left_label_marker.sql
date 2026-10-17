@@ -72,6 +72,8 @@
 -- Post-check (read the catalog and the data, not tool output):
 --   SELECT md5(prosrc) FROM pg_proc WHERE oid = 'public.process_account_deletions()'::regprocedure;
 --     → 64f8d93a584a6c29ca01fd2ea0cc10ed (this file's body)
+--   SELECT md5(prosrc) FROM pg_proc WHERE oid = 'public.snapshot_epoch_member_names()'::regprocedure;
+--     → 6ecfd3eb98b4092aef037f8580f9edf8 (this file's trigger body)
 --   SELECT p.oid::regprocedure, p.prosecdef, p.proconfig,
 --          has_function_privilege('anon', p.oid, 'EXECUTE') AS anon_x,
 --          has_function_privilege('authenticated', p.oid, 'EXECUTE') AS auth_x
