@@ -162,10 +162,13 @@
      * nav — originally because the 2026-08 sources carried a dev-overlay "N"
      * badge there (the 2026-09-20 re-capture no longer does), and still
      * because a cropped nav bar reads as a broken screenshot. */
+    /* Order = store order. Frame 1 is the only one a search-result card is
+     * sure to show, so it states what the app does (split + settle); the
+     * brand hero moved to 2 (#1759). */
     const frames = {
-      1: { scene: '../../public/illustration-hero.png', hero: true },
-      2: { shot: '01-dashboard-ios-6.7.png', crop: [0, 500, 1290, 1010],
+      1: { shot: '01-dashboard-ios-6.7.png', crop: [0, 500, 1290, 1010],
            scene: '../../docs/store-assets/illustrations/story-2.png', pos: '50% 60%', brief: '巷口那家晚餐。兩人並肩坐在麵店吧台，一人拿手機結帳，另一人看著笑。頭頂一顆燈泡的暖光，窗外是雨後的巷子。' },
+      2: { scene: '../../public/illustration-hero.png', hero: true },
       3: { shot: '01-dashboard-ios-6.7.png', crop: [50, 1290, 1240, 2030],
            scene: '../../docs/store-assets/illustrations/story-3.png', pos: '50% 55%', brief: '晚上的廚房。一人把超市袋子的東西收進冰箱，另一人靠在流理台邊用手機記一筆。桌上放著收據和一杯熱茶。' },
       4: { shot: '04-assets-ios-6.7.png', crop: [50, 1440, 1240, 2230],
@@ -178,8 +181,8 @@
     // the zh-TW draft is approved by the designer.
     const copy = {
       zh: {
-        1: { head: ['兩個人，', '<span class="lit">一本帳。</span>'], sub: '一起記，回頭看會很暖。' },
-        2: { head: ['誰先付的，', '<span class="lit">不用再算。</span>'], sub: '每一筆都分好了。想結清的時候，點一下就好。' },
+        1: { head: ['誰先付的，', '<span class="lit">不用再算。</span>'], sub: '每一筆都分好了。想結清的時候，點一下就好。' },
+        2: { head: ['兩個人，', '<span class="lit">一本帳。</span>'], sub: '一起記，回頭看會很暖。' },
         3: { head: ['一起記下的，', '<span class="lit">都是日子。</span>'], sub: '晚餐、看牙、營養液，兩個人的日常都在這裡。' },
         4: { head: ['小仙子陪了我們', '<span class="lit">285 天。</span>'], sub: '孩子、毛孩、植物，家裡的每一個都記得。' },
         5: { head: ['大阪七天，', '<span class="lit">回家就結清。</span>'], sub: '日圓、台幣照常記，旅行的帳自己分開算。' },
