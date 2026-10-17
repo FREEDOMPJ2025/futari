@@ -60,6 +60,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   技術：只改 `scripts/og/store-screens.html` 的 frame 順序並重新輸出 iPhone／iPad 兩組；圖片與舊版逐像素相同，只是對調。
 - **每週清理 cron 不再被已確認的定期卡片擋下（#1689）**
   技術：新 migration `0097` 重新排程 `cleanup-soft-deleted`，本體沿用 `0069`，最前面多刪「指向即將清除之交易」的已確認卡片；否則編輯過的定期交易滿一年後，外鍵讓整批清理每週失敗。prod 套用待 release。
+- **`record_created` 補齊所有記帳管道，server 事件帶 `group_id`（#1764）**
+  技術：定期支出確認、加油、旅行結算、愛物購入、CSV 匯入（每次一筆、帶 `count`）也發 `record_created`，以 `via` 區分；`setup_completed`、`income_created`、`asset_created`、`import_completed` 同帶 `group_id`。
+  技術：2026-10-17 前後的 `record_created` 計數不可比（之前只有 `manual`），口徑與失效樣子寫在 observability-design.md。
 
 ## [1.7.4] - 2026-10-16
 

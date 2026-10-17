@@ -86,7 +86,7 @@ export const createCar = action(async (input: CreateCarInput): Promise<{ id: str
     assertMemberInGroup(validated.primaryUserId, group, 'primary_user_not_in_group')
   }
 
-  const { created, firstRecord } = await db.transaction(async (tx) => {
+  const { created, firstRecord, hasPurchase } = await db.transaction(async (tx) => {
     const [asset] = await tx
       .insert(assets)
       .values({ groupId: group.id, type: 'car', name: validated.name, notes: validated.notes })
@@ -111,6 +111,7 @@ export const createCar = action(async (input: CreateCarInput): Promise<{ id: str
     // when present, so the truthy check below is sufficient — no need to guard
     // against 0 separately.
     let firstRecord = false
+    let hasPurchase = false
     if (validated.purchasePrice) {
       const partnerId =
         group.memberB && group.memberB !== viewer.id
@@ -141,9 +142,10 @@ export const createCar = action(async (input: CreateCarInput): Promise<{ id: str
 
       await recalcGroupBalance(group.id, tx)
       firstRecord = await isUserFirstNonDeletedRecord(tx, viewer.id, group.id)
+      hasPurchase = true
     }
 
-    return { created: asset, firstRecord }
+    return { created: asset, firstRecord, hasPurchase }
   })
 
   // Auto-tx affects /dashboard + /records too; revalidate unconditionally —
@@ -154,8 +156,12 @@ export const createCar = action(async (input: CreateCarInput): Promise<{ id: str
   if (firstRecord) {
     await captureServer(viewer.id, 'first_record_created', { via: 'asset_purchase' })
   }
+  // The purchase pair is a record whoever paid it (#1764).
+  if (hasPurchase) {
+    await captureServer(viewer.id, 'record_created', { via: 'asset_purchase', group_id: group.id })
+  }
   // Feature-adoption signal (#815).
-  await captureServer(viewer.id, 'asset_created', { asset_type: 'car' })
+  await captureServer(viewer.id, 'asset_created', { asset_type: 'car', group_id: group.id })
 
   return { id: created.id }
 })
@@ -308,7 +314,7 @@ export const createLifeEntity = action(async (input: CreateLifeEntityInput): Pro
     .returning({ id: assets.id })
 
   revalidateAfterAssetMutation()
-  await captureServer(user.id, 'asset_created', { asset_type: validated.type })
+  await captureServer(user.id, 'asset_created', { asset_type: validated.type, group_id: group.id })
   return { id: created.id }
 })
 
@@ -501,7 +507,7 @@ export const createChild = action(async (input: CreateChildInput): Promise<{ id:
   })
 
   revalidateAfterAssetMutation()
-  await captureServer(user.id, 'asset_created', { asset_type: 'child' })
+  await captureServer(user.id, 'asset_created', { asset_type: 'child', group_id: group.id })
   return { id: created.id }
 })
 
@@ -769,7 +775,7 @@ export const createPet = action(async (input: CreatePetInput): Promise<{ id: str
   })
 
   revalidateAfterAssetMutation()
-  await captureServer(user.id, 'asset_created', { asset_type: 'pet' })
+  await captureServer(user.id, 'asset_created', { asset_type: 'pet', group_id: group.id })
   return { id: created.id }
 })
 
@@ -860,7 +866,7 @@ export const createPlant = action(async (input: CreatePlantInput): Promise<{ id:
   })
 
   revalidateAfterAssetMutation()
-  await captureServer(user.id, 'asset_created', { asset_type: 'plant' })
+  await captureServer(user.id, 'asset_created', { asset_type: 'plant', group_id: group.id })
   return { id: created.id }
 })
 
@@ -1065,7 +1071,7 @@ export const createInsurance = action(async (input: CreateInsuranceInput): Promi
   })
 
   revalidateAfterAssetMutation()
-  await captureServer(user.id, 'asset_created', { asset_type: 'insurance' })
+  await captureServer(user.id, 'asset_created', { asset_type: 'insurance', group_id: group.id })
   return { id: created.id }
 })
 
@@ -1273,7 +1279,7 @@ export const createHouse = action(async (input: CreateHouseInput): Promise<{ id:
   // Same write gate as createCar: the purchase price records a CashTransaction.
   const { user: viewer, group } = await getViewerWriteContext()
 
-  const { created, firstRecord } = await db.transaction(async (tx) => {
+  const { created, firstRecord, hasPurchase } = await db.transaction(async (tx) => {
     const [asset] = await tx
       .insert(assets)
       .values({ groupId: group.id, type: 'house', name: validated.name, notes: validated.notes })
@@ -1289,6 +1295,7 @@ export const createHouse = action(async (input: CreateHouseInput): Promise<{ id:
     })
 
     let firstRecord = false
+    let hasPurchase = false
     if (validated.purchasePrice) {
       const partnerId =
         group.memberB && group.memberB !== viewer.id
@@ -1319,16 +1326,21 @@ export const createHouse = action(async (input: CreateHouseInput): Promise<{ id:
 
       await recalcGroupBalance(group.id, tx)
       firstRecord = await isUserFirstNonDeletedRecord(tx, viewer.id, group.id)
+      hasPurchase = true
     }
 
-    return { created: asset, firstRecord }
+    return { created: asset, firstRecord, hasPurchase }
   })
 
   revalidateAfterAssetMutation(null, { affectsRecords: true, affectsDashboard: true })
   if (firstRecord) {
     await captureServer(viewer.id, 'first_record_created', { via: 'asset_purchase' })
   }
-  await captureServer(viewer.id, 'asset_created', { asset_type: 'house' })
+  // The purchase pair is a record whoever paid it (#1764).
+  if (hasPurchase) {
+    await captureServer(viewer.id, 'record_created', { via: 'asset_purchase', group_id: group.id })
+  }
+  await captureServer(viewer.id, 'asset_created', { asset_type: 'house', group_id: group.id })
   return { id: created.id }
 })
 
@@ -1424,7 +1436,7 @@ export const createTemplateAsset = action(async (input: CreateTemplateAssetInput
     .returning({ id: assets.id })
 
   revalidateAfterAssetMutation()
-  await captureServer(user.id, 'asset_created', { asset_type: 'item' })
+  await captureServer(user.id, 'asset_created', { asset_type: 'item', group_id: group.id })
   return { id: created.id }
 })
 
