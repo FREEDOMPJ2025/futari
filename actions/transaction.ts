@@ -167,6 +167,7 @@ export const createTransaction = action(async (
     has_trip: !!(input.tripId),
     currency: inputCurrency,
     via: 'manual',
+    group_id: group.id,
   })
 
   return result

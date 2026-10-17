@@ -392,6 +392,7 @@ export const confirmPending = action(async (pendingId: string): Promise<{ txId: 
   if (result.firstRecord) {
     await captureServer(user.id, 'first_record_created', { via: 'recurring_confirm' })
   }
+  await captureServer(user.id, 'record_created', { via: 'recurring_confirm', group_id: group.id })
   return { txId: result.txId }
 })
 
@@ -485,6 +486,7 @@ export const editAndConfirmPending = action(async (
   if (result.firstRecord) {
     await captureServer(user.id, 'first_record_created', { via: 'recurring_confirm' })
   }
+  await captureServer(user.id, 'record_created', { via: 'recurring_confirm', group_id: group.id })
   return { txId: result.txId }
 })
 

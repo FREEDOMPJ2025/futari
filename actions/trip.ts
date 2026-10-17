@@ -158,7 +158,7 @@ export const endTrip = action(async (input: { tripId: string; endDate: string })
       ? await isUserFirstNonDeletedRecord(tx, user.id, group.id)
       : false
 
-    return { row, expenseCount, firstRecord }
+    return { row, expenseCount, firstRecord, summaryCount }
   })
 
   revalidatePath('/trips')
@@ -169,6 +169,10 @@ export const endTrip = action(async (input: { tripId: string; endDate: string })
   // Milestone signal (#891, not the activation metric — see #1127): trip-end summary may be viewer's first record.
   if (txResult.firstRecord) {
     await captureServer(user.id, 'first_record_created', { via: 'trip_summary' })
+  }
+  // The summary rows are records the user's trip produced, whoever paid (#1764).
+  if (txResult.summaryCount > 0) {
+    await captureServer(user.id, 'record_created', { via: 'trip_summary', group_id: group.id })
   }
 
   // Feature-adoption signal (#814): trip duration and scale.

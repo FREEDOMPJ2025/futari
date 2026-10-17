@@ -377,6 +377,9 @@ describe.skipIf(!isLocalDb)('acceptInvite ends the inviter\'s active trip (#1438
     expect(captured.find((c) => c.event === 'first_record_created')).toEqual({
       distinctId: s.inviter, event: 'first_record_created', props: { via: 'trip_summary' },
     })
+    expect(captured.find((c) => c.event === 'record_created')).toEqual({
+      distinctId: s.inviter, event: 'record_created', props: { via: 'trip_summary', group_id: s.g.id },
+    })
     expect(captured.filter((c) => c.event === 'partner_joined')).toHaveLength(1)
 
     // Back in the new chapter the trip is read-only, as any past trip.
@@ -433,6 +436,7 @@ describe.skipIf(!isLocalDb)('acceptInvite ends the inviter\'s active trip (#1438
     await expectNothingInNewChapter(s.g.id)
     expect(tripEndedEvents().map((e) => e.props.expense_count)).toEqual([0])
     expect(captured.find((c) => c.event === 'first_record_created')).toBeUndefined()
+    expect(captured.find((c) => c.event === 'record_created')).toBeUndefined()
   })
 
   it('a planned end date is kept; one after the accept is brought back to the accept day', async () => {

@@ -274,7 +274,7 @@ export const importCsvBatch = action(async (
 
     await recalcGroupBalance(group.id, tx)
 
-    return { batchId: batch.id }
+    return { batchId: batch.id, expenseCount: cashRows.length }
   })
 
   revalidateAfterImportMutation()
@@ -284,7 +284,19 @@ export const importCsvBatch = action(async (
     migrate_source: input.source,
     imported_rows: input.rows.length,
     error_count: input.errors.length,
+    group_id: group.id,
   })
+
+  // One activation signal per import, not one per row (#1764): a 500-row CSV
+  // would otherwise outweigh every manual record in the DAU count. Income-only
+  // imports write no CashTransactions, so they are not a record here.
+  if (result.expenseCount > 0) {
+    await captureServer(user.id, 'record_created', {
+      via: 'import',
+      count: result.expenseCount,
+      group_id: group.id,
+    })
+  }
 
   return {
     batchId: result.batchId,

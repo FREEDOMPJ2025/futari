@@ -61,6 +61,7 @@ export const createIncome = action(async (input: CreateIncomeInput): Promise<{ i
   await captureServer(user.id, 'income_created', {
     category: validated.category,
     has_asset: !!validated.assetId,
+    group_id: group.id,
   })
 
   return { id: created.id }
