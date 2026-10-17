@@ -33,9 +33,9 @@ import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 //
 // Local throwaway database only; refuses to run against anything that is not
 // localhost:
-//   docker run -d --name pg-1438 -e POSTGRES_PASSWORD=pg -p 127.0.0.1:55830:5432 postgres:17
-//   DATABASE_URL_DIRECT=postgres://postgres:pg@127.0.0.1:55830/postgres npx drizzle-kit push --force
-//   DATABASE_URL=postgres://postgres:pg@127.0.0.1:55830/postgres npx vitest run __tests__/actions/acceptInvite.inviterTrip.test.ts
+//   DATABASE_URL=<stand-in url> npx vitest run __tests__/actions/acceptInvite.inviterTrip.test.ts
+// The Postgres + Supabase stand-in recipe lives in __tests__/actions/_standinCli.mts
+// (drizzle-kit push is not enough: no auth schema, no SQL functions).
 // ──────────────────────────────────────────────────────────────────────────
 
 function loadEnvLocal() {
