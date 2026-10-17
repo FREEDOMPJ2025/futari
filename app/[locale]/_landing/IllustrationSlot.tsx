@@ -77,6 +77,12 @@ export function IllustrationSlot({ mobile }: Props) {
             fetchPriority="high"
           />
         </picture>
+        {/* #1527 — mobile has no phone mock, so the points of light leave the
+            couple's own phone in the illustration instead and drift up into
+            the ribbon. Siblings of <picture>: the LCP image is untouched. */}
+        <span aria-hidden="true" className="lp-dot lp-dot-1 lp-dot-band-1" />
+        <span aria-hidden="true" className="lp-dot lp-dot-2 lp-dot-band-2" />
+        <span aria-hidden="true" className="lp-dot lp-dot-3 lp-dot-band-3" />
       </div>
     )
   }

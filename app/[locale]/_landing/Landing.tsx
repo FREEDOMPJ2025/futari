@@ -20,6 +20,7 @@ import { PhonePreview } from './PhonePreview'
 import { TrustSection } from './TrustSection'
 import { Phrase } from '../_components/Phrase'
 import { phraseHtml } from '@/lib/i18n/phrase'
+import './landing-motion.css'
 
 type LandingStrings = Translations['landing']
 
@@ -75,7 +76,7 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
   return (
     <main
       id="main"
-      className="relative min-h-dvh overflow-hidden"
+      className="lp-root relative min-h-dvh overflow-hidden"
       style={{
         background: 'var(--bg-committed)',
         color: 'var(--ink)',
@@ -475,7 +476,7 @@ function MigrateLinksSection({
       className="relative z-10 px-5 md:px-16 py-12 md:py-16"
       style={{ background: 'var(--surface-alt)' }}
     >
-      <div className="max-w-md md:max-w-[1080px] mx-auto">
+      <div className="lp-lamp max-w-md md:max-w-[1080px] mx-auto">
         <div className="text-center md:text-left md:flex md:items-baseline md:justify-between md:gap-10 mb-7 md:mb-9">
           <div>
             <p
@@ -594,7 +595,7 @@ function UseCaseLinksSection({
       className="relative z-10 px-5 md:px-16 py-12 md:py-16"
       style={{ background: 'var(--bg)' }}
     >
-      <div className="max-w-md md:max-w-[1080px] mx-auto">
+      <div className="lp-lamp max-w-md md:max-w-[1080px] mx-auto">
         <div className="text-center md:text-left md:flex md:items-baseline md:justify-between md:gap-10 mb-7 md:mb-9">
           <div>
             <p
@@ -709,7 +710,7 @@ function FeatureEntry({
 }) {
   return (
     <div
-      className="flex gap-5 md:gap-6 py-6 md:py-8"
+      className="lp-feature flex gap-5 md:gap-6 py-6 md:py-8"
       style={{
         borderBottom: isLast ? undefined : '1px solid var(--hairline)',
       }}
@@ -733,7 +734,7 @@ function FeatureEntry({
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2.5 mb-2 md:mb-2.5">
-          <span aria-hidden="true" style={{ color: glyphColor }}>
+          <span aria-hidden="true" className="lp-halo" style={{ color: glyphColor }}>
             {glyph}
           </span>
           <h3
