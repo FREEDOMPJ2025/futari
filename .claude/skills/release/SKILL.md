@@ -157,7 +157,7 @@ git log vPREV..HEAD -p -- package.json | grep -E '^[+-].*"@capacitor(-community)
 再看本版 milestone 的描述開頭有沒有 `[shell]`（代表這版預定要送原生殼）：
 
 ```bash
-gh api repos/redtear1115/oikos/milestones --jq '.[] | select(.title=="vX.Y.Z") | .description'
+gh api repos/redtear1115/oikos/milestones --jq '[.[] | select(.title=="vX.Y.Z")] | if length==1 then .[0].description else error("找不到 milestone vX.Y.Z") end'
 ```
 
 - **有命中** → 收尾 checklist 明確標示：**本版含原生殼變更，需依 [runbook](../../../docs/app-store-submission-runbook.md) 重送商店（版本計數 +1 規則見 §E）**，並列出命中的路徑。
@@ -200,7 +200,7 @@ gh pr create --base main --head chore/release-vX.Y.Z \
 2. 在 PR head 上重跑第 4 步的兩段驗證腳本，兩個 ✓ 都出現。
 3. `[X.Y.Z]` 段的每一條條目，都在 `git diff vPREV..origin/main` 裡指得出支持它的那幾行；`vPREV..origin/main` 裡有使用者可見的改動卻沒有條目，也算失敗。issue／PR 內文是意圖不是證據。
 4. CLAUDE.md「目前狀態」是 `vX.Y.Z`、backlog 表已刪掉 `vX.Y.Z` 那列；README 最近 3 版表正確。
-5. 第 7 步原生影響結論和重跑掃描的結果一致。
+5. 第 7 步原生影響結論和重跑掃描的結果一致，也和 milestone 描述的 `[shell]` 標記一致（不一致時 PR 內文要有使用者的說明）。
 6. CI 全綠、`mergeStateStatus` 是 `CLEAN`。
 
 任何一條 REFUTED 或 INCONCLUSIVE → 修正後重新驗證，**不 merge**。
