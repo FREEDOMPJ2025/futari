@@ -23,6 +23,13 @@ import {
   type DetectedSource,
   type ProcessResult,
 } from '@/lib/csvImport'
+import {
+  ANDROMONEY_HEADERS,
+  ANDROMONEY_LABELS,
+  MANEBO_HEADERS,
+  MANEBO_LABELS,
+  normalizeHeader,
+} from '@/lib/csvImport/headerAliases'
 
 const FIXTURES = resolve(__dirname, 'fixtures/1791')
 
@@ -211,9 +218,82 @@ describe('missing required columns are named, not swallowed into "no valid rows"
   it('まねーぼ file whose 種別 column was renamed', async () => {
     const text = bytesOf('manebo_ja_utf8.csv').toString('utf8').replace('種別', '区分')
     const r = await runText(text, 'manebo')
-    expect(r.missingColumns).toEqual(['Type'])
+    // The file is Japanese, so the column is named the way the file would name it (#1799).
+    expect(r.missingColumns).toEqual(['Type（種別）'])
     expect(r.rows).toEqual([])
     expect(r.errors).toEqual([])
+  })
+
+  it('AndroMoney 繁中 file without the two account columns: names them in 繁中', async () => {
+    const r = await runText('Id,幣別,金額,日期\n1,TWD,5,20260901\n', 'andromoney')
+    expect(r.missingColumns).toEqual([
+      'Expense(Transfer Out)（付款(轉出)）',
+      'Income(Transfer In)（收款(轉入)）',
+    ])
+  })
+
+  it('AndroMoney 简中 file: names them in 简中, not 繁中', async () => {
+    const r = await runText('Id,币别,金额,日期\n1,TWD,5,20260901\n', 'andromoney')
+    expect(r.missingColumns).toEqual([
+      'Expense(Transfer Out)（付款(转出)）',
+      'Income(Transfer In)（收款(转入)）',
+    ])
+  })
+
+  it('AndroMoney English file: English names only', async () => {
+    const r = await runText('Id,Currency,Amount,Date\n1,TWD,5,20260901\n', 'andromoney')
+    expect(r.missingColumns).toEqual(['Expense(Transfer Out)', 'Income(Transfer In)'])
+  })
+
+  it('まねーぼ 繁中 file: names the missing column in 繁中', async () => {
+    const text = bytesOf('manebo_zhHant_utf8.csv').toString('utf8').replace('類型', '種類')
+    const r = await runText(text, 'manebo')
+    expect(r.missingColumns).toEqual(['Type（類型）'])
+  })
+
+  it('まねーぼ ja file under the AndroMoney button: English names, not 繁中 ones it cannot contain', async () => {
+    // 金額 is also 繁中; on that alone the file used to be read as 繁中 and the
+    // message named 付款(轉出) (#1806).
+    const r = await run('manebo_ja_utf8.csv', 'andromoney')
+    expect(r.missingColumns).toEqual(['Date', 'Expense(Transfer Out)', 'Income(Transfer In)'])
+  })
+
+  it('まねーぼ 繁中 file under the AndroMoney button: 繁中 names (the file is 繁中)', async () => {
+    const r = await run('manebo_zhHant_utf8.csv', 'andromoney')
+    expect(r.missingColumns).toEqual([
+      'Expense(Transfer Out)（付款(轉出)）',
+      'Income(Transfer In)（收款(轉入)）',
+    ])
+  })
+
+  it('AndroMoney 繁中 file under the まねーぼ button: 繁中 name of Type', async () => {
+    const header = 'Id,幣別,金額,分類,子分類,日期,付款(轉出),收款(轉入),備註'
+    const r = await runText(`${header}\n1,TWD,5,餐飲,,20260901,現金,,\n`, 'manebo')
+    expect(r.missingColumns).toEqual(['Type（類型）'])
+  })
+
+  it('AndroMoney 简中 file under the まねーぼ button: まねーぼ has no 简中 names, so English', async () => {
+    const header = 'Id,币别,金额,分类,子分类,日期,付款(转出),收款(转入),备注'
+    const r = await runText(`${header}\n1,TWD,5,餐饮,,20260901,现金,,\n`, 'manebo')
+    expect(r.missingColumns).toEqual(['Type', 'Amount'])
+  })
+
+  it('only names shared by several languages (金額, 日期) keep the English names', async () => {
+    expect((await runText('Id,日期,金額\n1,2026-01-01,5\n', 'andromoney')).missingColumns)
+      .toEqual(['Expense(Transfer Out)', 'Income(Transfer In)'])
+    expect((await runText('日期,金額\n2026-01-01,5\n', 'manebo')).missingColumns).toEqual(['Type'])
+  })
+
+  it('a title row whose language cannot be told apart keeps the English names', async () => {
+    // 日期 is both 繁中 and 简中; 金額 is both 日本語 and 繁中 — nothing decides.
+    expect((await runText('日期\n2026-01-01\n', 'andromoney')).missingColumns)
+      .toEqual(['Amount', 'Expense(Transfer Out)', 'Income(Transfer In)'])
+    expect((await runText('金額\n100\n', 'manebo')).missingColumns).toEqual(['Date', 'Type'])
+  })
+
+  it('a title row in a language we have no names for keeps the English names', async () => {
+    const r = await runText('Datum,Typ,Betrag\n2026-01-01,x,1\n', 'manebo')
+    expect(r.missingColumns).toEqual(['Date', 'Type', 'Amount'])
   })
 
   it('Splitwise picked for a file with no Cost column', async () => {
@@ -317,5 +397,20 @@ describe('encoding and banner hints apply only to the source the user chose', ()
     expect(parseCsvText(plain, { skipBanner: true })).toEqual(parseCsvText(plain))
     // A different first line is not a banner: nothing is dropped.
     expect(parseCsvText('"Windows Excel","Other","1"\nA,B,C\n', { skipBanner: true }).headers[0]).toBe('Windows Excel')
+  })
+})
+
+describe('the names used to report a missing column are names the mapper accepts (#1799)', () => {
+  it.each([
+    ['AndroMoney', ANDROMONEY_LABELS, ANDROMONEY_HEADERS],
+    ['まねーぼ', MANEBO_LABELS, MANEBO_HEADERS],
+  ] as const)('%s: every label is one of the aliases of its column', (_n, labels, headers) => {
+    expect(Object.keys(labels).sort()).toEqual(Object.keys(headers).sort())
+    for (const [key, byLang] of Object.entries(labels)) {
+      const aliases = (headers as Record<string, readonly string[]>)[key]!
+      for (const name of Object.values(byLang as Record<string, string>)) {
+        expect(aliases, `${key}: ${name}`).toContain(normalizeHeader(name))
+      }
+    }
   })
 })

@@ -12,11 +12,16 @@
 import { isWritableExpenseCategory } from '@/lib/categories'
 import {
   ANDROMONEY_HEADERS,
+  ANDROMONEY_LABELS,
   ANDROMONEY_POSITION,
   ANDROMONEY_WIDTH,
   MANEBO_HEADERS,
+  MANEBO_LABELS,
   SPLITWISE_HEADERS,
+  describeMissing,
+  detectHeaderLang,
   normalizeHeader,
+  type HeaderLang,
 } from './headerAliases'
 import type {
   HeaderMap,
@@ -389,8 +394,18 @@ function withCurrency(out: PartialImportRow, currency: string, amount: number | 
 export interface ColumnResolution<C> {
   /** `null` when a required column is missing. */
   columns: C | null
-  /** Canonical names of the required columns that were not found. */
+  /** The required columns that were not found, named for the user: the English
+   *  name, plus the file's own language when it can be told (`Type（種別）`). */
   missing: string[]
+}
+
+/** Names a missing column in the language the file's title row is written in. */
+function missingNamer<L extends Record<string, Partial<Record<HeaderLang, string>>>>(
+  headers: readonly string[],
+  labels: L,
+): (key: keyof L & string) => string {
+  const lang = detectHeaderLang(headers)
+  return (key) => describeMissing(key, labels, lang)
 }
 
 // ── AndroMoney ──
@@ -416,11 +431,12 @@ export function resolveAndromoneyColumns(headers: readonly string[]): ColumnReso
   const amount = findColumn(headers, H.amount, P.amount, W)
   const out = findColumn(headers, H.out, P.out, W)
   const inn = findColumn(headers, H.in, P.in, W)
+  const name = missingNamer(headers, ANDROMONEY_LABELS)
   const missing: string[] = []
-  if (date === undefined) missing.push('Date')
-  if (amount === undefined) missing.push('Amount')
-  if (out === undefined) missing.push('Expense(Transfer Out)')
-  if (inn === undefined) missing.push('Income(Transfer In)')
+  if (date === undefined) missing.push(name('date'))
+  if (amount === undefined) missing.push(name('amount'))
+  if (out === undefined) missing.push(name('out'))
+  if (inn === undefined) missing.push(name('in'))
   if (date === undefined || amount === undefined || out === undefined || inn === undefined) {
     return { columns: null, missing }
   }
@@ -490,10 +506,11 @@ export function resolveManeboColumns(headers: readonly string[]): ColumnResoluti
   const date = findColumn(headers, H.date)
   const type = findColumn(headers, H.type)
   const amount = findColumn(headers, H.amount)
+  const name = missingNamer(headers, MANEBO_LABELS)
   const missing: string[] = []
-  if (date === undefined) missing.push('Date')
-  if (type === undefined) missing.push('Type')
-  if (amount === undefined) missing.push('Amount')
+  if (date === undefined) missing.push(name('date'))
+  if (type === undefined) missing.push(name('type'))
+  if (amount === undefined) missing.push(name('amount'))
   if (date === undefined || type === undefined || amount === undefined) {
     return { columns: null, missing }
   }

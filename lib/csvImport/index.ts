@@ -130,7 +130,10 @@ export interface ProcessResult {
    *  (AndroMoney / まねーぼ / Splitwise), and only when a required column is
    *  not in the file. Then nothing was mapped: `rows` and `errors` are empty.
    *  Callers check it BEFORE the "no valid rows" case — both look like an empty
-   *  result, but only this one names what to fix. Absent for every other source. */
+   *  result, but only this one names what to fix. Absent for every other source.
+   *  Each entry is display text, not an identifier: `Type（種別）` for a file
+   *  whose title row is Japanese, plain `Type` for English or an undetectable
+   *  language (#1799). */
   missingColumns?: string[]
 }
 

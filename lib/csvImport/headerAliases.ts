@@ -66,3 +66,105 @@ export const SPLITWISE_HEADERS = {
   cost: ['cost'],
   currency: ['currency'],
 } as const
+
+// ──────────────────── Naming a missing column (#1799) ────────────────────
+
+/** The language a file's title row is written in. */
+export type HeaderLang = 'en' | 'ja' | 'zh-TW' | 'zh-CN' | 'pt'
+
+type Labels = Partial<Record<HeaderLang, string>>
+
+/**
+ * The name each language's export gives a column, keyed like the tables above.
+ * Only used to say which column is missing: `findColumn` never reads this, it
+ * matches on the alias tables. Every value must also be an alias there (a test
+ * holds that), otherwise the message would name a header the mapper does not
+ * accept.
+ */
+export const ANDROMONEY_LABELS: Record<keyof typeof ANDROMONEY_HEADERS, Labels> = {
+  amount: { en: 'Amount', 'zh-TW': '金額', 'zh-CN': '金额' },
+  category: { en: 'Category', 'zh-TW': '分類', 'zh-CN': '分类' },
+  subCategory: { en: 'Sub-Category', 'zh-TW': '子分類', 'zh-CN': '子分类' },
+  date: { en: 'Date', 'zh-TW': '日期', 'zh-CN': '日期' },
+  out: { en: 'Expense(Transfer Out)', 'zh-TW': '付款(轉出)', 'zh-CN': '付款(转出)' },
+  in: { en: 'Income(Transfer In)', 'zh-TW': '收款(轉入)', 'zh-CN': '收款(转入)' },
+  note: { en: 'Note', 'zh-TW': '備註', 'zh-CN': '备注' },
+  currency: { en: 'Currency', 'zh-TW': '幣別', 'zh-CN': '币别' },
+}
+
+export const MANEBO_LABELS: Record<keyof typeof MANEBO_HEADERS, Labels> = {
+  date: { ja: '日付', en: 'Date', 'zh-TW': '日期', pt: 'Data' },
+  type: { ja: '種別', en: 'Type', 'zh-TW': '類型', pt: 'Tipo' },
+  amount: { ja: '金額', en: 'Amount', 'zh-TW': '金額', pt: 'Valor' },
+  category: { ja: 'カテゴリ', en: 'Category', 'zh-TW': '類別', pt: 'Categoria' },
+  subCategory: { ja: 'サブカテゴリ', en: 'Sub Category', 'zh-TW': '子類別', pt: 'Subcategoria' },
+  account: { ja: 'アカウント / 振込元', en: 'Account / From', 'zh-TW': '帳戶 / 來源', pt: 'Conta / De' },
+  to: { ja: '振替先', en: 'To', 'zh-TW': '目的地', pt: 'Para' },
+  note: { ja: 'メモ', en: 'Note', 'zh-TW': '備註', pt: 'Nota' },
+}
+
+/**
+ * Every name above, by the languages that spell it that way, across BOTH
+ * tables: `金額` is Japanese, 繁中 and (in まねーぼ) shared, `日期` is 繁中 and
+ * 简中. A name spelled in more than one language says nothing about which one
+ * the file is in.
+ */
+const LANGS_BY_NAME: ReadonlyMap<string, ReadonlySet<HeaderLang>> = (() => {
+  const m = new Map<string, Set<HeaderLang>>()
+  for (const table of [ANDROMONEY_LABELS, MANEBO_LABELS] as Record<string, Labels>[]) {
+    for (const byLang of Object.values(table)) {
+      for (const [lang, name] of Object.entries(byLang) as [HeaderLang, string][]) {
+        const key = normalizeHeader(name)
+        m.set(key, (m.get(key) ?? new Set()).add(lang))
+      }
+    }
+  }
+  return m
+})()
+
+/**
+ * The language of a title row, judged by which language's names the file
+ * actually contains: the language with the most matching headers wins.
+ *
+ * Only a header spelled in exactly one language counts (see `LANGS_BY_NAME`,
+ * which covers both tables). Otherwise a まねーぼ ja file
+ * picked as AndroMoney was read as 繁中 on the strength of `金額` alone — and
+ * the message named `付款(轉出)`, a column the user can never find in it. A
+ * language the table being reported on has no names for (here ja under AndroMoney) can
+ * still win; `describeMissing` then falls back to English.
+ *
+ * `null` when no header is specific to a language, or two languages tie — a
+ * file with only `日期` and `金額` stays English instead of being guessed at.
+ */
+export function detectHeaderLang(headers: readonly string[]): HeaderLang | null {
+  const seen = new Set(headers.map(normalizeHeader))
+  const score = new Map<HeaderLang, number>()
+  for (const name of seen) {
+    const langs = LANGS_BY_NAME.get(name)
+    if (langs === undefined || langs.size !== 1) continue
+    const [lang] = langs
+    score.set(lang!, (score.get(lang!) ?? 0) + 1)
+  }
+  const ranked = [...score.entries()].sort((a, b) => b[1] - a[1])
+  if (ranked.length === 0) return null
+  if (ranked.length > 1 && ranked[0]![1] === ranked[1]![1]) return null
+  return ranked[0]![0]
+}
+
+/**
+ * How a missing column is shown: the English name, plus the name in the file's
+ * own language when that differs — `Type（種別）`. The English name stays
+ * because the message is in the app's language, which need not be the file's
+ * (an English UI reading a Japanese file), and it is the one name that never
+ * changes between languages. With no language detected, or an English file,
+ * the English name alone.
+ */
+export function describeMissing(
+  key: string,
+  labels: Record<string, Labels>,
+  lang: HeaderLang | null,
+): string {
+  const english = labels[key]?.en ?? key
+  const local = lang === null || lang === 'en' ? undefined : labels[key]?.[lang]
+  return local === undefined || local === english ? english : `${english}（${local}）`
+}
