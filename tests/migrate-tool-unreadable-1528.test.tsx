@@ -1,7 +1,7 @@
 /**
  * #1528 A6 + F1, on the /migrate upload surface.
  *
- * A6: a file with no usable record shows the in-world error and no import
+ * A6: a file that is not a table (one column, or no data rows) shows the in-world error and no import
  * button. Failure looks like a preview card reading "1 筆紀錄 · 約 0 筆支出" and a
  * sign-up CTA that would import nothing; nothing throws.
  * F1: the dropzone label gets a keyboard focus ring on the brand variant only.
@@ -42,9 +42,18 @@ describe('unreadable file on the /migrate dropzone (#1528 A6)', () => {
     await waitFor(() =>
       expect(track).toHaveBeenCalledWith('migrate_preview_failed', {
         migrate_source: 'honeydue',
-        reason: 'no_usable_rows',
+        reason: 'not_a_csv_table',
       }),
     )
+  })
+
+  it('a CSV with columns we do not recognise still previews with the import button', async () => {
+    const { container } = render(
+      <MigrateTool t={zhTW.migrate} locale="zh-TW" signInHref="/sign-in" hint="honeydue" />,
+    )
+    upload(container, ['Foo,Bar', 'a,1', 'b,2'].join('\n'))
+    expect(await screen.findByText(zhTW.migrate.cta.button)).toBeTruthy()
+    expect(screen.queryByText(zhTW.migrate.upload.error)).toBeNull()
   })
 
   it('a valid Honeydue file still previews with the import button', async () => {

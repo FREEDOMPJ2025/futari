@@ -30,7 +30,6 @@ vi.mock('@/actions/import', () => ({
 
 import { ImportContent } from '@/app/(dashboard)/settings/import/_components/ImportContent'
 import { useCsvPreview } from '@/lib/migrate/useCsvPreview'
-import { decodeBytes, detectCsvSource, parseCsvText, parseHintsFor } from '@/lib/csvImport'
 
 const FIXTURES = resolve(__dirname, '../lib/csvImport/__tests__/fixtures/1791')
 const fixture = (name: string) => new File([readFileSync(resolve(FIXTURES, name))], name, { type: 'text/csv' })
@@ -215,15 +214,9 @@ describe('useCsvPreview — the /migrate page hint selects the same parse hints 
   it('any other page leaves the banner as the header, exactly as before', async () => {
     const { result } = renderHook(() => useCsvPreview({ hint: 'cwmoney' }))
     await act(async () => { await result.current.load(fixture('andromoney_googledocs_utf8_zh.csv')) })
-    // #1528 A6: an AndroMoney file under CWMoney has no row CWMoney can read, so
-    // it is now the error state (it used to be a "ready" preview of 0 expenses).
-    // What this test pins is the parse hints, so read the headers directly.
-    await waitFor(() => expect(result.current.status).toBe('error'))
-    const bytes = fixture('andromoney_googledocs_utf8_zh.csv')
-    const hints = parseHintsFor('cwmoney')
-    const { headers } = parseCsvText(decodeBytes(await bytes.arrayBuffer(), hints).text, hints)
-    expect(headers).toEqual(['Google Documents', 'AndroMoney', '20261001'])
-    expect(detectCsvSource(headers) ?? 'cwmoney').toBe('cwmoney')
+    await waitFor(() => expect(result.current.status).toBe('ready'))
+    expect(result.current.headers).toEqual(['Google Documents', 'AndroMoney', '20261001'])
+    expect(result.current.detectedSource).toBe('cwmoney')
   })
 
   it('Manebo page: a Shift_JIS file is read as Shift_JIS', async () => {

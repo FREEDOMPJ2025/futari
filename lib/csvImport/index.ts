@@ -400,37 +400,14 @@ export function computePreviewStats(
   rows: readonly CsvRow[],
   hint: MigrateSource = 'unknown',
 ): CsvStats {
-  return computePreview(headers, rows, hint).stats
-}
-
-/**
- * `computePreviewStats` plus whether the file has anything an import could use
- * (#1528 A6). `usableRows` is how many rows the source's mapper turned into
- * records with a date and an amount, so a file read through the wrong columns
- * (a text file, another app's export) is 0 rather than "1 record, about 0
- * expenses" with an import button that would import nothing. Files with no
- * mapper have no such count; they are usable only when a date column was
- * found with a value in it.
- */
-export function computePreview(
-  headers: readonly string[],
-  rows: readonly CsvRow[],
-  hint: MigrateSource = 'unknown',
-): { stats: CsvStats; usableRows: number } {
   const source = rows.length === 0 ? null : previewMapperSource(headers, hint)
-  if (source === null) {
-    const stats = computeStats(rows)
-    return { stats, usableRows: stats.dateRange ? stats.totalRows : 0 }
-  }
+  if (source === null) return computeStats(rows)
 
   const result = mapRows(headers, rows, { source })
   // A required column is missing: the wizard names it and imports nothing; the
   // card can only say how many rows the file has.
   if (result.missingColumns) {
-    return {
-      stats: { totalRows: rows.length, estimatedExpenseRows: 0, dateRange: null, topCategories: [] },
-      usableRows: 0,
-    }
+    return { totalRows: rows.length, estimatedExpenseRows: 0, dateRange: null, topCategories: [] }
   }
 
   const skipped = new Set(result.errors.map((e) => e.rowIndex))
@@ -453,15 +430,12 @@ export function computePreview(
   }
 
   return {
-    stats: {
-      totalRows: rows.length,
-      estimatedExpenseRows: result.rows.filter((r) => r.type === 'expense').length,
-      dateRange: first && last ? { first: ymd(first), last: ymd(last) } : null,
-      topCategories: Array.from(catCounts.entries())
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
-        .map(([name, count]) => ({ name, count })),
-    },
-    usableRows: result.rows.length,
+    totalRows: rows.length,
+    estimatedExpenseRows: result.rows.filter((r) => r.type === 'expense').length,
+    dateRange: first && last ? { first: ymd(first), last: ymd(last) } : null,
+    topCategories: Array.from(catCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, count]) => ({ name, count })),
   }
 }

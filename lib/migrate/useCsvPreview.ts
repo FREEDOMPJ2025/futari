@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import {
-  computePreview,
+  computePreviewStats,
   decodeBytes,
   detectCsvSource,
   parseCsvText,
@@ -26,9 +26,9 @@ export interface CsvPreviewState {
   error: string | null
 }
 
-/** `error` for a file that parsed but has no usable rows; also the `reason`
+/** `error` for a file that parsed to nothing table-shaped; also the `reason`
  *  of the `migrate_preview_failed` event, so it reads apart from a thrown message. */
-export const NO_USABLE_ROWS = 'no_usable_rows'
+export const NOT_A_CSV_TABLE = 'not_a_csv_table'
 
 const INITIAL: CsvPreviewState = {
   status: 'idle',
@@ -48,8 +48,8 @@ const INITIAL: CsvPreviewState = {
  * a known source (e.g. /migrate/honeydue passes 'honeydue') when the header
  * sniffer can't tell, and selects that source's decode / banner hints.
  *
- * A file that parses but yields no usable row (no date and amount the source's
- * mapper can read) ends in `status: 'error'`, not 'ready' (#1528 A6).
+ * A file with no data rows or fewer than two columns ends in `status: 'error'`,
+ * not 'ready' (#1528 A6). Anything wider than that stays a preview.
  */
 export function useCsvPreview({ hint = 'unknown' }: { hint?: MigrateSource } = {}) {
   const [state, setState] = useState<CsvPreviewState>(INITIAL)
@@ -66,13 +66,16 @@ export function useCsvPreview({ hint = 'unknown' }: { hint?: MigrateSource } = {
       const { text, encoding } = decodeBytes(buffer, hints)
       const { headers, rows } = parseCsvText(text, hints)
       const detectedSource = detectCsvSource(headers) ?? hint
-      const { stats, usableRows } = computePreview(headers, rows, hint)
-      // Nothing an import could use (#1528 A6): same terminal state as a file
-      // that throws, so the page shows its error and no import button.
-      if (usableRows === 0) {
-        setState({ ...INITIAL, status: 'error', file, error: NO_USABLE_ROWS })
+      // Not CSV-shaped (a lone column, e.g. plain text) or no data rows (#1528
+      // A6): same terminal state as a file that throws, so the page shows its
+      // error and no import button. Deliberately narrow: a real CSV whose
+      // columns we don't recognise (even one that maps to 0 records here) still
+      // previews with the CTA, because the signed-in wizard can map columns by hand.
+      if (rows.length === 0 || headers.length < 2) {
+        setState({ ...INITIAL, status: 'error', file, error: NOT_A_CSV_TABLE })
         return
       }
+      const stats = computePreviewStats(headers, rows, hint)
       setState({
         status: 'ready',
         file,
