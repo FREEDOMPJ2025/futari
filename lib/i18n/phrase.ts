@@ -79,26 +79,49 @@ function splitZh(text: string, locale: string): string[] {
     cur += segment
   }
   flush()
-  return out
+  // 「——」 and 「……」 arrive as two segments; never break between the halves
+  return out.reduce<string[]>((acc, p) => {
+    if (acc.length && /^[—…]/.test(p)) acc[acc.length - 1] += p
+    else acc.push(p)
+    return acc
+  }, [])
 }
 
 /** Phrases of `text`, or `null` when there is nothing to split (no Han / kana,
- *  e.g. all of English). Concatenating the result gives `text` back. */
-export function splitPhrases(text: string): string[] | null {
+ *  e.g. all of English). Concatenating the result gives `text` back.
+ *
+ *  `zhOnly` is for body and row text (#1528 F2): headings get phrases in every
+ *  locale, but ja body text keeps relying on Chromium's `auto-phrase` (which
+ *  does segment ja), so any text with kana is left alone. */
+export function splitPhrases(text: string, zhOnly = false): string[] | null {
   if (!HAN.test(text) && !KANA.test(text)) return null
-  const parts = KANA.test(text) ? splitJa(text) : splitZh(text, 'zh')
+  const ja = KANA.test(text)
+  if (ja && zhOnly) return null
+  const parts = ja ? splitJa(text) : splitZh(text, 'zh')
   return parts.length > 1 ? parts : null
 }
 
 /** HTML variant for the `*Html` strings (taglineHtml …): phrase-splits the text
  *  between tags, leaves tags and entities alone. */
-export function phraseHtml(html: string): string {
+export function phraseHtml(html: string, zhOnly = false): string {
   return html
     .split(/(<[^>]*>|&[#\w]+;)/)
     .map((piece, i) => {
       if (i % 2 === 1) return piece
-      const parts = splitPhrases(piece)
+      const parts = splitPhrases(piece, zhOnly)
       return parts ? parts.join('<wbr>') : piece
     })
     .join('')
+}
+
+const ESC: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }
+
+/** `text` as an escaped HTML string with `<wbr>` at phrase boundaries, or
+ *  `null` when there is nothing to split. For body and row text (#1528 F2): as
+ *  one string it costs about a fifth of what separate `<wbr>` elements do,
+ *  because a server-rendered tree is sent twice (in the HTML and again in the
+ *  RSC payload) and each element is 20+ bytes in the payload. */
+export function phraseTextHtml(text: string, zhOnly = false): string | null {
+  const parts = splitPhrases(text, zhOnly)
+  return parts ? parts.map((p) => p.replace(/[&<>"]/g, (c) => ESC[c])).join('<wbr>') : null
 }

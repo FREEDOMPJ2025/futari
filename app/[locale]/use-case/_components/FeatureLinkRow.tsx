@@ -1,5 +1,6 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { track } from '@/lib/analytics/track'
 import { Ember } from '../../_components/Ember'
@@ -22,7 +23,8 @@ export function FeatureLinkRow({
 }: {
   href: string
   name: string
-  description: string
+  /** A server-rendered node (`<Phrase body …/>`), not a string: phrase breaks come from `Intl.Segmenter`, which must run on the server so a Safari client cannot disagree with it at hydration. */
+  description: ReactNode
   cta: string
   source: FeatureOutingLinkSource
 }) {

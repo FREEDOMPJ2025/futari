@@ -1,4 +1,5 @@
 import { FeatureLinkRow } from './FeatureLinkRow'
+import { Phrase } from '../../_components/Phrase'
 import { s } from '../../_components/brand-inner'
 import { dictionaries } from '@/lib/i18n/t'
 import { localizedHref } from '@/lib/i18n/path'
@@ -24,7 +25,7 @@ export function FeatureLinkSection({ locale, source }: { locale: Locale; source:
         <FeatureLinkRow
           href={localizedHref('/features/outing', locale)}
           name={link.name}
-          description={link.description}
+          description={<Phrase body text={link.description} />}
           cta={link.cta}
           source={source}
         />

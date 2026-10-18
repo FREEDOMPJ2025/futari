@@ -1,4 +1,5 @@
 import type { Translations } from '@/lib/i18n/locales/zh-TW'
+import { Phrase } from '../_components/Phrase'
 import { Ember } from '../_components/Ember'
 import { s } from '../_components/brand-inner'
 
@@ -20,7 +21,7 @@ export function FeatureCards({ t }: { t: Features }) {
           <Ember />
           <div>
             <p className={`${s.rowTitle} text-base font-medium`}>{title}</p>
-            <p className={`${s.rowBody} text-sm`}>{body}</p>
+            <p className={`${s.rowBody} text-sm`}><Phrase body text={body} /></p>
           </div>
         </li>
       ))}

@@ -72,7 +72,16 @@ type Props = {
 // promoted to a two-column hero + 4-column feature row at md+ (>=768px).
 // All copy is i18n-driven via t.landing — see Translations type.
 
+// Body HTML with zh phrase breaks (#1528 F2): `ph` joins the class list only
+// when a break was inserted, so en and ja markup is unchanged.
+function phraseBodyHtml(html: string) {
+  const out = phraseHtml(html, true)
+  return { __html: out, ph: out.includes('<wbr>') ? 'ph ' : '' }
+}
+
 export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkingLabel, useCaseHrefs, migrateHrefs, featureOutingHref, legalLinks, languageSwitcher }: Props) {
+  const body = phraseBodyHtml(t.bodyHtml)
+  const subtitle = phraseBodyHtml(t.featuresSubtitleHtml)
   return (
     <main
       id="main"
@@ -171,7 +180,7 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
                 letterSpacing: '4px',
               }}
             >
-              {t.heroKicker}
+              <Phrase body text={t.heroKicker} />
             </p>
 
             <h1
@@ -208,12 +217,12 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
 
             {/* body — both layouts */}
             <p
-              className="m-0 mt-5 md:mt-7 text-base md:text-lg leading-[1.7] mx-auto md:mx-0"
+              className={`${body.ph}m-0 mt-5 md:mt-7 text-base md:text-lg leading-[1.7] mx-auto md:mx-0`}
               style={{
                 color: 'var(--ink-2)',
                 maxWidth: 320,
               }}
-              dangerouslySetInnerHTML={{ __html: t.bodyHtml }}
+              dangerouslySetInnerHTML={{ __html: body.__html }}
             />
 
             {/* CTA row */}
@@ -330,9 +339,9 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
               </h2>
             </div>
             <p
-              className="hidden md:block m-0 text-sm"
+              className={`${subtitle.ph}hidden md:block m-0 text-sm`}
               style={{ color: 'var(--ink-2)', lineHeight: 1.6, maxWidth: 320 }}
-              dangerouslySetInnerHTML={{ __html: t.featuresSubtitleHtml }}
+              dangerouslySetInnerHTML={{ __html: subtitle.__html }}
             />
           </div>
 
@@ -379,7 +388,7 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
               source="landing_features"
               className="inline-flex items-center min-h-11 underline text-ink-2"
             >
-              {t.featuresOutingLink}
+              <Phrase body text={t.featuresOutingLink} />
               <span aria-hidden="true">&nbsp;→</span>
             </FeatureOutingTextLink>
           </p>
@@ -414,7 +423,7 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
         >
           <ShieldOutlineGlyph />
           <span className="text-xs" style={{ letterSpacing: '0.3px' }}>
-            {t.footerTrust}
+            <Phrase body text={t.footerTrust} />
           </span>
         </div>
         <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
@@ -509,7 +518,7 @@ function MigrateLinksSection({
             className="m-0 mt-3 md:mt-0 text-sm"
             style={{ color: 'var(--ink-2)', lineHeight: 1.6, maxWidth: 360 }}
           >
-            {t.migrateSection.subtitle}
+            <Phrase body text={t.migrateSection.subtitle} />
           </p>
         </div>
 
@@ -538,7 +547,7 @@ function MigrateLinksSection({
                 {item.title}
               </p>
               <p className="m-0 mt-1.5 text-sm leading-[1.6] text-ink-2">
-                {item.body}
+                <Phrase body text={item.body} />
               </p>
             </LandingCtaLink>
           ))}
@@ -628,7 +637,7 @@ function UseCaseLinksSection({
             className="m-0 mt-3 md:mt-0 text-sm"
             style={{ color: 'var(--ink-2)', lineHeight: 1.6, maxWidth: 360 }}
           >
-            {t.useCaseSection.subtitle}
+            <Phrase body text={t.useCaseSection.subtitle} />
           </p>
         </div>
 
@@ -665,7 +674,7 @@ function UseCaseLinksSection({
                   </span>
                 </span>
                 <span className="block mt-2 text-sm leading-[1.6] text-ink-2">
-                  {item.body}
+                  <Phrase body text={item.body} />
                 </span>
               </LandingCtaLink>
             </li>
@@ -753,7 +762,7 @@ function FeatureEntry({
           className="m-0 text-sm md:text-base leading-[1.65] md:leading-[1.7]"
           style={{ color: 'var(--ink-2)' }}
         >
-          {body}
+          <Phrase body text={body} />
         </p>
       </div>
     </div>

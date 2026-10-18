@@ -20,6 +20,7 @@ import { MigrateComparison } from '../_components/MigrateComparison'
 import { MigrateOtherSources } from '../_components/MigrateOtherSources'
 import { FeatureLinkSection } from '../../use-case/_components/FeatureLinkSection'
 import { s } from '../../_components/brand-inner'
+import { Phrase } from '../../_components/Phrase'
 import { LightRibbon } from '../../_components/LightRibbon'
 
 type Params = Promise<{ locale: string; source: string }>
@@ -77,7 +78,7 @@ export default async function MigrateSourcePage({ params }: { params: Params }) 
   const step1Content =
     page.formatHintLabel ? (
       <>
-        <div>{page.step1}</div>
+        <div><Phrase body text={page.step1} /></div>
         <div className="mt-3 space-y-1.5">
           <div className="text-xs" style={{ color: 'var(--ink-2)' }}>
             {page.formatHintLabel}
@@ -95,19 +96,19 @@ export default async function MigrateSourcePage({ params }: { params: Params }) 
           {/* --ink-2 not --ink-3: the step list has no card, so this note sits
               straight on --bg-committed, where --ink-3 is 4.03:1 (#1184). */}
           <p className="text-xs mt-1.5 m-0" style={{ color: 'var(--ink-2)' }}>
-            {page.formatHintNote}
+            {page.formatHintNote && <Phrase body text={page.formatHintNote} />}
           </p>
         </div>
       </>
     ) : (
-      page.step1
+      <Phrase body text={page.step1} />
     )
 
   // cwmoney: Excel template download injected inside step 2
   const step2Content =
     def.templateDownload ? (
       <>
-        <div>{page.step2}</div>
+        <div><Phrase body text={page.step2} /></div>
         <a
           href={def.templateDownload.href}
           download
@@ -124,11 +125,11 @@ export default async function MigrateSourcePage({ params }: { params: Params }) 
         </a>
         {/* Same ground as formatHintNote above — --ink-3 would be 4.03:1 (#1184). */}
         <p className="text-xs mt-1.5 m-0" style={{ color: 'var(--ink-2)' }}>
-          {page.templateNote}
+          {page.templateNote && <Phrase body text={page.templateNote} />}
         </p>
       </>
     ) : (
-      page.step2
+      <Phrase body text={page.step2} />
     )
 
   return (
@@ -172,7 +173,7 @@ export default async function MigrateSourcePage({ params }: { params: Params }) 
 
       <MigrateSteps
         heading={page.stepsHeading}
-        steps={[step1Content, step2Content, page.step3]}
+        steps={[step1Content, step2Content, <Phrase key="s3" body text={page.step3} />]}
       />
 
       {def.screenshotWorkflow && (
