@@ -97,6 +97,15 @@ describe('settings/shortcut-key page payload', () => {
   })
 })
 
+// #1807 — the key and the closed dialog render before the action's transition
+// ends: `pending` clears in a later, lower-priority render. Until then the
+// buttons are disabled and a click is silently dropped. Failure looked like:
+// under load (parallel sessions, full suite) the revoke click did nothing and
+// findByText(confirmBody) timed out, ~1 in 5 runs; alone it always passed.
+async function settled() {
+  await waitFor(() => expect(document.querySelector('[aria-busy="true"], button:disabled')).toBeNull())
+}
+
 describe('ShortcutKeyContent', () => {
   beforeEach(() => {
     generateMock.mockResolvedValue({ ok: true, data: { key: KEY, hint: 'wxyz', createdAt: '2026-10-17T00:00:00.000Z' } })
@@ -113,6 +122,7 @@ describe('ShortcutKeyContent', () => {
     expect((input as HTMLInputElement).readOnly).toBe(true)
     expect(generateMock).toHaveBeenCalledWith()
     expect(refreshMock).toHaveBeenCalled()
+    await settled()
 
     act(() => { window.dispatchEvent(new Event('pagehide')) })
     expect(screen.queryByLabelText(tk.fresh.inputLabel)).toBeNull()
@@ -130,6 +140,7 @@ describe('ShortcutKeyContent', () => {
     await screen.findByLabelText(tk.fresh.inputLabel)
     expect(generateMock).toHaveBeenCalledTimes(1)
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    await settled()
 
     fireEvent.click(screen.getByRole('button', { name: tk.revoke.cta }))
     expect(await screen.findByText(tk.revoke.confirmBody)).toBeTruthy()
