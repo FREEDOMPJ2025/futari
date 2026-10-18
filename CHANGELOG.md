@@ -45,7 +45,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 - **中文品牌頁的內文與列表文字不再斷在詞中間（#1528）**
   使用者：首頁、登入、使用情境、搬遷頁的繁中與簡中內文，換行時依詞斷，不再出現「一起照／顧」「值得被記／住」；日文與英文不變。
-  技術：`Phrase` 加 `body` 模式（只處理中文，在詞界放 `<wbr>`，整段一個字串輸出；`splitPhrases` 與 `phraseHtml` 多一個 `zhOnly` 參數）；沒動 globals.css，已知 Safari 的 `auto-phrase` 缺口由此補上。
+  技術：`Phrase` 加 `body` 模式（只處理中文，在詞界放 `<wbr>`，整段一個字串輸出；`splitPhrases` 與 `phraseHtml` 多一個 `zhOnly` 參數，新增轉義後輸出的 `phraseTextHtml`，登入頁來自 RSS 的部落格標題也經過它）；「——」「……」不再從中間拆開；/features/outing 的連結列說明一併套用；沒動 globals.css，已知 Safari 的 `auto-phrase` 缺口由此補上。
 - **品牌頁桌面版的首頁「一起記錄」按鈕點得到、出遊連結列回到內容欄（#1528）**
   使用者：1024–1580 px 寬的桌面，首頁右上角「一起記錄」不再被手機畫面蓋住而點不動，手機畫面也移到按鈕下方；/use-case、/use-case/travel、/migrate/splitwise 的出遊連結列不再擠成 240 px 的細條。
   技術：`Landing.tsx` 手機畫面外框加 `pointer-events-none`、`bottom-6` 改 `-bottom-8`；新增 `FeatureLinkSection`，不再借用沒有標題的 `.bi-band`。

@@ -114,7 +114,9 @@ export function phraseHtml(html: string, zhOnly = false): string {
     .join('')
 }
 
-const ESC: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }
+// sign-in blog titles come from the external RSS feed (lib/blog-feed.ts), so
+// this output carries untrusted text into dangerouslySetInnerHTML.
+const ESC: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
 
 /** `text` as an escaped HTML string with `<wbr>` at phrase boundaries, or
  *  `null` when there is nothing to split. For body and row text (#1528 F2): as
@@ -123,5 +125,5 @@ const ESC: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"
  *  RSC payload) and each element is 20+ bytes in the payload. */
 export function phraseTextHtml(text: string, zhOnly = false): string | null {
   const parts = splitPhrases(text, zhOnly)
-  return parts ? parts.map((p) => p.replace(/[&<>"]/g, (c) => ESC[c])).join('<wbr>') : null
+  return parts ? parts.map((p) => p.replace(/[&<>"']/g, (c) => ESC[c])).join('<wbr>') : null
 }
