@@ -26,14 +26,22 @@
  * Kept as literals, not read from the dictionaries: lib/outing/validate.ts is
  * imported by a client component, and the four dictionaries must not ride
  * along. tests/reserved-display-name-1782.test.ts asserts these equal each
- * dictionary's `common.leftPartnerLabel`.
+ * dictionary's `common.leftPartnerLabel`. LEGACY_RESERVED_LABELS is the one
+ * exception: retired wording, kept refused.
  */
 export const RESERVED_LEFT_LABELS = [
   '已離開的夥伴', // zh-TW
   '已离开的伙伴', // zh-CN
-  'a partner who left', // en
+  'Partner who left', // en
   '退出したパートナー', // ja
 ] as const
+
+/**
+ * Earlier labels, no longer shown but still refused: they exist in saved data
+ * and old screens, so a person must not be able to take them either. (en was
+ * 'a partner who left' until the #1787 copy review.)
+ */
+const LEGACY_RESERVED_LABELS = ['a partner who left'] as const
 
 /** Traditional → simplified for the characters the zh labels differ in, so every mix (離/离, 開/开, 夥/伙) folds to one form. */
 const TRAD_TO_SIMP: Record<string, string> = { 離: '离', 開: '开', 夥: '伙' }
@@ -55,7 +63,7 @@ export function normalizeForReservedCheck(name: string): string {
     .replace(/[離開夥]/gu, (c) => TRAD_TO_SIMP[c] ?? c)
 }
 
-const RESERVED = new Set(RESERVED_LEFT_LABELS.map(normalizeForReservedCheck))
+const RESERVED = new Set([...RESERVED_LEFT_LABELS, ...LEGACY_RESERVED_LABELS].map(normalizeForReservedCheck))
 
 /** True when `name`, normalised, IS one of the system's left labels. Containing one is fine. */
 export function isReservedDisplayName(name: string): boolean {

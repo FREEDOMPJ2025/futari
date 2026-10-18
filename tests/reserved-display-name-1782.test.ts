@@ -29,7 +29,8 @@ describe('isReservedDisplayName — blocked after normalisation', () => {
   const cases: [string, string][] = [
     ['zh-TW', '已離開的夥伴'],
     ['zh-CN', '已离开的伙伴'],
-    ['en', 'a partner who left'],
+    ['en', 'Partner who left'],
+    ['en (retired wording, still refused)', 'a partner who left'],
     ['ja', '退出したパートナー'],
     // every traditional / simplified mix of 離/离, 開/开, 夥/伙
     ...['離開夥', '離開伙', '離开夥', '離开伙', '离開夥', '离開伙', '离开夥', '离开伙'].map(
@@ -41,7 +42,7 @@ describe('isReservedDisplayName — blocked after normalisation', () => {
     ['BOM', '﻿已離開的夥伴'],
     ['soft hyphen', '已離開的夥伴­'],
     ['bidi override', '‮已離開的夥伴‬'],
-    ['bidi isolate', '⁦a partner who left⁩'],
+    ['bidi isolate', '⁦Partner who left⁩'],
     ['LRM / RLM', '‎a partner who left‏'],
     ['variation selector', '已️離開的夥伴'],
     ['tag character', '已離開的夥伴\u{E0041}'],
@@ -63,6 +64,7 @@ describe('isReservedDisplayName — allowed', () => {
     ['contains the label', '已離開的夥伴們'],
     ['label plus a name', '已離開的夥伴 小明'],
     ['en label in a sentence', 'not a partner who left'],
+    ['en label with a prefix', 'Not Partner who left'],
     // Accepted residual: look-alikes. The system style is what tells these apart.
     ['look-alike 己', '己離開的夥伴'],
     ['look-alike 巳', '巳離開的夥伴'],

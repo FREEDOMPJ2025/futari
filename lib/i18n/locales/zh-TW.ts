@@ -448,8 +448,8 @@ export type Translations = {
      *  at render with Intl (「9月」/ "September"), never string-concatenated. */
     soloHero: {
       monthLabel: string
-      /** `{count}` = number of expense records in the month. */
-      countLabel: string
+      /** `{count}` = number of expense records in the month; en needs one/other. */
+      countLabel: { one: string; other: string }
     }
     addExpense: string
     addIncome: string
@@ -3895,7 +3895,7 @@ export const zhTW: Translations = {
     },
     soloHero: {
       monthLabel: '{month}記下',
-      countLabel: '{count} 筆',
+      countLabel: { one: '{count} 筆', other: '{count} 筆' },
     },
     addExpense: '新增一筆',
     addIncome: '記一筆收入',
@@ -4717,7 +4717,7 @@ export const zhTW: Translations = {
         fileSelected: '已選：{name}',
         summary: '共 {total} 筆 · 有效 {valid} 筆 · 失敗 {invalid} 筆',
         sourceDetected: '偵測到來源：{source}',
-        invalidNote: '失敗的列會略過匯入，並保留在錯誤紀錄供日後修正',
+        invalidNote: '略過的列會留在錯誤紀錄裡，之後可以再看。',
         retryCta: '換一個檔案',
         parseError: '解析失敗，請確認檔案格式或換一個檔案重試',
       },
@@ -4783,7 +4783,7 @@ export const zhTW: Translations = {
         submitFailed: '寫入時遇到問題，請稍後再試',
         rollbackFailed: '復原失敗，請稍後再試',
         noValidRows: '這個檔案沒有可匯入的紀錄',
-        missingColumns: '這個檔案少了這些欄位：{columns}。請確認匯出時選的是 CSV，也選對了來源',
+        missingColumns: '這個檔案少了這些欄位：{columns}（以英文欄位名稱列出）。請確認匯出時選的是 CSV，也選對了來源',
       },
     },
   },

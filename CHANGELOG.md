@@ -43,6 +43,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **四張文案審稿（Grok）一次套用：單人月卡、離開名字、問答用字、匯入提示（#1784、#1787、#1790、#1796）**
+  使用者：單人月卡 en 讀成「1 entry／7 entries」；en 的離開名字改成 "Partner who left"，ja 的保留名稱錯誤改說「この名前は使えません」；zh-CN 問答引號改「」、en 的 Futari 不再暗示有付費方案、ja 用「タップ」；匯入的「略過的列」說明改成中性說法，缺欄位訊息註明欄位以英文名稱列出。
+  技術：`dashboard.soloHero.countLabel` 改 `{ one, other }`（`pickPlural`）；保留名稱檢查與 `handle_new_user.sql` 加入新 en 字樣並保留舊字樣（SQL 要手動重套到 dev、prod）；其餘只改 `lib/i18n/locales/` 的字串。
 - **匯入精靈新增 AndroMoney、Manebo（まねーぼ）、Splitwise 三個來源（#1791）**
   使用者：選對應按鈕上傳就能匯入；轉帳、期初餘額、Splitwise 的結清與 Total balance 列不會匯入，會列在失敗的列；檔案少了必要欄位時，會直接說少了哪幾個。
   技術：新增三個 mapper 與標題偵測（排在 CWMoney 之前、整欄比對）；AndroMoney 跳過橫幅行、まねーぼ 以 Shift_JIS 解碼只對選定來源套用，搬遷頁預覽同步。
@@ -56,7 +59,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：首頁手機畫面裡的紀錄各化成一個光點飄進插畫；「四種光」逐列亮起；信任、使用情境、搬遷段落進入畫面時亮燈。減少動態效果時直接呈現亮著的樣子。
   技術：純 CSS（`app/[locale]/_landing/landing-motion.css`），只動 transform／opacity，scroll-driven 包在 `@supports (animation-timeline: view())`；沿用 `about-fade-up` 的 easing；不碰 LCP 元素。
 - **「已離開的夥伴」依讀者語系顯示，且只有系統寫的才算（#1782）**
-  使用者：刪除帳號或選擇不留名字的人，在章節、月回顧、出遊名單、公開出遊頁與 CSV 裡以讀者語系顯示（a partner who left／退出したパートナー／已离开的伙伴），頭像改成不含字的中性圓；四語的這個字樣不能再拿來當暱稱或出遊名字。
+  使用者：刪除帳號或選擇不留名字的人，在章節、月回顧、出遊名單、公開出遊頁與 CSV 裡以讀者語系顯示（Partner who left／退出したパートナー／已离开的伙伴），頭像改成不含字的中性圓；四語的這個字樣不能再拿來當暱稱或出遊名字。
   技術：migration `0099` 加四個標記欄位（backfill 只標刪除帳號寫的形狀；`process_account_deletions` 以 0096 本體加賦值），讀取端只看標記（`lib/leftPartnerLabel.ts`），保留名字檢查在 `lib/reservedDisplayName.ts`＋`handle_new_user`（兩個 project 都要手動套）；prod 套用待 release。
 - **清掉標成機翻、尚未審的 en／ja 文案（#1280）**
   使用者：單人月份改成 “Logged in September” 這類說法；問答揭曉後不再說成已經打開；邀請頁日文改成「被邀請」，不再像是在招人開始記帳；問答錯誤裡的帳本改回「帳本」。

@@ -94,7 +94,7 @@ if (isLocalDb) {
 }
 
 const postgres = (await import('postgres')).default
-const L = { zhTW: '已離開的夥伴', zhCN: '已离开的伙伴', en: 'a partner who left', ja: '退出したパートナー' }
+const L = { zhTW: '已離開的夥伴', zhCN: '已离开的伙伴', en: 'Partner who left', ja: '退出したパートナー' }
 const RESERVED_CODE = 'display_name_reserved'
 
 let sql: Sql
@@ -560,7 +560,7 @@ describe.skipIf(!isLocalDb)('#1782 (a) — reserved names', () => {
   it('handle_new_user: a reserved provider name falls back to the email; anything else is kept as given', async () => {
     const cases: [string, string | null][] = [
       [L.zhTW, null], [L.zhCN, null], [L.en.toUpperCase(), null], [L.ja, null],
-      ['已離​開的伙伴', null], [' a  partner who left ', null], ['退出したﾊﾟｰﾄﾅｰ', null],
+      ['已離​開的伙伴', null], [' a  partner who left ', null], [' Partner  who left ', null], ['退出したﾊﾟｰﾄﾅｰ', null],
       ['Dev 👨‍💻', 'Dev 👨‍💻'], ['已離開的夥伴 小明', '已離開的夥伴 小明'], ['己離開的夥伴', '己離開的夥伴'],
     ]
     for (const [name, expected] of cases) {

@@ -327,7 +327,7 @@ export const zhCN: Translations = {
     },
     soloHero: {
       monthLabel: '{month}记下',
-      countLabel: '{count} 笔',
+      countLabel: { one: '{count} 笔', other: '{count} 笔' },
     },
     addExpense: '新增一笔',
     addIncome: '记一笔收入',
@@ -1149,7 +1149,7 @@ export const zhCN: Translations = {
         fileSelected: '已选：{name}',
         summary: '共 {total} 笔 · 有效 {valid} 笔 · 失败 {invalid} 笔',
         sourceDetected: '检测到来源：{source}',
-        invalidNote: '失败的行会跳过导入，并保留在错误记录供日后修正',
+        invalidNote: '跳过的行会留在错误记录里，之后可以再看。',
         retryCta: '换一个文件',
         parseError: '解析失败，请确认文件格式或换一个文件重试',
       },
@@ -1215,7 +1215,7 @@ export const zhCN: Translations = {
         submitFailed: '写入时遇到问题，请稍后再试',
         rollbackFailed: '还原失败，请稍后再试',
         noValidRows: '这个文件没有可导入的记录',
-        missingColumns: '这个文件少了这些字段：{columns}。请确认导出时选的是 CSV，也选对了来源',
+        missingColumns: '这个文件少了这些字段：{columns}（以英文字段名列出）。请确认导出时选的是 CSV，也选对了来源',
       },
     },
   },
@@ -2662,7 +2662,7 @@ export const zhCN: Translations = {
         faq: [
           {
             question: 'Honeydue 的分类能对得上吗？',
-            answer: 'Food & Dining、Home、Transportation 这类常见的英文分类名称，会自动归到 Futari 的饮食、居住、交通；对不上的全部归在“其他”一组，导入前可以整组改选别的类别。',
+            answer: 'Food & Dining、Home、Transportation 这类常见的英文分类名称，会自动归到 Futari 的饮食、居住、交通；对不上的全部归在「其他」一组，导入前可以整组改选别的类别。',
           },
           {
             question: 'Honeydue 换了东家，搬过来要付费吗？',
@@ -2699,7 +2699,7 @@ export const zhCN: Translations = {
         stepsHeading: 'Spendee 搬迁三步',
         step1: '在 Spendee → More → Export Data，下载 CSV。',
         step2: '把 CSV 上传到这里预览，Type 一栏会用来区分支出和进账。',
-        step3: '创建 Futari 账号。类别对应那一步，Spendee 的分类会先自动归到 Futari 的类别（比如 Food & Drinks 归到饮食），对不上的归在“其他”，可以整组改选。',
+        step3: '创建 Futari 账号。类别对应那一步，Spendee 的分类会先自动归到 Futari 的类别（比如 Food & Drinks 归到饮食），对不上的归在「其他」，可以整组改选。',
         formatHintLabel: 'Spendee CSV 的字段长这样',
         formatHintHeaders: 'Date,Wallet,Type,Category name,Amount,Currency,Note',
         formatHintNote: 'Type 字段是「Expense / Income / Transfer」。Transfer（账户间转账）导入时会被标为错误——Futari 不存转账，请在预览阶段删除这几行。',
@@ -2754,7 +2754,7 @@ export const zhCN: Translations = {
           },
           {
             question: 'CWMoney 的分类能对得上吗？',
-            answer: 'CWMoney 里的饮食、交通、居住、娱乐、医疗这几类，会自动归到 Futari 的同名类别；对不上的全部归在“其他”一组，导入前可以整组改选别的类别。',
+            answer: 'CWMoney 里的饮食、交通、居住、娱乐、医疗这几类，会自动归到 Futari 的同名类别；对不上的全部归在「其他」一组，导入前可以整组改选别的类别。',
           },
           {
             question: 'CWMoney 的共同账本是付费功能，搬过来要付费吗？',
@@ -2953,7 +2953,7 @@ export const zhCN: Translations = {
         ],
         stepsHeading: '简单记账搬迁三步',
         step1: '在简单记账里把要搬的交易一页一页截图，VIP 才有的导出不用碰（下方有完整做法）。',
-        step2: '用 ChatGPT 把截图整理成 CSV，免费版就够；分类文字会原样写进 CSV，导入时对得上的会归到 Futari 的类别，其余归在“其他”。',
+        step2: '用 ChatGPT 把截图整理成 CSV，免费版就够；分类文字会原样写进 CSV，导入时对得上的会归到 Futari 的类别，其余归在「其他」。',
         step3: '把 CSV 上传到这里预览，确认笔数和日期范围对得上，再创建账号完成导入。',
         faq: [
           {
@@ -3560,7 +3560,7 @@ export const zhCN: Translations = {
           },
           {
             heading: '「我付了大部分，对方记得吗？」',
-            body: '看病、买粮常常是同一个人先掏钱。每笔记下是谁付的、对方分担多少，余额就一直留着；想结清时记一笔结算，不用凭印象说“我好像出得多”。',
+            body: '看病、买粮常常是同一个人先掏钱。每笔记下是谁付的、对方分担多少，余额就一直留着；想结清时记一笔结算，不用凭印象说「我好像出得多」。',
           },
           {
             heading: '「多猫家庭的费用怎么分开记？」',
@@ -3578,7 +3578,7 @@ export const zhCN: Translations = {
           },
           {
             question: '粮食、猫砂这种固定要买的，可以设成定期吗？',
-            answer: '可以。把每月都会买的粮食设成定期支出，并选择这只毛孩；到了日期，首页会出现一张待确认的卡片，金额没变就点“就这样”，这次价格不同就点“改一下”。不会在后台自动写进账本。',
+            answer: '可以。把每月都会买的粮食设成定期支出，并选择这只毛孩；到了日期，首页会出现一张待确认的卡片，金额没变就点「就这样」，这次价格不同就点「改一下」。不会在后台自动写进账本。',
           },
         ],
       },
@@ -3669,7 +3669,7 @@ export const zhCN: Translations = {
         faq: [
           {
             question: '固定支出通常是同一个人在交，怎么让另一个人也看到？',
-            answer: '每笔固定账都记上付款人，放进同一本账。另一个人打开就能看到这个月谁交了什么，不用再问“网费交了没”；之后想回头查，也能在筛选器里按分类或付款人筛出来。',
+            answer: '每笔固定账都记上付款人，放进同一本账。另一个人打开就能看到这个月谁交了什么，不用再问「网费交了没」；之后想回头查，也能在筛选器里按分类或付款人筛出来。',
           },
           {
             question: 'Futari 有定期支出提醒功能吗？',
@@ -3677,7 +3677,7 @@ export const zhCN: Translations = {
           },
           {
             question: '固定支出每个月金额不一样，怎么办？',
-            answer: '水电、话费这类每期金额会变的账，照样可以设成定期支出。到期的卡片上点“改一下”，填入这期实际的金额；这期没有这笔，就点“跳过”。',
+            answer: '水电、话费这类每期金额会变的账，照样可以设成定期支出。到期的卡片上点「改一下」，填入这期实际的金额；这期没有这笔，就点「跳过」。',
           },
         ],
       },
@@ -3787,7 +3787,7 @@ export const zhCN: Translations = {
         painPoints: [
           {
             heading: '「我们说好 AA，但每次结账都不知道谁欠谁多少。」',
-            body: 'AA 制最难的不是定分法，而是记得住。当下记一笔付款人和分法，余额就往上累计，两个人随时看得到“现在差多少”。',
+            body: 'AA 制最难的不是定分法，而是记得住。当下记一笔付款人和分法，余额就往上累计，两个人随时看得到「现在差多少」。',
           },
           {
             heading: '「这顿我付，下顿你付——但次数和金额不一样。」',
@@ -3809,7 +3809,7 @@ export const zhCN: Translations = {
           },
           {
             question: '和朋友一起的 AA 聚餐，也能记吗？',
-            answer: '可以。两个人之间的 AA 记在主账本；多人聚餐可以开一个“出游”，把链接发到群里，朋友不用下载就能加入记账，结束时会算出谁该转给谁，笔数最多是人数减一。',
+            answer: '可以。两个人之间的 AA 记在主账本；多人聚餐可以开一个「出游」，把链接发到群里，朋友不用下载就能加入记账，结束时会算出谁该转给谁，笔数最多是人数减一。',
           },
         ],
       },
