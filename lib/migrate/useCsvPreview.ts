@@ -26,6 +26,10 @@ export interface CsvPreviewState {
   error: string | null
 }
 
+/** `error` for a file that parsed to nothing table-shaped; also the `reason`
+ *  of the `migrate_preview_failed` event, so it reads apart from a thrown message. */
+export const NOT_A_CSV_TABLE = 'not_a_csv_table'
+
 const INITIAL: CsvPreviewState = {
   status: 'idle',
   file: null,
@@ -43,6 +47,9 @@ const INITIAL: CsvPreviewState = {
  * import flow live behind auth. `hint` lets the caller bias the page towards
  * a known source (e.g. /migrate/honeydue passes 'honeydue') when the header
  * sniffer can't tell, and selects that source's decode / banner hints.
+ *
+ * A file with no data rows or fewer than two columns ends in `status: 'error'`,
+ * not 'ready' (#1528 A6). Anything wider than that stays a preview.
  */
 export function useCsvPreview({ hint = 'unknown' }: { hint?: MigrateSource } = {}) {
   const [state, setState] = useState<CsvPreviewState>(INITIAL)
@@ -59,6 +66,15 @@ export function useCsvPreview({ hint = 'unknown' }: { hint?: MigrateSource } = {
       const { text, encoding } = decodeBytes(buffer, hints)
       const { headers, rows } = parseCsvText(text, hints)
       const detectedSource = detectCsvSource(headers) ?? hint
+      // Not CSV-shaped (a lone column, e.g. plain text) or no data rows (#1528
+      // A6): same terminal state as a file that throws, so the page shows its
+      // error and no import button. Deliberately narrow: a real CSV whose
+      // columns we don't recognise (even one that maps to 0 records here) still
+      // previews with the CTA, because the signed-in wizard can map columns by hand.
+      if (rows.length === 0 || headers.length < 2) {
+        setState({ ...INITIAL, status: 'error', file, error: NOT_A_CSV_TABLE })
+        return
+      }
       const stats = computePreviewStats(headers, rows, hint)
       setState({
         status: 'ready',

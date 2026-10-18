@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useCsvPreview } from '@/lib/migrate/useCsvPreview'
+import { NOT_A_CSV_TABLE, useCsvPreview } from '@/lib/migrate/useCsvPreview'
 import { processBuffer, type DetectedSource, type MigrateSource } from '@/lib/csvImport'
 import { GOLDEN_CASES } from '@/lib/csvImport/__tests__/golden1791.cases'
 import before from '@/lib/csvImport/__tests__/previewGolden1801.before.json'
@@ -23,6 +23,14 @@ async function preview(bytes: Uint8Array<ArrayBufferLike> | string, hint: Migrat
   await act(async () => { await result.current.load(new File([bytes as BlobPart], 'export.csv', { type: 'text/csv' })) })
   await waitFor(() => expect(result.current.status).toBe('ready'))
   return { source: result.current.detectedSource, stats: result.current.stats! }
+}
+
+/** For files expected to end in the error state (#1528 A6). */
+async function previewError(bytes: Uint8Array<ArrayBufferLike> | string, hint: MigrateSource) {
+  const { result } = renderHook(() => useCsvPreview({ hint }))
+  await act(async () => { await result.current.load(new File([bytes as BlobPart], 'export.csv', { type: 'text/csv' })) })
+  await waitFor(() => expect(result.current.status).toBe('error'))
+  return result.current
 }
 
 interface Expected {
@@ -111,6 +119,30 @@ describe('preview card stats come from the source mapper (#1801)', () => {
   })
 })
 
+// #1528 A6: the error state is only for what is not a table at all (one column,
+// or no data rows). Failure looks like a preview card over plain text, or, the
+// other way, an error for a real CSV the signed-in wizard could have mapped by hand.
+describe('only non-tables end in the error state (#1528 A6)', () => {
+  it.each(['honeydue', 'cwmoney', 'unknown'] as const)('two plain text lines on the %s page', async (hint) => {
+    const state = await previewError('hello there\nthis is not a ledger', hint)
+    expect(state.error).toBe(NOT_A_CSV_TABLE)
+  })
+
+  it('an empty file', async () => {
+    await previewError('', 'honeydue')
+  })
+
+  it('a header row and no records', async () => {
+    await previewError('Date,Wallet,Type,Category name,Amount,Currency,Note', 'spendee')
+  })
+
+  it('a two-column CSV with headers nobody recognises still previews (the wizard can map columns)', async () => {
+    const { stats } = await preview(['Foo,Bar', 'a,1', 'b,2'].join('\n'), 'honeydue')
+    expect(stats.totalRows).toBe(2)
+    expect(stats.estimatedExpenseRows).toBe(0)
+  })
+})
+
 // Existing sources: what the card said before this change, recorded from the
 // code at e44d691 (legacy column-name heuristic) for every golden1791 input,
 // once per page that can receive it. Anything not listed in IMPROVED must be
@@ -180,6 +212,11 @@ describe('existing sources keep their numbers, or get better ones (#1801 golden)
   })
 
   it.each(cases)('%s', async (key, c, hint) => {
+    if (key === 'header row only:spendee') {
+      // No data rows: the error state (#1528 A6), not an empty preview card.
+      await previewError(c.csv, hint)
+      return
+    }
     const { source, stats } = await preview(c.csv, hint)
     const was = recorded[key]!
     // The label on the card is not touched by this change.

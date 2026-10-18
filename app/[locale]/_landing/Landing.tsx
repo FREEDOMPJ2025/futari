@@ -286,8 +286,13 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
           {/* Illustration + demoted phone — desktop only */}
           <div className="hidden md:flex flex-1 self-stretch relative min-h-[420px] items-stretch py-2">
             <IllustrationSlot />
-            {/* PhonePreview demoted to secondary product proof — overlaps illo corner */}
-            <div className="hidden lg:block absolute right-[-8px] bottom-6 z-10">
+            {/* PhonePreview demoted to secondary product proof — overlaps illo corner.
+                (#1528 F3) The wrapper's layout box is the unscaled 320x640 phone, so
+                at 1024-1580 it reached up under the header CTA and won hit-testing
+                (a centre click didn't navigate, no error). Two parts: -bottom-8 sits
+                the phone low enough that its tilted top edge clears the header, and
+                pointer-events-none because the mock is aria-hidden and not interactive. */}
+            <div className="hidden lg:block absolute right-[-8px] -bottom-8 z-10 pointer-events-none">
               <PhonePreview t={t} scale={0.78} />
             </div>
           </div>

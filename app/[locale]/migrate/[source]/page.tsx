@@ -18,7 +18,7 @@ import { MigrateHowToJsonLd } from '../_components/MigrateHowToJsonLd'
 import { MigrateFaq } from '../_components/MigrateFaq'
 import { MigrateComparison } from '../_components/MigrateComparison'
 import { MigrateOtherSources } from '../_components/MigrateOtherSources'
-import { FeatureLinkRow } from '../../use-case/_components/FeatureLinkRow'
+import { FeatureLinkSection } from '../../use-case/_components/FeatureLinkSection'
 import { s } from '../../_components/brand-inner'
 import { LightRibbon } from '../../_components/LightRibbon'
 
@@ -111,7 +111,7 @@ export default async function MigrateSourcePage({ params }: { params: Params }) 
         <a
           href={def.templateDownload.href}
           download
-          className="inline-flex items-center gap-2 mt-2 text-sm"
+          className="inline-flex items-center gap-2 min-h-11 text-sm"
           style={{
             color: 'var(--ink)',
             textDecoration: 'underline',
@@ -189,17 +189,7 @@ export default async function MigrateSourcePage({ params }: { params: Params }) 
       />
 
       {def.featureLinks?.includes('outing') && (
-        <section className={s.band} aria-label={dictionaries[locale].featureOuting.crossLink.name}>
-          <ul className={s.rows}>
-            <FeatureLinkRow
-              href={localizedHref('/features/outing', locale)}
-              name={dictionaries[locale].featureOuting.crossLink.name}
-              description={dictionaries[locale].featureOuting.crossLink.description}
-              cta={dictionaries[locale].featureOuting.crossLink.cta}
-              source="migrate_splitwise"
-            />
-          </ul>
-        </section>
+        <FeatureLinkSection locale={locale} source="migrate_splitwise" />
       )}
 
       <MigrateFaq locale={locale} heading={t.faqHeading} items={page.faq} />

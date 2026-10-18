@@ -9,7 +9,7 @@ import { BrandBreadcrumb } from '../_components/BrandBreadcrumb'
 import { UseCaseHero } from './_components/UseCaseHero'
 import { UseCaseCard } from './_components/UseCaseCard'
 import { UseCaseCta } from './_components/UseCaseCta'
-import { FeatureLinkRow } from './_components/FeatureLinkRow'
+import { FeatureLinkSection } from './_components/FeatureLinkSection'
 import { Phrase } from '../_components/Phrase'
 import { s } from '../_components/brand-inner'
 
@@ -121,17 +121,7 @@ export default async function UseCaseHubPage({ params }: { params: Params }) {
 
       {/* #1724 — outings are not a use case of their own, but every situation
           above can turn into one; the hub is one of the outing page's inbound links. */}
-      <section className={s.band} aria-label={dictionaries[locale].featureOuting.crossLink.name}>
-        <ul className={s.rows}>
-          <FeatureLinkRow
-            href={localizedHref('/features/outing', locale)}
-            name={dictionaries[locale].featureOuting.crossLink.name}
-            description={dictionaries[locale].featureOuting.crossLink.description}
-            cta={dictionaries[locale].featureOuting.crossLink.cta}
-            source="use_case_hub"
-          />
-        </ul>
-      </section>
+      <FeatureLinkSection locale={locale} source="use_case_hub" />
 
       <UseCaseCta label={t.ctaLabel} signInHref={localizedHref('/sign-in', locale)} slug="hub" />
     </div>

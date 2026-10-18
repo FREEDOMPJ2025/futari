@@ -68,7 +68,13 @@ const VARIANTS: Record<'sm' | 'md', Variant> = {
     errorRetry: 'mt-2 underline cursor-pointer text-xs',
   },
   md: {
-    label: 'block cursor-pointer rounded-2xl px-6 py-10 md:py-12 text-center transition-colors',
+    // Brand variant only (#1528 F1). The real <input> is sr-only, so the label
+    // is what the eye sees; without this a keyboard user tabs onto the dropzone
+    // and nothing changes (2.4.7). --ink, not the default focus ring: that ring
+    // is accent at 55% and only ~1.5:1 on this ground. The sm (signed-in) variant
+    // is deliberately left as it was.
+    label:
+      'block cursor-pointer rounded-2xl px-6 py-10 md:py-12 text-center transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink',
     prompt: 'text-base mb-3',
     button:
       'inline-flex items-center justify-center h-11 px-6 rounded-xl text-sm font-medium',
