@@ -53,7 +53,7 @@ describe('import wizard file picker (#1088)', () => {
 describe('/migrate preview file picker', () => {
   it('stays CSV-only — the preview never runs the OFX / QIF parsers', () => {
     const { container } = render(
-      <MigrateTool t={zhTW.migrate} signInHref="/sign-in" hint="honeydue" />,
+      <MigrateTool t={zhTW.migrate} locale="zh-TW" signInHref="/sign-in" hint="honeydue" />,
     )
     const exts = extensionsOf(acceptOf(container))
     expect(exts.sort()).toEqual(['.csv', '.txt'])

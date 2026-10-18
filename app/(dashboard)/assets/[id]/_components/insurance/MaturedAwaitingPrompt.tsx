@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from '@/lib/i18n/client'
 import { useBaseCurrency } from '@/app/(dashboard)/_components/MemberContext'
 import { currencySymbol } from '@/lib/currency'
 import { formatDateAbsolute } from '@/lib/format-date'
+import { pickPlural } from '@/lib/i18n/plural'
 
 interface Props {
   maturityDate: string
@@ -60,7 +61,7 @@ export function MaturedAwaitingPrompt({
 
       {premiumCount > 0 && (
         <div className="mt-4 text-xs text-ink-3">
-          {ts.maturedAwaitingPremiumNote
+          {pickPlural(locale, premiumCount, ts.maturedAwaitingPremiumNote)
             .replace('{total}', `${currencySymbol(baseCurrency)} ${premiumTotal.toLocaleString()}`)
             .replace('{count}', String(premiumCount))}
         </div>
