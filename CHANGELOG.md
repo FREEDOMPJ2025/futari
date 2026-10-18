@@ -52,6 +52,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - **搬遷頁讀不出內容的檔案改顯示錯誤、鍵盤可見焦點、模板連結好點（#1528）**
   使用者：上傳不是表格的檔案（純文字只有一欄、空檔、只有標題列）不再顯示「1 筆紀錄 · 約 0 筆支出」和匯入按鈕，改顯示既有的「讀不懂這個檔案」並可換檔；以逗號或 Tab 分隔、兩欄以上的 CSV 照舊顯示預覽與匯入按鈕（分號分隔的檔案讀成一欄，也會顯示錯誤；登入後的匯入本來就讀不了）；用鍵盤選到上傳區時會出現深色外框；「下載轉換模板」連結高度 44 px。
   技術：`useCsvPreview` 在沒有資料列或標題少於兩欄時進 `error`（`migrate_preview_failed` 的 `reason` 為 `not_a_csv_table`），規則刻意放窄，因為登入後的匯入精靈可手動對欄；焦點外框只加在 `CsvFileUploadWidget` 的 `md` 版。
+- **搬遷頁的說明與登入邀請、首頁的搬遷入口不再是白色卡片（#1528）**
+  使用者：/migrate/honeydue 的背景說明和「建立 Futari 帳號」改成與下方「為什麼選 Futari」同一種分隔線列，帶一點暖光小圓點；首頁「本來在用別的記帳工具？」三張卡片改成一列一個來源、右側箭頭。文字、連結與按鈕不變。
+  技術：`MigrateIntroCallout`、`MigratePrimaryCta` 改用 `.bi-band` / `.bi-rows` / `.bi-row` 與 `Ember`；`Landing.tsx` 的 `MigrateLinksSection` 改成分隔線清單，只用既有 utility，沒動 globals.css。
 - **匯入缺欄位的訊息改列檔案上的欄名，例如 Type（種別）（Closes #1799；關聯 #1791、#1796、#1797）**
   使用者：まねーぼ（日文、繁中檔）與 AndroMoney（繁中、簡中檔）少了必要欄位時，除了英文名稱，也會附上檔案那一種語言的欄名（如 `Type（種別）`、`Expense(Transfer Out)（付款(轉出)）`）；判斷不了檔案語言（只有各語共用的 `日期`、`金額` 等）就只列英文，不會列出檔案裡不可能有的欄名；拿掉 #1797 加的「以英文欄位名稱列出」說明（zh-TW／zh-CN／ja）。
   技術：`headerAliases.ts` 新增各語欄名表、`detectHeaderLang`（只計「只屬於單一語言」的欄名，跨兩張表比對；平手或沒有證據回 null）與 `describeMissing`；`resolveAndromoneyColumns`、`resolveManeboColumns` 兩個 resolver 的 `missing` 改回傳顯示文字，`resolveSplitwiseColumns` 不變（Splitwise 只有英文）。
