@@ -30,6 +30,10 @@ const exportWord = /匯出|导出|export|書き出|エクスポート/i
 const notACoverageClaim = new Set([
   // ja 「…CSV の書き出しと取り込みはすべて追加課金なしで」: every feature is free.
   'ja:migrate.pages.simple-daily-money.faq.4.answer',
+  // zh 「…匯出檔裡沒有付款人欄，所以…整批指定一次」: 整批 = payer/split chosen once for the whole
+  // import batch; the sentence says the export LACKS a payer column, not what it covers.
+  'zh-TW:migrate.pages.manebo.step3',
+  'zh-CN:migrate.pages.manebo.step3',
 ])
 
 type Dict = typeof zhTW
