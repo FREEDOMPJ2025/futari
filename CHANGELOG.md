@@ -43,6 +43,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **其餘依數量變化的 en 字串補上單複數（Closes #1798；關聯 #1738、#1784）**
+  使用者：en 在數量為 1 時讀成「in 1 day」「across 1 entry」（保單下次續約倒數、滿期待領取的繳費筆數）、「1 record」「~1 looks like an expense」（搬遷頁預覽）；zh／ja 不變。
+  技術：`summaryDaysUntil`、`maturedAwaitingPremiumNote`、`migrate.preview.totalRowsLabel`／`expenseRowsLabel` 改 `{ one, other }` 並走 `pickPlural`；`MigrateTool` 多收 `locale`。
 - **AndroMoney、Manebo、Splitwise 搬遷頁的步驟與問答對齊匯入精靈的實際行為（Closes #1800；關聯 #1791、#1795）**
   使用者：三頁的步驟 2、3 改寫成實際流程（設定 → 從其他 app 匯入、整批指定付款人與分攤）並各加一題問答，說明轉帳、期初餘額、結清、外幣與分類怎麼處理；預覽不再承諾日期範圍（四語，en／ja 已經 Grok 審閱）。
   技術：只改 `migrate.pages` 三個 slug 的字串；`contentUpdatedAt` 已是 2026-10-18，snapshot 重跑。

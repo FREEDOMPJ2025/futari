@@ -182,7 +182,7 @@ describe('locale placeholder parity', () => {
     'monthlyReview.card1Body', 'monthlyReview.card1BodySolo', 'monthlyReview.card2Body',
     'monthlyReview.card3ExpenseTotal', 'monthlyReview.card3IncomeTotal',
     'assetDetail.savings.heroMatured', 'assetDetail.savings.heroNoExpectedBar',
-    'assetDetail.savings.maturedAwaitingPremiumNote',
+    'assetDetail.savings.maturedAwaitingPremiumNote.one', 'assetDetail.savings.maturedAwaitingPremiumNote.other',
   ]
   const get = (o: unknown, p: string) =>
     p.split('.').reduce<unknown>((a, k) => (a as Record<string, unknown> | undefined)?.[k], o) as string | undefined
