@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import {
-  computePreviewStats,
+  computePreview,
   decodeBytes,
   detectCsvSource,
   parseCsvText,
@@ -26,6 +26,10 @@ export interface CsvPreviewState {
   error: string | null
 }
 
+/** `error` for a file that parsed but has no usable rows; also the `reason`
+ *  of the `migrate_preview_failed` event, so it reads apart from a thrown message. */
+export const NO_USABLE_ROWS = 'no_usable_rows'
+
 const INITIAL: CsvPreviewState = {
   status: 'idle',
   file: null,
@@ -43,6 +47,9 @@ const INITIAL: CsvPreviewState = {
  * import flow live behind auth. `hint` lets the caller bias the page towards
  * a known source (e.g. /migrate/honeydue passes 'honeydue') when the header
  * sniffer can't tell, and selects that source's decode / banner hints.
+ *
+ * A file that parses but yields no usable row (no date and amount the source's
+ * mapper can read) ends in `status: 'error'`, not 'ready' (#1528 A6).
  */
 export function useCsvPreview({ hint = 'unknown' }: { hint?: MigrateSource } = {}) {
   const [state, setState] = useState<CsvPreviewState>(INITIAL)
@@ -59,7 +66,13 @@ export function useCsvPreview({ hint = 'unknown' }: { hint?: MigrateSource } = {
       const { text, encoding } = decodeBytes(buffer, hints)
       const { headers, rows } = parseCsvText(text, hints)
       const detectedSource = detectCsvSource(headers) ?? hint
-      const stats = computePreviewStats(headers, rows, hint)
+      const { stats, usableRows } = computePreview(headers, rows, hint)
+      // Nothing an import could use (#1528 A6): same terminal state as a file
+      // that throws, so the page shows its error and no import button.
+      if (usableRows === 0) {
+        setState({ ...INITIAL, status: 'error', file, error: NO_USABLE_ROWS })
+        return
+      }
       setState({
         status: 'ready',
         file,

@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useCsvPreview } from '@/lib/migrate/useCsvPreview'
+import { NO_USABLE_ROWS, useCsvPreview } from '@/lib/migrate/useCsvPreview'
 import { processBuffer, type DetectedSource, type MigrateSource } from '@/lib/csvImport'
 import { GOLDEN_CASES } from '@/lib/csvImport/__tests__/golden1791.cases'
 import before from '@/lib/csvImport/__tests__/previewGolden1801.before.json'
@@ -23,6 +23,14 @@ async function preview(bytes: Uint8Array<ArrayBufferLike> | string, hint: Migrat
   await act(async () => { await result.current.load(new File([bytes as BlobPart], 'export.csv', { type: 'text/csv' })) })
   await waitFor(() => expect(result.current.status).toBe('ready'))
   return { source: result.current.detectedSource, stats: result.current.stats! }
+}
+
+/** For files expected to end in the error state (#1528 A6). */
+async function previewError(bytes: Uint8Array<ArrayBufferLike> | string, hint: MigrateSource) {
+  const { result } = renderHook(() => useCsvPreview({ hint }))
+  await act(async () => { await result.current.load(new File([bytes as BlobPart], 'export.csv', { type: 'text/csv' })) })
+  await waitFor(() => expect(result.current.status).toBe('error'))
+  return result.current
 }
 
 interface Expected {
@@ -104,10 +112,46 @@ describe('preview card stats come from the source mapper (#1801)', () => {
     expect(stats.dateRange).toEqual({ first: '2026-09-15', last: '2026-09-15' })
   })
 
-  it('a file missing a required column reports its row count and nothing it cannot know', async () => {
+  it('a file missing a required column is an error state, not a preview of rows it cannot read (#1528 A6)', async () => {
     const csv = readFileSync(resolve(FIXTURES, 'manebo_en_utf8.csv'), 'utf8').replace('Type', 'Kind')
-    const { stats } = await preview(csv, 'manebo')
-    expect(stats).toEqual({ totalRows: 3, estimatedExpenseRows: 0, dateRange: null, topCategories: [] })
+    const state = await previewError(csv, 'manebo')
+    expect(state.error).toBe(NO_USABLE_ROWS)
+    expect(state.stats).toBeNull()
+  })
+})
+
+// #1528 A6: a file the page can read no record from is an error with no import
+// button, not "1 record, about 0 expenses". Failure looks like a preview card
+// over text that is not a ledger.
+describe('files with nothing usable end in the error state (#1528 A6)', () => {
+  it.each(['honeydue', 'cwmoney', 'unknown'] as const)('two plain text lines on the %s page', async (hint) => {
+    const state = await previewError('hello there\nthis is not a ledger', hint)
+    expect(state.error).toBe(NO_USABLE_ROWS)
+  })
+
+  it('an empty file', async () => {
+    await previewError('', 'honeydue')
+  })
+
+  it('a header row and no records', async () => {
+    await previewError('Date,Wallet,Type,Category name,Amount,Currency,Note', 'spendee')
+  })
+
+  it('records whose date and amount cannot be read (every row rejected)', async () => {
+    const state = await previewError(
+      ['Date,Name,Category,Amount,Account', 'not-a-date,Rent,Housing,abc,Cash', 'later,Food,Dining,xyz,Cash'].join('\n'),
+      'honeydue',
+    )
+    expect(state.error).toBe(NO_USABLE_ROWS)
+  })
+
+  it('one good row among bad ones is still a preview', async () => {
+    const { stats } = await preview(
+      ['Date,Name,Category,Amount,Account', 'not-a-date,Rent,Housing,abc,Cash', '2026-01-15,Coffee,Food,-4.5,Cash'].join('\n'),
+      'honeydue',
+    )
+    expect(stats.totalRows).toBe(2)
+    expect(stats.estimatedExpenseRows).toBe(1)
   })
 })
 
@@ -168,6 +212,16 @@ const IMPROVED: Record<string, { stats: Expected; why: string }> = {
   },
 }
 
+/** Golden inputs this page cannot read a single record from. Each is the wrong
+ *  file for the page (a headerMap-only file, an AndroMoney file under CWMoney)
+ *  or has no records, so the old "preview" was empty numbers over a dead end. */
+const UNREADABLE = new Set([
+  'generic with a headerMap:unknown',
+  'generic with a headerMap:icost',
+  'a file with a banner line, picked as CWMoney (no skip for other sources):cwmoney',
+  'header row only:spendee',
+])
+
 describe('existing sources keep their numbers, or get better ones (#1801 golden)', () => {
   const pages = (c: (typeof GOLDEN_CASES)[number]): MigrateSource[] => {
     const h = hintFor(c.source)
@@ -180,6 +234,13 @@ describe('existing sources keep their numbers, or get better ones (#1801 golden)
   })
 
   it.each(cases)('%s', async (key, c, hint) => {
+    if (UNREADABLE.has(key)) {
+      // These used to preview as "N records, about 0 expenses" with an import
+      // button that would import nothing; now the error state (#1528 A6).
+      const state = await previewError(c.csv, hint)
+      expect(state.error).toBe(NO_USABLE_ROWS)
+      return
+    }
     const { source, stats } = await preview(c.csv, hint)
     const was = recorded[key]!
     // The label on the card is not touched by this change.
