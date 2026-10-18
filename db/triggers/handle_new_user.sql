@@ -9,8 +9,9 @@
 --
 -- #1782 — the OAuth full_name is copied without any validator, so a provider
 -- name that IS the system's left label (「已離開的夥伴」 and its zh-CN / en /
--- ja forms, lib/reservedDisplayName.ts) falls back to the email, the same
--- fallback as no full_name at all. Compared on a normalised copy, the SQL twin
+-- ja forms, plus the retired en wording 'a partner who left';
+-- lib/reservedDisplayName.ts) falls back to the email, the same fallback as no
+-- full_name at all. Compared on a normalised copy, the SQL twin
 -- of normalizeForReservedCheck: NFKC → drop default-ignorable / format
 -- characters → collapse whitespace → trim → lower → fold 離開夥 to 离开伙.
 -- The name is stored as given when it is not reserved. Look-alike characters
@@ -36,7 +37,7 @@ BEGIN
           '', 'g'),
         '\s+', ' ', 'g'))),
       '離開夥', '离开伙');
-    IF v_cmp IN ('已离开的伙伴', 'a partner who left', '退出したパートナー') THEN
+    IF v_cmp IN ('已离开的伙伴', 'partner who left', 'a partner who left', '退出したパートナー') THEN
       v_name := NULL;
     END IF;
   END IF;

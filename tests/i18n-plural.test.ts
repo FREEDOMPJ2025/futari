@@ -28,11 +28,15 @@ describe('outing plural strings', () => {
     expect(pickPlural('en', 1, en.outing.share.unpicked).replace('{n}', '1')).toBe('1 name not picked yet')
     expect(pickPlural('en', 4, en.outing.share.unpicked).replace('{n}', '4')).toBe('4 names not picked yet')
     expect(pickPlural('en', 1, en.outingList.countTag)).toBe('1 person')
+    const solo = (n: number) => pickPlural('en', n, en.dashboard.soloHero.countLabel).replace('{count}', String(n))
+    expect(solo(1)).toBe('1 entry')
+    expect(solo(7)).toBe('7 entries')
   })
 
   it.each([['zh-TW', zhTW], ['zh-CN', zhCN], ['ja', ja]] as const)('%s: one and other are identical', (_l, d) => {
     expect(d.outing.share.unpicked.one).toBe(d.outing.share.unpicked.other)
     expect(d.outing.splitCountTag.one).toBe(d.outing.splitCountTag.other)
     expect(d.outingList.countTag.one).toBe(d.outingList.countTag.other)
+    expect(d.dashboard.soloHero.countLabel.one).toBe(d.dashboard.soloHero.countLabel.other)
   })
 })

@@ -95,7 +95,7 @@ const row = (over: Partial<CompactRowProps['tx']> = {}): CompactRowProps['tx'] =
 
 describe('leftAwareName / localizeChapterMembers', () => {
   it('the marker decides, never the text', () => {
-    expect(leftAwareName({ name: LITERAL, isLeftLabel: true }, en.common.leftPartnerLabel)).toBe('a partner who left')
+    expect(leftAwareName({ name: LITERAL, isLeftLabel: true }, en.common.leftPartnerLabel)).toBe('Partner who left')
     expect(leftAwareName({ name: LITERAL, isLeftLabel: false }, en.common.leftPartnerLabel)).toBe(LITERAL)
     expect(leftAwareName({ name: null, isLeftLabel: false }, en.common.leftPartnerLabel)).toBeNull()
     expect(localizeChapterMembers({ ...slots(true), memberBId: null }, 'x'))

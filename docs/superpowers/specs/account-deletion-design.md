@@ -40,7 +40,7 @@ related_issues: ["#923", "#848", "#1604", "#1618", "#1619", "#1701", "#1782"]
 - 共享交易上的人名顯示為「已離開的夥伴」。
   - 自 #1619 起，「已離開的夥伴」**不再等於帳號已刪除**：離開帳本的人可以自己選擇，把自己在已離開帳本的已關閉章節裡的名字換成同一個字樣，帳號仍在（見 [after-leaving](after-leaving-design.md)「人：停在當時」）。判斷帳號是否刪除要看 `auth.users`（`public.profile_is_live`），不能看這個名字。
     - 失效的樣子：沒有任何錯誤；某段程式或文案把「名字是已離開的夥伴」當成「帳號已刪除」，對一個還在的人做了只該對已刪除帳號做的事。
-  - 自 #1782（migration 0099）起，**標記欄位是「這格是系統寫的已離開的夥伴」的唯一判斷依據**；寫進名字欄的字面值只是 fallback（舊程式、手寫 SQL 看到的仍是它）。刪除流程在寫字面值的同一條 UPDATE 設 `GroupEpochs.member_*_name_is_left_label`、`OutingParticipants.display_name_is_left_label`，墓碑分支設 `Profiles.is_tombstone`。讀取端只看標記，顯示讀者語系的說法（已離開的夥伴／已离开的伙伴／a partner who left／退出したパートナー）與系統樣式；`is_tombstone` 不送到任何 client。細節見 [after-leaving](after-leaving-design.md)「人：停在當時」。
+  - 自 #1782（migration 0099）起，**標記欄位是「這格是系統寫的已離開的夥伴」的唯一判斷依據**；寫進名字欄的字面值只是 fallback（舊程式、手寫 SQL 看到的仍是它）。刪除流程在寫字面值的同一條 UPDATE 設 `GroupEpochs.member_*_name_is_left_label`、`OutingParticipants.display_name_is_left_label`，墓碑分支設 `Profiles.is_tombstone`。讀取端只看標記，顯示讀者語系的說法（已離開的夥伴／已离开的伙伴／Partner who left／退出したパートナー）與系統樣式；`is_tombstone` 不送到任何 client。細節見 [after-leaving](after-leaving-design.md)「人：停在當時」。
     - 失效的樣子：沒有任何錯誤。之後重定義 `process_account_deletions` 的 migration 漏了這四個賦值，刪除之後名字欄仍是字面值，但標記是 false：英文、日文的讀者看到繁中的「已離開的夥伴」，而且樣式跟一般人一樣（`__tests__/actions/leftLabelMarker1782.test.ts` 與 `tests/migration-0099-body-1782.test.ts` 會擋）。反過來，用名字比對字面值來判斷的程式，會把本人取了這個名字的人當成系統標記。
 
 **不採用**的替代方案：

@@ -191,7 +191,7 @@ describe('every close path freezes the names of that moment (#1604 part 2)', () 
 
     // The S3 chapter identity (dashboard rows, trips, filter, BrandHeader) for
     // A pinned to A+B: B as B was, no avatar.
-    const identity = buildChapterIdentity(localizeChapterMembers((await getEpochMembers(chAB))!, 'a partner who left'), A, '對方')
+    const identity = buildChapterIdentity(localizeChapterMembers((await getEpochMembers(chAB))!, 'Partner who left'), A, '對方')
     expect(identity.partner).toMatchObject({ id: B, displayName: 'TEST_1604S4_B', avatarUrl: null })
 
     // 過去的時光: closed rows frozen, the open (solo) chapter live.

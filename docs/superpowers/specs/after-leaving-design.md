@@ -40,7 +40,7 @@ related_issues: ["#1603", "#1604", "#1605", "#1611", "#1612", "#1588", "#1618", 
   - 因此「已離開的夥伴」**不再等於帳號已刪除**：它可能只是離開的人自己選擇不留名字。
     - 失效的樣子：沒有任何錯誤；有人看到舊章節顯示「已離開的夥伴」就以為對方刪了帳號，或依此寫出「這個人已刪除」的判斷或文案。
 - **「已離開的夥伴」是系統標記，不是名字（#1782）**：刪除帳號、#1619、章節關閉時抄到墓碑，這三種寫入除了寫字面值，也在**同一條 UPDATE** 設標記欄位（`GroupEpochs.member_*_name_is_left_label`、`OutingParticipants.display_name_is_left_label`、`Profiles.is_tombstone`；migration 0099）。
-  - **標記是唯一的判斷依據；字面值只是 fallback**（給還沒改的讀取端、部署空窗期的舊程式、手寫 SQL）。讀取端只看標記：標記是 true，顯示讀者語系的 `common.leftPartnerLabel`（已離開的夥伴／已离开的伙伴／a partner who left／退出したパートナー），並用系統樣式（頭像是不含字的中性圓，名字用次要墨色）；標記是 false 就照寫的顯示，就算名字剛好是「已離開的夥伴」也不翻譯、不換樣式。共用 helper 在 `lib/leftPartnerLabel.ts`，翻譯在有 locale 的那一層做（server component、公開出遊頁的 locale、CSV 匯出當下的 locale）。
+  - **標記是唯一的判斷依據；字面值只是 fallback**（給還沒改的讀取端、部署空窗期的舊程式、手寫 SQL）。讀取端只看標記：標記是 true，顯示讀者語系的 `common.leftPartnerLabel`（已離開的夥伴／已离开的伙伴／Partner who left／退出したパートナー），並用系統樣式（頭像是不含字的中性圓，名字用次要墨色）；標記是 false 就照寫的顯示，就算名字剛好是「已離開的夥伴」也不翻譯、不換樣式。共用 helper 在 `lib/leftPartnerLabel.ts`，翻譯在有 locale 的那一層做（server component、公開出遊頁的 locale、CSV 匯出當下的 locale）。
   - 送到 client 的只有翻好的字串，最多再加一個 `isLeftLabel` 布林；`is_tombstone` 永遠不送。三種來源合成同一個布林，所以畫面不會透露「帳號已刪除」。
   - 失效的樣子：沒有任何錯誤；讀取端拿名字跟字面值比對、而不是讀標記，會把本人取的名字翻譯掉；漏走 helper 的讀取端，英文、日文的讀者會看到繁中的「已離開的夥伴」。
   - 冒充：一般人改不了標記（client 沒有任何路徑寫這四欄），所以樣式是唯一偽造不了的訊號。另外四語的標籤是保留名字（`lib/reservedDisplayName.ts`：改暱稱、出遊加人、免登入加入出遊會被擋，建出遊時抄成員名字與註冊時的 `handle_new_user` 改用預設名字）；形近字（已/己/巳、西里爾字母）擋不住，這是樣式存在的原因。
