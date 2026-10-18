@@ -13,6 +13,8 @@ type MigrateStrings = Translations['migrate']
 
 interface Props {
   t: MigrateStrings
+  /** Page locale — picks the singular/plural form of count strings. */
+  locale: string
   /** Locale-aware /sign-in href — `MigrateCta` appends `?from=<source>`. */
   signInHref: string
   /** Page-level source bias (e.g. /migrate/honeydue → 'honeydue'). Header
@@ -24,7 +26,7 @@ interface Props {
  * Self-contained upload → parse → preview → CTA flow shared by all three
  * /migrate/<source> pages. The page only supplies the SEO copy + `hint`.
  */
-export function MigrateTool({ t, signInHref, hint }: Props) {
+export function MigrateTool({ t, locale, signInHref, hint }: Props) {
   const preview = useCsvPreview({ hint })
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -115,6 +117,7 @@ export function MigrateTool({ t, signInHref, hint }: Props) {
         <>
           <MigratePreviewCard
             t={t}
+            locale={locale}
             source={preview.detectedSource}
             encoding={preview.encoding}
             stats={preview.stats}

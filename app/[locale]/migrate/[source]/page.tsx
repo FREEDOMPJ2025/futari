@@ -179,7 +179,7 @@ export default async function MigrateSourcePage({ params }: { params: Params }) 
         <MigrateChatgptWorkflow copy={t.chatgptWorkflow} source={slug} />
       )}
 
-      <MigrateTool t={t} signInHref={signInHref} hint={slug} />
+      <MigrateTool t={t} locale={locale} signInHref={signInHref} hint={slug} />
 
       <MigrateComparison
         heading={t.comparisonHeading.replace('{other}', def.name)}
