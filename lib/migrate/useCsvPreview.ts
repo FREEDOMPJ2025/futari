@@ -6,6 +6,7 @@ import {
   decodeBytes,
   detectCsvSource,
   parseCsvText,
+  parseHintsFor,
   type CsvRow,
   type CsvStats,
   type DetectedEncoding,
@@ -41,7 +42,7 @@ const INITIAL: CsvPreviewState = {
  * the /migrate pages are anonymous SEO entries; account creation + the real
  * import flow live behind auth. `hint` lets the caller bias the page towards
  * a known source (e.g. /migrate/honeydue passes 'honeydue') when the header
- * sniffer can't tell.
+ * sniffer can't tell, and selects that source's decode / banner hints.
  */
 export function useCsvPreview({ hint = 'unknown' }: { hint?: MigrateSource } = {}) {
   const [state, setState] = useState<CsvPreviewState>(INITIAL)
@@ -50,8 +51,13 @@ export function useCsvPreview({ hint = 'unknown' }: { hint?: MigrateSource } = {
     setState({ ...INITIAL, status: 'parsing', file })
     try {
       const buffer = await file.arrayBuffer()
-      const { text, encoding } = decodeBytes(buffer)
-      const { headers, rows } = parseCsvText(text)
+      // The page's own source declares how its file is read (AndroMoney: skip
+      // the banner line; まねーぼ: Shift_JIS fallback) — same hints as the
+      // wizard, so the preview and the import see the same columns. Other pages
+      // get no hints and parse exactly as before.
+      const hints = parseHintsFor(hint)
+      const { text, encoding } = decodeBytes(buffer, hints)
+      const { headers, rows } = parseCsvText(text, hints)
       const detectedSource = detectCsvSource(headers) ?? hint
       const stats = computeStats(rows)
       setState({

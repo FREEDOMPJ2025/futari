@@ -10,6 +10,14 @@
  */
 
 import { isWritableExpenseCategory } from '@/lib/categories'
+import {
+  ANDROMONEY_HEADERS,
+  ANDROMONEY_POSITION,
+  ANDROMONEY_WIDTH,
+  MANEBO_HEADERS,
+  SPLITWISE_HEADERS,
+  normalizeHeader,
+} from './headerAliases'
 import type {
   HeaderMap,
   ImportRowType,
@@ -333,6 +341,271 @@ export function mapGeneric(
   if (currency) {
     out.originalCurrency = currency.toUpperCase()
     if (amt) out.originalAmount = amt.value
+  }
+  return out
+}
+
+// ──────────────────── Dedicated mappers (#1791) ────────────────────
+//
+// AndroMoney / まねーぼ / Splitwise. Unlike the mappers above these resolve
+// their columns from the title row first (`resolve…Columns`), because the
+// titles are localised and a column can be absent: when a required column is
+// missing the file is not read at all and `processFile` reports which ones,
+// instead of mapping every row to nothing and ending in the generic
+// "no rows we can import".
+
+/**
+ * The header text of the column called any of `aliases`; failing that, the one
+ * at `position` — but only when the file is exactly as wide as the documented
+ * layout, so a differently shaped file is never read by position.
+ */
+function findColumn(
+  headers: readonly string[],
+  aliases: readonly string[],
+  position?: number,
+  width?: number,
+): string | undefined {
+  const i = headers.findIndex(h => aliases.includes(normalizeHeader(h)))
+  if (i !== -1) return headers[i]
+  if (position !== undefined && width !== undefined && headers.length === width) {
+    return headers[position]
+  }
+  return undefined
+}
+
+function cell(row: Record<string, string>, column: string | undefined): string {
+  return column === undefined ? '' : (row[column] ?? '').trim()
+}
+
+/** Non-base currencies carry the original tuple; TWD (or blank) does not. */
+function withCurrency(out: PartialImportRow, currency: string, amount: number | undefined): void {
+  const code = currency.trim().toUpperCase()
+  if (code && code !== 'TWD') {
+    out.originalCurrency = code
+    if (amount !== undefined) out.originalAmount = amount
+  }
+}
+
+export interface ColumnResolution<C> {
+  /** `null` when a required column is missing. */
+  columns: C | null
+  /** Canonical names of the required columns that were not found. */
+  missing: string[]
+}
+
+// ── AndroMoney ──
+
+export interface AndromoneyColumns {
+  date: string
+  amount: string
+  /** `Expense(Transfer Out)` — the paying account. */
+  out: string
+  /** `Income(Transfer In)` — the receiving account. */
+  in: string
+  category?: string
+  subCategory?: string
+  note?: string
+  currency?: string
+}
+
+export function resolveAndromoneyColumns(headers: readonly string[]): ColumnResolution<AndromoneyColumns> {
+  const H = ANDROMONEY_HEADERS
+  const P = ANDROMONEY_POSITION
+  const W = ANDROMONEY_WIDTH
+  const date = findColumn(headers, H.date, P.date, W)
+  const amount = findColumn(headers, H.amount, P.amount, W)
+  const out = findColumn(headers, H.out, P.out, W)
+  const inn = findColumn(headers, H.in, P.in, W)
+  const missing: string[] = []
+  if (date === undefined) missing.push('Date')
+  if (amount === undefined) missing.push('Amount')
+  if (out === undefined) missing.push('Expense(Transfer Out)')
+  if (inn === undefined) missing.push('Income(Transfer In)')
+  if (date === undefined || amount === undefined || out === undefined || inn === undefined) {
+    return { columns: null, missing }
+  }
+  return {
+    missing,
+    columns: {
+      date, amount, out, in: inn,
+      category: findColumn(headers, H.category, P.category, W),
+      subCategory: findColumn(headers, H.subCategory, P.subCategory, W),
+      note: findColumn(headers, H.note, P.note, W),
+      currency: findColumn(headers, H.currency, P.currency, W),
+    },
+  }
+}
+
+/**
+ * AndroMoney: `Amount` is always positive; the direction is which account
+ * column is filled (paying → expense, receiving → income). Both filled is a
+ * transfer between the user's own accounts; `SYSTEM` / `INIT_AMOUNT` is the
+ * account's opening balance (dated 10100101). Neither is a record Futari has a
+ * place for, so both are skipped with their own reason.
+ */
+export function mapAndromoney(row: Record<string, string>, c: AndromoneyColumns): PartialImportRow {
+  const category = cell(row, c.category)
+  const subCategory = cell(row, c.subCategory)
+  const payFrom = cell(row, c.out)
+  const payTo = cell(row, c.in)
+  const out: PartialImportRow = {
+    category: mapCategory(category),
+    description: cell(row, c.note) || subCategory,
+    paidBy: 'viewer',
+    splitType: 'half',
+  }
+  if (category.toUpperCase() === 'SYSTEM' || subCategory.toUpperCase() === 'INIT_AMOUNT') {
+    out.skipReason = 'opening balance rows are not imported'
+    return out
+  }
+  if (payFrom && payTo) {
+    out.skipReason = 'transfer rows are not imported'
+    return out
+  }
+  const date = parseDate(row[c.date] ?? '')
+  const amt = parseAmount(row[c.amount] ?? '')
+  if (date) out.date = date
+  if (amt) {
+    out.amount = amt.value
+    if (payFrom) out.type = 'expense'
+    else if (payTo) out.type = 'income'
+    withCurrency(out, cell(row, c.currency), amt.value)
+  }
+  return out
+}
+
+// ── まねーぼ (Manebo) ──
+
+export interface ManeboColumns {
+  date: string
+  type: string
+  amount: string
+  category?: string
+  subCategory?: string
+  note?: string
+}
+
+export function resolveManeboColumns(headers: readonly string[]): ColumnResolution<ManeboColumns> {
+  const H = MANEBO_HEADERS
+  const date = findColumn(headers, H.date)
+  const type = findColumn(headers, H.type)
+  const amount = findColumn(headers, H.amount)
+  const missing: string[] = []
+  if (date === undefined) missing.push('Date')
+  if (type === undefined) missing.push('Type')
+  if (amount === undefined) missing.push('Amount')
+  if (date === undefined || type === undefined || amount === undefined) {
+    return { columns: null, missing }
+  }
+  return {
+    missing,
+    columns: {
+      date, type, amount,
+      category: findColumn(headers, H.category),
+      subCategory: findColumn(headers, H.subCategory),
+      note: findColumn(headers, H.note),
+    },
+  }
+}
+
+/**
+ * まねーぼ: `金額` is positive; `種別` is `income` / `expense` / `transfer`
+ * (English in every app language) and is the only thing that decides the
+ * direction. A transfer is skipped; any other value leaves `type` unset so the
+ * validator reports the row.
+ */
+export function mapManebo(row: Record<string, string>, c: ManeboColumns): PartialImportRow {
+  const kind = cell(row, c.type).toLowerCase()
+  const subCategory = cell(row, c.subCategory)
+  const out: PartialImportRow = {
+    category: mapCategory(cell(row, c.category)),
+    description: cell(row, c.note) || subCategory,
+    paidBy: 'viewer',
+    splitType: 'half',
+  }
+  if (kind === 'transfer') {
+    out.skipReason = 'transfer rows are not imported'
+    return out
+  }
+  const date = parseDate(row[c.date] ?? '')
+  const amt = parseAmount(row[c.amount] ?? '')
+  if (date) out.date = date
+  if (amt) {
+    out.amount = amt.value
+    if (kind === 'income' || kind === 'expense') out.type = kind
+  }
+  return out
+}
+
+// ── Splitwise ──
+
+export interface SplitwiseColumns {
+  date: string
+  cost: string
+  description?: string
+  category?: string
+  currency?: string
+}
+
+export function resolveSplitwiseColumns(headers: readonly string[]): ColumnResolution<SplitwiseColumns> {
+  const H = SPLITWISE_HEADERS
+  const date = findColumn(headers, H.date)
+  const cost = findColumn(headers, H.cost)
+  const missing: string[] = []
+  if (date === undefined) missing.push('Date')
+  if (cost === undefined) missing.push('Cost')
+  if (date === undefined || cost === undefined) return { columns: null, missing }
+  return {
+    missing,
+    columns: {
+      date, cost,
+      description: findColumn(headers, H.description),
+      category: findColumn(headers, H.category),
+      currency: findColumn(headers, H.currency),
+    },
+  }
+}
+
+const RE_US_SHORT = /^(\d{1,2})\/(\d{1,2})\/(\d{2})$/   // Splitwise 2018 exports: 7/31/18
+
+function parseSplitwiseDate(raw: string): Date | null {
+  const m = raw.trim().match(RE_US_SHORT)
+  // Read M/D/YY here instead of letting `parseDate` fall through to `new Date()`:
+  // the engine's two-digit-year window is the engine's, not ours.
+  if (m !== null) return mkLocalDate(2000 + +m[3]!, +m[1]!, +m[2]!)
+  return parseDate(raw)
+}
+
+/**
+ * Splitwise: `Cost` is the whole bill, always positive, so every kept row is an
+ * expense. The member columns (paid − owed per person) are not read: the wizard
+ * assigns one payer to the whole batch. A `Payment` row is a settle-up between
+ * members and the `Total balance` row is a footer; neither is an expense.
+ */
+export function mapSplitwise(row: Record<string, string>, c: SplitwiseColumns): PartialImportRow {
+  const description = cell(row, c.description)
+  const category = cell(row, c.category)
+  const out: PartialImportRow = {
+    category: mapCategory(category),
+    description,
+    paidBy: 'viewer',
+    splitType: 'half',
+  }
+  if (description.toLowerCase() === 'total balance') {
+    out.skipReason = 'Total balance row is not imported'
+    return out
+  }
+  if (category.toLowerCase() === 'payment') {
+    out.skipReason = 'settle-up (Payment) rows are not imported'
+    return out
+  }
+  const date = parseSplitwiseDate(row[c.date] ?? '')
+  const amt = parseAmount(row[c.cost] ?? '')
+  if (date) out.date = date
+  if (amt) {
+    out.amount = amt.value
+    out.type = 'expense'
+    withCurrency(out, cell(row, c.currency), amt.value)
   }
   return out
 }

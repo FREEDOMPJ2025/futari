@@ -1,0 +1,7 @@
+"Google Documents","AndroMoney","20261001"
+"Id","Currency","Amount","Category","Sub-Category","Date","Expense(Transfer Out)","Income(Transfer In)","Note","Periodic","Project","Payee/Payer","uid","Time"
+"1","TWD","5000","SYSTEM","INIT_AMOUNT","10100101","","現金","","","","","0a1b2c3d4e5f60718293a4b5c6d7e8f9",""
+"2","TWD","120","飲食","午餐","20260915","現金","","便當，加蛋","","","","1f2e3d4c5b6a79881726354453627180","1230"
+"3","TWD","45000","收入","薪水","20260905","","銀行","","","","公司","aa11bb22cc33dd44ee55ff6677889900","900"
+"4","TWD","3000","Transfer","提款","20260910","銀行","現金","","","","","00ff11ee22dd33cc44bb55aa66997788","1815"
+"5","EUR","18.5","Food","Lunch","20260917","現金","","Pasta","","","","11ff22ee33dd44cc55bb66aa77998800","1305"

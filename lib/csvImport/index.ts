@@ -18,7 +18,15 @@
  */
 
 export type { DetectedSource, KnownCsvSource, MigrateSource } from './detector'
-export type { DecodeResult, DetectedEncoding, ParsedCsv, Separator } from './parser'
+export type {
+  DecodeOptions,
+  DecodeResult,
+  DetectedEncoding,
+  ParseOptions,
+  ParsedCsv,
+  Separator,
+  SourceParseHints,
+} from './parser'
 export type { CsvRow, CsvStats } from './stats'
 export type {
   HeaderMap,
@@ -37,32 +45,45 @@ export {
   detectSeparator,
   parseCsvBuffer,
   parseCsvText,
+  parseHintsFor,
 } from './parser'
 export { DETECTED_SOURCES, detectCsvSource, detectFormat, detectSource } from './detector'
 export { CSV_ONLY_ACCEPT, IMPORT_ACCEPT } from './accept'
 export { computeStats } from './stats'
 export {
+  mapAndromoney,
   mapCategory,
   mapCwmoney,
   mapFutariGeneric,
   mapGeneric,
   mapHoneydue,
+  mapManebo,
   mapSpendee,
+  mapSplitwise,
   parseAmount,
   parseDate,
+  resolveAndromoneyColumns,
+  resolveManeboColumns,
+  resolveSplitwiseColumns,
 } from './mapper'
 export { parseOfx } from './ofxParser'
 export { parseQif } from './qifParser'
 export { validateRow } from './validator'
 
-import { decodeBytes, parseCsvText } from './parser'
+import { decodeBytes, parseCsvText, parseHintsFor } from './parser'
 import { detectFormat, detectSource, type DetectedSource } from './detector'
 import {
+  mapAndromoney,
   mapCwmoney,
   mapFutariGeneric,
   mapGeneric,
   mapHoneydue,
+  mapManebo,
   mapSpendee,
+  mapSplitwise,
+  resolveAndromoneyColumns,
+  resolveManeboColumns,
+  resolveSplitwiseColumns,
 } from './mapper'
 import { parseOfx } from './ofxParser'
 import { parseQif } from './qifParser'
@@ -97,19 +118,45 @@ export interface ProcessResult {
   errors: RowError[]
   warnings: RowError[]
   stats: ProcessStats
+  /** Only the dedicated mappers that read their columns by title set this
+   *  (AndroMoney / まねーぼ / Splitwise), and only when a required column is
+   *  not in the file. Then nothing was mapped: `rows` and `errors` are empty.
+   *  Callers check it BEFORE the "no valid rows" case — both look like an empty
+   *  result, but only this one names what to fix. Absent for every other source. */
+  missingColumns?: string[]
 }
 
-function pickMapper(source: DetectedSource, headerMap?: HeaderMap) {
+type RowMapper = (r: Record<string, string>) => PartialImportRow
+
+/** A row mapper, or the required columns the file lacks. */
+type MapperPick = { map: RowMapper; missing?: undefined } | { map?: undefined; missing: string[] }
+
+function fromColumns<C>(
+  resolved: { columns: C | null; missing: string[] },
+  map: (r: Record<string, string>, c: C) => PartialImportRow,
+): MapperPick {
+  const { columns } = resolved
+  return columns === null ? { missing: resolved.missing } : { map: (r) => map(r, columns) }
+}
+
+function pickMapper(
+  source: DetectedSource,
+  headers: readonly string[],
+  headerMap?: HeaderMap,
+): MapperPick {
   switch (source) {
-    case 'honeydue': return (r: Record<string, string>) => mapHoneydue(r)
-    case 'spendee':  return (r: Record<string, string>) => mapSpendee(r)
-    case 'cwmoney':  return (r: Record<string, string>) => mapCwmoney(r)
-    case 'futari_generic': return (r: Record<string, string>) => mapFutariGeneric(r)
+    case 'honeydue': return { map: (r) => mapHoneydue(r) }
+    case 'spendee':  return { map: (r) => mapSpendee(r) }
+    case 'cwmoney':  return { map: (r) => mapCwmoney(r) }
+    case 'futari_generic': return { map: (r) => mapFutariGeneric(r) }
+    case 'andromoney': return fromColumns(resolveAndromoneyColumns(headers), mapAndromoney)
+    case 'manebo':     return fromColumns(resolveManeboColumns(headers), mapManebo)
+    case 'splitwise':  return fromColumns(resolveSplitwiseColumns(headers), mapSplitwise)
     case 'generic':
       if (!headerMap) {
         throw new Error('headerMap is required when source is "generic"')
       }
-      return (r: Record<string, string>) => mapGeneric(r, headerMap)
+      return { map: (r) => mapGeneric(r, headerMap) }
     case 'ofx':
     case 'qif':
       throw new Error(`${source} does not use the CSV mapper path`)
@@ -155,7 +202,9 @@ export function processBuffer(
   buffer: ArrayBuffer,
   options: ProcessOptions = {},
 ): ProcessResult {
-  const { text } = decodeBytes(buffer)
+  // A source the user chose may declare how its bytes are read (まねーぼ →
+  // Shift_JIS); with no source the Big5 fallback is unchanged.
+  const { text } = decodeBytes(buffer, parseHintsFor(options.source))
   // Format dispatch: explicit option wins, then content sniff.
   const format =
     options.source === 'ofx' || options.source === 'qif'
@@ -194,7 +243,11 @@ function resolveSource(
 }
 
 function runCsv(text: string, options: ProcessOptions): ProcessResult {
-  const { headers, rows: rawRows } = parseCsvText(text)
+  // The banner skip (AndroMoney) applies only when the user chose that source.
+  // A CWMoney button on an AndroMoney file therefore still reads the banner as
+  // the header and ends with 0 valid rows — never an opening balance imported
+  // as an expense.
+  const { headers, rows: rawRows } = parseCsvText(text, parseHintsFor(options.source))
   const source = resolveSource(headers, options.source)
   // Empty file: nothing to map. Bail before requiring a headerMap so callers
   // can probe the file shape without committing to a mapper choice.
@@ -207,8 +260,18 @@ function runCsv(text: string, options: ProcessOptions): ProcessResult {
       stats: { total: 0, valid: 0, invalid: 0, dateRange: null, topCategories: [] },
     }
   }
-  const mapper = pickMapper(source, options.headerMap)
-  const partials = rawRows.map(r => mapper(r))
+  const picked = pickMapper(source, headers, options.headerMap)
+  if (picked.missing) {
+    return {
+      source,
+      rows: [],
+      errors: [],
+      warnings: [],
+      stats: { total: 0, valid: 0, invalid: 0, dateRange: null, topCategories: [] },
+      missingColumns: picked.missing,
+    }
+  }
+  const partials = rawRows.map(r => picked.map(r))
   return validatePartials(partials, source)
 }
 
@@ -229,6 +292,10 @@ function validatePartials(
 
   for (let i = 0; i < partials.length; i++) {
     const partial = partials[i]!
+    if (partial.skipReason) {
+      errors.push({ rowIndex: i, errors: [`row ${i + 1}: ${partial.skipReason}`] })
+      continue
+    }
     const result = validateRow(partial, i)
     if (result.warnings.length > 0) {
       warnings.push({ rowIndex: i, errors: result.warnings })

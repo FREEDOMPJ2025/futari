@@ -107,6 +107,15 @@ export function ImportContent({ viewer, partner, viewerIsMemberA, history }: Pro
           ? await processFile(file, { source: 'generic', headerMap: { date: 'Date', amount: 'Amount' } })
           : await processFile(file, { source: requestedSource })
 
+      // Before the empty case: a file missing a required column also has no
+      // valid rows, but only this message says which column to look for.
+      if (result.missingColumns && result.missingColumns.length > 0) {
+        setParseError(
+          t.settings.import.errors.missingColumns.replace('{columns}', result.missingColumns.join(', ')),
+        )
+        return
+      }
+
       if (result.rows.length === 0) {
         setParseError(t.settings.import.errors.noValidRows)
         return

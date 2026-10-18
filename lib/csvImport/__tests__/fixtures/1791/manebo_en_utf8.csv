@@ -1,0 +1,4 @@
+Date,Type,Amount,Category,Sub Category,Account / From,To,Note
+2026/09/12,income,100000,Salary,,Bank,,
+2026/09/15,expense,1200,Food,Dining out,Cash,,Lunch
+2026/09/16,transfer,30000,,,Bank,Cash,Withdrawal

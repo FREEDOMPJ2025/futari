@@ -20,7 +20,7 @@ interface Props {
 /** The sources a user picks by hand. `ofx` / `qif` / `futari_generic` are also
  *  valid `ImportSource`s but are recognised from the file itself, never chosen
  *  here — hence the narrow literal type rather than `ImportSource[]`. */
-const SOURCE_OPTIONS = ['honeydue', 'spendee', 'cwmoney', 'generic'] as const satisfies readonly ImportSource[]
+const SOURCE_OPTIONS = ['honeydue', 'spendee', 'cwmoney', 'andromoney', 'manebo', 'splitwise', 'generic'] as const satisfies readonly ImportSource[]
 
 /**
  * Label for the *detected* source. Only the hand-picked ones have translated
