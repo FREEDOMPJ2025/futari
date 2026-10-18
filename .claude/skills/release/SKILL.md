@@ -154,8 +154,15 @@ git log vPREV..HEAD --name-only --pretty=format: | sort -u | grep -E '^(ios/|and
 git log vPREV..HEAD -p -- package.json | grep -E '^[+-].*"@capacitor(-community)?/'
 ```
 
+再看本版 milestone 的描述開頭有沒有 `[shell]`（代表這版預定要送原生殼）：
+
+```bash
+gh api repos/redtear1115/oikos/milestones --jq '.[] | select(.title=="vX.Y.Z") | .description'
+```
+
 - **有命中** → 收尾 checklist 明確標示：**本版含原生殼變更，需依 [runbook](../../../docs/app-store-submission-runbook.md) 重送商店（版本計數 +1 規則見 §E）**，並列出命中的路徑。
 - **沒命中** → 標示：**純 web release，原生殼不需動作**（merge 到 `release` 後 Vercel 部署即觸達三平台）。
+- **掃描和 `[shell]` 不一致**（有 `[shell]` 卻沒命中，或沒 `[shell]` 卻命中）→ 停下來問使用者：是原生改動還沒 merge、標記忘了拿掉，還是該補標。失效的樣子：標了 `[shell]` 的版本照「純 web」收尾，原生殼沒送，商店上的殼一直停在舊版，沒有任何錯誤。
 
 skill 本身到此為止，**不**改任何原生檔。
 
