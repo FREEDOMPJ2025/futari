@@ -1,0 +1,8 @@
+Date,Description,Category,Cost,Currency,Alice,Bob
+
+2026-09-02,Groceries,Groceries,60.00,TWD,30.00,-30.00
+2026-09-05,Dinner,Dining out,900.00,TWD,-450.00,450.00
+2026-09-10,Bob paid Alice,Payment,200.00,TWD,-200.00,200.00
+2026-09-12,Rent,Rent,15000.00,TWD,7500.00,-7500.00
+
+2026-09-12,Total balance, , ,TWD,6880.00,-6880.00

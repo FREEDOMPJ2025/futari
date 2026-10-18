@@ -43,6 +43,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **匯入精靈新增 AndroMoney、Manebo（まねーぼ）、Splitwise 三個來源（#1791）**
+  使用者：選對應按鈕上傳就能匯入；轉帳、期初餘額、Splitwise 的結清與 Total balance 列不會匯入，會列在失敗的列；檔案少了必要欄位時，會直接說少了哪幾個。
+  技術：新增三個 mapper 與標題偵測（排在 CWMoney 之前、整欄比對）；AndroMoney 跳過橫幅行、まねーぼ 以 Shift_JIS 解碼只對選定來源套用，搬遷頁預覽同步。
 - **CSV 匯入的日期不再早一天（#1793）**
   使用者：台灣（UTC 以東）匯入的紀錄，確認畫面和帳本都會是檔案裡寫的那一天，月初那筆也不再掉到上個月；已匯入的舊紀錄不會自動改。
   技術：送出與確認頁改用本地日期（`localYmd`，取代 `toISOString`），伺服端存成與手動記帳相同的 UTC 正午，並只收 `YYYY-MM-DD`。

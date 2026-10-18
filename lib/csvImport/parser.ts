@@ -12,7 +12,7 @@
  * comma CSVs and ignores the detected separator.
  */
 
-export type DetectedEncoding = 'utf-8' | 'utf-8-bom' | 'big5'
+export type DetectedEncoding = 'utf-8' | 'utf-8-bom' | 'big5' | 'shift_jis'
 export type Separator = ',' | '\t'
 
 export interface DecodeResult {
@@ -28,7 +28,15 @@ export interface ParsedCsv {
 
 // ──────────────────────────── Decoding ────────────────────────────
 
-export function decodeBytes(buffer: ArrayBuffer): DecodeResult {
+export interface DecodeOptions {
+  /** What to try when the bytes are not valid UTF-8. Big5 by default. A caller
+   *  that knows the source (まねーぼ → Shift_JIS) says so here: Big5 decodes
+   *  Shift_JIS bytes without throwing, so the file would come back as mojibake
+   *  rather than as an error — the encoding cannot be guessed from the bytes. */
+  legacyEncoding?: 'big5' | 'shift_jis'
+}
+
+export function decodeBytes(buffer: ArrayBuffer, options: DecodeOptions = {}): DecodeResult {
   const bytes = new Uint8Array(buffer)
   if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
     const text = new TextDecoder('utf-8').decode(bytes.subarray(3))
@@ -38,8 +46,9 @@ export function decodeBytes(buffer: ArrayBuffer): DecodeResult {
     const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes)
     return { text, encoding: 'utf-8' }
   } catch {
-    const text = new TextDecoder('big5').decode(bytes)
-    return { text, encoding: 'big5' }
+    const encoding = options.legacyEncoding ?? 'big5'
+    const text = new TextDecoder(encoding).decode(bytes)
+    return { text, encoding }
   }
 }
 
@@ -61,11 +70,38 @@ export function parseCsvBuffer(buffer: ArrayBuffer): ParsedCsv {
   return parseCsvText(text)
 }
 
-export function parseCsvText(text: string): ParsedCsv {
+export interface ParseOptions {
+  /** The first line is an export banner, not the header: skip it. Only the
+   *  AndroMoney banner (`"Windows Excel","AndroMoney","20250708"`) is
+   *  recognised, and only when the second field says `AndroMoney`. Opt-in per
+   *  source (see `parseHintsFor`) — for every other source the first line is
+   *  the header, as before. */
+  skipBanner?: boolean
+}
+
+/** Decode + parse hints a source declares. Applied only when the user chose that
+ *  source (wizard button or /migrate page); never inferred from the bytes. */
+export type SourceParseHints = DecodeOptions & ParseOptions
+
+const SOURCE_PARSE_HINTS: Record<string, SourceParseHints> = {
+  andromoney: { skipBanner: true },
+  manebo: { legacyEncoding: 'shift_jis' },
+}
+
+export function parseHintsFor(source: string | null | undefined): SourceParseHints {
+  return source && Object.hasOwn(SOURCE_PARSE_HINTS, source) ? SOURCE_PARSE_HINTS[source]! : {}
+}
+
+function isAndromoneyBanner(record: string[] | undefined): boolean {
+  return record !== undefined && record.length >= 2 && record[1]!.trim().toLowerCase() === 'andromoney'
+}
+
+export function parseCsvText(text: string, options: ParseOptions = {}): ParsedCsv {
   const firstBreak = text.search(/[\r\n]/)
   const firstLine = firstBreak === -1 ? text : text.slice(0, firstBreak)
   const separator = detectSeparator(firstLine)
-  const records = tokenize(text, separator)
+  let records = tokenize(text, separator)
+  if (options.skipBanner && isAndromoneyBanner(records[0])) records = records.slice(1)
   if (records.length === 0) return { headers: [], rows: [], separator }
   const headers = records[0]!.map(h => h.trim())
   const rows: Record<string, string>[] = []

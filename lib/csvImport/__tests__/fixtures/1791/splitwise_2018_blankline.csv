@@ -1,0 +1,7 @@
+Date,Description,Category,Cost,Currency,Alice,Bob
+
+7/31/18,Groceries,Groceries,60.00,TWD,30.00,-30.00
+8/5/18,Dinner,Dining out,900.00,TWD,-450.00,450.00
+8/10/18,Bob paid Alice,Payment,200.00,TWD,-200.00,200.00
+
+8/10/18,Total balance, , ,TWD,-620.00,620.00

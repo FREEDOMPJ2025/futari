@@ -318,8 +318,8 @@ export const MIGRATE_SOURCES = {
     contentUpdatedAt: '2026-10-18',
     // No screenshotWorkflow: Splitwise exports a spreadsheet per group /
     // friendship (kb.splitwise.com "How can I double check my balances?"),
-    // so users arrive holding a real CSV. Headers don't match any dedicated
-    // sniff signature, so the file routes to the generic mapping wizard.
+    // so users arrive holding a real CSV. It has its own sniff signature
+    // (`Cost` + `Currency`, no `Amount`) and mapper — `mapSplitwise`, #1791.
     featureLinks: ['outing'],
     comparison: {
       rows: [

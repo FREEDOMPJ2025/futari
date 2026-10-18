@@ -1522,6 +1522,9 @@ export type Translations = {
           honeydue: string
           spendee: string
           cwmoney: string
+          andromoney: string
+          manebo: string
+          splitwise: string
           generic: string
         }
         uploadPrompt: string
@@ -1598,6 +1601,8 @@ export type Translations = {
         submitFailed: string
         rollbackFailed: string
         noValidRows: string
+        /** `{columns}` = required column names the file lacks, joined with ', ' */
+        missingColumns: string
       }
     }
   }
@@ -4701,6 +4706,9 @@ export const zhTW: Translations = {
           honeydue: 'Honeydue',
           spendee: 'Spendee',
           cwmoney: 'CWMoney',
+          andromoney: 'AndroMoney',
+          manebo: 'Manebo（まねーぼ）',
+          splitwise: 'Splitwise',
           generic: '通用 CSV',
         },
         uploadPrompt: '拖檔案到這裡，或點選下方按鈕',
@@ -4775,6 +4783,7 @@ export const zhTW: Translations = {
         submitFailed: '寫入時遇到問題，請稍後再試',
         rollbackFailed: '復原失敗，請稍後再試',
         noValidRows: '這個檔案沒有可匯入的紀錄',
+        missingColumns: '這個檔案少了這些欄位：{columns}。請確認匯出時選的是 CSV，或把檔案寄給我們看看',
       },
     },
   },

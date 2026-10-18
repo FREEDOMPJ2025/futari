@@ -28,7 +28,13 @@ export interface ImportRow {
   originalAmount?: number
 }
 
-export type PartialImportRow = Partial<ImportRow>
+export type PartialImportRow = Partial<ImportRow> & {
+  /** The mapper recognised this row and chose not to import it (a transfer,
+   *  an opening balance, a settle-up). It goes through the same invalid path as
+   *  a row that failed validation, but carries this reason instead of a generic
+   *  "missing transaction type". English diagnostic, like the validator's. */
+  skipReason?: string
+}
 
 export interface HeaderMap {
   date: string
