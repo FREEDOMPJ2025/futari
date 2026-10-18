@@ -195,7 +195,7 @@ function GuardianSummary({ insurances }: { insurances: AssetsListItem[] }) {
               {upcoming.a.insurance?.expiryDate ?? '—'}
             </div>
             <div className="mt-1 text-xs text-ink-3">
-              {upcoming.a.name} · {i.summaryDaysUntil.replace('{days}', String(upcoming.days))}
+              {upcoming.a.name} · {pickPlural(locale, upcoming.days, i.summaryDaysUntil).replace('{days}', String(upcoming.days))}
             </div>
           </>
         ) : (

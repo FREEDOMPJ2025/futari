@@ -1867,7 +1867,7 @@ export type Translations = {
       summaryPolicyCount: { one: string; other: string }
       summaryNextRenewal: string
       /** #1173 — Template with `{days}`. */
-      summaryDaysUntil: string
+      summaryDaysUntil: { one: string; other: string }
     }
   }
 
@@ -2538,7 +2538,7 @@ export type Translations = {
       maturedAwaitingStatus: string
       maturedAwaitingCta: string
       /** Template with `{total}` and `{count}`. */
-      maturedAwaitingPremiumNote: string
+      maturedAwaitingPremiumNote: { one: string; other: string }
       /** #166 — informational hero row for investment-linked policies. */
       accountValueLabel: string
       accountValueEditCta: string
@@ -3057,9 +3057,9 @@ export type Translations = {
       /** Label for detected encoding row. Replace `{encoding}` literally. */
       encodingLabel: string
       /** Total parsed rows. Replace `{count}`. */
-      totalRowsLabel: string
+      totalRowsLabel: { one: string; other: string }
       /** Estimated expense rows (negative-amount heuristic). Replace `{count}`. */
-      expenseRowsLabel: string
+      expenseRowsLabel: { one: string; other: string }
       /** Date span. Replace `{first}` / `{last}` with raw date strings. */
       dateRangeLabel: string
       /** Heading for the top-categories list. */
@@ -4955,7 +4955,7 @@ export const zhTW: Translations = {
       summaryAnnualPremium: '年繳保費',
       summaryPolicyCount: { one: '共 {count} 張保單', other: '共 {count} 張保單' },
       summaryNextRenewal: '下次續約',
-      summaryDaysUntil: '{days} 天後',
+      summaryDaysUntil: { one: '{days} 天後', other: '{days} 天後' },
     },
   },
 
@@ -5570,7 +5570,7 @@ export const zhTW: Translations = {
       maturedAwaitingTitle: '滿期日已到 · {date}',
       maturedAwaitingStatus: '待入帳',
       maturedAwaitingCta: '我已經收到滿期金了 →',
-      maturedAwaitingPremiumNote: '累計繳 {total} 已記入 {count} 筆',
+      maturedAwaitingPremiumNote: { one: '累計繳 {total} 已記入 {count} 筆', other: '累計繳 {total} 已記入 {count} 筆' },
       accountValueLabel: '目前帳戶價值',
       accountValueEditCta: '更新',
       recurringSectionTitle: '定期進帳',
@@ -5986,8 +5986,8 @@ export const zhTW: Translations = {
       title: '看一下你的資料長什麼樣',
       sourceLabel: '來源 · {source}',
       encodingLabel: '編碼 · {encoding}',
-      totalRowsLabel: '{count} 筆紀錄',
-      expenseRowsLabel: '約 {count} 筆支出',
+      totalRowsLabel: { one: '{count} 筆紀錄', other: '{count} 筆紀錄' },
+      expenseRowsLabel: { one: '約 {count} 筆支出', other: '約 {count} 筆支出' },
       dateRangeLabel: '{first} ~ {last}',
       topCategoriesLabel: '常出現的分類',
       empty: '這個檔案沒有可預覽的內容。',
