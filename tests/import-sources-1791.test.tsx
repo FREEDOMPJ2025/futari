@@ -146,11 +146,47 @@ describe('import wizard — new source buttons (#1791)', () => {
   })
 })
 
+describe('missing columns are named the way the file names them (#1799)', () => {
+  function mountIn(t: typeof en | typeof ja | typeof zhTW, locale: 'en' | 'ja' | 'zh-TW') {
+    return render(
+      <TranslationsProvider value={t} locale={locale}>
+        <ImportContent viewer={{ id: 'a', displayName: 'A' }} partner={{ id: 'b', displayName: 'B' }} viewerIsMemberA history={[]} />
+      </TranslationsProvider>,
+    )
+  }
+
+  it('ja UI, まねーぼ ja file without 種別: Type（種別）, and no note about English names', async () => {
+    const text = readFileSync(resolve(FIXTURES, 'manebo_ja_utf8.csv'), 'utf8').replace('種別', '区分')
+    const { container } = mountIn(ja, 'ja')
+    await upload(container, ja.settings.import.step1.sources.manebo, new File([text], 'manebo.csv', { type: 'text/csv' }))
+    const msg = await screen.findByText(ja.settings.import.errors.missingColumns.replace('{columns}', 'Type（種別）'))
+    expect(msg.textContent).toContain('Type（種別）')
+    expect(msg.textContent).not.toContain('英語')
+  })
+
+  it('zh-TW UI, AndroMoney 繁中 file without the transfer columns: both named in 繁中', async () => {
+    const text = 'Id,幣別,金額,日期\n1,TWD,5,20260901\n'
+    const { container } = mountIn(zhTW, 'zh-TW')
+    await upload(container, zhTW.settings.import.step1.sources.andromoney, new File([text], 'andro.csv', { type: 'text/csv' }))
+    const columns = 'Expense(Transfer Out)（付款(轉出)）, Income(Transfer In)（收款(轉入)）'
+    const msg = await screen.findByText(zhTW.settings.import.errors.missingColumns.replace('{columns}', columns))
+    expect(msg.textContent).not.toContain('英文')
+  })
+
+  it('en UI, Splitwise without Cost: Cost', async () => {
+    const { container } = mount()
+    await upload(container, 'Splitwise', new File(['Date,Description,Amount\n2026-01-01,x,10\n'], 's.csv', { type: 'text/csv' }))
+    expect(await screen.findByText(S.errors.missingColumns.replace('{columns}', 'Cost'))).toBeTruthy()
+  })
+})
+
 describe('missingColumns message exists in all four locales', () => {
   it.each([['zh-TW', zhTW], ['zh-CN', zhCN], ['en', en], ['ja', ja]] as const)('%s', (_n, t) => {
     const m = t.settings.import.errors.missingColumns
     expect(m).toContain('{columns}')
     expect(m).not.toMatch(/[!！]/)
+    // #1797 said the names were English; since #1799 they follow the file.
+    expect(m).not.toMatch(/英文|英語|English/)
     for (const s of ['andromoney', 'manebo', 'splitwise'] as const) {
       expect(t.settings.import.step1.sources[s].length).toBeGreaterThan(0)
     }

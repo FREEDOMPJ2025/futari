@@ -43,6 +43,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **匯入缺欄位的訊息改列檔案上的欄名，例如 Type（種別）（Closes #1799；關聯 #1791、#1796、#1797）**
+  使用者：まねーぼ 日文檔、AndroMoney 繁中／簡中檔少了必要欄位時，除了英文名稱，也會附上檔案那一種語言的欄名（如 `Type（種別）`、`Amount（金額）`）；判斷不了檔案語言就只列英文；拿掉 #1797 加的「以英文欄位名稱列出」說明（zh-TW／zh-CN／ja）。
+  技術：`headerAliases.ts` 新增各語欄名表、`detectHeaderLang`（依檔案實際含有的欄名計分，平手回 null）與 `describeMissing`，三個 `resolve…Columns` 的 `missing` 改回傳顯示文字；Splitwise 只有英文，維持原樣。
 - **搬遷頁預覽卡的筆數、日期範圍、分類改用匯入精靈的判讀（Closes #1801；關聯 #1791、#1795、#1800）**
   使用者：AndroMoney、まねーぼ、Splitwise 的檔案不再顯示「約 0 筆支出」、從 1010 年起算或排錯的日期範圍；期初餘額、轉帳、結清與 Total balance 不列入；Spendee、CWMoney 與截圖流程的 CSV 同樣算得出支出筆數與日期範圍。
   技術：新增 `computePreviewStats`（`lib/csvImport/index.ts`）沿用該來源的 mapper 與 validator，沒有 mapper 的檔案仍走 `computeStats` 的欄位猜測；日期範圍改成解析後的 YYYY-MM-DD。
