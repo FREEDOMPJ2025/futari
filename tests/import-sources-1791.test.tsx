@@ -164,6 +164,14 @@ describe('missing columns are named the way the file names them (#1799)', () => 
     expect(msg.textContent).not.toContain('英語')
   })
 
+  it('ja UI, まねーぼ ja file under the AndroMoney button: English names only (#1806)', async () => {
+    const { container } = mountIn(ja, 'ja')
+    await upload(container, ja.settings.import.step1.sources.andromoney, fixture('manebo_ja_utf8.csv'))
+    const columns = 'Date, Expense(Transfer Out), Income(Transfer In)'
+    const msg = await screen.findByText(ja.settings.import.errors.missingColumns.replace('{columns}', columns))
+    expect(msg.textContent).not.toMatch(/付款|收款/)
+  })
+
   it('zh-TW UI, AndroMoney 繁中 file without the transfer columns: both named in 繁中', async () => {
     const text = 'Id,幣別,金額,日期\n1,TWD,5,20260901\n'
     const { container } = mountIn(zhTW, 'zh-TW')

@@ -404,7 +404,7 @@ function missingNamer<L extends Record<string, Partial<Record<HeaderLang, string
   headers: readonly string[],
   labels: L,
 ): (key: keyof L & string) => string {
-  const lang = detectHeaderLang(headers, labels)
+  const lang = detectHeaderLang(headers)
   return (key) => describeMissing(key, labels, lang)
 }
 

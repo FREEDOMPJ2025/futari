@@ -251,6 +251,39 @@ describe('missing required columns are named, not swallowed into "no valid rows"
     expect(r.missingColumns).toEqual(['Type（類型）'])
   })
 
+  it('まねーぼ ja file under the AndroMoney button: English names, not 繁中 ones it cannot contain', async () => {
+    // 金額 is also 繁中; on that alone the file used to be read as 繁中 and the
+    // message named 付款(轉出) (#1806).
+    const r = await run('manebo_ja_utf8.csv', 'andromoney')
+    expect(r.missingColumns).toEqual(['Date', 'Expense(Transfer Out)', 'Income(Transfer In)'])
+  })
+
+  it('まねーぼ 繁中 file under the AndroMoney button: 繁中 names (the file is 繁中)', async () => {
+    const r = await run('manebo_zhHant_utf8.csv', 'andromoney')
+    expect(r.missingColumns).toEqual([
+      'Expense(Transfer Out)（付款(轉出)）',
+      'Income(Transfer In)（收款(轉入)）',
+    ])
+  })
+
+  it('AndroMoney 繁中 file under the まねーぼ button: 繁中 name of Type', async () => {
+    const header = 'Id,幣別,金額,分類,子分類,日期,付款(轉出),收款(轉入),備註'
+    const r = await runText(`${header}\n1,TWD,5,餐飲,,20260901,現金,,\n`, 'manebo')
+    expect(r.missingColumns).toEqual(['Type（類型）'])
+  })
+
+  it('AndroMoney 简中 file under the まねーぼ button: まねーぼ has no 简中 names, so English', async () => {
+    const header = 'Id,币别,金额,分类,子分类,日期,付款(转出),收款(转入),备注'
+    const r = await runText(`${header}\n1,TWD,5,餐饮,,20260901,现金,,\n`, 'manebo')
+    expect(r.missingColumns).toEqual(['Type', 'Amount'])
+  })
+
+  it('only names shared by several languages (金額, 日期) keep the English names', async () => {
+    expect((await runText('Id,日期,金額\n1,2026-01-01,5\n', 'andromoney')).missingColumns)
+      .toEqual(['Expense(Transfer Out)', 'Income(Transfer In)'])
+    expect((await runText('日期,金額\n2026-01-01,5\n', 'manebo')).missingColumns).toEqual(['Type'])
+  })
+
   it('a title row whose language cannot be told apart keeps the English names', async () => {
     // 日期 is both 繁中 and 简中; 金額 is both 日本語 and 繁中 — nothing decides.
     expect((await runText('日期\n2026-01-01\n', 'andromoney')).missingColumns)

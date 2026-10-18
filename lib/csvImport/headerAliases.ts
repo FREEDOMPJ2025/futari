@@ -104,21 +104,46 @@ export const MANEBO_LABELS: Record<keyof typeof MANEBO_HEADERS, Labels> = {
 }
 
 /**
- * The language of a title row, judged by which language's names the file
- * actually contains: the language with the most matching headers wins. `null`
- * when nothing matches or two languages tie (`日期` alone is both zh-TW and
- * zh-CN) — guessing there would name a column the user cannot find.
+ * Every name above, by the languages that spell it that way, across BOTH
+ * tables: `金額` is Japanese, 繁中 and (in まねーぼ) shared, `日期` is 繁中 and
+ * 简中. A name spelled in more than one language says nothing about which one
+ * the file is in.
  */
-export function detectHeaderLang(
-  headers: readonly string[],
-  labels: Record<string, Labels>,
-): HeaderLang | null {
+const LANGS_BY_NAME: ReadonlyMap<string, ReadonlySet<HeaderLang>> = (() => {
+  const m = new Map<string, Set<HeaderLang>>()
+  for (const table of [ANDROMONEY_LABELS, MANEBO_LABELS] as Record<string, Labels>[]) {
+    for (const byLang of Object.values(table)) {
+      for (const [lang, name] of Object.entries(byLang) as [HeaderLang, string][]) {
+        const key = normalizeHeader(name)
+        m.set(key, (m.get(key) ?? new Set()).add(lang))
+      }
+    }
+  }
+  return m
+})()
+
+/**
+ * The language of a title row, judged by which language's names the file
+ * actually contains: the language with the most matching headers wins.
+ *
+ * Only a header spelled in exactly one language counts (see `LANGS_BY_NAME`,
+ * which covers both tables). Otherwise a まねーぼ ja file
+ * picked as AndroMoney was read as 繁中 on the strength of `金額` alone — and
+ * the message named `付款(轉出)`, a column the user can never find in it. A
+ * language the table being reported on has no names for (here ja under AndroMoney) can
+ * still win; `describeMissing` then falls back to English.
+ *
+ * `null` when no header is specific to a language, or two languages tie — a
+ * file with only `日期` and `金額` stays English instead of being guessed at.
+ */
+export function detectHeaderLang(headers: readonly string[]): HeaderLang | null {
   const seen = new Set(headers.map(normalizeHeader))
   const score = new Map<HeaderLang, number>()
-  for (const byLang of Object.values(labels)) {
-    for (const [lang, name] of Object.entries(byLang) as [HeaderLang, string][]) {
-      if (seen.has(normalizeHeader(name))) score.set(lang, (score.get(lang) ?? 0) + 1)
-    }
+  for (const name of seen) {
+    const langs = LANGS_BY_NAME.get(name)
+    if (langs === undefined || langs.size !== 1) continue
+    const [lang] = langs
+    score.set(lang!, (score.get(lang!) ?? 0) + 1)
   }
   const ranked = [...score.entries()].sort((a, b) => b[1] - a[1])
   if (ranked.length === 0) return null
