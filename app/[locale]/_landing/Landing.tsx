@@ -541,11 +541,11 @@ function MigrateLinksSection({
                 className="group flex items-start gap-3 py-5 md:py-6 text-ink no-underline text-left transition-opacity duration-150 ease-out active:opacity-60 motion-reduce:transition-none"
               >
                 <span aria-hidden="true" className="mt-2.5 size-2 shrink-0 rounded-full bg-accent" />
-                <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-6 md:items-baseline min-w-0 flex-1">
+                <div className="grid grid-cols-1 md:grid-cols-3 md:gap-x-6 md:items-baseline min-w-0 flex-1">
                   <p className="m-0 font-serif text-lg font-medium text-ink underline decoration-transparent underline-offset-4 transition-colors duration-150 ease-out group-hover:decoration-ink motion-reduce:transition-none">
                     {item.title}
                   </p>
-                  <p className="m-0 mt-1.5 md:mt-0 text-sm leading-[1.6] text-ink-2">
+                  <p className="m-0 mt-1.5 md:mt-0 md:col-span-2 text-sm leading-[1.6] text-ink-2">
                     <Phrase body text={item.body} />
                   </p>
                 </div>
