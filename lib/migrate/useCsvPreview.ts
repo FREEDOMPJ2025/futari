@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import {
-  computeStats,
+  computePreviewStats,
   decodeBytes,
   detectCsvSource,
   parseCsvText,
@@ -59,7 +59,7 @@ export function useCsvPreview({ hint = 'unknown' }: { hint?: MigrateSource } = {
       const { text, encoding } = decodeBytes(buffer, hints)
       const { headers, rows } = parseCsvText(text, hints)
       const detectedSource = detectCsvSource(headers) ?? hint
-      const stats = computeStats(rows)
+      const stats = computePreviewStats(headers, rows, hint)
       setState({
         status: 'ready',
         file,

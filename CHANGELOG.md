@@ -43,6 +43,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **搬遷頁預覽卡的筆數、日期範圍、分類改用匯入精靈的判讀（Closes #1801；關聯 #1791、#1795、#1800）**
+  使用者：AndroMoney、まねーぼ、Splitwise 的檔案不再顯示「約 0 筆支出」、從 1010 年起算或排錯的日期範圍；期初餘額、轉帳、結清與 Total balance 不列入；Spendee、CWMoney 與截圖流程的 CSV 同樣算得出支出筆數與日期範圍。
+  技術：新增 `computePreviewStats`（`lib/csvImport/index.ts`）沿用該來源的 mapper 與 validator，沒有 mapper 的檔案仍走 `computeStats` 的欄位猜測；日期範圍改成解析後的 YYYY-MM-DD。
 - **其餘依數量變化的 en 字串補上單複數（Closes #1798；關聯 #1738、#1784）**
   使用者：en 在數量為 1 時讀成「in 1 day」「across 1 entry」（保單下次續約倒數、滿期待領取的繳費筆數）、「1 record」「~1 looks like an expense」（搬遷頁預覽）；zh／ja 不變。
   技術：`summaryDaysUntil`、`maturedAwaitingPremiumNote`、`migrate.preview.totalRowsLabel`／`expenseRowsLabel` 改 `{ one, other }` 並走 `pickPlural`；`MigrateTool` 多收 `locale`。
