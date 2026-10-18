@@ -2788,7 +2788,7 @@ I will upload the screenshots once you confirm.`,
         differentiators: [
           {
             title: 'Core logging, free forever',
-            body: "You don't need a subscription to log today's spending; Futari's shared ledger, splitting, and settling all live in the free tier.",
+            body: "You don't need a subscription to log today's spending; Futari's shared ledger, splitting, and settling are all free.",
           },
           {
             title: 'Splits, done for you',
