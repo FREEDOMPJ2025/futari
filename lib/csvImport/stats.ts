@@ -1,8 +1,8 @@
 /**
  * Heuristic stats over raw CSV rows (issue #623 unified layer).
  *
- * Used by the anonymous /migrate preview to summarise an uploaded file before
- * the user signs up. Operates on the loose `Record<string, string>` rows
+ * Used by the anonymous /migrate preview to summarise a file it has no mapper
+ * for (see `computePreviewStats` in `index.ts` for the rest). Operates on the loose `Record<string, string>` rows
  * produced by `parser.ts` — no validation, no normalisation; the column-name
  * candidates cover the three target sources plus any future CSV with
  * date/amount/category columns in common naming.
@@ -25,7 +25,7 @@ export interface CsvStats {
 
 const DATE_KEYS = ['date', 'Date', 'DATE', '日期', 'datetime', 'Datetime', 'transacted_at']
 const AMOUNT_KEYS = ['amount', 'Amount', 'AMOUNT', '金額', 'value', 'Value']
-const CATEGORY_KEYS = ['category', 'Category', 'Category name', '類別', 'type', 'Type', 'tag']
+export const CATEGORY_KEYS = ['category', 'Category', 'Category name', '類別', 'i_kind', 'type', 'Type', 'tag']
 
 function pickColumn(row: CsvRow, candidates: readonly string[]): string | null {
   for (const k of candidates) if (k in row) return k
@@ -33,9 +33,10 @@ function pickColumn(row: CsvRow, candidates: readonly string[]): string | null {
 }
 
 /**
- * Aggregate stats for the preview card. Expense detection = amount string
- * starts with '-', which holds for every source the marketing flow currently
- * targets (Honeydue / Spendee / CWMoney).
+ * Aggregate stats for a file with no mapper to read it by (a page without a
+ * parser, or headers nobody recognises). Expense detection = amount string
+ * starts with '-', which is only a guess: sources with a mapper go through
+ * `computePreviewStats` in `index.ts` instead (#1801).
  */
 export function computeStats(rows: readonly CsvRow[]): CsvStats {
   if (rows.length === 0) {

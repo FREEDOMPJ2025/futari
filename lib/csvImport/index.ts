@@ -71,7 +71,15 @@ export { parseQif } from './qifParser'
 export { validateRow } from './validator'
 
 import { decodeBytes, parseCsvText, parseHintsFor } from './parser'
-import { detectFormat, detectSource, type DetectedSource } from './detector'
+import {
+  KNOWN_CSV_SOURCES,
+  detectCsvSource,
+  detectFormat,
+  detectSource,
+  type DetectedSource,
+  type MigrateSource,
+} from './detector'
+import { CATEGORY_KEYS, computeStats, type CsvRow, type CsvStats } from './stats'
 import {
   mapAndromoney,
   mapCwmoney,
@@ -247,7 +255,17 @@ function runCsv(text: string, options: ProcessOptions): ProcessResult {
   // A CWMoney button on an AndroMoney file therefore still reads the banner as
   // the header and ends with 0 valid rows — never an opening balance imported
   // as an expense.
-  const { headers, rows: rawRows } = parseCsvText(text, parseHintsFor(options.source))
+  const { headers, rows } = parseCsvText(text, parseHintsFor(options.source))
+  return mapRows(headers, rows, options)
+}
+
+/** The mapping + validation half of `runCsv`, for callers that already hold the
+ *  parsed table (the /migrate preview parses once for its own table). */
+function mapRows(
+  headers: readonly string[],
+  rawRows: readonly CsvRow[],
+  options: ProcessOptions,
+): ProcessResult {
   const source = resolveSource(headers, options.source)
   // Empty file: nothing to map. Bail before requiring a headerMap so callers
   // can probe the file shape without committing to a mapper choice.
@@ -328,5 +346,93 @@ function validatePartials(
       dateRange: dateMin && dateMax ? { from: dateMin, to: dateMax } : null,
       topCategories,
     },
+  }
+}
+
+// ──────────────────────────── /migrate preview ────────────────────────────
+
+/** Which mapper reads the preview's file, or null when none does. The header
+ *  signature wins (it is what the card's source label shows); the page's own
+ *  source only decides when the sniffer cannot tell. */
+function previewMapperSource(
+  headers: readonly string[],
+  hint: MigrateSource,
+): DetectedSource | null {
+  const known = detectCsvSource(headers)
+  if (known) return known
+  if ((KNOWN_CSV_SOURCES as readonly string[]).includes(hint)) return hint as DetectedSource
+  return detectSource(headers) === 'futari_generic' ? 'futari_generic' : null
+}
+
+/** The column the card's category chips read, as the file spells it. */
+function previewCategoryColumn(source: DetectedSource, headers: readonly string[]): string | undefined {
+  switch (source) {
+    case 'andromoney': return resolveAndromoneyColumns(headers).columns?.category
+    case 'manebo':     return resolveManeboColumns(headers).columns?.category
+    case 'splitwise':  return resolveSplitwiseColumns(headers).columns?.category
+    default:           return CATEGORY_KEYS.find((k) => headers.includes(k))
+  }
+}
+
+const ymd = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+/** AndroMoney dates its opening-balance rows 10100101. Those are skipped by the
+ *  mapper, but a row that slips past it must not turn the range into "1010 →". */
+const EARLIEST_PLAUSIBLE_YEAR = 1900
+
+/**
+ * Stats for the anonymous /migrate card, read through the same mapper and
+ * validator the import wizard uses (#1801), so the numbers are what an import
+ * would actually do: income vs expense from the mapper (not the amount sign),
+ * dates parsed (not compared as strings), and rows the mapper skips or the
+ * validator rejects (opening balance, transfer, settle-up, Total balance, bad
+ * rows) counted in neither the totals below nor the range and categories.
+ *
+ * `totalRows` stays the file's row count. Files with no mapper fall back to the
+ * column-name guesses in `computeStats`.
+ */
+export function computePreviewStats(
+  headers: readonly string[],
+  rows: readonly CsvRow[],
+  hint: MigrateSource = 'unknown',
+): CsvStats {
+  const source = rows.length === 0 ? null : previewMapperSource(headers, hint)
+  if (source === null) return computeStats(rows)
+
+  const result = mapRows(headers, rows, { source })
+  // A required column is missing: the wizard names it and imports nothing; the
+  // card can only say how many rows the file has.
+  if (result.missingColumns) {
+    return { totalRows: rows.length, estimatedExpenseRows: 0, dateRange: null, topCategories: [] }
+  }
+
+  const skipped = new Set(result.errors.map((e) => e.rowIndex))
+  const categoryColumn = previewCategoryColumn(source, headers)
+  const catCounts = new Map<string, number>()
+  if (categoryColumn !== undefined) {
+    rows.forEach((row, i) => {
+      if (skipped.has(i)) return
+      const c = (row[categoryColumn] ?? '').trim()
+      if (c) catCounts.set(c, (catCounts.get(c) ?? 0) + 1)
+    })
+  }
+
+  let first: Date | null = null
+  let last: Date | null = null
+  for (const { date } of result.rows) {
+    if (date.getFullYear() < EARLIEST_PLAUSIBLE_YEAR) continue
+    if (first === null || date < first) first = date
+    if (last === null || date > last) last = date
+  }
+
+  return {
+    totalRows: rows.length,
+    estimatedExpenseRows: result.rows.filter((r) => r.type === 'expense').length,
+    dateRange: first && last ? { first: ymd(first), last: ymd(last) } : null,
+    topCategories: Array.from(catCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, count]) => ({ name, count })),
   }
 }

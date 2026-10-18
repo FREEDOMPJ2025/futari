@@ -43,6 +43,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **搬遷頁預覽卡的筆數、日期範圍、分類改用匯入精靈的判讀（Closes #1801；關聯 #1791、#1795、#1800）**
+  使用者：AndroMoney、まねーぼ、Splitwise 的檔案不再顯示「約 0 筆支出」、從 1010 年起算或排錯的日期範圍；期初餘額、轉帳、結清與 Total balance 不列入；Spendee、CWMoney 與截圖流程的 CSV 同樣算得出支出筆數與日期範圍。
+  技術：新增 `computePreviewStats`（`lib/csvImport/index.ts`）沿用該來源的 mapper 與 validator，沒有 mapper 的檔案仍走 `computeStats` 的欄位猜測；日期範圍改成解析後的 YYYY-MM-DD。
 - **AndroMoney、Manebo、Splitwise 搬遷頁的步驟與問答對齊匯入精靈的實際行為（Closes #1800；關聯 #1791、#1795）**
   使用者：三頁的步驟 2、3 改寫成實際流程（設定 → 從其他 app 匯入、整批指定付款人與分攤）並各加一題問答，說明轉帳、期初餘額、結清、外幣與分類怎麼處理；預覽不再承諾日期範圍（四語，en／ja 已經 Grok 審閱）。
   技術：只改 `migrate.pages` 三個 slug 的字串；`contentUpdatedAt` 已是 2026-10-18，snapshot 重跑。
