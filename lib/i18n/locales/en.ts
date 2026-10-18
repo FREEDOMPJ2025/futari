@@ -2845,8 +2845,8 @@ I will upload the screenshots once you confirm.`,
         ],
         stepsHeading: 'Moving from AndroMoney in three steps',
         step1: 'In AndroMoney, go to Settings → Export and output your data as CSV.',
-        step2: 'Upload the CSV here to preview it: the row count, date range and most common categories show up at a glance.',
-        step3: 'Create a Futari account and pick a default payer and split during import. Going from a solo ledger to a shared one adds exactly this step.',
+        step2: 'Upload the CSV here to preview the row count. The AndroMoney banner on the first line can stay, and files in Big5 or UTF-8 both work.',
+        step3: 'Create a Futari account, open Settings → Import from another app, choose AndroMoney and upload the same CSV. Categories whose names match are filed automatically and the rest start out under Other. Pick a payer and split once for the whole batch: going from a solo ledger to a shared one adds exactly this step.',
         faq: [
           {
             question: 'Should I keep AndroMoney after moving?',
@@ -2860,12 +2860,17 @@ I will upload the screenshots once you confirm.`,
           {
             question: "What's new when a solo ledger becomes a shared one?",
             answer:
-              'Every record now needs a payer and a split. During import you set defaults for the whole batch (you paid, they paid, or half each) and edit rows afterwards.',
+              "Every record needs a payer and a split, and an AndroMoney file has neither, so you set them once for the whole batch: the payer is you or them, and the split is All mine, All theirs or Half each. You can edit rows afterwards. These are records you kept on your own, so if you don't want them to move the balance between you, choose All mine.",
           },
           {
             question: 'AndroMoney has multiple accounts — does Futari?',
             answer:
               'Futari is one shared ledger focused on the two of you; instead of separate accounts, split modes record who paid and how each expense divides.',
+          },
+          {
+            question: 'What happens to AndroMoney transfers, opening balances and foreign currencies?',
+            answer:
+              "Transfers (both the paying and receiving account columns filled) and an account's opening balance aren't income or spending, so those rows are skipped and left in the error log. A row with only the paying column becomes an expense; a row with only the receiving column becomes income, filed under Other. If the currency isn't TWD, the number in the file is written as-is in your base currency, with no conversion and no original currency kept, and decimals are rounded to whole numbers. Adjust those rows one by one afterwards.",
           },
         ],
       },
@@ -2936,8 +2941,8 @@ I will upload the screenshots once you confirm.`,
         ],
         stepsHeading: 'Moving from Manebo in three steps',
         step1: 'In Manebo, go to "Other" → CSV export (a Premium feature) and choose a date range to export.',
-        step2: "Upload the CSV here and check the row count, date range and categories to make sure it's the stretch you meant to move.",
-        step3: 'Create a Futari account and set a default payer and split during import. Whatever the two of you shared in Manebo is already one ledger in Futari.',
+        step2: 'Upload the CSV here and check the row count to make sure the export covers the stretch you meant. Manebo files in Shift_JIS or UTF-8 both read fine, so there is no need to convert anything first.',
+        step3: 'Create a Futari account, open Settings → Import from another app, choose Manebo (まねーぼ) and upload the same CSV. The export has no payer column, so you set the payer and split once for the whole batch. Whatever the two of you shared in Manebo is already one ledger in Futari.',
         faq: [
           {
             question: "I'm not subscribed to Premium — can I still get my data out?",
@@ -2956,6 +2961,11 @@ I will upload the screenshots once you confirm.`,
             question: 'Manebo supports multiple ledgers — how does Futari handle that?',
             answer:
               'Futari is one shared ledger for two people. Instead of separate books, you choose a split mode per entry and the balance is calculated automatically.',
+          },
+          {
+            question: 'What happens to Manebo transfers, income and categories?',
+            answer:
+              "Rows whose Type (種別) is expense become expenses, income becomes income, and transfer rows are skipped and left in the error log. Income is always filed under Other. Expense categories are names you chose in Manebo, and only names already in Futari's lookup (English and Traditional Chinese for now, not Japanese) are matched automatically; the rest are gathered into one Other group. You can reassign that group as a whole before importing, but not split it back by original name.",
           },
         ],
       },
@@ -3212,18 +3222,18 @@ I will upload the screenshots once you confirm.`,
         ],
         stepsHeading: 'Moving from Splitwise in three steps',
         step1: 'Open the group or friendship in Splitwise and use “Export spreadsheet” to download it.',
-        step2: 'Upload the CSV here and preview your history.',
-        step3: 'Create a Futari account and start logging your everyday spending together here. Keep your Splitwise spreadsheet as a backup you can look things up in.',
+        step2: 'Upload the CSV here to preview the row count and the most common categories.',
+        step3: 'Create a Futari account, open Settings → Import from another app, choose Splitwise and upload the same CSV. Each transaction comes in as one expense for its total (Cost), and you set the payer and split once for the whole batch. Keep your Splitwise spreadsheet as a backup you can look things up in.',
         faq: [
           {
             question: 'How do I move my Splitwise data to Futari?',
             answer:
-              'Export the group or friendship as a spreadsheet, upload the CSV here to preview it, then create an account to finish the import.',
+              "The date, description, category and total come across, one expense per transaction. Settle-up (Payment) rows and the Total balance row are not imported and stay in the error log, and the who-owes-whom balance from Splitwise doesn't come along either. Categories whose names match (Groceries or Rent, say) are filed automatically and the rest start out together under Other. If you both exported the same group, import only one copy: Futari does not de-duplicate.",
           },
           {
             question: 'Are the columns the same as Futari’s?',
             answer:
-              "Not exactly. Splitwise exports one row per transaction, with the total (Cost) plus a column for each person's share. Those columns don't line up one-to-one with Futari's, so the file can't simply be dropped in and moved across as it is.",
+              "Not exactly, but it reads in. Futari uses the date, description, category, total (Cost) and currency; the per-person share columns are not read, so you set the payer and split once for the whole batch. To keep this older history from touching today's balance, choose All mine; with Half each, every row in the batch counts toward the balance between you two.",
           },
           {
             question: "Splitwise's free plan allows 4 entries a day. What about Futari?",
@@ -3233,6 +3243,11 @@ I will upload the screenshots once you confirm.`,
             question: 'We also use it for trips — does Futari have something for that?',
             answer:
               'Yes. A Futari trip keeps one journey’s spending in its own ledger, in the local currency, and folds it back into the main ledger when the trip ends.',
+          },
+          {
+            question: 'What happens to Splitwise rows in another currency?',
+            answer:
+              "When the Currency column isn't TWD, the number in the file is written as-is in your base currency, with no conversion and no original currency kept, and decimals are rounded to whole numbers. You can edit the amounts row by row afterwards.",
           },
         ],
       },

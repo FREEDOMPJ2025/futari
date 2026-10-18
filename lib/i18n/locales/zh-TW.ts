@@ -6393,8 +6393,8 @@ export const zhTW: Translations = {
         ],
         stepsHeading: 'AndroMoney 搬遷三步',
         step1: '在 AndroMoney → 設定 → 匯出，把資料輸出成 CSV。',
-        step2: '把 CSV 上傳到這裡預覽，筆數、日期範圍和常出現的分類一眼就看得到。',
-        step3: '建立 Futari 帳號，匯入時選好預設付款人與分攤方式：從單人帳換成兩個人的帳，多出來的就是這一步。',
+        step2: '把 CSV 上傳到這裡預覽筆數。檔案第一行 AndroMoney 的標頭列不用先刪，Big5 或 UTF-8 編碼都讀得懂。',
+        step3: '建立 Futari 帳號，到「設定 → 從其他 app 匯入」選 AndroMoney，再上傳同一份 CSV。名稱對得上的分類會自動歸好，其餘先放「其他」；付款人與分攤方式整批選一次：從單人帳換成兩個人的帳，多出來的就是這一步。',
         faq: [
           {
             question: '搬過來之後，AndroMoney 要留著嗎？',
@@ -6406,11 +6406,16 @@ export const zhTW: Translations = {
           },
           {
             question: '單人帳換成雙人帳，匯入時多了什麼？',
-            answer: '每筆記錄都需要有付款人和分攤方式。匯入時整批指定預設值（你付、對方付，或一人一半），匯入後再逐筆修改。',
+            answer: '每筆記錄都需要有付款人和分攤方式，而 AndroMoney 的檔案沒有這兩項，所以匯入時整批指定一次：付款人選你或對方，分攤方式選「全部我的」「全部對方的」或「一人一半」，匯入後再逐筆修改。這批是你一個人記的帳，不想讓它動到兩人之間的餘額，就選「全部我的」。',
           },
           {
             question: 'AndroMoney 的多帳戶，Futari 有對應嗎？',
             answer: 'Futari 是一本共同帳本，專注在兩個人的共同收支；不分多帳戶，而是用分攤模式記下每筆是誰付、怎麼分。',
+          },
+          {
+            question: 'AndroMoney 的轉帳、期初餘額和外幣，匯入時會怎麼處理？',
+            answer:
+              '轉帳（付款和收款兩個帳戶欄都有值）與帳戶的期初餘額不是收支，這兩種列會略過，留在錯誤紀錄裡。只有付款欄有值的列匯成支出，只有收款欄有值的列匯成進帳，進帳的類別歸在「其他」。幣別不是 TWD 的列，金額照檔案裡的數字當成主幣別寫入，不換算也不另記原幣別，小數四捨五入到整數，匯入後再逐筆調整。',
           },
         ],
       },
@@ -6476,8 +6481,8 @@ export const zhTW: Translations = {
         ],
         stepsHeading: 'Manebo 搬遷三步',
         step1: '在 Manebo →「其他」→ CSV 匯出（Premium 功能），選擇時間範圍輸出 CSV。',
-        step2: '把 CSV 上傳到這裡，先看筆數、日期範圍和分類，確定是你要搬的那一段。',
-        step3: '建立 Futari 帳號，匯入時指定預設付款人與分攤方式；Manebo 裡兩個人共有的記錄，在 Futari 本來就是同一本帳。',
+        step2: '把 CSV 上傳到這裡，先看筆數，確定匯出的範圍沒錯。Manebo 的 Shift_JIS 或 UTF-8 檔案都讀得懂，不用先轉檔。',
+        step3: '建立 Futari 帳號，到「設定 → 從其他 app 匯入」選 Manebo（まねーぼ），再上傳同一份 CSV。匯出檔裡沒有付款人欄，所以付款人與分攤方式整批指定一次；Manebo 裡兩個人共有的記錄，在 Futari 本來就是同一本帳。',
         faq: [
           {
             question: '沒有訂閱 Premium，資料拿得出來嗎？',
@@ -6494,6 +6499,11 @@ export const zhTW: Translations = {
           {
             question: 'Manebo 支援多帳本，Futari 怎麼處理？',
             answer: 'Futari 是一本兩人共用的帳，不分多帳本；用分攤模式記下每筆是誰付、怎麼分，餘額自動算清。',
+          },
+          {
+            question: 'Manebo 的轉帳、進帳和分類，匯入後會變怎樣？',
+            answer:
+              'Type（種別）欄是 expense 的列匯成支出，income 匯成進帳，transfer（轉帳）會略過並留在錯誤紀錄裡；進帳的類別一律歸在「其他」。支出的分類是你在 Manebo 自己取的名字，只有對照表裡已有的名稱（目前是英文和繁體中文，日文名稱不在其中）會自動歸好，沒對上的合成「其他」一組。匯入前可以整組改選別的類別，但沒辦法依原名稱拆開。',
           },
         ],
       },
@@ -6729,16 +6739,16 @@ export const zhTW: Translations = {
         ],
         stepsHeading: 'Splitwise 搬遷三步',
         step1: '在 Splitwise 打開群組或好友頁，用「Export spreadsheet」下載試算表。',
-        step2: '把 CSV 上傳到這裡，預覽你們的分帳歷史。',
-        step3: '建立 Futari 帳號，兩個人的日常從這裡開始記。Splitwise 的試算表留著當備份，隨時可以回頭查。',
+        step2: '把 CSV 上傳到這裡，預覽筆數和常出現的分類。',
+        step3: '建立 Futari 帳號，到「設定 → 從其他 app 匯入」選 Splitwise，再上傳同一份 CSV。每筆交易以總金額（Cost）匯成一筆支出，付款人與分攤方式整批指定一次。Splitwise 的試算表留著當備份，隨時可以回頭查。',
         faq: [
           {
             question: 'Splitwise 的資料怎麼搬到 Futari？',
-            answer: '在群組或好友頁匯出試算表，再把 CSV 上傳到這裡預覽，建立帳號後完成匯入。',
+            answer: '日期、說明、分類和總金額會帶過來，一筆交易一筆支出。結清（Payment）的列和 Total balance 那一列不會匯入，留在錯誤紀錄裡；Splitwise 裡「誰欠誰」的餘額也不會跟著過來。分類名稱對得上的（例如 Groceries、Rent）自動歸好，其餘先合成「其他」一組。兩個人都匯出了同一個群組的話，只匯入其中一份，Futari 不會自動去重。',
           },
           {
             question: '匯出的欄位和 Futari 一樣嗎？',
-            answer: '不完全一樣。Splitwise 的匯出每筆交易一列，除了總金額（Cost）還有每個人各自的分攤欄位，和 Futari 的欄位並不對應，所以不是丟進去就能一對一搬過來。',
+            answer: '不完全一樣，但讀得進來。Futari 讀的是日期、說明、分類、總金額（Cost）和幣別；每個人各自的分攤欄不會讀，所以付款人與分攤方式在匯入時整批指定一次。想讓這批舊帳不影響現在的餘額，就選「全部我的」；選「一人一半」的話，這批的每一筆都會算進兩人之間的餘額。',
           },
           {
             question: 'Splitwise 免費版每天只能記 4 筆，Futari 呢？',
@@ -6747,6 +6757,11 @@ export const zhTW: Translations = {
           {
             question: '我們也用它記旅行的帳，Futari 有對應的做法嗎？',
             answer: '有。Futari 的旅行帳本把一趟旅行的支出獨立記，可以用當地幣別，結束後折回主帳本，日常的帳不會被旅行洗掉。',
+          },
+          {
+            question: 'Splitwise 裡幣別不是 TWD 的帳，匯入後金額會怎樣？',
+            answer:
+              'Currency 欄不是 TWD 的列，金額照檔案裡的數字寫成主幣別，不換算，也不另記原幣別；小數四捨五入到整數。這類列匯入後可以逐筆改金額。',
           },
         ],
       },

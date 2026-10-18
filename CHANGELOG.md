@@ -43,6 +43,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **AndroMoney、Manebo、Splitwise 搬遷頁的步驟與問答對齊匯入精靈的實際行為（Closes #1800；關聯 #1791、#1795）**
+  使用者：三頁的步驟 2、3 改寫成實際流程（設定 → 從其他 app 匯入、整批指定付款人與分攤）並各加一題問答，說明轉帳、期初餘額、結清、外幣與分類怎麼處理；預覽不再承諾日期範圍（四語，en／ja 已經 Grok 審閱）。
+  技術：只改 `migrate.pages` 三個 slug 的字串；`contentUpdatedAt` 已是 2026-10-18，snapshot 重跑。
 - **四張文案審稿（Grok）一次套用：單人月卡、離開名字、問答用字、匯入提示（#1784、#1787、#1790、#1796）**
   使用者：單人月卡 en 讀成「1 entry／7 entries」；en 的離開名字改成 "Partner who left"，ja 的保留名稱錯誤改說「この名前は使えません」；zh-CN 問答引號改「」、en 的 Futari 不再暗示有付費方案、ja 用「タップ」與「家計簿」、en 的按鈕名稱不加引號；匯入的「略過的列」說明改成中性說法，缺欄位訊息註明欄位以英文名稱列出。
   技術：`dashboard.soloHero.countLabel` 改 `{ one, other }`（`pickPlural`）；保留名稱檢查與 `handle_new_user.sql` 加入新 en 字樣並保留舊字樣（SQL 要手動重套到 dev、prod）；其餘改 `lib/i18n/locales/` 的字串，並同步 after-leaving／account-deletion spec 的 en 譯名。

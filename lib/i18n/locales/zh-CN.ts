@@ -2828,8 +2828,8 @@ export const zhCN: Translations = {
         ],
         stepsHeading: 'AndroMoney 搬迁三步',
         step1: '在 AndroMoney → 设置 → 导出，把数据输出成 CSV。',
-        step2: '把 CSV 上传到这里预览，笔数、日期范围和常出现的分类一眼就能看到。',
-        step3: '创建 Futari 账号，导入时选好默认付款人和分摊方式：从单人账换成两个人的账，多出来的就是这一步。',
+        step2: '把 CSV 上传到这里预览笔数。文件第一行 AndroMoney 的标题行不用先删，Big5 或 UTF-8 编码都能读。',
+        step3: '创建 Futari 账号，到「设置 → 从其他 app 导入」选 AndroMoney，再上传同一份 CSV。名称对得上的分类会自动归好，其余先放进「其他」；付款人和分摊方式整批选一次：从单人账换成两个人的账，多出来的就是这一步。',
         faq: [
           {
             question: '搬过来之后，AndroMoney 还要留着吗？',
@@ -2841,11 +2841,16 @@ export const zhCN: Translations = {
           },
           {
             question: '单人账换成双人账，导入时多了什么？',
-            answer: '每笔记录都需要有付款人和分摊方式。导入时整批指定默认值（你付、对方付，或一人一半），导入后再逐笔修改。',
+            answer: '每笔记录都需要付款人和分摊方式，而 AndroMoney 的文件里没有这两项，所以导入时整批指定一次：付款人选你或对方，分摊方式选「全部我的」「全部对方的」或「一人一半」，导入后再逐笔修改。这批是你一个人记的账，不想让它动到两人之间的余额，就选「全部我的」。',
           },
           {
             question: 'AndroMoney 的多账户，Futari 有对应吗？',
             answer: 'Futari 是一本共同账本，专注在两个人的共同收支；不分多账户，而是用分摊模式记下每笔是谁付、怎么分。',
+          },
+          {
+            question: 'AndroMoney 的转账、期初余额和外币，导入时怎么处理？',
+            answer:
+              '转账（付款和收款两个账户栏都有值）和账户的期初余额不算收支，这两类行会跳过，留在错误记录里。只有付款栏有值的行导入为支出，只有收款栏有值的行导入为进账，进账的类别都归到「其他」。币种不是 TWD 的行，金额按文件里的数字直接当作主币种写入，不做换算，也不另记原币种；小数四舍五入到整数，导入后可以逐笔改。',
           },
         ],
       },
@@ -2911,8 +2916,8 @@ export const zhCN: Translations = {
         ],
         stepsHeading: 'Manebo 搬迁三步',
         step1: '在 Manebo →「其他」→ CSV 导出（Premium 功能），选择时间范围输出 CSV。',
-        step2: '把 CSV 上传到这里，先看笔数、日期范围和分类，确认是你要搬的那一段。',
-        step3: '创建 Futari 账号，导入时指定默认付款人和分摊方式；Manebo 里两个人共有的记录，在 Futari 本来就是同一本账。',
+        step2: '把 CSV 上传到这里，先看笔数，确认导出的范围没错。Manebo 的 Shift_JIS 或 UTF-8 文件都能读，不用先转换编码。',
+        step3: '创建 Futari 账号，到「设置 → 从其他 app 导入」选 Manebo（まねーぼ），再上传同一份 CSV。导出文件里没有付款人这一栏，所以付款人和分摊方式整批指定一次；Manebo 里两个人共有的记录，在 Futari 本来就是同一本账。',
         faq: [
           {
             question: '没有订阅 Premium，数据拿得出来吗？',
@@ -2929,6 +2934,11 @@ export const zhCN: Translations = {
           {
             question: 'Manebo 支持多账本，Futari 怎么处理？',
             answer: 'Futari 是一本两人共用的账，不分多账本；用分摊模式记下每笔是谁付、怎么分，余额自动算清。',
+          },
+          {
+            question: 'Manebo 的转账、进账和分类，导入后会怎样？',
+            answer:
+              'Type（種別）一栏是 expense 的行导入为支出，income 的导入为进账，transfer（转账）会跳过并留在错误记录里；进账的类别统一归到「其他」。支出的分类是你在 Manebo 里自己起的名字，只有对照表里已有的名称（目前是英文和繁体中文，日文名称不在其中）会自动归好，没对上的合成「其他」一组。导入前可以整组改选别的类别，但没办法按原名称拆开。',
           },
         ],
       },
@@ -3164,16 +3174,16 @@ export const zhCN: Translations = {
         ],
         stepsHeading: 'Splitwise 搬迁三步',
         step1: '在 Splitwise 打开群组或好友页，用「Export spreadsheet」下载表格。',
-        step2: '把 CSV 上传到这里，预览你们的分账历史。',
-        step3: '创建 Futari 账号，两个人的日常从这里开始记。Splitwise 的表格留着当备份，随时可以回头查。',
+        step2: '把 CSV 上传到这里，预览笔数和常出现的分类。',
+        step3: '创建 Futari 账号，到「设置 → 从其他 app 导入」选 Splitwise，再上传同一份 CSV。每笔交易按总金额（Cost）导入为一笔支出，付款人和分摊方式整批指定一次。Splitwise 的表格留着当备份，随时可以回头查。',
         faq: [
           {
             question: 'Splitwise 的数据怎么搬到 Futari？',
-            answer: '在群组或好友页导出表格，再把 CSV 上传到这里预览，创建账号后完成导入。',
+            answer: '日期、说明、分类和总金额会带过来，一笔交易对应一笔支出。结清（Payment）的行和 Total balance 那一行不会导入，留在错误记录里；Splitwise 里「谁欠谁」的余额也不会跟着过来。分类名称对得上的（比如 Groceries、Rent）会自动归好，其余先合成「其他」一组。两个人要是都导出了同一个群组，只导入其中一份，Futari 不会自动去重。',
           },
           {
             question: '导出的字段和 Futari 一样吗？',
-            answer: '不完全一样。Splitwise 的导出每笔交易一行，除了总金额（Cost），还有每个人各自的分摊列，和 Futari 的字段并不对应，所以不是丢进去就能一对一搬过来。',
+            answer: '不完全一样，但读得进来。Futari 读的是日期、说明、分类、总金额（Cost）和币种；每个人各自的分摊列不会读，所以付款人和分摊方式在导入时整批指定一次。想让这批旧账不影响现在的余额，就选「全部我的」；选「一人一半」的话，这批的每一笔都会算进两人之间的余额。',
           },
           {
             question: 'Splitwise 免费版每天只能记 4 笔，Futari 呢？',
@@ -3182,6 +3192,11 @@ export const zhCN: Translations = {
           {
             question: '我们也用它记旅行的账，Futari 有对应的做法吗？',
             answer: '有。Futari 的旅行账本把一趟旅行的支出独立记，可以用当地币种，结束后折回主账本，日常的账不会被旅行冲掉。',
+          },
+          {
+            question: 'Splitwise 里币种不是 TWD 的账，导入后金额会怎样？',
+            answer:
+              'Currency 一栏不是 TWD 的行，金额按文件里的数字直接写成主币种，不做换算，也不另记原币种；小数四舍五入到整数。这类行导入后可以逐笔改金额。',
           },
         ],
       },
