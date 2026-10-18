@@ -1217,7 +1217,7 @@ export const en: Translations = {
         submitFailed: 'Could not write the batch. Please try again.',
         rollbackFailed: 'Rollback failed. Please try again.',
         noValidRows: 'This file has no rows we can import',
-        missingColumns: 'This file is missing these columns: {columns}. Check that you exported as CSV, or send us the file so we can take a look',
+        missingColumns: 'This file is missing these columns: {columns}. Check that you exported as CSV and picked the right app',
       },
     },
   },

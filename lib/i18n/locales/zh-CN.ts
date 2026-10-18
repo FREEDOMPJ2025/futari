@@ -1215,7 +1215,7 @@ export const zhCN: Translations = {
         submitFailed: '写入时遇到问题，请稍后再试',
         rollbackFailed: '还原失败，请稍后再试',
         noValidRows: '这个文件没有可导入的记录',
-        missingColumns: '这个文件少了这些字段：{columns}。请确认导出时选的是 CSV，或把文件发给我们看看',
+        missingColumns: '这个文件少了这些字段：{columns}。请确认导出时选的是 CSV，也选对了来源',
       },
     },
   },

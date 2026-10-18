@@ -1217,7 +1217,7 @@ export const ja: Translations = {
         submitFailed: '保存できませんでした。少し時間をおいてお試しください。',
         rollbackFailed: '取り消しに失敗しました。少し時間をおいてお試しください。',
         noValidRows: 'このファイルには取り込める記録がありません',
-        missingColumns: 'このファイルには次の列がありません：{columns}。書き出し形式が CSV か確認するか、ファイルを送ってください',
+        missingColumns: 'このファイルには次の列がありません：{columns}。書き出し形式が CSV か、選んだアプリが合っているか確認してください',
       },
     },
   },
