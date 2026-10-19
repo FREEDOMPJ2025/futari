@@ -310,7 +310,7 @@ function AboutNarrative({
                 key={j}
                 className="m-0 mt-2 font-serif font-normal text-ink text-base lg:text-lg leading-relaxed italic tracking-[-0.1px]"
               >
-                {p}
+                <Phrase body text={p} />
               </p>
             )
           }
@@ -319,12 +319,12 @@ function AboutNarrative({
               key={j}
               className="m-0 text-sm text-ink-2 lg:text-base leading-[1.85]"
             >
-              {p}
+              <Phrase body text={p} />
             </p>
           )
         })}
         <p className="m-0 mt-4 font-serif font-normal text-ink-2 text-sm leading-relaxed italic tracking-[-0.05px]">
-          {about.moreStoriesHint}
+          <Phrase body text={about.moreStoriesHint} />
         </p>
       </article>
 

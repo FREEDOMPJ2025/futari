@@ -3,6 +3,7 @@ import type { Locale } from '@/lib/i18n/locales-meta'
 import type { Translations } from '@/lib/i18n/locales/zh-TW'
 import type { BlogPost } from '@/lib/blog-feed'
 import { withUtm } from '@/lib/utm'
+import { Phrase } from '../_components/Phrase'
 import { Ember } from '../_components/Ember'
 import { AfterPaint } from '../_components/AfterPaint'
 import { s } from '../_components/brand-inner'
@@ -54,7 +55,7 @@ export function BlogSection({
           {post.pubDate && (
             <p className={`${s.devDate} m-0 text-xs`}>{dateFmt.format(new Date(post.pubDate))}</p>
           )}
-          <p className={`${s.rowTitle} text-sm mt-1`}>{post.title}</p>
+          <p className={`${s.rowTitle} text-sm mt-1`}><Phrase body text={post.title} /></p>
         </div>
         <span className={s.arrow} aria-hidden="true">
           →

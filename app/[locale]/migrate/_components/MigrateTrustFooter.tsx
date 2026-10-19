@@ -29,7 +29,7 @@ export function MigrateTrustBlock({
             <Ember />
             <div>
               <p className={`${s.rowTitle} text-base font-medium`}>{title}</p>
-              <p className={`${s.rowBody} text-sm`}>{body}</p>
+              <p className={`${s.rowBody} text-sm`}><Phrase body text={body} /></p>
             </div>
           </li>
         ))}
@@ -68,7 +68,7 @@ export function MigrateFooter({
       >
         <ShieldOutlineGlyph />
         <span className="text-xs" style={{ letterSpacing: '0.3px' }}>
-          {trustNote}
+          <Phrase body text={trustNote} />
         </span>
       </div>
       <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">

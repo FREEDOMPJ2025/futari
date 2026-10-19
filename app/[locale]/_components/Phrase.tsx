@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { splitPhrases } from '@/lib/i18n/phrase'
+import { splitPhrases, phraseTextHtml } from '@/lib/i18n/phrase'
 
 /**
  * Heading text with `<wbr>` at phrase boundaries, so Safari / the iOS shell
@@ -7,8 +7,15 @@ import { splitPhrases } from '@/lib/i18n/phrase'
  * rule (word-break: keep-all) lives in app/[locale]/layout.tsx.
  * Latin-only text, i.e. all of English, is returned untouched: no wrapper, no
  * extra HTML.
+ * `body` is for body and row text (#1528 F2): zh only. Text with kana (ja) is
+ * returned untouched, since Chromium's `auto-phrase` already segments ja.
  */
-export function Phrase({ text }: { text: string }) {
+export function Phrase({ text, body }: { text: string; body?: boolean }) {
+  if (body) {
+    // One string, not one element per phrase: see phraseTextHtml for why.
+    const html = phraseTextHtml(text, true)
+    return html ? <span className="ph" dangerouslySetInnerHTML={{ __html: html }} /> : <>{text}</>
+  }
   const parts = splitPhrases(text)
   if (!parts) return <>{text}</>
   return (

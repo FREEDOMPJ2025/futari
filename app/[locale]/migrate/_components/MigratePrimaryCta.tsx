@@ -30,7 +30,7 @@ export function MigratePrimaryCta({
     <section className="rounded-card bg-surface-alt border border-hairline px-5 py-6 md:px-8 md:py-7 flex flex-col gap-5 md:flex-row md:items-center md:justify-between md:gap-8">
       <div className="space-y-2">
         <h2 className="m-0 text-xl md:text-title font-medium text-ink"><Phrase text={title} /></h2>
-        <p className="m-0 text-sm md:text-base leading-[1.7] text-ink-2">{body}</p>
+        <p className="m-0 text-sm md:text-base leading-[1.7] text-ink-2"><Phrase body text={body} /></p>
       </div>
       <LandingCtaLink
         href={signInHref}

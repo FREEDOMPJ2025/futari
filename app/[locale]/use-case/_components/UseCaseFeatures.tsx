@@ -26,7 +26,7 @@ export function UseCaseFeatures({
               <Ember />
               <div>
                 <p className={`${s.rowTitle} text-base font-medium`}>{f.title}</p>
-                <p className={`${s.rowBody} text-sm`}>{f.body}</p>
+                <p className={`${s.rowBody} text-sm`}><Phrase body text={f.body} /></p>
               </div>
             </li>
           )
