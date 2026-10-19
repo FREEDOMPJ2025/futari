@@ -60,9 +60,13 @@ async function seedProfile(tx: Tx, name: string, pendingDeletion: boolean, withA
   const id = randomUUID()
   const requested = pendingDeletion ? sql`now() - interval '15 days'` : sql`NULL`
   if (withAuth) {
-    // on_auth_user_created (handle_new_user) inserts the Profiles row.
+    // on_auth_user_created (handle_new_user) inserts the Profiles row. It reads
+    // `full_name` and falls back to `email`; with neither, display_name is NULL
+    // and the insert fails on its NOT NULL (#1810), so pass both like the other
+    // fixtures (_authUser.ts, _deletionWorld1701.ts).
     await tx.execute(sql`
-      INSERT INTO auth.users (id, raw_user_meta_data) VALUES (${id}, jsonb_build_object('name', ${name}::text))`)
+      INSERT INTO auth.users (id, email, raw_user_meta_data)
+      VALUES (${id}, ${`${id}@example.invalid`}, jsonb_build_object('full_name', ${name}::text))`)
     await tx.execute(sql`UPDATE "Profiles" SET deletion_requested_at = ${requested} WHERE id = ${id}`)
   } else {
     await tx.execute(sql`

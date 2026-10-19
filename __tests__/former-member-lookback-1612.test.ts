@@ -410,7 +410,7 @@ describe('#1612 — 2. the layout renders from the viewer and the chapter row', 
     expect(v.isSolo).toBe(false)
     expect(v.viewerIsA).toBe(false)
     expect(v.canAccessGuardian).toBe(false)
-    expect(v.chapter?.partner).toEqual({ id: A, displayName: 'TEST_1612_A_AT_CLOSE', initial: 'T', avatarUrl: null })
+    expect(v.chapter?.partner).toEqual({ id: A, displayName: 'TEST_1612_A_AT_CLOSE', initial: 'T', avatarUrl: null, isLeftLabel: false })
     expect(v.group).toMatchObject({ id: w.g, name: '家計簿' })
     expectNoLiveState(await layoutFor())
   })
@@ -646,7 +646,8 @@ describe('#1612 — 5c. a NULL frozen name reads as 「對方」 everywhere', ()
     expect(month.props.partner).toMatchObject({ displayName: '對方', avatarUrl: null })
     expect(month.props.payerName).toBe('對方')
     const listed = (await listEpochsForViewer(B2))[0]
-    expect(listed.memberAName).toBeNull() // no live read; the page shows 「對方」
+    // #1782: names are { name, isLeftLabel }; a NULL frozen name stays NULL (no live read; the page shows 「對方」).
+    expect(listed.memberAName).toEqual({ name: null, isLeftLabel: false })
     expectNoLiveState(await payloadOf(month))
   })
 })
