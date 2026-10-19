@@ -30,7 +30,7 @@ export function MigrateDifferentiators({
                 </span>{' '}
                 <Phrase text={title} />
               </p>
-              <p className={`${s.rowBody} text-sm`}>{body}</p>
+              <p className={`${s.rowBody} text-sm`}><Phrase body text={body} /></p>
             </div>
           </li>
         ))}

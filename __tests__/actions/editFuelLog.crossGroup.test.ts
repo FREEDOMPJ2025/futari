@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 
 // ─── Regression for #1032 ─────────────────────────────────────────────────
 //
@@ -37,6 +38,9 @@ function loadEnvLocal() {
   }
 }
 loadEnvLocal()
+// Each test seeds over the network (incl. an auth.users row, #1710); the default
+// 5 s is too tight against dev.
+vi.setConfig({ testTimeout: 60_000 })
 
 let mockUserId = ''
 vi.mock('@/lib/supabase/server', () => ({
@@ -100,7 +104,10 @@ describe('editFuelLog — the edited row must belong to the viewer (#1032)', () 
         await db.delete(oikosGroups).where(inArray(oikosGroups.id, groups))
       }
       const people = [ids.attacker, ids.victim].filter(Boolean)
-      if (people.length) await db.delete(profiles).where(inArray(profiles.id, people))
+      if (people.length) {
+        await deleteAuthUsers(people)
+        await db.delete(profiles).where(inArray(profiles.id, people))
+      }
     } catch (e) {
       console.error('cleanup failed', e)
     }
@@ -110,6 +117,10 @@ describe('editFuelLog — the edited row must belong to the viewer (#1032)', () 
     ids.attacker = randomUUID()
     ids.victim = randomUUID()
     await db.insert(profiles).values([
+      { id: ids.attacker, displayName: 'TEST_1032_attacker' },
+      { id: ids.victim, displayName: 'TEST_1032_victim' },
+    ])
+    await seedAuthUsers([
       { id: ids.attacker, displayName: 'TEST_1032_attacker' },
       { id: ids.victim, displayName: 'TEST_1032_victim' },
     ])
@@ -208,6 +219,7 @@ describe('editFuelLog — the edited row must belong to the viewer (#1032)', () 
   it('still lets the owning group edit its own fuel log', async () => {
     ids.victim = randomUUID()
     await db.insert(profiles).values([{ id: ids.victim, displayName: 'TEST_1032_owner' }])
+    await seedAuthUsers([{ id: ids.victim, displayName: 'TEST_1032_owner' }])
 
     const [group] = await db.insert(oikosGroups)
       .values({ name: 'TEST_1032_owner_group', memberA: ids.victim })

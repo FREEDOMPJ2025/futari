@@ -11,7 +11,8 @@ import { SectionHeader, InfoCard, InfoRow, MoneyLine } from './aibutsu-ui'
 import { AibutsuHintCard } from './AibutsuHintCard'
 import type { PagedTxnRow } from '@/actions/transaction'
 import { loadMoreTransactionsForAsset } from '@/actions/transaction'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { useMember } from '@/app/(dashboard)/_components/MemberContext'
 import { getTemplate, type AssetTemplateKey } from '@/lib/assetTemplates'
 import { unwrapAction } from '@/lib/action-errors'
@@ -56,6 +57,7 @@ export function TemplateAssetDetailClient({
 }: Props) {
   const router = useRouter()
   const t = useTranslations()
+  const locale = useLocale()
   const ts = t.assetTemplate
   const { isPast } = useMember()
   const [addOpen, setAddOpen] = useState(false)
@@ -151,7 +153,7 @@ export function TemplateAssetDetailClient({
         emptyState={<AibutsuHintCard type="item" onCtaPress={isPast ? undefined : () => setAddOpen(true)} />}
         header={(count) => (
           <div className="text-xs tracking-[1.5px] uppercase text-ink-3 font-numeric">
-            {t.assetDetail.timelineEntries.replace('{count}', String(count))}
+            {pickPlural(locale, count, t.assetDetail.timelineEntries).replace('{count}', String(count))}
           </div>
         )}
       />

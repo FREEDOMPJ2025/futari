@@ -305,6 +305,12 @@ export type Translations = {
     done: string
     me: string
     partner: string
+    /** #1782 — the system's label for a person whose name slot is marked
+     *  as left (account deletion, #1619 hide-my-name, a tombstone). Shown
+     *  only for a marked slot (lib/leftPartnerLabel.ts), never matched
+     *  against a name; the four values are also the reserved names
+     *  (lib/reservedDisplayName.ts). No gender, no "account deleted". */
+    leftPartnerLabel: string
     you: string
     all: string
     error: string
@@ -410,6 +416,21 @@ export type Translations = {
   }
 
   dashboard: {
+    /** #1536 — cards an iOS Shortcut left in 待確認; only their owner sees them. */
+    shortcutPending: {
+      sectionLabel: string
+      primaryAction: string
+      editAction: string
+      /** The only action on a card with no note: edit first, then record. */
+      editOnlyAction: string
+      skipAction: string
+      noNoteHint: string
+      skipConfirmTitle: string
+      skipConfirmDescription: string
+      /** Template with `{n}` placeholder. */
+      expandAll: string
+      collapse: string
+    }
     /** ContinuityRow under the hero (#1364): the always-there ways into
      *  月回顧 and 旅行. `{month}` is an Intl month name ('8月' / 'August'). */
     continuity: {
@@ -427,8 +448,8 @@ export type Translations = {
      *  at render with Intl (「9月」/ "September"), never string-concatenated. */
     soloHero: {
       monthLabel: string
-      /** `{count}` = number of expense records in the month. */
-      countLabel: string
+      /** `{count}` = number of expense records in the month; en needs one/other. */
+      countLabel: { one: string; other: string }
     }
     addExpense: string
     addIncome: string
@@ -459,7 +480,7 @@ export type Translations = {
       /** Aria label for the single-trip card link — `{name}` trip name. */
       singleAriaLabel: string
       /** Heading when N > 1 trips are active — `{count}` the count. */
-      multipleHeading: string
+      multipleHeading: { one: string; other: string }
       /** CTA line under the multi-trip heading. */
       multipleCta: string
       /** Aria label for the multi-trip card link — `{count}` the count. */
@@ -990,7 +1011,7 @@ export type Translations = {
     /** Soft note shown beneath a non-base currency row when there are already
      *  TripExpenses recorded against it. `{n}` is the count. Reassures that
      *  rate edits only affect future records. */
-    usedCountNote: string
+    usedCountNote: { one: string; other: string }
     customRow: {
       /** Aria label on the custom-row code input. */
       codeAriaLabel: string
@@ -1335,6 +1356,50 @@ export type Translations = {
     recurringSettings: string
     sectionData: string
     trust: string
+    /** #1750 - settings row linking to the public shortcuts guide. */
+    shortcutsGuide: string
+    /** #1536 — 捷徑金鑰 settings page (/settings/shortcut-key). */
+    shortcutKey: {
+      navLabel: string
+      title: string
+      back: string
+      pageHeading: string
+      pageSubtitle: string
+      empty: string
+      generate: string
+      failed: string
+      current: {
+        heading: string
+        hintLabel: string
+        createdLabel: string
+        lastUsedLabel: string
+        neverUsed: string
+      }
+      fresh: {
+        heading: string
+        body: string
+        inputLabel: string
+        copy: string
+        copied: string
+        copyFailed: string
+      }
+      shareWarning: {
+        heading: string
+        body: string
+      }
+      regenerate: {
+        cta: string
+        confirmTitle: string
+        confirmBody: string
+        confirmLabel: string
+      }
+      revoke: {
+        cta: string
+        confirmTitle: string
+        confirmBody: string
+        confirmLabel: string
+      }
+    }
     exportData: string
     pastTimes: string
     trips: string
@@ -1457,6 +1522,9 @@ export type Translations = {
           honeydue: string
           spendee: string
           cwmoney: string
+          andromoney: string
+          manebo: string
+          splitwise: string
           generic: string
         }
         uploadPrompt: string
@@ -1474,7 +1542,7 @@ export type Translations = {
         subtitle: string
         sourceColumn: string
         targetColumn: string
-        rowCount: string
+        rowCount: { one: string; other: string }
         keepOriginal: string
       }
       step3: {
@@ -1505,14 +1573,15 @@ export type Translations = {
         }
         typeExpense: string
         typeIncome: string
-        moreRows: string
-        confirmCta: string
+        moreRows: { one: string; other: string }
+        confirmCta: { one: string; other: string }
         confirming: string
-        summary: string
+        summary: { one: string; other: string }
+        summaryInvalid: { one: string; other: string }
       }
       result: {
         successHeading: string
-        successBody: string
+        successBody: { one: string; other: string }
         rollbackHint: string
         rollbackCta: string
         rollbackConfirm: string
@@ -1532,6 +1601,8 @@ export type Translations = {
         submitFailed: string
         rollbackFailed: string
         noValidRows: string
+        /** `{columns}` = required column names the file lacks, joined with ', ' */
+        missingColumns: string
       }
     }
   }
@@ -1631,6 +1702,23 @@ export type Translations = {
      *  what the file holds: expenses, income, settlements. */
     exportHint: string
     exportCta: string
+    /** #1619 — rename yourself to 「已離開的夥伴」 in the closed chapters (and
+     *  their outing lists) of ledgers you left. One-way. Name the scope only:
+     *  never 「移除」「徹底」「所有地方」, never the viewer's own name. */
+    hideName: {
+      title: string
+      hint: string
+      cta: string
+      confirmTitle: string
+      /** Scope sentence + 「之後才結束的時光不會跟著改。」 + 「這個改動無法還原。」（#1775）. */
+      confirmBody: string
+      /** `{chapters}` / `{outings}` substituted. */
+      confirmCount: string
+      confirmLabel: string
+      pending: string
+      done: string
+      failed: string
+    }
   }
 
   csvExport: {
@@ -1776,10 +1864,10 @@ export type Translations = {
       timelineTarget: string
       summaryAnnualPremium: string
       /** #1173 — Template with `{count}` (rendered emphasised, so keep it a standalone token). */
-      summaryPolicyCount: string
+      summaryPolicyCount: { one: string; other: string }
       summaryNextRenewal: string
       /** #1173 — Template with `{days}`. */
-      summaryDaysUntil: string
+      summaryDaysUntil: { one: string; other: string }
     }
   }
 
@@ -1797,7 +1885,7 @@ export type Translations = {
       intervalEveryHalfYear: string
       intervalEveryYear: string
       /** Template with `{n}` for non-standard intervals. */
-      intervalEveryNMonths: string
+      intervalEveryNMonths: { one: string; other: string }
       /** Template with `{day}` placeholder. */
       dayLabel: string
       /** #1187 — list row next-run date. Template with `{date}`. */
@@ -2219,7 +2307,7 @@ export type Translations = {
     notesSection: string
     recentExpenses: string
     /** Template with `{count}` placeholder. */
-    timelineEntries: string
+    timelineEntries: { one: string; other: string }
     addOtherExpense: string
     refuel: string
     relatedInsurance: string
@@ -2345,12 +2433,12 @@ export type Translations = {
       location: string
       waterEvery: string
       /** Template with `{n}` placeholder. */
-      waterEveryValue: string
+      waterEveryValue: { one: string; other: string }
       companionDays: string
       daysSuffix: string
       sproutedSuffix: string
       /** Template with `{n}` placeholder. */
-      waterEveryFooter: string
+      waterEveryFooter: { one: string; other: string }
     }
     house: {
       sectionInfo: string
@@ -2450,7 +2538,7 @@ export type Translations = {
       maturedAwaitingStatus: string
       maturedAwaitingCta: string
       /** Template with `{total}` and `{count}`. */
-      maturedAwaitingPremiumNote: string
+      maturedAwaitingPremiumNote: { one: string; other: string }
       /** #166 — informational hero row for investment-linked policies. */
       accountValueLabel: string
       accountValueEditCta: string
@@ -2480,7 +2568,7 @@ export type Translations = {
       intervalEveryQuarter: string
       intervalEveryHalfYear: string
       intervalEveryYear: string
-      intervalEveryNMonths: string
+      intervalEveryNMonths: { one: string; other: string }
       dayLabel: string
       /** #1187 — list row next-run date. Template with `{date}`. */
       nextDate: string
@@ -2969,9 +3057,9 @@ export type Translations = {
       /** Label for detected encoding row. Replace `{encoding}` literally. */
       encodingLabel: string
       /** Total parsed rows. Replace `{count}`. */
-      totalRowsLabel: string
+      totalRowsLabel: { one: string; other: string }
       /** Estimated expense rows (negative-amount heuristic). Replace `{count}`. */
-      expenseRowsLabel: string
+      expenseRowsLabel: { one: string; other: string }
       /** Date span. Replace `{first}` / `{last}` with raw date strings. */
       dateRangeLabel: string
       /** Heading for the top-categories list. */
@@ -3151,6 +3239,11 @@ export type Translations = {
       description: string
       ogDescription: string
     }
+    featureShortcuts: {
+      title: string
+      description: string
+      ogDescription: string
+    }
   }
 
   /** Shared shell + per-slug copy for /use-case/* situational SEO pages (#851).
@@ -3291,6 +3384,57 @@ export type Translations = {
     entries: { shareLink: string; emptyLink: string }
   }
 
+  /** #1750 - public shortcuts guide /features/shortcuts. Copy facts are limited to
+   *  docs/shortcuts/linepay-quick-add.md and lib/quickAdd.ts. Never write 自動記帳 / 綁定 /
+   *  串接 or claim encryption: Futari reads no payment data, the Shortcut only opens
+   *  Add Expense. `applePay.platformNote` must not name another mobile platform
+   *  (Apple Guideline 2.3.10: the iOS shell opens this page). `linePay` is zh-TW only:
+   *  the other locales keep the same keys with empty values (the key-parity test needs
+   *  them) and the page omits the section when `heading` is empty. */
+  featureShortcuts: {
+    heroKicker: string
+    heroTitle: string
+    heroSubtitle: string
+    breadcrumbLabel: string
+    /** HowToStep name template, contains `{n}`. */
+    howToStepName: string
+    answerQuestion: string
+    answer: string
+    /** Names of the Shortcuts variables as the guide calls them; they go into the example URL. */
+    vars: { amount: string; merchant: string }
+    applePay: {
+      heading: string
+      intro: string
+      steps: readonly { title: string; body: string }[]
+      urlLabel: string
+      platformNote: string
+      foreignNote: string
+    }
+    linePay: {
+      heading: string
+      intro: string
+      /** Variable name of the optional description step. */
+      noteVar: string
+      steps: readonly { title: string; body: string }[]
+    }
+    web: { heading: string; body: string; urlLabel: string }
+    params: {
+      heading: string
+      intro: string
+      cols: { param: string; rule: string; fallback: string }
+      rows: readonly { param: string; rule: string; fallback: string }[]
+      categoriesHeading: string
+      catCols: { id: string; name: string }
+      fixedNote: string
+    }
+    whenNot: { heading: string; intro: string; items: readonly string[] }
+    trouble: {
+      heading: string
+      cols: { symptom: string; cause: string }
+      rows: readonly { symptom: string; cause: string }[]
+    }
+  }
+
   /** #1156 — localized server-action errors, resolved by `describeError`.
    *  Keys are the wire codes thrown via `actionError()` (lib/action-errors.ts),
    *  so they stay snake_case on purpose. `{name}` placeholders are filled from
@@ -3340,6 +3484,9 @@ export type Translations = {
       split_ratio_invalid: string
       split_type_invalid: string
       profile_not_found: string
+      /** #1782 — a person or participant name that is the system's left
+       *  label (any language, after normalisation). */
+      display_name_reserved: string
       fx_rate_not_set: string
       fx_rate_not_positive: string
       currency_unsupported: string
@@ -3367,6 +3514,9 @@ export type Translations = {
       rule_recipient_not_member: string
       pending_income_not_found: string
       pending_income_handled_elsewhere: string
+      shortcut_pending_handled_elsewhere: string
+      shortcut_pending_needs_note: string
+      shortcut_pending_invalid: string
       review_month_locked: string
       review_message_locked: string
       asset_not_found: string
@@ -3628,6 +3778,7 @@ export const zhTW: Translations = {
     done: '完成',
     me: '我',
     partner: '對方',
+    leftPartnerLabel: '已離開的夥伴',
     you: '你',
     all: '全部',
     error: '發生錯誤',
@@ -3719,6 +3870,18 @@ export const zhTW: Translations = {
   },
 
   dashboard: {
+    shortcutPending: {
+      sectionLabel: '捷徑送來的待確認',
+      primaryAction: '記下',
+      editAction: '改一下',
+      editOnlyAction: '編輯後記下',
+      skipAction: '跳過',
+      noNoteHint: '沒有描述，請先編輯再記下',
+      skipConfirmTitle: '跳過這張待確認？',
+      skipConfirmDescription: '跳過後不會記進帳本，卡片也會消失。',
+      expandAll: '展開全部（還有 {n} 筆）',
+      collapse: '收合',
+    },
     continuity: {
       reviewTitle: '月回顧',
       reviewLatest: '{month}的回顧 · 看一看',
@@ -3732,7 +3895,7 @@ export const zhTW: Translations = {
     },
     soloHero: {
       monthLabel: '{month}記下',
-      countLabel: '{count} 筆',
+      countLabel: { one: '{count} 筆', other: '{count} 筆' },
     },
     addExpense: '新增一筆',
     addIncome: '記一筆收入',
@@ -3751,7 +3914,7 @@ export const zhTW: Translations = {
       singleStartedAt: '{date} 起 · 點開看這趟',
       singleStartedAtWithCurrency: '{date} 起 · {currency} · 點開看這趟',
       singleAriaLabel: '進入旅行：{name}',
-      multipleHeading: '{count} 段旅行進行中',
+      multipleHeading: { one: '{count} 段旅行進行中', other: '{count} 段旅行進行中' },
       multipleCta: '一起翻 ›',
       multipleAriaLabel: '查看 {count} 段進行中的旅行',
       emptyCta: '開始一段旅行',
@@ -4109,7 +4272,7 @@ export const zhTW: Translations = {
     rateInverseFormat: '≈ 1 {default} = {inverse} {code}',
     rateAriaLabel: '{code} 對 {baseCode} 的匯率',
     basePill: '基礎貨幣',
-    usedCountNote: '已記過 {n} 筆；改匯率不影響舊紀錄',
+    usedCountNote: { one: '已記過 {n} 筆；改匯率不影響舊紀錄', other: '已記過 {n} 筆；改匯率不影響舊紀錄' },
     customRow: {
       codeAriaLabel: '幣別代碼',
       codePlaceholder: 'VND',
@@ -4372,6 +4535,48 @@ export const zhTW: Translations = {
     recurringSettings: '定期支出/收入設定',
     sectionData: '資料',
     trust: '資料安全',
+    shortcutsGuide: '用捷徑記帳',
+    shortcutKey: {
+      navLabel: '捷徑金鑰',
+      title: '捷徑金鑰',
+      back: '返回',
+      pageHeading: '捷徑金鑰',
+      pageSubtitle: 'iPhone 捷徑用這把金鑰把花費送進你的待確認，你確認後才會記進帳本。待確認只有你自己看得到。',
+      empty: '目前沒有金鑰。',
+      generate: '產生金鑰',
+      failed: '沒有成功，請稍後再試',
+      current: {
+        heading: '目前的金鑰',
+        hintLabel: '結尾',
+        createdLabel: '產生時間',
+        lastUsedLabel: '最後使用',
+        neverUsed: '還沒用過',
+      },
+      fresh: {
+        heading: '新的金鑰',
+        body: '金鑰只會顯示這一次，離開這頁就看不到了。現在複製，貼進捷徑裡。',
+        inputLabel: '新的捷徑金鑰',
+        copy: '複製',
+        copied: '已複製',
+        copyFailed: '沒辦法自動複製，請點一下金鑰，選取後手動複製',
+      },
+      shareWarning: {
+        heading: '不要分享含金鑰的捷徑',
+        body: '拿到金鑰的人，可以把花費送進你的待確認。如果你分享過含金鑰的捷徑，請重新產生一把。',
+      },
+      regenerate: {
+        cta: '重新產生',
+        confirmTitle: '重新產生金鑰？',
+        confirmBody: '目前的金鑰會立刻失效，用它的捷徑要換上新的金鑰才能送出。',
+        confirmLabel: '重新產生',
+      },
+      revoke: {
+        cta: '撤銷金鑰',
+        confirmTitle: '撤銷這把金鑰？',
+        confirmBody: '用這把金鑰的捷徑會立刻無法送出。之後可以再產生一把。',
+        confirmLabel: '撤銷',
+      },
+    },
     exportData: '匯出資料（CSV）',
     pastTimes: '過去的時光',
     trips: '旅行',
@@ -4501,6 +4706,9 @@ export const zhTW: Translations = {
           honeydue: 'Honeydue',
           spendee: 'Spendee',
           cwmoney: 'CWMoney',
+          andromoney: 'AndroMoney',
+          manebo: 'Manebo（まねーぼ）',
+          splitwise: 'Splitwise',
           generic: '通用 CSV',
         },
         uploadPrompt: '拖檔案到這裡，或點選下方按鈕',
@@ -4509,7 +4717,7 @@ export const zhTW: Translations = {
         fileSelected: '已選：{name}',
         summary: '共 {total} 筆 · 有效 {valid} 筆 · 失敗 {invalid} 筆',
         sourceDetected: '偵測到來源：{source}',
-        invalidNote: '失敗的列會略過匯入，並保留在錯誤紀錄供日後修正',
+        invalidNote: '略過的列會留在錯誤紀錄裡，之後可以再看。',
         retryCta: '換一個檔案',
         parseError: '解析失敗，請確認檔案格式或換一個檔案重試',
       },
@@ -4518,7 +4726,7 @@ export const zhTW: Translations = {
         subtitle: '把來源的類別，對應到家計簿裡的類別',
         sourceColumn: '來源類別',
         targetColumn: '對應到',
-        rowCount: '{count} 筆',
+        rowCount: { one: '{count} 筆', other: '{count} 筆' },
         keepOriginal: '其他',
       },
       step3: {
@@ -4547,14 +4755,15 @@ export const zhTW: Translations = {
         },
         typeExpense: '支出',
         typeIncome: '收入',
-        moreRows: '還有 {count} 筆未顯示',
-        confirmCta: '確認匯入 {count} 筆',
+        moreRows: { one: '還有 {count} 筆未顯示', other: '還有 {count} 筆未顯示' },
+        confirmCta: { one: '確認匯入 {count} 筆', other: '確認匯入 {count} 筆' },
         confirming: '匯入中…',
-        summary: '預計寫入 {count} 筆 · 失敗 {invalid} 筆會保留紀錄',
+        summary: { one: '預計寫入 {count} 筆 · {invalid}', other: '預計寫入 {count} 筆 · {invalid}' },
+        summaryInvalid: { one: '失敗 {n} 筆會保留紀錄', other: '失敗 {n} 筆會保留紀錄' },
       },
       result: {
         successHeading: '匯入完成',
-        successBody: '已寫入 {count} 筆紀錄',
+        successBody: { one: '已寫入 {count} 筆紀錄', other: '已寫入 {count} 筆紀錄' },
         rollbackHint: '24 小時內可一鍵復原這次匯入',
         rollbackCta: '復原這次匯入',
         rollbackConfirm: '確定要復原嗎？所有這次匯入的紀錄會一起撤回',
@@ -4574,6 +4783,7 @@ export const zhTW: Translations = {
         submitFailed: '寫入時遇到問題，請稍後再試',
         rollbackFailed: '復原失敗，請稍後再試',
         noValidRows: '這個檔案沒有可匯入的紀錄',
+        missingColumns: '這個檔案少了這些欄位：{columns}。請確認匯出時選的是 CSV，也選對了來源',
       },
     },
   },
@@ -4629,6 +4839,18 @@ export const zhTW: Translations = {
     empty: '還沒有過去的時光。第一段才剛開始。',
     exportHint: '想留一份自己的紀錄，可以把這些章節裡的支出、進帳和結算匯出成 CSV。',
     exportCta: '匯出支出、進帳和結算',
+    hideName: {
+      title: '我在已離開帳本裡的名字',
+      hint: '已離開的帳本裡，已結束的那幾段時光與出遊名單上，你的名字可以改成顯示「已離開的夥伴」。',
+      cta: '改成「已離開的夥伴」',
+      confirmTitle: '改成「已離開的夥伴」？',
+      confirmBody: '已離開的帳本裡，目前已結束的那幾段時光與出遊名單上，你的名字會顯示為「已離開的夥伴」。之後才結束的時光不會跟著改。這個改動無法還原。',
+      confirmCount: '這次會改到 {chapters} 段時光、{outings} 份出遊名單。',
+      confirmLabel: '確定更改',
+      pending: '處理中…',
+      done: '已改成「已離開的夥伴」。',
+      failed: '沒有改成，請稍後再試。',
+    },
   },
 
   csvExport: {
@@ -4731,9 +4953,9 @@ export const zhTW: Translations = {
       timelineInvested: '已投入',
       timelineTarget: '目標',
       summaryAnnualPremium: '年繳保費',
-      summaryPolicyCount: '共 {count} 張保單',
+      summaryPolicyCount: { one: '共 {count} 張保單', other: '共 {count} 張保單' },
       summaryNextRenewal: '下次續約',
-      summaryDaysUntil: '{days} 天後',
+      summaryDaysUntil: { one: '{days} 天後', other: '{days} 天後' },
     },
   },
 
@@ -4750,7 +4972,7 @@ export const zhTW: Translations = {
       intervalEveryQuarter: '每季',
       intervalEveryHalfYear: '每半年',
       intervalEveryYear: '每年',
-      intervalEveryNMonths: '每 {n} 個月',
+      intervalEveryNMonths: { one: '每 {n} 個月', other: '每 {n} 個月' },
       dayLabel: '{day} 號',
       nextDate: '下次 {date}',
     },
@@ -5155,7 +5377,7 @@ export const zhTW: Translations = {
     },
     notesSection: '備註',
     recentExpenses: '近期支出',
-    timelineEntries: '時間軸 · {count} 筆',
+    timelineEntries: { one: '時間軸 · {count} 筆', other: '時間軸 · {count} 筆' },
     addOtherExpense: '其他支出',
     refuel: '加油',
     relatedInsurance: '相關保險',
@@ -5264,11 +5486,11 @@ export const zhTW: Translations = {
       cost: '入手金額',
       location: '位置',
       waterEvery: '澆水週期',
-      waterEveryValue: '每 {n} 天',
+      waterEveryValue: { one: '每 {n} 天', other: '每 {n} 天' },
       companionDays: '陪伴天數',
       daysSuffix: '天',
       sproutedSuffix: ' 入手',
-      waterEveryFooter: ' · 每 {n} 天澆水',
+      waterEveryFooter: { one: ' · 每 {n} 天澆水', other: ' · 每 {n} 天澆水' },
     },
     house: {
       sectionInfo: '房子資訊',
@@ -5348,7 +5570,7 @@ export const zhTW: Translations = {
       maturedAwaitingTitle: '滿期日已到 · {date}',
       maturedAwaitingStatus: '待入帳',
       maturedAwaitingCta: '我已經收到滿期金了 →',
-      maturedAwaitingPremiumNote: '累計繳 {total} 已記入 {count} 筆',
+      maturedAwaitingPremiumNote: { one: '累計繳 {total} 已記入 {count} 筆', other: '累計繳 {total} 已記入 {count} 筆' },
       accountValueLabel: '目前帳戶價值',
       accountValueEditCta: '更新',
       recurringSectionTitle: '定期進帳',
@@ -5375,7 +5597,7 @@ export const zhTW: Translations = {
       intervalEveryQuarter: '每季',
       intervalEveryHalfYear: '每半年',
       intervalEveryYear: '每年',
-      intervalEveryNMonths: '每 {n} 個月',
+      intervalEveryNMonths: { one: '每 {n} 個月', other: '每 {n} 個月' },
       dayLabel: '{day} 號',
       nextDate: '下次 {date}',
     },
@@ -5656,7 +5878,7 @@ export const zhTW: Translations = {
       submitFailed: '送出失敗，等一下再試',
       alreadyAnswered: '你已經答完了',
       alreadyRevealed: '這次問答已經揭曉，答案不能再改了',
-      wrongGroup: '這次的問答不屬於這個家計簿',
+      wrongGroup: '這次的問答不屬於這個帳本',
       solo: '這份問答是兩個人一起答的',
     },
     questions: {
@@ -5764,8 +5986,8 @@ export const zhTW: Translations = {
       title: '看一下你的資料長什麼樣',
       sourceLabel: '來源 · {source}',
       encodingLabel: '編碼 · {encoding}',
-      totalRowsLabel: '{count} 筆紀錄',
-      expenseRowsLabel: '約 {count} 筆支出',
+      totalRowsLabel: { one: '{count} 筆紀錄', other: '{count} 筆紀錄' },
+      expenseRowsLabel: { one: '約 {count} 筆支出', other: '約 {count} 筆支出' },
       dateRangeLabel: '{first} ~ {last}',
       topCategoriesLabel: '常出現的分類',
       empty: '這個檔案沒有可預覽的內容。',
@@ -5975,7 +6197,7 @@ export const zhTW: Translations = {
       formatExample: `date,category,amount,description,currency,kind
 2026-05-30,飲食,150,星巴克,TWD,expense
 2026-05-30,薪水,50000,五月,TWD,income`,
-      note: 'currency 不是 TWD 的會照原數字先匯入，換算可以在匯入後逐筆調整。重複出現的同一筆（相同日期＋金額＋描述）會自動去掉。',
+      note: 'currency 不是 TWD 的會照原數字先匯入，換算可以在匯入後逐筆調整。提示詞已請 ChatGPT 把重複出現的同一筆（相同日期＋金額＋描述）只留一筆；匯入時 Futari 不會再去重，同一份檔案請只匯入一次。',
       settingsHint: '不急著現在弄也沒關係——登入後在設定裡一樣能匯入 CSV。',
     },
     pages: {
@@ -5994,26 +6216,26 @@ export const zhTW: Translations = {
             body: '沒有「分開帳戶」的不對稱能見度，從一開始就為共同的家設計。',
           },
           {
-            title: '免費、無廣告',
-            body: '核心記帳永遠免費，不靠廣告或資料變現。',
+            title: '免費，也沒有廣告',
+            body: '從匯入到每天記帳都不收費，畫面裡沒有廣告，也不靠資料賺錢。',
           },
         ],
-        stepsHeading: '搬遷三步',
+        stepsHeading: 'Honeydue 搬遷三步',
         step1: '在 Honeydue App → 設定 → 匯出資料，下載 CSV。',
-        step2: '把 CSV 上傳到這裡，預覽你的記帳歷史。',
-        step3: '建立 Futari 帳號，一鍵完成搬遷。',
+        step2: '把 CSV 上傳到這裡預覽。Honeydue 的日期是月/日/年、負數是支出，正式匯入時 Futari 會照這個規則讀。',
+        step3: '建立 Futari 帳號，匯入時選好預設付款人和分攤方式：Honeydue 的檔案沒有這兩項，整批統一指定，事後可以逐筆修改。',
         faq: [
           {
-            question: '匯入後資料需要再整理嗎？',
-            answer: '類別可在匯入流程中對照調整，一次完成，不需要事後手動修改。',
+            question: 'Honeydue 的分類會對得上嗎？',
+            answer: 'Food & Dining、Home、Transportation 這類常見的英文分類名稱，會自動歸到 Futari 的飲食、居住、交通；對不上的全部歸在「其他」一組，匯入前可以整組改選別的類別。',
           },
           {
-            question: '匯入需要付費嗎？',
-            answer: 'Futari 完全免費，沒有隱藏費用。',
+            question: 'Honeydue 轉手了，搬過來要付費嗎？',
+            answer: '不用。匯入不收費，核心記帳也是免費的，沒有需要另外解鎖的雙人功能。',
           },
           {
-            question: '原本的記帳記錄能全部帶過來嗎？',
-            answer: '支援 CSV 格式匯入，大部分記錄都能轉移。特殊類型（如轉帳）會標記供你確認。',
+            question: 'Honeydue 的欄位都帶得進來嗎？',
+            answer: '日期、名稱、分類、金額都會讀進來，負數記成支出、正數記成進帳。Account 欄不會保留：Futari 是一本共同帳本，不分帳戶。',
           },
           {
             question: 'Honeydue 的共同帳本功能，Futari 有嗎？',
@@ -6035,29 +6257,29 @@ export const zhTW: Translations = {
             body: '一個人記下，另一個人馬上看見，不用等對方刷新。',
           },
           {
-            title: '免費、無廣告',
-            body: '不靠廣告或拍賣資料生活，記帳就是記帳。',
+            title: '沒有廣告，也沒有升級提示',
+            body: '不靠廣告或拍賣資料生活，打開就是你們兩個人的帳。',
           },
         ],
-        stepsHeading: '搬遷三步',
+        stepsHeading: 'Spendee 搬遷三步',
         step1: '在 Spendee → More → Export Data，下載 CSV。',
-        step2: '把 CSV 上傳到這裡，預覽你的記帳歷史。',
-        step3: '建立 Futari 帳號，一鍵完成搬遷。',
+        step2: '把 CSV 上傳到這裡預覽，Type 欄會用來分出支出與進帳。',
+        step3: '建立 Futari 帳號。類別對照那一步，Spendee 的分類會先自動歸到 Futari 的類別（例如 Food & Drinks 歸到飲食），對不上的歸在「其他」，可以整組改選。',
         formatHintLabel: 'Spendee CSV 的欄位長這樣',
         formatHintHeaders: 'Date,Wallet,Type,Category name,Amount,Currency,Note',
         formatHintNote: 'Type 欄位是「Expense / Income / Transfer」。Transfer（帳戶間轉帳）匯入時會被標記為錯誤——Futari 不存轉帳，請在預覽階段刪除這幾列。',
         faq: [
           {
-            question: '匯入後資料需要再整理嗎？',
-            answer: '類別可在匯入流程中對照調整，一次完成，不需要事後手動修改。',
+            question: 'Spendee 的錢包和分類會一起帶過來嗎？',
+            answer: '分類會對到 Futari 的類別，例如 Food & Drinks 對到飲食。錢包不會保留：Futari 是一本兩人共用的帳，不分錢包。',
           },
           {
-            question: '匯入需要付費嗎？',
-            answer: 'Futari 完全免費，沒有隱藏費用。',
+            question: 'Spendee 的共享要解鎖，搬過來也要嗎？',
+            answer: '不用。Spendee 的共享需要付費解鎖；Futari 兩個人共用一本帳是免費內建的，匯入也不收費。',
           },
           {
-            question: '原本的記帳記錄能全部帶過來嗎？',
-            answer: '支援 CSV 格式匯入，大部分記錄都能轉移。特殊類型（如轉帳）會標記供你確認。',
+            question: 'Spendee 有多幣別的記錄，匯入後金額會怎樣？',
+            answer: 'Currency 欄不是主幣別的列，會照原數字先匯入，換算可以在匯入後逐筆調整。Transfer（錢包間轉帳）會被標成失敗列，不會寫進帳本。',
           },
           {
             question: 'Spendee 的分攤功能，Futari 支援嗎？',
@@ -6084,7 +6306,7 @@ export const zhTW: Translations = {
             body: '沒有評分、不打分數、不暗示誰花得太多。',
           },
         ],
-        stepsHeading: '搬遷三步',
+        stepsHeading: 'CWMoney 搬遷三步',
         step1: '在 CWMoney 匯出 Excel／CSV 格式的記帳資料。',
         step2: '下載下方的轉換模板，把資料貼進去。',
         step3: '上傳轉換後的 CSV，預覽並建立帳號匯入。',
@@ -6096,12 +6318,12 @@ export const zhTW: Translations = {
             answer: '這是 CWMoney 匯出檔常見的編碼情況，官方說明中心也有專頁處理。不用自己修——把資料貼進下方轉換模板整理好再上傳就可以。',
           },
           {
-            question: '匯入後資料需要再整理嗎？',
-            answer: '類別可在匯入流程中對照調整，一次完成，不需要事後手動修改。',
+            question: 'CWMoney 的分類會對得上嗎？',
+            answer: 'CWMoney 裡的飲食、交通、居住、娛樂、醫療這幾類，會自動歸到 Futari 的同名類別；對不上的全部歸在「其他」一組，匯入前可以整組改選別的類別。',
           },
           {
-            question: '匯入需要付費嗎？',
-            answer: 'Futari 完全免費，沒有隱藏費用。',
+            question: 'CWMoney 的共同帳本是付費功能，搬過來要付費嗎？',
+            answer: '不用。Futari 的雙人帳本、分攤和即時同步都是免費內建，匯入也不收費。',
           },
           {
             question: 'CWMoney 的資產功能，Futari 有對應嗎？',
@@ -6128,22 +6350,22 @@ export const zhTW: Translations = {
             body: '麻布的自動同步需要代理登入網銀；Futari 以手動記帳為主，兩個人記下的，就是你們願意記下的。',
           },
         ],
-        stepsHeading: '搬遷三步',
+        stepsHeading: '麻布記帳搬遷三步',
         step1: '在麻布記帳（訂閱會員）用「明細匯出」把交易輸出成 CSV。',
-        step2: '把 CSV 上傳到這裡，預覽你的記帳歷史。',
-        step3: '建立 Futari 帳號，一鍵完成搬遷。',
+        step2: '把 CSV 上傳到這裡預覽，先確認交易明細的日期範圍和筆數沒有缺一段。',
+        step3: '建立 Futari 帳號，匯入時對照類別、指定付款人，之後和伴侶一起接著記。',
         faq: [
           {
             question: '免費帳號還能把資料匯出來嗎？',
             answer: '2026 年 4 月收費制上路後，明細匯出屬於訂閱會員功能。若你們還在訂閱期，建議先把明細匯出留存一份。',
           },
           {
-            question: '麻布記帳的欄位和 Futari 一樣嗎？',
-            answer: '不完全一樣。上傳後會先預覽解析結果，正式匯入時可以對照調整分類與欄位，不會直接寫進帳本。',
+            question: '匯出的 CSV 和 Futari 的格式對得起來嗎？',
+            answer: '不完全一樣。上傳到這頁會先在瀏覽器預覽，看得到筆數、日期範圍和常出現的分類；正式匯入時，付款人與分攤方式整批指定，讀不出來的列會被略過並留下紀錄。',
           },
           {
-            question: '匯入需要付費嗎？',
-            answer: 'Futari 完全免費，沒有隱藏費用。',
+            question: '搬過來之後要訂閱嗎？',
+            answer: '不用。Futari 的核心記帳、分攤與結算都在免費層，匯入也不收費。',
           },
           {
             question: '麻布記帳會自動同步銀行，Futari 也會嗎？',
@@ -6161,34 +6383,39 @@ export const zhTW: Translations = {
             body: 'AndroMoney 是單人記帳的好手；Futari 則是為兩個人共用一本帳設計，記錄彼此都看得到。',
           },
           {
-            title: '即時同步',
-            body: '一個人記下，另一個人馬上看見，不用互傳截圖或檔案對帳。',
+            title: '不用互傳檔案對帳',
+            body: 'AndroMoney 的備份要自己動手；Futari 的帳存在雲端，一個人記下，另一個人馬上看見。',
           },
           {
-            title: '免費、無廣告',
-            body: '核心記帳永遠免費，不靠廣告或資料變現。',
+            title: '不用在廣告和付費版之間選',
+            body: 'AndroMoney 有廣告版與付費版；Futari 沒有廣告，核心記帳免費，不必為了去廣告而升級。',
           },
         ],
-        stepsHeading: '搬遷三步',
+        stepsHeading: 'AndroMoney 搬遷三步',
         step1: '在 AndroMoney → 設定 → 匯出，把資料輸出成 CSV。',
-        step2: '把 CSV 上傳到這裡，預覽你的記帳歷史。',
-        step3: '建立 Futari 帳號，一鍵完成搬遷。',
+        step2: '把 CSV 上傳到這裡預覽筆數。檔案第一行 AndroMoney 的標頭列不用先刪，Big5 或 UTF-8 編碼都讀得懂。',
+        step3: '建立 Futari 帳號，到「設定 → 從其他 app 匯入」選 AndroMoney，再上傳同一份 CSV。名稱對得上的分類會自動歸好，其餘先放「其他」；付款人與分攤方式整批選一次：從單人帳換成兩個人的帳，多出來的就是這一步。',
         faq: [
           {
-            question: '匯入後資料需要再整理嗎？',
-            answer: '類別可在匯入流程中對照調整，一次完成，不需要事後手動修改。',
+            question: '搬過來之後，AndroMoney 要留著嗎？',
+            answer: '匯入是複製，不會動到 AndroMoney 裡的資料。CSV 先留一份，等兩個人都記順手了，再決定要不要刪掉原本的 App。匯入後 24 小時內，也可以一鍵復原整批。',
           },
           {
-            question: '匯入需要付費嗎？',
-            answer: 'Futari 完全免費，沒有隱藏費用。',
+            question: '匯入 AndroMoney 的 CSV 要付費嗎？',
+            answer: '不用，匯入不收費。核心記帳也免費，沒有廣告。',
           },
           {
-            question: '原本的記帳記錄能全部帶過來嗎？',
-            answer: '支援 CSV 格式匯入，大部分記錄都能轉移。特殊類型（如轉帳）會標記供你確認。',
+            question: '單人帳換成雙人帳，匯入時多了什麼？',
+            answer: '每筆記錄都需要有付款人和分攤方式，而 AndroMoney 的檔案沒有這兩項，所以匯入時整批指定一次：付款人選你或對方，分攤方式選「全部我的」「全部對方的」或「一人一半」，匯入後再逐筆修改。這批是你一個人記的帳，不想讓它動到兩人之間的餘額，就選「全部我的」。',
           },
           {
             question: 'AndroMoney 的多帳戶，Futari 有對應嗎？',
             answer: 'Futari 是一本共同帳本，專注在兩個人的共同收支；不分多帳戶，而是用分攤模式記下每筆是誰付、怎麼分。',
+          },
+          {
+            question: 'AndroMoney 的轉帳、期初餘額和外幣，匯入時會怎麼處理？',
+            answer:
+              '轉帳（付款和收款兩個帳戶欄都有值）與帳戶的期初餘額不是收支，這兩種列會略過，留在錯誤紀錄裡。只有付款欄有值的列匯成支出，只有收款欄有值的列匯成進帳，進帳的類別歸在「其他」。幣別不是 TWD 的列，金額照檔案裡的數字當成主幣別寫入，不換算也不另記原幣別，小數四捨五入到整數，匯入後再逐筆調整。',
           },
         ],
       },
@@ -6202,30 +6429,30 @@ export const zhTW: Translations = {
             body: 'Mobills 以個人理財為主；Futari 是兩個人共用的一本帳，共同支出記一次，兩邊都看得到。',
           },
           {
-            title: '分攤與結算內建',
-            body: '對半、依比例、各付各、由一方負擔——選好之後，誰欠誰自動算清。',
+            title: '選好分法，餘額自動算',
+            body: 'Mobills 沒有分攤這一步；在 Futari，每筆選好分法——對半、依比例、各付各、由一方負擔——餘額就自動算清。',
           },
           {
-            title: '免費、無廣告',
-            body: '核心記帳永遠免費，不靠廣告或拍賣資料生活。',
+            title: '不用訂閱，也沒有廣告',
+            body: 'Mobills 的進階功能要訂閱；Futari 的核心記帳、分攤與結算都免費，畫面裡沒有廣告。',
           },
         ],
-        stepsHeading: '搬遷三步',
+        stepsHeading: 'Mobills 搬遷三步',
         step1: '在 Mobills 匯出交易紀錄，下載 CSV 檔。',
-        step2: '把 CSV 上傳到這裡，預覽你的記帳歷史。',
-        step3: '建立 Futari 帳號，一鍵完成搬遷。',
+        step2: '把 CSV 上傳到這裡，先看預覽裡的日期範圍，確認你要搬的那段時間都在。',
+        step3: '建立 Futari 帳號，兩個人各自匯入各自的檔案，記錄都會落在同一本共同帳本。',
         faq: [
           {
-            question: '匯入後資料需要再整理嗎？',
-            answer: '類別可在匯入流程中對照調整，一次完成，不需要事後手動修改。',
+            question: '匯錯了可以重來嗎？',
+            answer: '可以。匯入完成後 24 小時內能一鍵復原整批，不會留下半份資料，也不會動到 Mobills 裡的原始記錄。',
           },
           {
-            question: '匯入需要付費嗎？',
-            answer: 'Futari 完全免費，沒有隱藏費用。',
+            question: 'Mobills 的進階功能要訂閱，搬過來也要嗎？',
+            answer: '不用。Futari 匯入不收費，核心功能也不需要訂閱。',
           },
           {
-            question: '原本的記帳記錄能全部帶過來嗎？',
-            answer: '支援 CSV 格式匯入，大部分記錄都能轉移。特殊類型（如轉帳）會標記供你確認。',
+            question: '我們兩個人都有 Mobills 的記錄，要怎麼合併？',
+            answer: '各自匯入各自的檔案就好。每次匯入都可以指定預設付款人（你或對方）與分攤方式，兩份記錄最後落在同一本共同帳本。同一筆共同支出如果兩邊都記了，匯入前先留下其中一份；Futari 不會自動合併重複的記錄。',
           },
           {
             question: 'Mobills 有預算功能，Futari 有嗎？',
@@ -6244,34 +6471,39 @@ export const zhTW: Translations = {
             body: '在 Manebo，把記錄匯出成 CSV 需要 Premium 訂閱；Futari 的匯入與匯出都不收費，支出、進帳和結算隨時帶得走。',
           },
           {
-            title: '分攤與結算內建',
-            body: '對半、依比例、各付各、由一方負擔——選好之後，誰欠誰自動算清，不用月底再對帳。',
+            title: '月底不必再對帳',
+            body: '每筆選好分法，餘額自動累計；想結清時記一筆結算，不用等到月底才一次對帳。',
           },
           {
-            title: '免費、無廣告',
+            title: '不跳廣告，也不跳解鎖視窗',
             body: '核心記帳永遠免費，畫面裡沒有廣告，也沒有中途跳出的解鎖視窗。',
           },
         ],
-        stepsHeading: '搬遷三步',
+        stepsHeading: 'Manebo 搬遷三步',
         step1: '在 Manebo →「其他」→ CSV 匯出（Premium 功能），選擇時間範圍輸出 CSV。',
-        step2: '把 CSV 上傳到這裡，預覽你的記帳歷史。',
-        step3: '建立 Futari 帳號，一鍵完成搬遷。',
+        step2: '把 CSV 上傳到這裡，先看筆數，確定匯出的範圍沒錯。Manebo 的 Shift_JIS 或 UTF-8 檔案都讀得懂，不用先轉檔。',
+        step3: '建立 Futari 帳號，到「設定 → 從其他 app 匯入」選 Manebo（まねーぼ），再上傳同一份 CSV。匯出檔裡沒有付款人欄，所以付款人與分攤方式整批指定一次；Manebo 裡兩個人共有的記錄，在 Futari 本來就是同一本帳。',
         faq: [
           {
             question: '沒有訂閱 Premium，資料拿得出來嗎？',
             answer: 'Manebo 的 CSV 匯出是 Premium 功能。可以訂閱一個月、匯出後再取消；Futari 這邊的匯入不收費。',
           },
           {
-            question: 'Manebo 的欄位和 Futari 一樣嗎？',
-            answer: '不完全一樣。上傳後會先預覽解析結果，正式匯入時可以對照調整分類與欄位，不會直接寫進帳本。',
+            question: '匯入後還能修改嗎？',
+            answer: '可以。匯入的記錄和手動記的一樣，能逐筆修改；整批復原則只有 24 小時內可用，所以匯入後建議先翻一遍。',
           },
           {
-            question: '匯入需要付費嗎？',
-            answer: 'Futari 完全免費，沒有隱藏費用。',
+            question: 'Futari 這邊的匯入要付費嗎？',
+            answer: '不用。Premium 只用在 Manebo 匯出 CSV 的那一步，Futari 的匯入與匯出都不收費。',
           },
           {
             question: 'Manebo 支援多帳本，Futari 怎麼處理？',
             answer: 'Futari 是一本兩人共用的帳，不分多帳本；用分攤模式記下每筆是誰付、怎麼分，餘額自動算清。',
+          },
+          {
+            question: 'Manebo 的轉帳、進帳和分類，匯入後會變怎樣？',
+            answer:
+              'Type（種別）欄是 expense 的列匯成支出，income 匯成進帳，transfer（轉帳）會略過並留在錯誤紀錄裡；進帳的類別一律歸在「其他」。支出的分類是你在 Manebo 自己取的名字，只有對照表裡已有的名稱（目前是英文和繁體中文，日文名稱不在其中）會自動歸好，沒對上的合成「其他」一組。匯入前可以整組改選別的類別，但沒辦法依原名稱拆開。',
           },
         ],
       },
@@ -6294,22 +6526,22 @@ export const zhTW: Translations = {
             body: '在簡單記帳，CSV 匯出是 VIP 功能；Futari 的匯入與匯出都免費，支出、進帳和結算隨時能匯出。',
           },
         ],
-        stepsHeading: '搬遷三步',
-        step1: '在簡單記帳把要搬的交易截圖（下方有完整做法）。',
-        step2: '用 ChatGPT 把截圖整理成 CSV——下方有可直接複製的提示詞。',
-        step3: '把 CSV 上傳到這裡，預覽後建立帳號完成匯入。',
+        stepsHeading: '簡單記帳搬遷三步',
+        step1: '在簡單記帳把要搬的交易一頁一頁截圖，VIP 才有的匯出不必碰（下方有完整做法）。',
+        step2: '用 ChatGPT 把截圖整理成 CSV，免費版就夠；分類文字會原樣寫進 CSV，匯入時對得上的會歸到 Futari 的類別，其餘歸在「其他」。',
+        step3: '把 CSV 上傳到這裡預覽，確認筆數和日期範圍對得上，再建立帳號完成匯入。',
         faq: [
           {
             question: '簡單記帳的 CSV 匯出要訂 VIP，不付費搬得動嗎？',
-            answer: '可以。把交易畫面截圖請 ChatGPT 整理成 CSV 再上傳——下方有完整步驟和可複製的提示詞，免費版 ChatGPT 就能做。',
+            answer: '可以。簡單記帳的 CSV 匯出要 VIP，不想為了搬家先訂閱的話，改用截圖：把交易畫面截下來請 ChatGPT 整理成 CSV，下方有完整步驟和可複製的提示詞。',
           },
           {
             question: '要截幾張圖？',
-            answer: '建議 5–10 張，往下捲動蓋過你想搬的時間範圍即可。同一筆重複出現的會自動去掉。',
+            answer: '建議 5–10 張，往下捲動蓋過你想搬的時間範圍即可。同一筆重複出現的，提示詞已請 ChatGPT 只留一筆。',
           },
           {
-            question: '匯入需要付費嗎？',
-            answer: 'Futari 完全免費，沒有隱藏費用。',
+            question: 'ChatGPT 免費版夠用，Futari 這邊有哪一步要收費嗎？',
+            answer: '沒有。上傳預覽、類別對照和匯入都不收費，從簡單記帳截圖到進 Futari，整條路不需要訂閱任何東西。',
           },
           {
             question: 'ChatGPT 整理的分類會不會跑掉？',
@@ -6336,26 +6568,26 @@ export const zhTW: Translations = {
             body: '沒有跳出的廣告，也沒有關不掉的解鎖視窗；記帳的節奏由你們決定。',
           },
           {
-            title: '資料自由進出',
+            title: '想離開，也帶得走',
             body: '在 Futari，匯出不需要訂閱，支出、進帳和結算會匯出成標準 UTF-8 CSV；哪天想離開，也一樣帶得走。',
           },
         ],
-        stepsHeading: '搬遷三步',
-        step1: '在記帳城市把要搬的交易截圖（下方有完整做法）。',
-        step2: '用 ChatGPT 把截圖整理成 CSV——下方有可直接複製的提示詞。',
-        step3: '把 CSV 上傳到這裡，預覽後建立帳號完成匯入。',
+        stepsHeading: '記帳城市搬遷三步',
+        step1: '在記帳城市打開帳目，往下捲動把要搬的交易截圖；城市畫面不用截（下方有完整做法）。',
+        step2: '用 ChatGPT 把截圖整理成 CSV；日期、金額和分類照畫面帶過來，遊戲裡的城市進度不會進 CSV。',
+        step3: '把 CSV 上傳到這裡預覽，沒問題就建立帳號，把這些記錄接在兩個人的帳本裡。',
         faq: [
           {
             question: '記帳城市不是有 CSV 匯出嗎？',
             answer: '有，但屬於訂閱功能，而且官方說明提到匯出檔在 Excel 打開可能出現亂碼、需要自行轉存編碼。沒訂閱的話，用下方截圖請 ChatGPT 整理的流程一樣能搬。',
           },
           {
-            question: '要截幾張圖？',
-            answer: '建議 5–10 張，往下捲動蓋過你想搬的時間範圍即可。重複出現的同一筆會自動去掉。',
+            question: '截圖整理完，怎麼確認沒有漏？',
+            answer: '上傳後的預覽會列出筆數、日期範圍和最常出現的分類，和記帳城市裡的數字對一下；缺了一段就回頭補截那一段，再整理一次。',
           },
           {
-            question: '匯入需要付費嗎？',
-            answer: 'Futari 完全免費，沒有隱藏費用。',
+            question: '記帳城市的訂閱視窗那麼多，Futari 也會有嗎？',
+            answer: '不會。Futari 沒有廣告，也沒有中途跳出的解鎖視窗；匯入同樣不收費。',
           },
           {
             question: '記帳城市的遊戲進度會一起搬嗎？',
@@ -6369,34 +6601,34 @@ export const zhTW: Translations = {
         heroSubtitle: '用了很久的 CashMan，想換成兩個人一起記？用截圖請 ChatGPT 整理成 CSV，就能把記錄搬到 Futari。',
         differentiators: [
           {
-            title: '雙人帳本是預設',
-            body: 'CashMan 是單人記帳的老幫手；Futari 一開始就為兩個人共用一本帳設計，記錄彼此都看得到。',
+            title: '從單人帳換成雙人帳',
+            body: 'CashMan 是單人記帳的老幫手；換到 Futari，兩個人記在同一本帳上，誰付的、怎麼分都一目了然。',
           },
           {
-            title: '分攤算給你看',
-            body: '誰付的、怎麼分、現在誰欠誰，餘額自動算清楚，不用自己記。',
+            title: '不用在腦中記帳',
+            body: '單人帳裡，共同支出要自己記誰多付了；Futari 每筆標好付款人與分法，餘額自動累計。',
           },
           {
             title: '雲端同步、隨時帶走',
             body: '記錄存在雲端，換手機不怕不見；想離開時，支出、進帳和結算都能匯出 CSV 帶走。',
           },
         ],
-        stepsHeading: '搬遷三步',
-        step1: '在 CashMan 把要搬的交易截圖（下方有完整做法）。',
-        step2: '用 ChatGPT 把截圖整理成 CSV——下方有可直接複製的提示詞。',
-        step3: '把 CSV 上傳到這裡，預覽後建立帳號完成匯入。',
+        stepsHeading: 'CashMan 搬遷三步',
+        step1: '在 CashMan 從最近一筆往回捲動截圖，一直截到你想搬的最早那天（下方有完整做法）。',
+        step2: '用 ChatGPT 把截圖整理成 CSV；CashMan 沒有匯出可用，所以截圖就是你的匯出檔。',
+        step3: '把 CSV 上傳到這裡預覽，確認幾年的記錄都在，再建立帳號完成匯入。',
         faq: [
           {
             question: 'CashMan 沒有匯出功能，資料真的搬得過來嗎？',
-            answer: '可以。把交易畫面截圖請 ChatGPT 整理成 CSV 再上傳——下方有完整步驟和可複製的提示詞，免費版 ChatGPT 就能做。',
+            answer: '可以。沒有匯出時，截圖就是匯出：把交易畫面截下來，請 ChatGPT 依固定欄位整理成 CSV，下方有完整步驟和可複製的提示詞。',
           },
           {
-            question: '要截幾張圖？',
-            answer: '建議 5–10 張，往下捲動蓋過你想搬的時間範圍即可。重複出現的同一筆會自動去掉。',
+            question: '截圖裡有些列被切掉了怎麼辦？',
+            answer: '重截一張把那幾列包進去就行；同一筆在兩張截圖都出現也沒關係，提示詞已請 ChatGPT 把重複的只留一筆。',
           },
           {
-            question: '匯入需要付費嗎？',
-            answer: 'Futari 完全免費，沒有隱藏費用。',
+            question: 'CashMan 本身免費，換到 Futari 要付費嗎？',
+            answer: '不用。Futari 的核心記帳也是免費的，雙人共用、分攤和匯出都不需要加價。',
           },
           {
             question: '用很久了，幾年的記錄都能搬嗎？',
@@ -6411,33 +6643,33 @@ export const zhTW: Translations = {
         differentiators: [
           {
             title: '兩個人共用一本帳',
-            body: '1Money 以個人記帳為主；Futari 是兩個人共用的一本帳，共同支出記一次，兩邊都看得到。',
+            body: '1Money 把帳記在一個人名下；換到 Futari，共同支出只記一次，付款人和分法也一起標好。',
           },
           {
-            title: '分攤與結算內建',
-            body: '對半、依比例、各付各、由一方負擔——選好之後，誰欠誰自動算清。',
+            title: '記完就知道誰欠誰',
+            body: '每筆選好分法，餘額自動更新；兩個人不必再用另一份試算表對帳。',
           },
           {
             title: '多幣別也記得清楚',
             body: '出國或跨幣別的支出照樣記，回頭看帳目一樣清楚。',
           },
         ],
-        stepsHeading: '搬遷三步',
-        step1: '在 1Money 把要搬的交易截圖（下方有完整做法）。',
-        step2: '用 ChatGPT 把截圖整理成 CSV——下方有可直接複製的提示詞。',
-        step3: '把 CSV 上傳到這裡，預覽後建立帳號完成匯入。',
+        stepsHeading: '1Money 搬遷三步',
+        step1: '在 1Money 把要搬的交易截圖，讓金額旁的幣別一起入鏡（下方有完整做法）。',
+        step2: '用 ChatGPT 把截圖整理成 CSV；每筆的幣別會寫進 currency 欄，一起帶過來。',
+        step3: '把 CSV 上傳到這裡預覽，筆數和日期範圍對得上，就建立帳號完成匯入；非台幣的列會照原數字先匯入，換算之後再調。',
         faq: [
           {
             question: '1Money 沒有完整匯出，資料真的搬得過來嗎？',
             answer: '即使沒有完整匯出，把交易截圖請 ChatGPT 整理成 CSV 一樣能搬——下方有完整步驟和可複製的提示詞，免費版 ChatGPT 就能做。',
           },
           {
-            question: '要截幾張圖？',
-            answer: '建議 5–10 張，往下捲動蓋過你想搬的時間範圍即可。重複出現的同一筆會自動去掉。',
+            question: '免費版 ChatGPT 夠用嗎？',
+            answer: '夠用。提示詞已經把輸出格式寫死，免費版照著做就行；記錄很多的話，分批截圖、分批整理就好。',
           },
           {
-            question: '匯入需要付費嗎？',
-            answer: 'Futari 完全免費，沒有隱藏費用。',
+            question: '1Money 的進階功能要付費，搬過來呢？',
+            answer: 'Futari 的核心記帳、雙人帳本、分攤與結算都免費，匯入也不收費。',
           },
           {
             question: '多幣別的記錄會跑掉嗎？',
@@ -6455,30 +6687,30 @@ export const zhTW: Translations = {
             body: 'iCost 限 iOS；Futari 是 iOS／Android／Web 都能用的雙人帳本，另一半用什麼手機都行。',
           },
           {
-            title: '分攤與結算內建',
-            body: '對半、依比例、各付各、由一方負擔——選好之後，誰欠誰自動算清。',
+            title: '共同開銷，各自分好',
+            body: '每筆標好是誰付的、怎麼分，餘額隨記隨更新，不用另外拉一張試算表。',
           },
           {
-            title: '免費、無廣告',
-            body: '核心記帳永遠免費，不靠廣告或拍賣資料生活。',
+            title: '免費，不分平台',
+            body: 'iCost 含內購；Futari 的核心記帳免費、沒有廣告，用 iOS、Android 或瀏覽器都一樣。',
           },
         ],
-        stepsHeading: '搬遷三步',
-        step1: '在 iCost 把要搬的交易截圖（下方有完整做法）。',
-        step2: '用 ChatGPT 把截圖整理成 CSV——下方有可直接複製的提示詞。',
-        step3: '把 CSV 上傳到這裡，預覽後建立帳號完成匯入。',
+        stepsHeading: 'iCost 搬遷三步',
+        step1: '在 iPhone 上打開 iCost，把要搬的交易截圖（下方有完整做法）。',
+        step2: '把 iPhone 上的截圖交給 ChatGPT 整理成 CSV——下方有可直接複製的提示詞。',
+        step3: '把 CSV 上傳到這裡預覽，再建立帳號完成匯入；另一半用 iPhone 或 Android 都能一起記。',
         faq: [
           {
-            question: 'iCost 沒有匯出功能，資料真的搬得過來嗎？',
-            answer: '可以。把交易畫面截圖請 ChatGPT 整理成 CSV 再上傳——下方有完整步驟和可複製的提示詞，免費版 ChatGPT 就能做。',
+            question: 'iCost 只有 iOS 也沒有匯出，資料搬得走嗎？',
+            answer: '可以。iCost 目前沒有匯出可用，所以改走截圖：把交易畫面截下來，請 ChatGPT 依固定欄位整理成 CSV，再上傳到下方預覽。',
           },
           {
-            question: '要截幾張圖？',
-            answer: '建議 5–10 張，往下捲動蓋過你想搬的時間範圍即可。重複出現的同一筆會自動去掉。',
+            question: 'ChatGPT 整理出來的 CSV 長什麼樣？',
+            answer: '固定六欄：date、category、amount、description、currency、kind，kind 填 expense 或 income。下方有範例，上傳時 Futari 靠這幾欄認得這份檔案。',
           },
           {
-            question: '匯入需要付費嗎？',
-            answer: 'Futari 完全免費，沒有隱藏費用。',
+            question: 'iCost 有內購，Futari 呢？',
+            answer: 'Futari 目前核心記帳免費、沒有廣告，匯入也不收費。',
           },
           {
             question: '另一半用 Android，也能一起用嗎？',
@@ -6505,26 +6737,31 @@ export const zhTW: Translations = {
             body: '旅行時用當地幣別記下，主幣別的餘額自動換算好，不必另外升級。',
           },
         ],
-        stepsHeading: '搬遷三步',
+        stepsHeading: 'Splitwise 搬遷三步',
         step1: '在 Splitwise 打開群組或好友頁，用「Export spreadsheet」下載試算表。',
-        step2: '把 CSV 上傳到這裡，預覽你們的分帳歷史。',
-        step3: '建立 Futari 帳號，一鍵完成搬遷。',
+        step2: '把 CSV 上傳到這裡，預覽筆數和常出現的分類。',
+        step3: '建立 Futari 帳號，到「設定 → 從其他 app 匯入」選 Splitwise，再上傳同一份 CSV。每筆交易以總金額（Cost）匯成一筆支出，付款人與分攤方式整批指定一次。Splitwise 的試算表留著當備份，隨時可以回頭查。',
         faq: [
           {
             question: 'Splitwise 的資料怎麼搬到 Futari？',
-            answer: '在群組或好友頁匯出試算表，再把 CSV 上傳到這裡預覽，建立帳號後完成匯入。',
+            answer: '日期、說明、分類和總金額會帶過來，一筆交易一筆支出。結清（Payment）的列和 Total balance 那一列不會匯入，留在錯誤紀錄裡；Splitwise 裡「誰欠誰」的餘額也不會跟著過來。分類名稱對得上的（例如 Groceries、Rent）自動歸好，其餘先合成「其他」一組。兩個人都匯出了同一個群組的話，只匯入其中一份，Futari 不會自動去重。',
           },
           {
             question: '匯出的欄位和 Futari 一樣嗎？',
-            answer: '不完全一樣。Splitwise 的匯出每筆交易一列，除了總金額（Cost）還有每個人各自的分攤欄位。上傳後會先預覽解析結果，匯入時可以對照調整欄位與分類，不會直接寫進帳本。',
+            answer: '不完全一樣，但讀得進來。Futari 讀的是日期、說明、分類、總金額（Cost）和幣別；每個人各自的分攤欄不會讀，所以付款人與分攤方式在匯入時整批指定一次。想讓這批舊帳不影響現在的餘額，就選「全部我的」；選「一人一半」的話，這批的每一筆都會算進兩人之間的餘額。',
           },
           {
-            question: '匯入需要付費嗎？',
-            answer: 'Futari 完全免費，沒有隱藏費用。',
+            question: 'Splitwise 免費版每天只能記 4 筆，Futari 呢？',
+            answer: '核心記帳沒有每日筆數上限，匯入也不收費。',
           },
           {
             question: '我們也用它記旅行的帳，Futari 有對應的做法嗎？',
             answer: '有。Futari 的旅行帳本把一趟旅行的支出獨立記，可以用當地幣別，結束後折回主帳本，日常的帳不會被旅行洗掉。',
+          },
+          {
+            question: 'Splitwise 裡幣別不是 TWD 的帳，匯入後金額會怎樣？',
+            answer:
+              'Currency 欄不是 TWD 的列，金額照檔案裡的數字寫成主幣別，不換算，也不另記原幣別；小數四捨五入到整數。這類列匯入後可以逐筆改金額。',
           },
         ],
       },
@@ -6538,30 +6775,30 @@ export const zhTW: Translations = {
             body: '隨手記要另外開共享帳本；Futari 進來就是兩個人的帳，不必額外設定。',
           },
           {
-            title: '分攤與結算內建',
-            body: '對半、依比例、各付各、由一方負擔——選好之後，誰欠誰自動算清。',
+            title: '有共享，也有分攤',
+            body: '對半、依比例、各付各、由一方負擔，每筆選一種；隨手記的共享帳本沒有這一層，Futari 內建。',
           },
           {
-            title: '免費、無廣告',
-            body: '核心記帳永遠免費，不靠廣告或拍賣資料生活。',
+            title: '不用會員，沒有廣告',
+            body: '隨手記含廣告與會員方案；Futari 核心記帳免費、沒有廣告，兩個人共用也不需要加入會員。',
           },
         ],
-        stepsHeading: '搬遷三步',
-        step1: '在隨手記把要搬的交易截圖（下方有完整做法）。',
-        step2: '用 ChatGPT 把截圖整理成 CSV——下方有可直接複製的提示詞。',
-        step3: '把 CSV 上傳到這裡，預覽後建立帳號完成匯入。',
+        stepsHeading: '隨手記搬遷三步',
+        step1: '在隨手記把要搬的交易明細截圖，不必先加入會員（下方有完整做法）。',
+        step2: '請 ChatGPT 讀懂截圖、整理成 CSV，免費版就能做；提示詞在下方，複製貼上即可。',
+        step3: '把 CSV 上傳到這裡預覽，確認後建立帳號；兩個人的共享不必另外設定。',
         faq: [
           {
-            question: '隨手記的資料怎麼搬到 Futari？',
-            answer: '把交易畫面截圖請 ChatGPT 整理成 CSV 再上傳——下方有完整步驟和可複製的提示詞，免費版 ChatGPT 就能做。',
+            question: '隨手記要會員才能匯出，資料還搬得走嗎？',
+            answer: '隨手記的資料匯出需要會員；不想為了搬家加入會員，可以改用截圖：把交易畫面截下來，請 ChatGPT 整理成 CSV，再上傳到下方。',
           },
           {
-            question: '要截幾張圖？',
-            answer: '建議 5–10 張，往下捲動蓋過你想搬的時間範圍即可。重複出現的同一筆會自動去掉。',
+            question: '截圖要蓋到多久以前的記錄？',
+            answer: '往下捲到你想搬的最早一天為止；一般 5–10 張就夠，記錄很多的話，分批截圖、分批整理成 CSV，再分次上傳。',
           },
           {
-            question: '匯入需要付費嗎？',
-            answer: 'Futari 完全免費，沒有隱藏費用。',
+            question: '會員才能用的功能，搬過來也要嗎？',
+            answer: '不用。Futari 的核心記帳、雙人共用和分攤都免費，不需要會員；匯入也不收費。',
           },
           {
             question: '隨手記有共享帳本，跟 Futari 一樣嗎？',
@@ -6634,8 +6871,8 @@ export const zhTW: Translations = {
         ogDescription: 'Manebo 用戶的下一站：匯出 CSV，搬進 Futari 情侶共同記帳。',
       },
       'simple-daily-money': {
-        title: '從簡單記帳搬到 Futari｜兩人同步記帳、不用 VIP',
-        description: '想和伴侶兩支手機同步記同一本帳？簡單記帳的共享只能看、CSV 匯出要 VIP。截圖請 ChatGPT 整理成 CSV，免費搬進 Futari，兩個人都能記、都能改。',
+        title: '簡單記帳買了永久 VIP，搬家會浪費嗎？｜Futari 免費雙人記帳',
+        description: '買過的 VIP 留在簡單記帳，記錄可以帶走：截圖請 ChatGPT 整理成 CSV，免費搬進 Futari。記帳、雙人分攤、同步、匯出都不用另外解鎖，兩個人都能記、都能改。',
         ogDescription: '簡單記帳用戶搬家指南：截圖→ChatGPT→CSV，搬進 Futari 雙人記帳。',
       },
       'fortune-city': {
@@ -6735,6 +6972,11 @@ export const zhTW: Translations = {
       title: '出遊分帳：丟一個連結，朋友不用下載就能一起記｜Futari',
       description: '跟朋友出遊，誰付了什麼、誰該轉給誰，記在同一個地方。開一個出遊、把連結丟到群組，朋友點開選自己的名字就能記，不用下載、不用註冊，最多 20 人。',
       ogDescription: '開一個出遊、把連結丟到群組，朋友點開選自己的名字就能一起記帳，不用下載、不用註冊。',
+    },
+    featureShortcuts: {
+      title: 'iPhone 捷徑記帳：Apple Pay、LINE Pay 付款後打開「新增紀錄」 | Futari',
+      description: '用 iPhone 的捷徑，在 Apple Pay 或 LINE Pay 付款後打開 Futari 的「新增紀錄」，金額先填好，由你確認後儲存。Futari 不連結付款帳戶，也不讀付款資料。',
+      ogDescription: '付款後，iPhone 捷徑打開 Futari 的「新增紀錄」，金額、分類和描述先填好，儲存由你按。',
     },
   },
   useCase: {
@@ -6850,8 +7092,8 @@ export const zhTW: Translations = {
             answer: '建議把每筆支出記下來並標記分攤方式——對半、按比例、或全額由某人負擔。Futari 會自動累計餘額，讓你隨時看到目前誰多出了多少，不需要月底才對帳。',
           },
           {
-            question: 'Futari 要收費嗎？',
-            answer: '基本功能完全免費，包含雙人帳本、多種分攤模式與即時同步。',
+            question: '兩個人都要付費嗎？',
+            answer: '不用。雙人帳本、多種分攤模式和即時同步都免費，邀請另一半加入也不需要另外開通什麼。',
           },
         ],
       },
@@ -6880,7 +7122,7 @@ export const zhTW: Translations = {
           },
           {
             question: '夫妻記帳要分開記還是合在一起？',
-            answer: 'Futari 的設計是兩個人共用一本帳本，每筆支出都清楚標記是誰付的、怎麼分攤，而不是把兩個人的帳強制合并。你們可以選擇全額 AA、按比例，或某類支出由某人負擔。',
+            answer: 'Futari 的設計是兩個人共用一本帳，每筆支出都清楚標記是誰付的、怎麼分攤，而不是把兩個人的帳強制合併。你們可以選擇對半 AA、按比例，或某類支出由某人全額負擔。',
           },
           {
             question: 'Futari 支援什麼樣的愛物記錄？',
@@ -6895,11 +7137,11 @@ export const zhTW: Translations = {
         painPoints: [
           {
             heading: '「這個月在貓咪身上花了多少？」',
-            body: '醫療費、疫苗、零食、玩具、美容——寵物費用分散在各種類別，很難知道整體花了多少。Futari 讓每筆支出都可以關聯到你們的毛孩，篩一下就看到全貌。',
+            body: '醫療費、疫苗、零食、玩具、美容分散在不同分類，要知道貓咪這個月花多少，得自己加總。把這些支出記在牠的名下，牠的頁面就直接顯示本月的數字；想回頭看更早的，用篩選器挑這隻，就只剩牠的支出。',
           },
           {
             heading: '「我付了大部分，對方記得嗎？」',
-            body: '兩個人一起養，費用卻可能都由某一方先墊。Futari 的分攤功能讓每筆支出都清楚標記，餘額自動累計，不需要特別去問「這次誰出比較多」。',
+            body: '看診、買飼料，常常是同一個人先刷卡。每筆記下是誰付的、對方分多少，餘額就一直留著；想結清時記一筆結算，不必靠印象說「我好像出比較多」。',
           },
           {
             heading: '「多貓家庭的費用怎麼分開記？」',
@@ -6913,11 +7155,11 @@ export const zhTW: Translations = {
           },
           {
             question: '貓咪、狗狗的醫療費要怎麼記才清楚？',
-            answer: '在 Futari 建立你們的毛孩作為「愛物」，每次回診或購買相關用品時關聯到這個愛物，費用就會自動歸類。想看這隻貓這個月花了多少，篩一下就出來了。',
+            answer: '新增一隻寵物，填上名字和種類就能用。之後每次回診、買藥、洗澡美容，記帳時選這隻毛孩；想看牠的全部醫療費，打開牠的頁面，或在篩選器挑這隻就看得到。',
           },
           {
-            question: '如果養了兩隻以上，可以分開記嗎？',
-            answer: '可以。Futari 支援多個愛物，每隻毛孩都可以獨立建立，各自的費用分開記，不會混在一起。',
+            question: '飼料、貓砂這種固定要買的，可以設成定期嗎？',
+            answer: '可以。把每月會買的飼料設成定期支出，並選擇這隻毛孩；到了日期，首頁會出現一張待確認的卡片，金額沒變按「就這樣」，這次價格不同按「改一下」。不會在背景自動寫進帳本。',
           },
         ],
       },
@@ -6964,8 +7206,8 @@ export const zhTW: Translations = {
             body: '同住費用最容易忘，因為每筆都不大，但累積起來差距不小。Futari 讓每筆費用即時記下來，月底不用再翻訊息對帳。',
           },
           {
-            heading: '「按比例分還是對半分？每次都要重新算。」',
-            body: '沒有對錯，只有適合你們的方式。Futari 支援對半、按比例、全額等多種分攤模式，選一次設定好，之後自動套用。',
+            heading: '「房間大小不一樣，電費還要對半分嗎？」',
+            body: '室友之間的分法常常不是對半：房間大的多出一點，整天在家的多分一點電費。Futari 可以按比例分，比例設好之後，之後的每一筆都能直接套用，不必每次重新心算。',
           },
           {
             heading: '「一方先墊，另一方記不清楚要還多少。」',
@@ -6979,11 +7221,11 @@ export const zhTW: Translations = {
           },
           {
             question: '同住費用怎麼記才不會出問題？',
-            answer: '每筆費用當下記下來，標記誰付的、怎麼分。Futari 會自動累計餘額，任何時候都知道目前的狀態，不用等月底才結算。',
+            answer: '付款當下就記，並選好這筆怎麼分：房租按各自房間的比例，共用的日用品對半。誰先墊了，Futari 的餘額會記著；下次輪到誰付、還差多少，看餘額就知道。',
           },
           {
-            question: 'Futari 要收費嗎？',
-            answer: '基本功能完全免費，包含雙人帳本、多種分攤模式與即時同步。',
+            question: '室友不是情侶，也能共用一本帳嗎？',
+            answer: '可以。帳本固定是兩個人，邀請同住的室友加入就能一起記，不需要是伴侶。如果其中一位搬走、退出帳本，這段帳會留在過去的章節，隨時能翻回來看。',
           },
         ],
       },
@@ -7007,16 +7249,16 @@ export const zhTW: Translations = {
         ],
         faq: [
           {
-            question: '每月固定支出要怎麼和伴侶一起記？',
-            answer: '在 Futari 記下每筆固定支出，標記誰付的、怎麼分攤。兩個人都能即時看到每筆帳，不需要另外說明。',
+            question: '固定支出通常是同一個人在繳，怎麼讓另一個人也看到？',
+            answer: '每筆固定帳都記上付款人，放進同一本帳。另一個人打開就能看到這個月誰繳了什麼，不用再問「網路費繳了沒」；之後想回頭看，也能在篩選器依分類或付款人挑出來。',
           },
           {
             question: 'Futari 有定期支出提醒功能嗎？',
-            answer: 'Futari 支援定期支出規則，可以設定每月固定發生的帳，到時系統會提示確認，讓固定帳不被遺忘。',
+            answer: '有。把房租、網路費、保險費設成定期支出，週期可以是每月、每季、每半年或每年；到了日期，首頁會出現待確認的卡片，確認後才記進帳本，固定帳不會被忘記。',
           },
           {
-            question: 'Futari 要收費嗎？',
-            answer: '基本功能完全免費，包含雙人帳本、多種分攤模式與即時同步。',
+            question: '固定支出每個月金額不一樣，怎麼辦？',
+            answer: '水電、電話費這類每期金額會變的帳，照樣可以設成定期支出。到期的卡片上按「改一下」，填入這期實際的金額；這期沒有這筆，就按「跳過」。',
           },
         ],
       },
@@ -7035,21 +7277,21 @@ export const zhTW: Translations = {
           },
           {
             heading: '「這筆是我出的，但後來算起來好像不公平。」',
-            body: '大筆支出最容易造成不平衡感。Futari 的分攤功能讓每筆大額費用清楚標記怎麼分，餘額自動更新，不靠感覺靠數字。',
+            body: '大筆支出最容易讓其中一個人覺得吃虧。每一筆記下付款人和分法，餘額跟著更新，兩個人直接看數字，不必回頭翻是誰先刷的卡。',
           },
         ],
         faq: [
           {
             question: '大筆支出要怎麼和伴侶一起規劃記帳？',
-            answer: '在 Futari 記下每筆大額支出，關聯到對應愛物（如車輛、家電），選好分攤方式，兩個人都即時看到。需要回頭看這項資產花了多少，篩一下就出來了。',
+            answer: '先說好分法再記：一人全付、對半或按比例都可以。付款當天記下金額、付款人和分法，另一個人馬上看得到；事後想改分法，修改那一筆，餘額會跟著重算。',
           },
           {
             question: '購車費用怎麼在 Futari 記？',
-            answer: '在 Futari 建立你們的車輛作為愛物，之後每筆相關費用關聯到這輛車——購車金、保險、保養都歸在一起，清楚看見這台車的總花費。',
+            answer: '把車子建成一個愛物，購車金、保險、保養、加油都記在這輛車下面。車輛有加油紀錄，油耗與油費看得到；車輛頁面也會顯示本月和這個章節的花費。',
           },
           {
-            question: 'Futari 要收費嗎？',
-            answer: '基本功能完全免費，包含雙人帳本、多種分攤模式與即時同步。',
+            question: '一個人先付了大額，之後怎麼還？',
+            answer: '先付的人記成付款人，並選擇由對方負擔的分法，餘額就會顯示對方欠多少。要還的時候記一筆結算，餘額會跟著減少或歸零。',
           },
         ],
       },
@@ -7073,16 +7315,16 @@ export const zhTW: Translations = {
         ],
         faq: [
           {
-            question: '外食費用要怎麼和另一半一起記？',
-            answer: 'Futari 讓每筆外食費用即時記下來，標記誰付的、怎麼分，兩個人都即時看到。月底可以看這個月飲食類的累計，不需要另外整理。',
+            question: '每天外食的小額支出，怎麼記才不麻煩？',
+            answer: '吃完當下記一筆：金額、誰付、這頓怎麼分。輪流請客的，就選由付款人全額負擔；各付一半的，選對半。月底篩選飲食類別，就能看到這個月累計花了多少。',
           },
           {
             question: '外送費用可以在 Futari 記嗎？',
             answer: '可以。Futari 的餐飲分類涵蓋各種飲食支出，外送、外帶、內用都可以記，分類後清楚看見飲食開銷的全貌。',
           },
           {
-            question: 'Futari 要收費嗎？',
-            answer: '基本功能完全免費，包含雙人帳本、多種分攤模式與即時同步。',
+            question: '想知道外食是不是花太多，Futari 會提醒嗎？',
+            answer: '不會。日常的帳不設預算上限，也不會跳出超支提醒，只把飲食類這個月的金額列出來；要不要調整，由你們兩個人討論。',
           },
         ],
       },
@@ -7093,7 +7335,7 @@ export const zhTW: Translations = {
         painPoints: [
           {
             heading: '「這個月在孩子身上花了多少？我要想一下。」',
-            body: '醫療費、食品、衣物、課程——育兒支出分散在各個類別，很難有整體感。Futari 讓每筆支出關聯到孩子，篩一下就看到全貌。',
+            body: '醫療費、食品、衣物、課程——育兒支出分散在各個類別，很難有整體感。把每筆支出記在孩子名下，孩子的頁面會顯示本月的花費；想回頭看更早的，用篩選器挑這個孩子，就只剩孩子的支出。',
           },
           {
             heading: '「帶孩子看診都是我付的，對方記得嗎？」',
@@ -7101,21 +7343,21 @@ export const zhTW: Translations = {
           },
           {
             heading: '「有兩個孩子，費用要分開記。」',
-            body: 'Futari 支援多個愛物，每個孩子都可以獨立建立，各自的費用分開記，清楚知道每個孩子的開銷。',
+            body: '每個孩子各建一個，奶粉、學費、看診分別記在各自名下；兩個孩子的數字不會加在一起，老大和老二各花多少一目了然。',
           },
         ],
         faq: [
           {
-            question: '育兒費用要怎麼和另一半一起記？',
-            answer: '在 Futari 建立孩子作為愛物，每筆育兒相關費用關聯到這個孩子，兩個人即時看到、自動分攤，不需要月底才對帳。',
+            question: '孩子的花費，兩個人怎麼一起記比較不亂？',
+            answer: '新增孩子之後，記帳時選這個孩子，兩個人都會即時看到。分法每筆自己選：對半、按比例，或由出錢的人全額負擔，不必等到月底才對帳。',
           },
           {
             question: '嬰幼兒費用種類很多，Futari 可以分類嗎？',
             answer: 'Futari 有豐富的支出分類，育兒相關費用可以用醫療、餐飲、購物等分類歸類，每筆也可以關聯到孩子，雙重維度讓費用清晰。',
           },
           {
-            question: 'Futari 要收費嗎？',
-            answer: '基本功能完全免費，包含雙人帳本、多種分攤模式與即時同步。',
+            question: '孩子的資料，Futari 會怎麼保存？',
+            answer: '帳本只對你們兩人的帳號開放，連線以 HTTPS 加密；孩子的本名、身分證字號這類機敏欄位，會另外加密才存進資料庫。',
           },
         ],
       },
@@ -7126,7 +7368,7 @@ export const zhTW: Translations = {
         painPoints: [
           {
             heading: '「我們說好 AA，但每次結帳都不知道誰欠誰多少。」',
-            body: 'AA 制最難的地方不是「決定分法」，而是「執行起來記不清楚」。Futari 讓每筆帳即時記下來，餘額自動累計，誰欠誰多少一眼就知道。',
+            body: 'AA 制最難的不是決定分法，而是記得住。當下記一筆付款人和分法，餘額就往上累計，兩個人隨時看得到「現在差多少」。',
           },
           {
             heading: '「這頓我付，下頓你付——但次數和金額不一樣。」',
@@ -7144,11 +7386,11 @@ export const zhTW: Translations = {
           },
           {
             question: '輪流付帳要怎麼在 Futari 記？',
-            answer: '每次結帳時記下這筆費用由誰付、分攤方式是什麼（對半或某人全額）。Futari 會累計餘額，讓你隨時知道目前的平衡狀態。',
+            answer: '誰付就記誰是付款人，分法選對半，輪到對方付的那頓也一樣。次數相同、金額不同的時候，餘額會算出差距，想結清就記一筆結算。',
           },
           {
-            question: 'Futari 要收費嗎？',
-            answer: '基本功能完全免費，包含雙人帳本、多種分攤模式與即時同步。',
+            question: '朋友一起的 AA 聚餐，也能記嗎？',
+            answer: '可以。兩個人之間的 AA 記在主帳本；多人聚餐可以開一個「出遊」，把連結丟到群組，朋友不用下載就能加入記帳，結束時會算出誰該轉給誰，筆數最多是人數減一。',
           },
         ],
       },
@@ -7229,6 +7471,139 @@ export const zhTW: Translations = {
     },
   },
 
+  featureShortcuts: {
+    heroKicker: '捷徑記帳',
+    heroTitle: '付完款，讓 iPhone 把「新增紀錄」打開',
+    heroSubtitle: '用 iPhone 的「捷徑」，在付款後打開 Futari 的「新增紀錄」。金額、分類和描述先填好，你看過、需要就改，再按儲存。',
+    breadcrumbLabel: '捷徑記帳',
+    howToStepName: '步驟 {n}',
+    answerQuestion: 'Apple Pay 或 LINE Pay 付款後，怎麼快速記到 Futari？',
+    answer: 'Futari 不連結任何付款帳戶，也不讀你的付款資料。做事的是 iPhone 的「捷徑」：付款後它打開 Futari 的「新增紀錄」，把金額、分類和描述先填好，你確認後自己按儲存，紀錄才會寫進帳本。這個做法只適用於 iPhone 的「捷徑」App。',
+    vars: {
+      amount: '金額',
+      merchant: '商家',
+    },
+    applePay: {
+      heading: 'Apple Pay：刷完卡就跳出「新增紀錄」',
+      intro: '前提：iPhone 已安裝 Futari 並登入。下面用「錢包」的自動化，每次用 Apple Pay 付款，就打開一次填好的「新增紀錄」。',
+      steps: [
+        {
+          title: '新增「錢包」自動化',
+          body: '打開「捷徑」App，到「自動化」，點 ＋ 選「錢包」（在我感應錢包卡片或票卡時）。在「感應時」畫面勾選要記的卡片；「類別」可以維持全部勾選。點「下一步」→「新增捷徑」。最後在這個自動化的設定列，執行方式選「立即執行」，這樣不必每次先點通知。',
+        },
+        {
+          title: '把金額取整數（建議）',
+          body: '建議加上：加一個「取整數」動作（將〔捷徑輸入〕取整數到〔整數〕），點「捷徑輸入」選「數量」（iOS 把錢包的金額叫「數量」）。如果金額帶小數（例如 120.00），Futari 會讓金額欄空白；先取整數比較保險。「120」「1,280」「１２０」可以，「120.00」「NT$120.00」「120元」會讓金額欄空白。',
+        },
+        {
+          title: '把商家名稱做 URL 編碼',
+          body: '加一個「URL 編碼」動作，輸入選「捷徑輸入」→「商家」。中文和空白不先編碼，網址會斷在中間，描述會空白或只剩一半。描述可有可無，不想帶就跳過這步，並把網址裡的 &note=… 整段拿掉。',
+        },
+        {
+          title: '用「文字」組出網址',
+          body: '加一個「文字」動作，貼上下面的網址，把 [金額] 換成第 2 步的結果、[商家] 換成第 3 步的結果（沒加第 2 步，就換成「捷徑輸入」→「數量」）。想換分類，就改 category= 後面的 id（見下方分類表）。',
+        },
+        {
+          title: '打開 URL',
+          body: '加一個「打開 URL」動作，輸入選上一步的文字。之後每次用 Apple Pay 付款，Futari 會打開並跳出「新增紀錄」，確認後按儲存。',
+        },
+      ],
+      urlLabel: '網址（App）',
+      platformNote: '這個流程只適用於 iPhone 的「捷徑」App。',
+      foreignNote: '外幣提醒：用 Apple Pay 付外幣時，捷徑給的是外幣金額，Futari 會把它當成帳本主幣別的金額帶入。請在「新增紀錄」裡改成實際的金額。',
+    },
+    linePay: {
+      heading: 'LINE Pay：用「付款完成」的通知觸發',
+      intro: 'LINE Pay 沒有交易自動化，但付款完成時 LINE 會送出通知，捷徑可以拿它當觸發條件。',
+      noteVar: '描述',
+      steps: [
+        {
+          title: '新增通知自動化',
+          body: '「捷徑」→「自動化」→ 新增「通知」。App 選 LINE，名稱包含「LINE錢包」，訊息包含「付款完成」，執行方式選「立即執行」。',
+        },
+        {
+          title: '只取出數字金額',
+          body: '用裝置端模型從通知內文取出付款金額，並要求只輸出數字（例如 120，不要帶「元」或「NT$」），把結果命名為「金額」。這一步要用到裝置端模型，需要支援 Apple Intelligence 的 iPhone。',
+        },
+        {
+          title: '準備描述（可選）',
+          body: '加一個「文字」動作，內容例如 LINE Pay，再接一個「URL 編碼」動作，把結果命名為「描述」。不想帶描述就跳過，並把網址裡的 &note=… 整段拿掉。',
+        },
+        {
+          title: '組出網址並打開',
+          body: '加一個「文字」動作，貼上下面的網址，把 [金額]、[描述] 換成上面的結果，再加一個「打開 URL」動作，輸入選這段文字。',
+        },
+      ],
+    },
+    web: {
+      heading: '沒有裝 App：用網頁網址',
+      body: '沒有裝 App、用瀏覽器或「加到主畫面」的人，把網址換成下面這條，「打開 URL」會在 Safari 打開。要先在 Safari 登入過 Futari。# 後面的內容只留在你的瀏覽器，不會送到伺服器。',
+      urlLabel: '網址（網頁）',
+    },
+    params: {
+      heading: '網址可以帶哪些值',
+      intro: '三個參數都可以省略；某個值不合格時，只有那一格不帶入，其他照樣帶入。',
+      cols: {
+        param: '參數',
+        rule: '規則',
+        fallback: '不合格時',
+      },
+      rows: [
+        {
+          param: 'amount',
+          rule: '正整數，1 到 9,999,999。可以有千分位逗號（1,200），全形數字也可以。小數、負數、1e5 這類寫法都不收。',
+          fallback: '金額空白，自己輸入',
+        },
+        {
+          param: 'category',
+          rule: '下表其中一個 id，要全小寫、完全一樣。',
+          fallback: '用預設的「飲食」',
+        },
+        {
+          param: 'note',
+          rule: '會變成「描述」，最多 100 個字。',
+          fallback: '描述空白，儲存前要自己填',
+        },
+      ],
+      categoriesHeading: '分類 id',
+      catCols: {
+        id: 'id',
+        name: '顯示',
+      },
+      fixedNote: '網址只能帶這三個值。日期（今天）、誰付的（你）、分攤方式與幣別，都照「新增紀錄」平常的預設，寫在網址裡也不會採用；也不會自動歸到進行中的旅行，要歸到旅行請在畫面上自己選。',
+    },
+    whenNot: {
+      heading: '什麼時候不會跳出來',
+      intro: '捷徑只負責打開。下面三種情況 Futari 會安靜地略過，不動你的畫面：',
+      items: [
+        '另一個視窗正開著（例如正在改某一筆）：捷徑會被忽略，改到一半的內容不會被動到。關掉視窗後再跑一次。',
+        '正在看過去的章節：過去章節是唯讀的，先切回目前的章節。',
+        '還沒登入：登入後會停在首頁，填好的內容不會留著，再執行一次捷徑就好。',
+      ],
+    },
+    trouble: {
+      heading: '常見狀況',
+      cols: {
+        symptom: '狀況',
+        cause: '原因',
+      },
+      rows: [
+        {
+          symptom: '跳出來了，但金額是空的',
+          cause: '金額不是整數。通常是少了「取整數」那一步，或帶了「元」「NT$」。',
+        },
+        {
+          symptom: '描述空白或只有一半',
+          cause: '商家名稱沒有先經過「URL 編碼」。',
+        },
+        {
+          symptom: '分類變成「飲食」，不是我寫的',
+          cause: 'category 的 id 拼錯，或用了大寫。',
+        },
+      ],
+    },
+  },
+
   errors: {
     actions: {
       group_not_found: '找不到家計簿',
@@ -7273,6 +7648,7 @@ export const zhTW: Translations = {
       split_ratio_invalid: '分攤比例必須為 1–99 的整數',
       split_type_invalid: '分攤方式無效',
       profile_not_found: '找不到個人資料',
+      display_name_reserved: '這個名字是系統保留的，請換一個名字',
       fx_rate_not_set: '未設定 {from} → {to} 匯率',
       fx_rate_not_positive: '匯率必須是正數',
       currency_unsupported: '不支援的幣別',
@@ -7299,6 +7675,9 @@ export const zhTW: Translations = {
       rule_recipient_not_member: '這條規則的收入歸屬已離開這本帳本，請先修改再恢復。',
       pending_income_not_found: '待確認收入已被處理或找不到',
       pending_income_handled_elsewhere: '待確認收入已被其他裝置處理',
+      shortcut_pending_handled_elsewhere: '這張待確認已在其他裝置處理或已過期',
+      shortcut_pending_needs_note: '這張待確認沒有描述，請先編輯再記下',
+      shortcut_pending_invalid: '內容無法記下，請檢查金額與日期',
       review_month_locked: '這個月的留言已鎖定，無法再修改',
       review_message_locked: '留言已鎖定，無法再修改',
       asset_not_found: '找不到該資產',

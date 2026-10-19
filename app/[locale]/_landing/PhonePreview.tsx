@@ -204,6 +204,14 @@ export function PhonePreview({ t, scale = 1 }: Props) {
           +
         </div>
       </div>
+
+      {/* #1527 — each feed row gives off one point of light that drifts out of
+          the screen toward the illustration's light band. Siblings of the
+          clipped screen (not children), so the drift is not cut at its edge.
+          Pure decoration: invisible at rest, CSS-only (see landing-motion.css). */}
+      <span className="lp-dot lp-dot-1 lp-dot-phone-1" />
+      <span className="lp-dot lp-dot-2 lp-dot-phone-2" />
+      <span className="lp-dot lp-dot-3 lp-dot-phone-3" />
     </div>
   )
 }

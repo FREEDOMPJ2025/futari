@@ -22,7 +22,8 @@ export interface PendingCardProps {
   amount: number
   /** Optional payer/split line (expense), or 「前伴侶」 on a card whose person left the ledger (#1588). */
   meta?: string
-  confirmLabel: string
+  /** Omitted together with `onConfirm` on a card that cannot be confirmed as is (#1536: a shortcut card with no note); 改一下 then becomes the primary button. */
+  confirmLabel?: string
   editLabel: string
   skipLabel: string
   /** disabled-state utility classes for the primary / secondary buttons —
@@ -36,7 +37,7 @@ export interface PendingCardProps {
    * `unknown` the failure object was simply dropped and the card faded out as
    * if the write had succeeded.
    */
-  onConfirm: () => Promise<ActionResult<unknown>>
+  onConfirm?: () => Promise<ActionResult<unknown>>
   /** Mutating server action behind skip. Same contract as `onConfirm`. */
   onSkip: () => Promise<ActionResult<unknown>>
   confirmErrorFallback: string
@@ -89,6 +90,7 @@ export function PendingCard({
   }, [])
 
   const handleConfirm = () => startTransition(async () => {
+    if (!onConfirm) return
     try {
       unwrapAction(await onConfirm())
       setFading(true)
@@ -163,19 +165,25 @@ export function PendingCard({
         {/* Buttons render ~36px tall; the ::before adds 4px above and below
             so each hit area reaches 44px without changing the layout (#147). */}
         <div className="flex gap-2">
-          <button
-            type="button" onClick={handleConfirm} disabled={submitting}
-            className={`relative flex-1 rounded-full py-2 text-[var(--fs-sm)] before:absolute before:-inset-y-1 before:inset-x-0 before:content-[''] ${primaryDisabledClass}`}
-            style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)' }}
-          >
-            {confirmLabel}
-          </button>
+          {onConfirm && (
+            <button
+              type="button" onClick={handleConfirm} disabled={submitting}
+              className={`relative flex-1 rounded-full py-2 text-[var(--fs-sm)] before:absolute before:-inset-y-1 before:inset-x-0 before:content-[''] ${primaryDisabledClass}`}
+              style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)' }}
+            >
+              {confirmLabel}
+            </button>
+          )}
           <button
             type="button"
             onClick={onEdit}
             disabled={submitting || !onEdit}
-            className={`relative rounded-full px-4 py-2 text-[var(--fs-sm)] before:absolute before:-inset-y-1 before:inset-x-0 before:content-[''] ${secondaryDisabledClass}`}
-            style={{ border: `1px solid ${cat.ink}40`, color: 'var(--ink-2)', background: 'transparent' }}
+            className={onConfirm
+              ? `relative rounded-full px-4 py-2 text-[var(--fs-sm)] before:absolute before:-inset-y-1 before:inset-x-0 before:content-[''] ${secondaryDisabledClass}`
+              : `relative flex-1 rounded-full py-2 text-[var(--fs-sm)] before:absolute before:-inset-y-1 before:inset-x-0 before:content-[''] ${primaryDisabledClass}`}
+            style={onConfirm
+              ? { border: `1px solid ${cat.ink}40`, color: 'var(--ink-2)', background: 'transparent' }
+              : { background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)' }}
           >
             {editLabel}
           </button>

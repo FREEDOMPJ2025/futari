@@ -13,11 +13,25 @@
 // handle_new_user trigger (on_auth_user_created) inserts a Profiles row
 // WITHOUT ON CONFLICT, so inserting the auth user while the fixture's row
 // exists fails with `duplicate key ... "Profiles_pkey"` (#1596; failure looks
-// like 16 red invite tests unrelated to the change under test). So per user,
+// like 16 red invite tests unrelated to the change under test). So, for all the users,
 // in one transaction: drop the fixture's just-inserted row (nothing references
 // it yet), create the auth user (the trigger re-creates the profile from
 // full_name), then upsert the row so it ends up as the fixture wrote it
 // whether or not the database's trigger inserts one.
+//
+// #1710 — the second reason a fixture needs this row. Since 0096 the
+// `sweep-orphan-ledgers` cron (daily 15:00 UTC) and the tail of
+// `process_account_deletions()` delete every ledger whose member_a has no
+// auth.users row and whose member_b is NULL. A fixture's solo ledger (or a duo
+// after one member left) whose member_a has no auth row therefore vanishes
+// mid-run on the shared dev DB. Failure looks like: no error naming the sweep;
+// a suite fails now and then because a row it just inserted is gone, and a
+// rerun passes. So EVERY member_a of a ledger a suite commits to dev needs a
+// row here, and teardown must call deleteAuthUsers (after the ledger is gone).
+// Exempt: ledgers that only ever exist inside a transaction that is rolled
+// back (the sweep sees committed rows only), and ledgers with member_b set
+// for their whole life. A deliberately deleted / tombstone former member is
+// the one person who should NOT get a row.
 //
 // Connection: on a local throwaway DB, DATABASE_URL (it is the superuser
 // there). Anywhere else DATABASE_URL is the runtime role (futari_app), which
@@ -41,36 +55,53 @@ function adminUrl(): string {
   return direct
 }
 
+// One admin connection per test file, opened on first use and closed by
+// postgres.js after a few idle seconds (no afterAll to forget). Opening one per
+// call cost a TLS handshake to the dev pooler each time — ~0.3 s on top of the
+// statements — and the suites seed in beforeEach, against a 5 s default timeout.
+let admin: postgres.Sql | null = null
+
 async function withAdmin<T>(fn: (sql: postgres.Sql) => Promise<T>): Promise<T> {
-  const sql = postgres(adminUrl(), { max: 1, prepare: false, onnotice: () => {} })
-  try {
-    return await fn(sql)
-  } finally {
-    await sql.end()
-  }
+  admin ??= postgres(adminUrl(), { max: 1, prepare: false, onnotice: () => {}, idle_timeout: 3 })
+  return fn(admin)
 }
 
-/** Give already-inserted Profiles rows their auth.users rows. */
-export async function seedAuthUsers(users: Array<{ id: string; displayName: string }>): Promise<void> {
+/**
+ * Give already-inserted Profiles rows their auth.users rows. Call it right
+ * after inserting the Profiles and BEFORE any ledger names them as a member:
+ * it deletes and re-inserts the Profiles row (see the header), which fails
+ * once something references it. Only `displayName` and `avatarUrl` survive the
+ * re-insert, so pass `avatarUrl` here if the fixture sets one. One transaction,
+ * a fixed number of round trips however many users (the dev pooler is ~40 ms
+ * away).
+ */
+export async function seedAuthUsers(
+  users: Array<{ id: string; displayName: string; avatarUrl?: string | null }>,
+): Promise<void> {
   if (users.length === 0) return
+  const ids = users.map((u) => u.id)
+  const names = users.map((u) => u.displayName)
+  const avatars = users.map((u) => u.avatarUrl ?? null)
   await withAdmin(async (sql) => {
     await sql.begin(async (tx) => {
-      for (const u of users) {
-        await tx`DELETE FROM "Profiles" WHERE id = ${u.id}`
-        await tx`
-          INSERT INTO auth.users (id, raw_user_meta_data)
-          VALUES (${u.id}, jsonb_build_object('full_name', ${u.displayName}::text))
-          ON CONFLICT (id) DO NOTHING`
-        await tx`
-          INSERT INTO "Profiles" (id, display_name)
-          VALUES (${u.id}, ${u.displayName})
-          ON CONFLICT (id) DO UPDATE SET display_name = EXCLUDED.display_name`
-      }
+      await tx`DELETE FROM "Profiles" WHERE id = ANY(${ids}::uuid[])`
+      await tx`
+        INSERT INTO auth.users (id, raw_user_meta_data)
+        SELECT u.id, jsonb_build_object('full_name', u.name)
+          FROM unnest(${ids}::uuid[], ${names}::text[]) AS u(id, name)
+        ON CONFLICT (id) DO NOTHING`
+      await tx`
+        INSERT INTO "Profiles" (id, display_name, avatar_url)
+        SELECT u.id, u.name, u.avatar FROM unnest(${ids}::uuid[], ${names}::text[], ${avatars}::text[]) AS u(id, name, avatar)
+        ON CONFLICT (id) DO UPDATE SET display_name = EXCLUDED.display_name, avatar_url = EXCLUDED.avatar_url`
     })
   })
 }
 
-/** Remove the auth.users rows {@link seedAuthUsers} added. */
+/**
+ * Remove the auth.users rows {@link seedAuthUsers} added. Call it in teardown
+ * after the ledgers that name them are deleted. It does not touch Profiles.
+ */
 export async function deleteAuthUsers(ids: string[]): Promise<void> {
   if (ids.length === 0) return
   await withAdmin(async (sql) => {

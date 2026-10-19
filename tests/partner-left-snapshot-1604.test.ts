@@ -25,7 +25,11 @@ const PRIOR = {
 
 let prior: typeof PRIOR | null = PRIOR
 const getEpochMembers = vi.fn(async (id: string) => (id === 'e1'
-  ? { memberAId: ME, memberBId: EX, memberAName: 'A at close', memberBName: 'B at close' }
+  ? {
+      memberAId: ME, memberBId: EX,
+      memberAName: { name: 'A at close', isLeftLabel: false },
+      memberBName: { name: 'B at close', isLeftLabel: false },
+    }
   : null))
 
 vi.mock('next/navigation', () => ({
@@ -44,7 +48,11 @@ vi.mock('@/lib/db/queries/recurringView', () => ({
   listIncomePendingsForViewer: async () => [],
   listExpensePendingsForViewer: async () => [],
 }))
-vi.mock('@/lib/i18n/t', () => ({ getTranslations: async () => ({}), getLocale: async () => 'zh-TW' }))
+vi.mock('@/lib/db/queries/shortcutPending', () => ({ listShortcutPendingsForViewer: async () => [] }))
+vi.mock('@/lib/i18n/t', () => ({
+  getTranslations: async () => ({ common: { leftPartnerLabel: '已離開的夥伴' } }),
+  getLocale: async () => 'zh-TW',
+}))
 vi.mock('@/lib/db/client', () => ({ db: {} }))
 vi.mock('@/lib/db/queries/balance', () => ({ getGroupBalance: async () => 0, getGroupPendingBalanceDelta: async () => 0 }))
 vi.mock('@/lib/db/queries/transactions', () => ({ listTransactionsPaged: async () => [], monthlyStatsByCategory: async () => [] }))

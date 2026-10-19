@@ -48,7 +48,7 @@ function FullTrustSection({ t }: { t: LandingStrings }) {
       className="relative z-10 px-5 md:px-16 py-16 md:py-28"
       style={{ background: 'var(--bg)' }}
     >
-      <div className="max-w-md md:max-w-[720px] mx-auto text-center">
+      <div className="lp-lamp max-w-md md:max-w-[720px] mx-auto text-center">
         {/* The narrative line is the trust statement — serif standalone, no
             card chrome around it. The three trust facts that used to sit in
             three identical cards collapse to a single inline row underneath. */}

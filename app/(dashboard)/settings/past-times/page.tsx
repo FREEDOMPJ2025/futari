@@ -1,9 +1,11 @@
 import { requireViewerOrRedirect } from '@/lib/auth/viewer'
-import { listEpochsForViewer } from '@/lib/db/queries/epoch'
+import { leftAwareName } from '@/lib/leftPartnerLabel'
+import { countMyNameInLeftLedgers, listEpochsForViewer } from '@/lib/db/queries/epoch'
 import { getPinnedEpochId } from '@/actions/epoch-view'
 import { getLocale, getTranslations } from '@/lib/i18n/t'
 import { BottomNavSkeleton } from '@/app/(dashboard)/_components/BottomNavSkeleton'
 import { PastTimesList } from './_components/PastTimesList'
+import { HideNameInLeftLedgers } from './_components/HideNameInLeftLedgers'
 import { unwrapAction } from '@/lib/action-errors'
 
 /**
@@ -18,13 +20,15 @@ import { unwrapAction } from '@/lib/action-errors'
 export default async function PastTimesPage() {
   const { user } = await requireViewerOrRedirect()
 
-  const [epochs, pinnedId, locale, t] = await Promise.all([
+  const [epochs, pinnedId, locale, t, leftNames] = await Promise.all([
     // Exactly the chapters a pin can open (#1603 / #1612): ledgers the viewer
     // is still in, plus closed chapters of a ledger they left (read-only).
     listEpochsForViewer(user.id),
     getPinnedEpochId().then(unwrapAction),
     getLocale(),
     getTranslations(),
+    // #1619 — the entry below shows only while something would change.
+    countMyNameInLeftLedgers(user.id),
   ])
 
   return (
@@ -34,8 +38,10 @@ export default async function PastTimesPage() {
           id: e.id,
           startedAt: e.startedAt.toISOString(),
           endedAt: e.endedAt?.toISOString() ?? null,
-          memberAName: e.memberAName,
-          memberBName: e.memberBName,
+          // #1782 — translated on the server: a marked slot is the
+          // viewer's label, any other name as written.
+          memberAName: leftAwareName(e.memberAName, t.common.leftPartnerLabel),
+          memberBName: leftAwareName(e.memberBName, t.common.leftPartnerLabel),
           memberAId: e.memberAId,
           memberBId: e.memberBId,
         }))}
@@ -46,6 +52,9 @@ export default async function PastTimesPage() {
         backLabel={t.pastTimes.back}
         neutralPartnerLabel={t.common.partner}
       />
+      {leftNames.chapters + leftNames.outings > 0 && (
+        <HideNameInLeftLedgers chapters={leftNames.chapters} outings={leftNames.outings} />
+      )}
       <BottomNavSkeleton hideFab />
     </div>
   )

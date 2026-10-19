@@ -1,6 +1,6 @@
 import {
   pgTable, pgEnum, uuid, text, integer, numeric,
-  timestamp, date, jsonb, boolean, primaryKey, unique, uniqueIndex, check, foreignKey,
+  timestamp, date, jsonb, boolean, primaryKey, unique, uniqueIndex, index, check, foreignKey,
 } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
 
@@ -49,6 +49,12 @@ export const profiles = pgTable('Profiles', {
   defaultSplitType: splitTypeEnum('default_split_type').notNull().default('half'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   deletionRequestedAt: timestamp('deletion_requested_at', { withTimezone: true }),
+  // #1782 (0099) — this row is an account-deletion tombstone (written only by
+  // process_account_deletions, together with the 「已離開的夥伴」 name). Server
+  // only: never select it into a client prop (after-leaving-design: nothing
+  // on screen may say an account was deleted). Readers fold it into one
+  // "left label" boolean (lib/leftPartnerLabel.ts).
+  isTombstone: boolean('is_tombstone').notNull().default(false),
 })
 
 export const oikosGroups = pgTable('OikosGroups', {
@@ -102,6 +108,14 @@ export const groupEpochs = pgTable('GroupEpochs', {
   // without them every dashboard request fails with "column does not exist".
   memberAName: text('member_a_name'),
   memberBName: text('member_b_name'),
+  // #1782 (0099) — the slot holds the system's 「已離開的夥伴」 label (account
+  // deletion, #1619, or a tombstone captured at close), not a name someone
+  // chose. The ONLY thing a reader decides on: true → show the viewer's
+  // translation; false → show the name as written, even when it reads
+  // 「已離開的夥伴」. Written only by the database functions and
+  // hideNameInLeftLedgers; no client path writes it.
+  memberANameIsLeftLabel: boolean('member_a_name_is_left_label').notNull().default(false),
+  memberBNameIsLeftLabel: boolean('member_b_name_is_left_label').notNull().default(false),
 })
 
 export const groupInvites = pgTable('GroupInvites', {
@@ -681,6 +695,9 @@ export const outingParticipants = pgTable('OutingParticipants', {
   claimedAt: timestamp('claimed_at', { withTimezone: true }),
   deactivatedAt: timestamp('deactivated_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  // #1782 (0099) — display_name is the system's 「已離開的夥伴」 label (account
+  // deletion or #1619). Same rule as GroupEpochs.member_*_name_is_left_label.
+  displayNameIsLeftLabel: boolean('display_name_is_left_label').notNull().default(false),
 })
 
 // 支出。amount 為出遊 currency 整數。entered_by 稽核（匿名多人寫入要可追）。
@@ -776,4 +793,54 @@ export const pushTokens = pgTable('PushTokens', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (t) => ({
   uniqueUserPlatformToken: unique('push_tokens_unique').on(t.userId, t.platform, t.token),
+}))
+
+// ─── #1536 — personal shortcut keys and the pending cards they create ───────
+// drizzle/0098_shortcut_pending.sql. Server-only (RLS on, no policies,
+// anon / authenticated revoked); not in the realtime publication.
+//
+// `user_id` has NO .references() here on purpose: in SQL it is
+// REFERENCES auth.users(id) ON DELETE CASCADE, and drizzle has no model of
+// auth.users. It must not point at "Profiles": account deletion (0096) always
+// deletes auth.users but often keeps the Profiles row as a tombstone, so a
+// cascade from Profiles would never fire and a deleted user's key hashes and
+// cards would stay forever (nothing errors). This file is not used to
+// generate migrations (hand-written SQL since 0008), so the missing
+// .references() changes nothing in the database.
+
+export const shortcutKeys = pgTable('ShortcutKeys', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid('user_id').notNull(), // FK → auth.users ON DELETE CASCADE (SQL only, see above)
+  // hashShortcutKey(key) (lib/shortcutKey.ts): SHA-256 hex of the full
+  // `fts_sk_…` key. The plaintext key is never stored.
+  keyHash: text('key_hash').notNull(),
+  // shortcutKeyHint(key): last 4 characters, shown on the settings page.
+  keyHint: text('key_hint').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+}, (t) => ({
+  keyHashUnique: unique('ShortcutKeys_key_hash_unique').on(t.keyHash),
+  keyHashIsSha256Hex: check('ShortcutKeys_key_hash_is_sha256_hex', sql`${t.keyHash} ~ '^[0-9a-f]{64}$'`),
+  // At most one unrevoked key per user.
+  oneActivePerUser: uniqueIndex('ShortcutKeys_one_active_per_user')
+    .on(t.userId)
+    .where(sql`revoked_at IS NULL`),
+}))
+
+export const shortcutPendingExpenses = pgTable('ShortcutPendingExpenses', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid('user_id').notNull(), // FK → auth.users ON DELETE CASCADE (SQL only, see above)
+  keyId: uuid('key_id').references(() => shortcutKeys.id, { onDelete: 'set null' }),
+  amount: integer('amount').notNull(),
+  category: text('category'),
+  description: text('description'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  skippedAt: timestamp('skipped_at', { withTimezone: true }),
+}, (t) => ({
+  amountPositive: check('ShortcutPendingExpenses_amount_positive', sql`${t.amount} > 0`),
+  keyCreatedIdx: index('ShortcutPendingExpenses_key_created_idx').on(t.keyId, t.createdAt),
+  userOpenIdx: index('ShortcutPendingExpenses_user_open_idx')
+    .on(t.userId)
+    .where(sql`skipped_at IS NULL`),
 }))

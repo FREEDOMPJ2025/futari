@@ -80,7 +80,7 @@ const amy = { id: AMY, displayName: 'Amy', initial: 'A', avatarUrl: null, defaul
 const cleo = { id: CLEO, displayName: 'Cleo', initial: 'C', avatarUrl: CLEO_AVATAR, defaultSplitType: 'half' as const, who: 'T' as const }
 
 const chapterWithBen = buildChapterIdentity(
-  { memberAId: AMY, memberBId: BEN, memberAName: 'Amy', memberBName: 'Ben' },
+  { memberAId: AMY, memberBId: BEN, memberAName: 'Amy', memberBName: 'Ben', memberAIsLeftLabel: false, memberBIsLeftLabel: false },
   AMY,
   '對方',
 )
@@ -121,16 +121,16 @@ const row = (over: Partial<CompactRowProps['tx']>): CompactRowProps['tx'] => ({
 
 describe('buildChapterIdentity', () => {
   it('the other person on the chapter row, name + initial, never an avatar', () => {
-    expect(chapterWithBen).toEqual({ partner: { id: BEN, displayName: 'Ben', initial: 'B', avatarUrl: null }, isSolo: false })
+    expect(chapterWithBen).toEqual({ partner: { id: BEN, displayName: 'Ben', initial: 'B', avatarUrl: null, isLeftLabel: false }, isSolo: false })
   })
 
   it('works when the viewer was member B of the chapter', () => {
-    const id = buildChapterIdentity({ memberAId: BEN, memberBId: AMY, memberAName: 'Ben', memberBName: 'Amy' }, AMY, '對方')
+    const id = buildChapterIdentity({ memberAId: BEN, memberBId: AMY, memberAName: 'Ben', memberBName: 'Amy', memberAIsLeftLabel: false, memberBIsLeftLabel: false }, AMY, '對方')
     expect(id.partner).toMatchObject({ id: BEN, displayName: 'Ben' })
   })
 
   it('a solo chapter has no partner', () => {
-    expect(buildChapterIdentity({ memberAId: AMY, memberBId: null, memberAName: 'Amy', memberBName: null }, AMY, '對方'))
+    expect(buildChapterIdentity({ memberAId: AMY, memberBId: null, memberAName: 'Amy', memberBName: null, memberAIsLeftLabel: false, memberBIsLeftLabel: false }, AMY, '對方'))
       .toEqual({ partner: null, isSolo: true })
   })
 
@@ -139,7 +139,7 @@ describe('buildChapterIdentity', () => {
   })
 
   it('a missing profile name falls back to the generic label', () => {
-    const id = buildChapterIdentity({ memberAId: AMY, memberBId: BEN, memberAName: 'Amy', memberBName: null }, AMY, '對方')
+    const id = buildChapterIdentity({ memberAId: AMY, memberBId: BEN, memberAName: 'Amy', memberBName: null, memberAIsLeftLabel: false, memberBIsLeftLabel: false }, AMY, '對方')
     expect(id.partner).toMatchObject({ displayName: '對方', initial: '對' })
   })
 })

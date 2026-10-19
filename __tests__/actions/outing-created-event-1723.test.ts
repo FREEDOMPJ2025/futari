@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterAll, beforeEach } from 'vitest'
-import { loadEnvLocal, seedGroup } from '../outing/_setup'
+import { loadEnvLocal, seedGroup, deleteSeededAuthUsers } from '../outing/_setup'
 
 // ─── #1723 — `outing_created` is sent from createOuting, keyed on the user id ──
 //
@@ -43,6 +43,9 @@ const { createOuting } = await import('@/actions/outing')
 
 const seededGroups = new Set<string>()
 beforeEach(() => { captured.length = 0 })
+
+// Its own hook so a failing purge below cannot leave the auth rows behind.
+afterAll(async () => { await deleteSeededAuthUsers() })
 
 afterAll(async () => {
   const ids = [...seededGroups]

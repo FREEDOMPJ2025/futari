@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import { randomUUID } from 'node:crypto'
-import { loadEnvLocal, seedGroup as seedGroupRow } from '../outing/_setup'
+import { loadEnvLocal, seedGroup as seedGroupRow, deleteSeededAuthUsers } from '../outing/_setup'
 
 // ─── 出遊 v1.6.0 against the real dev database (#943, plan v2.1 S-C / S-D / S-E) ──
 //
@@ -72,6 +72,9 @@ async function seedGroup(opts?: Parameters<typeof seedGroupRow>[0]) {
   seededGroups.add(seed.groupId)
   return seed
 }
+
+// Its own hook so a failing purge below cannot leave the auth rows behind.
+afterAll(async () => { await deleteSeededAuthUsers() })
 
 afterAll(async () => {
   const ids = [...seededGroups]
@@ -681,7 +684,7 @@ describe('setBaseCurrency and createOuting serialize on the group row (#1378 re-
 
 /** What the member page computes (page.tsx): the view's signed couple net, from the current group row. */
 async function viewCoupleNet(outingId: string, groupId: string) {
-  const detail = (await getOutingDetail(outingId))!
+  const detail = (await getOutingDetail(outingId, '已離開的夥伴'))!
   const [g] = await db.select().from(oikosGroups).where(eq(oikosGroups.id, groupId))
   const { a, b } = memberPidsOf(detail.participants, g.memberA, g.memberB)
   return buildOutingView({
@@ -782,7 +785,7 @@ describe('endOuting folds the A<->B suggestion line, not a cross term (#1634)', 
     const [me] = await members(id)
     const { id: f } = ok(await addOutingParticipant({ outingId: id, displayName: '阿傑' }))
     ok(await addOutingExpense({ outingId: id, paidByParticipantId: me.id, amount: 100, participantIds: [me.id, f] }))
-    const detail = (await getOutingDetail(id))!
+    const detail = (await getOutingDetail(id, '已離開的夥伴'))!
     const [g] = await db.select().from(oikosGroups).where(eq(oikosGroups.id, solo.groupId))
     expect(memberPidsOf(detail.participants, g.memberA, g.memberB).b).toBeNull()
     expect((await viewCoupleNet(id, solo.groupId)).coupleNet).toBe(0)

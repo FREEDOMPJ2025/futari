@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Ember } from './Ember'
+import { Phrase } from './Phrase'
 import { s } from './brand-inner'
 
 /**
@@ -24,7 +25,7 @@ export function LampLinkRow({
       <Link href={href} className={s.link}>
         <Ember />
         <p className={`${s.rowTitle} text-base font-medium`}>{name}</p>
-        <p className={`${s.rowBody} text-sm`}>{description}</p>
+        <p className={`${s.rowBody} text-sm`}><Phrase body text={description} /></p>
         <span className={s.arrow} aria-hidden="true">
           →
         </span>

@@ -87,7 +87,7 @@ export function MigrateHero({
         className="text-base leading-[1.7] m-0 md:max-w-[520px] mx-auto md:mx-0"
         style={{ color: 'var(--ink-2)', maxWidth: 520 }}
       >
-        {subtitle}
+        <Phrase body text={subtitle} />
       </p>
     </header>
   )

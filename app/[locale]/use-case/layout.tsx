@@ -25,7 +25,7 @@ export default async function UseCaseLayout({
   return (
     <main
       id="main"
-      className="relative min-h-dvh overflow-hidden"
+      className="bi-root relative min-h-dvh overflow-hidden"
       style={{
         background: 'var(--bg-committed)',
         color: 'var(--ink)',

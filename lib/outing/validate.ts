@@ -1,5 +1,6 @@
 import { actionError } from '@/lib/action-errors'
 import { MAX_AMOUNT } from '@/lib/validators'
+import { isReservedDisplayName } from '@/lib/reservedDisplayName'
 
 /**
  * Input rules for the 出遊 actions (#943). Pure: every function either returns
@@ -45,10 +46,16 @@ export function normalizeOutingName(name: unknown): string {
   return trimmed
 }
 
+/**
+ * A participant name someone types (addOutingParticipant, the signed-out
+ * joinOuting). #1782 — the system's left label in any language is refused
+ * (lib/reservedDisplayName.ts); the accepted name is stored as typed.
+ */
 export function normalizeParticipantName(name: unknown): string {
   const trimmed = typeof name === 'string' ? name.trim() : ''
   if (!trimmed) throw actionError('outing_participant_name_empty')
   if (codePointLength(trimmed) > OUTING_PARTICIPANT_NAME_MAX) throw actionError('outing_participant_name_too_long')
+  if (isReservedDisplayName(trimmed)) throw actionError('display_name_reserved')
   return trimmed
 }
 
@@ -61,7 +68,12 @@ export function normalizeParticipantName(name: unknown): string {
  */
 export function memberParticipantName(displayName: string | null | undefined, fallback: string): string {
   const trimmed = (displayName ?? '').trim()
-  return truncateCodePoints(trimmed || fallback, OUTING_PARTICIPANT_NAME_MAX)
+  // #1782 — a member whose profile name is the system's left label (set
+  // before names were checked) joins the list under the generic name, so the
+  // copy cannot pass for a system label. Same reason as above for not
+  // rejecting: creating an outing must not fail on a profile name.
+  const usable = trimmed && !isReservedDisplayName(trimmed) ? trimmed : ''
+  return truncateCodePoints(usable || fallback, OUTING_PARTICIPANT_NAME_MAX)
 }
 
 export function normalizeDescription(description: unknown): string | null {

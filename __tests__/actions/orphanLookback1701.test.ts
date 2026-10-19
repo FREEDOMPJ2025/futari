@@ -97,7 +97,14 @@ const adminUrl = process.env.DATABASE_URL ?? ''
 const isLocalDb = isLocalUrl(adminUrl)
 let standInUrl = ''
 if (isLocalDb) {
-  standInUrl = await createStandInDb(adminUrl, '0096')
+  standInUrl = await createStandInDb(
+    adminUrl,
+    // #1782 — the app code under test names every column of today's schema
+    // (0099 added marker columns): a stand-in pinned to an older migration
+    // fails with "column does not exist". Always the latest.
+    (JSON.parse(readFileSync(resolve(__dirname, '../../drizzle/meta/_journal.json'), 'utf-8')) as { entries: { tag: string }[] })
+    .entries.at(-1)!.tag.slice(0, 4),
+  )
   process.env.DATABASE_URL = standInUrl
   process.env.DATABASE_URL_DIRECT = standInUrl
 }
@@ -275,7 +282,8 @@ function diffPaths(got: unknown, want: unknown, path = '$', out: string[] = []):
 function firstDiff(got: string, want: string): string | null {
   if (got === want) return null
   try {
-    return diffPaths(JSON.parse(got), JSON.parse(want)).join('\n')
+    const paths = diffPaths(JSON.parse(got), JSON.parse(want))
+    return paths.length === 0 ? null : paths.join('\n') // equal but for key order
   } catch {
     return `got ${got.slice(0, 300)}\nwant ${want.slice(0, 300)}`
   }
@@ -283,7 +291,9 @@ function firstDiff(got: string, want: string): string | null {
 
 /**
  * The allowed differences, applied to the "before" render.
- *  1. D's name reads 「已離開的夥伴」 (and the avatar initial follows the name).
+ *  1. D's name reads 「已離開的夥伴」, and (#1782) every place it shows is
+ *     marked as the system's left label: `isLeftLabel` true, and the chapter
+ *     partner's avatar has no initial (the neutral avatar).
  *  2. Outing detail: the processor unbinds D's participant (0088, unchanged by
  *     0096: profile_id NULL, claimed_at set), so the row reads `claimed`
  *     instead of `bound`, `isMember` is false, and the member-to-member fold
@@ -294,12 +304,28 @@ function firstDiff(got: string, want: string): string | null {
  *     D's ledger after the chapter (a friend slot); D's deletion removes that
  *     post-chapter outing (not visible-to-chapter), so it leaves the list.
  */
+/** #1782 — D's slots, after the deletion, carry the left-label marker. */
+function markLeft(v: unknown): void {
+  if (Array.isArray(v)) { v.forEach(markLeft); return }
+  if (!v || typeof v !== 'object') return
+  const o = v as Record<string, unknown>
+  // People objects that carry the flag: those that already had it, and the
+  // review page's partner (id, displayName, avatarUrl), which gains it. The
+  // outing net view (id, displayName, net) has no flag.
+  if (o.displayName === TOMB && ('isLeftLabel' in o || 'avatarUrl' in o)) {
+    o.isLeftLabel = true
+    if ('initial' in o) o.initial = ''
+  }
+  if (o.name === TOMB && 'isLeftLabel' in o) o.isLeftLabel = true
+  for (const k of Object.keys(o)) markLeft(o[k])
+}
+
 function allowed(name: string, s: string): string {
-  const named = s
-    .split(`${tag} D real name`).join(TOMB)
-    .replace(new RegExp(`("displayName":"${TOMB}","initial":")[^"]*"`, 'g'), '$1已"')
-  if (!named.startsWith('{')) return named
+  const named = s.split(`${tag} D real name`).join(TOMB)
+  if (!named.startsWith('{') && !named.startsWith('[')) return named
   const o = JSON.parse(named)
+  markLeft(o)
+  if (Array.isArray(o)) return JSON.stringify(o)
   if (name === 'outing detail outingIn') {
     o.props.view.coupleNet = 0
     for (const p of o.props.participants) {
@@ -360,12 +386,12 @@ describe.skipIf(!isLocalDb)('#1701 S2 — X looks back over an orphan ledger', (
 
   describe('past-times list and the pin', () => {
     it('listEpochsForViewer: the same chapters for X, with D\'s slot 「已離開的夥伴」', () => {
-      const b = epochsBefore as { id: string; memberAName: string | null }[]
+      const b = epochsBefore as { id: string; memberAName: { name: string | null; isLeftLabel: boolean } }[]
       const a = epochsAfter as typeof b
       expect(a.map((e) => e.id)).toContain(w.E1)
       expect(a.map((e) => e.id).sort()).toEqual(b.map((e) => e.id).sort())
       expect(JSON.parse(allowed('', JSON.stringify(b)))).toEqual(JSON.parse(JSON.stringify(a)))
-      expect(a.find((e) => e.id === w.E1)!.memberAName).toBe(TOMB)
+      expect(a.find((e) => e.id === w.E1)!.memberAName).toEqual({ name: TOMB, isLeftLabel: true })
       // E0 / E2 name only D: not X's chapters.
       expect(a.map((e) => e.id)).not.toContain(w.E0)
       expect(a.map((e) => e.id)).not.toContain(w.E2)

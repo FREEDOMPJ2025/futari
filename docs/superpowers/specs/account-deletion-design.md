@@ -1,9 +1,9 @@
 ---
-last_updated: 2026-10-15
+last_updated: 2026-10-17
 status: shipped
 first_shipped_in: v1.5.1
 related_specs: [native-auth, product]
-related_issues: ["#923", "#848", "#1604", "#1618", "#1701"]
+related_issues: ["#923", "#848", "#1604", "#1618", "#1619", "#1701", "#1782"]
 ---
 
 # Account Deletion（帳號刪除）
@@ -38,6 +38,10 @@ related_issues: ["#923", "#848", "#1604", "#1618", "#1701"]
 - 刪除者的交易 / 愛物**留在 group**，成為另一半保留的共享帳本。
 - 移除刪除者真正的 PII（登入、email、provider 身分、顯示名、頭像）。
 - 共享交易上的人名顯示為「已離開的夥伴」。
+  - 自 #1619 起，「已離開的夥伴」**不再等於帳號已刪除**：離開帳本的人可以自己選擇，把自己在已離開帳本的已關閉章節裡的名字換成同一個字樣，帳號仍在（見 [after-leaving](after-leaving-design.md)「人：停在當時」）。判斷帳號是否刪除要看 `auth.users`（`public.profile_is_live`），不能看這個名字。
+    - 失效的樣子：沒有任何錯誤；某段程式或文案把「名字是已離開的夥伴」當成「帳號已刪除」，對一個還在的人做了只該對已刪除帳號做的事。
+  - 自 #1782（migration 0099）起，**標記欄位是「這格是系統寫的已離開的夥伴」的唯一判斷依據**；寫進名字欄的字面值只是 fallback（舊程式、手寫 SQL 看到的仍是它）。刪除流程在寫字面值的同一條 UPDATE 設 `GroupEpochs.member_*_name_is_left_label`、`OutingParticipants.display_name_is_left_label`，墓碑分支設 `Profiles.is_tombstone`。讀取端只看標記，顯示讀者語系的說法（已離開的夥伴／已离开的伙伴／Partner who left／退出したパートナー）與系統樣式；`is_tombstone` 不送到任何 client。細節見 [after-leaving](after-leaving-design.md)「人：停在當時」。
+    - 失效的樣子：沒有任何錯誤。之後重定義 `process_account_deletions` 的 migration 漏了這四個賦值，刪除之後名字欄仍是字面值，但標記是 false：英文、日文的讀者看到繁中的「已離開的夥伴」，而且樣式跟一般人一樣（`__tests__/actions/leftLabelMarker1782.test.ts` 與 `tests/migration-0099-body-1782.test.ts` 會擋）。反過來，用名字比對字面值來判斷的程式，會把本人取了這個名字的人當成系統標記。
 
 **不採用**的替代方案：
 
@@ -81,9 +85,10 @@ Google 另要求一個免登入、可達的 web 頁描述刪除途徑。現有 `
    - 刪除者的交易 / 愛物留在 group。
    - group 轉 solo 給另一半：刪除者是 member_a → 另一半從 B 升 A，並比照 `confirmSwap` 翻轉 `split_ratio_a` / `default_split_ratio_a` 並 recalc balance；刪除者是 member_b → 直接 `member_b = NULL`。
    - 關閉雙人 epoch、開另一半的 solo epoch、bump `current_epoch_started_at`（比照 `leaveGroup`）。
-   - 刪 `auth.users`（移除登入 / email / provider 這些真正 PII），但**保留一個洗白的 `Profiles` 墓碑列**（displayName→「已離開的夥伴」、avatar→NULL），讓 `paid_by` / `recipient_id` 等 FK 仍解析得到。
+   - 刪 `auth.users`（移除登入 / email / provider 這些真正 PII），但**保留一個洗白的 `Profiles` 墓碑列**（displayName→「已離開的夥伴」、avatar→NULL、`is_tombstone`→true〔#1782〕），讓 `paid_by` / `recipient_id` 等 FK 仍解析得到。
    - 已關閉的章節各自保存了兩人在關閉當時的名字（#1604，migration 0088）。刪除時，刪除者在**所有**帳本、所有章節裡的這個名字一律換成「已離開的夥伴」，包括很久以前離開的帳本，以及寬限期內被對方關掉的章節。墓碑列本身不夠：章節不再讀 `Profiles` 的名字。
      - 失效的樣子：沒有任何錯誤；對方打開舊章節，看到的仍是刪除者的真名。
+     - 同一個字樣也會由 #1619 寫入（離開的人自己選擇，帳號仍在），所以章節裡的「已離開的夥伴」不代表該帳號已刪除。
    - 月回顧快照的「最大筆支出」不存名字，只存付款人 id（#1618，migration 0089）；頁面以該章節兩人的章節名字解析，所以刪除後同樣顯示「已離開的夥伴」，刪除流程不需要額外步驟。0089 把既有快照裡的名字全部清成 NULL；從 0089 之前的備份還原時要重跑這一步（[ops-runbook](../ops-runbook.md)「真正還原」第 7 步）。
      - 失效的樣子：沒有任何錯誤；對方打開刪除者付過最大一筆的那個月，看到的仍是真名。
    - 帳本名不取自任何人的名字（#1622，migration 0090）：`leaveGroup` 為離開者新建的帳本改用中性預設名（`postLeave.newLedgerName`，zh-TW「家計簿」），不再是「{displayName} 的家計簿」；0090 把既有這類帳本一次改名為「家計簿」。刪除流程不需要額外步驟，`process_account_deletions` 不動帳本名。

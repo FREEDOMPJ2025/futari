@@ -9,9 +9,11 @@ import { getGroupBalance, getGroupPendingBalanceDelta } from '@/lib/db/queries/b
 import { listTransactionsPaged, monthlyStatsByCategory } from '@/lib/db/queries/transactions'
 import { listIncomeMonthSummary, listIncomesPaged } from '@/lib/db/queries/incomes'
 import { resolveViewerEpochContext, getLatestPriorClosedEpoch, getEpochMembers } from '@/lib/db/queries/epoch'
+import { leftAwareName } from '@/lib/leftPartnerLabel'
 import { PartnerLeftCard } from './_components/PartnerLeftCard'
 import { WelcomeSoloCard } from './_components/WelcomeSoloCard'
 import { listExpensePendingsForViewer, listIncomePendingsForViewer } from '@/lib/db/queries/recurringView'
+import { listShortcutPendingsForViewer } from '@/lib/db/queries/shortcutPending'
 import { loadMemberLinkScope } from '@/lib/db/queries/insuranceView'
 import { listActiveTrips } from '@/lib/db/queries/trips'
 import { listRatesForGroup } from '@/lib/db/queries/currencyRates'
@@ -124,6 +126,7 @@ export default async function DashboardPage() {
     incomeSummary,
     pendings,
     expensePendings,
+    shortcutPendings,
     latestIncomes,
     soloExpenseStats,
     t,
@@ -143,6 +146,9 @@ export default async function DashboardPage() {
     listIncomeMonthSummary(group.id, yyyymm, epochWindow),
     epochWindow.isPast ? Promise.resolve([]) : listIncomePendingsForViewer(group.id, memberScope),
     epochWindow.isPast ? Promise.resolve([]) : listExpensePendingsForViewer(group.id, memberScope),
+    // #1536 — the viewer's own shortcut cards (never the partner's), today's
+    // like the recurring ones: none on a pinned past chapter.
+    epochWindow.isPast ? Promise.resolve([]) : listShortcutPendingsForViewer(user.id),
     listIncomesPaged(group.id, null, 1, undefined, undefined, undefined, undefined, epochWindow),
     // Solo expense hero (#1118): the month total + record count that replace
     // the balance a solo ledger cannot have. Reuses the stats donut's query and
@@ -206,9 +212,12 @@ export default async function DashboardPage() {
     // snapshot), through the one chapter-name source; never today's profile
     // name. The chapter is this group's and the viewer is its member_a
     // (getEpochMembers' caller contract).
+    // #1782 — a marked slot reads in the viewer's language.
     const closedChapter = await getEpochMembers(priorClosedEpoch.id)
     partnerLeftProps = {
-      partnerName: closedChapter?.memberBName ?? '',
+      partnerName: closedChapter
+        ? (leftAwareName(closedChapter.memberBName, t.common.leftPartnerLabel) ?? '')
+        : '',
       currentEpochId: epochWindow.epochId,
     }
   }
@@ -357,6 +366,7 @@ export default async function DashboardPage() {
         expenseMonthKey={yyyymm}
         pendings={pendings}
         expensePendings={expensePendings}
+        shortcutPendings={shortcutPendings}
         feedDataPromise={feedDataPromise}
         groupDefaultRatioA={context.isFormerMemberView ? null : (group.defaultSplitRatioA ?? null)}
         baseCurrency={parseCurrencyCode(group.baseCurrency) ?? 'twd'}

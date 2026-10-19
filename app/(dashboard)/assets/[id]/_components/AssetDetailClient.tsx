@@ -20,7 +20,8 @@ import { AibutsuHintCard } from './AibutsuHintCard'
 import type { PagedTxnRow } from '@/actions/transaction'
 import { loadMoreTransactionsForAsset } from '@/actions/transaction'
 import { revealCarPlate } from '@/actions/asset'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import type { FuelType } from '@/lib/fuel'
 import type { CarPrimaryUserView } from '@/lib/carMemberLink'
 import { unwrapAction } from '@/lib/action-errors'
@@ -72,6 +73,7 @@ export function AssetDetailClient({
 }: Props) {
   const router = useRouter()
   const t = useTranslations()
+  const locale = useLocale()
   const { isPast } = useMember()
   const [editAssetOpen, setEditAssetOpen] = useState(false)
   const [addOpen, setAddOpen] = useState(false)
@@ -223,7 +225,7 @@ export function AssetDetailClient({
         header={(count) => (
           <div className="flex items-center justify-between">
             <div className="text-xs tracking-[1.5px] uppercase text-ink-3 font-numeric">
-              {t.assetDetail.timelineEntries.replace('{count}', String(count))}
+              {pickPlural(locale, count, t.assetDetail.timelineEntries).replace('{count}', String(count))}
             </div>
             {/* "+ 其他支出" is a write entry — hide on past-epoch view. */}
             {fuelType !== 'electric' && !isPast && (

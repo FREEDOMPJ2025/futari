@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { getLocale, getTranslations } from '@/lib/i18n/t'
-import { IS_PROD_DEPLOY } from '@/lib/deployEnv'
+import { DEPLOY_ENV, IS_PROD_DEPLOY } from '@/lib/deployEnv'
 import { InAppBrowserGuardLazy } from '@/components/InAppBrowserGuardLazy'
 import { PostHogProvider } from './providers'
 import { PostHogPageView } from './posthog-pageview'
@@ -129,7 +129,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <PostHogPageView />
           {children}
         </PostHogProvider>
-        <VercelInsights />
+        {/* Only on Vercel (#1733): /_vercel/* is served by the platform there.
+            Off Vercel the two script requests fall through to proxy.ts and are
+            redirected to /sign-in, so a local `next start` logs
+            "SyntaxError: Unexpected token '<'" and fetches /sign-in twice on
+            every brand-page load — noise in local Lighthouse runs. */}
+        {DEPLOY_ENV !== 'local' && <VercelInsights />}
         {/* Gated off URLs that carry a bearer token: outing share links (#1558),
             invites and the sign-in bounce whose `next` is one (#1583). */}
         {IS_PROD_DEPLOY && <GoogleAnalyticsGate gaId={GA_MEASUREMENT_ID} />}

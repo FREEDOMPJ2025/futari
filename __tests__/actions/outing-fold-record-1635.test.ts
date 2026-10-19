@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import postgres from 'postgres'
-import { loadEnvLocal, seedGroup as seedGroupRow } from '../outing/_setup'
+import { loadEnvLocal, seedGroup as seedGroupRow, deleteSeededAuthUsers } from '../outing/_setup'
 
 // ─── #1635: an ended outing stops listing the line it already folded ────────
 //
@@ -77,6 +77,9 @@ async function purgeOutingRows(ids: string[]) {
   })
 }
 
+// Its own hook so a failing purge below cannot leave the auth rows behind.
+afterAll(async () => { await deleteSeededAuthUsers() })
+
 afterAll(async () => {
   const ids = [...seededGroups]
   await purgeOutingRows(ids)
@@ -129,7 +132,7 @@ const isMemberLine = (o: Seeded) => (t: { from: string; to: string }) =>
 
 /** What the member page (page.tsx) renders. */
 async function memberViewTransfers(o: Seeded) {
-  const detail = (await getOutingDetail(o.outingId))!
+  const detail = (await getOutingDetail(o.outingId, '已離開的夥伴'))!
   const [g] = await db.select().from(oikosGroups).where(eq(oikosGroups.id, o.groupId))
   const { a, b } = memberPidsOf(detail.participants, g.memberA, g.memberB)
   return buildOutingView({
@@ -149,6 +152,7 @@ async function publicView(o: Seeded) {
   return getOutingFullView(
     { id: row.id, groupId: row.groupId, epochId: row.epochId, status: row.status, name: row.name, currency: row.currency },
     { kind: 'participant', participantId: o.pF } as never,
+    '已離開的夥伴',
   )
 }
 

@@ -92,7 +92,6 @@ export const en: Translations = {
     cta: 'Record together',
     ctaHint: 'Free · One ledger for two · Continue with Google or Apple',
     alreadyHaveAccount: 'I already have an account',
-    // TODO(i18n): native review pending (#1413) — MT-quality draft.
     appStoreCta: 'Get it on the App Store',
     appStoreCtaHint: 'Works on iPhone and iPad',
     androidBetaCta: 'Join the Android beta',
@@ -100,8 +99,7 @@ export const en: Translations = {
     useWebVersion: 'Use the web version',
     trustEncrypted: 'Open only to you two',
     trustFree: 'Free to use',
-    // TODO(i18n): native review pending (#1333) — MT-quality draft.
-    trustPwa: 'iPhone app · Web PWA',
+    trustPwa: 'iPhone app · Web',
     trust: {
       narrative: 'Your records belong only to the two of you. No ads, no data selling.',
       encryption: {
@@ -212,6 +210,7 @@ export const en: Translations = {
     done: 'Done',
     me: 'Me',
     partner: 'Partner',
+    leftPartnerLabel: 'Partner who left',
     you: 'You',
     all: 'All',
     error: 'Something went wrong',
@@ -303,6 +302,18 @@ export const en: Translations = {
   },
 
   dashboard: {
+    shortcutPending: {
+      sectionLabel: 'From your Shortcut',
+      primaryAction: 'Record',
+      editAction: 'Edit',
+      editOnlyAction: 'Edit and record',
+      skipAction: 'Skip',
+      noNoteHint: 'No description yet. Edit it before recording.',
+      skipConfirmTitle: 'Skip this one?',
+      skipConfirmDescription: "It won't be added to your ledger, and the card will go away.",
+      expandAll: 'Expand all ({n} more)',
+      collapse: 'Collapse',
+    },
     continuity: {
       reviewTitle: 'Monthly review',
       reviewLatest: '{month} review · take a look',
@@ -315,10 +326,8 @@ export const en: Translations = {
       tripAria: 'Trips: go to your trips',
     },
     soloHero: {
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      monthLabel: '{month}',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      countLabel: '{count} recorded',
+      monthLabel: 'Logged in {month}',
+      countLabel: { one: '{count} entry', other: '{count} entries' },
     },
     addExpense: 'Add entry',
     addIncome: 'Add income',
@@ -337,7 +346,7 @@ export const en: Translations = {
       singleStartedAt: 'Since {date} · open this trip',
       singleStartedAtWithCurrency: 'Since {date} · {currency} · open this trip',
       singleAriaLabel: 'Open trip: {name}',
-      multipleHeading: '{count} trips in progress',
+      multipleHeading: { one: '{count} trip in progress', other: '{count} trips in progress' },
       multipleCta: 'Browse all ›',
       multipleAriaLabel: 'View {count} active trips',
       emptyCta: 'Start a trip',
@@ -373,7 +382,6 @@ export const en: Translations = {
     sharedAndCopied: 'Shared. Link also copied.',
     copied: 'Link copied',
     shareTitle: 'Keep the books together on Futari',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     shareText: 'A shared ledger for two. Open the link to join.',
   },
 
@@ -503,7 +511,7 @@ export const en: Translations = {
     pending: 'Working…',
     title: 'Delete your account?',
     description:
-      "We'll remove your data after 14 days. You can come back and cancel any time before then. If you've shared a ledger, the records you wrote together stay with your partner, even if they've already left, and your name will show as “a partner who left”.",
+      "We'll remove your data after 14 days. You can come back and cancel any time before then. If you've shared a ledger, the records you wrote together stay with your partner, even if they've already left, and your name will show as \"Partner who left\".",
   },
 
   accountDeletionBanner: {
@@ -545,7 +553,7 @@ export const en: Translations = {
     petAgeMonths: '{months} mo',
     petAgeUnderOneMonth: 'Under 1 mo',
     birthdayThisMonth: '🎂 Birthday this month',
-    plantCompanionDays: '{days} days together',
+    plantCompanionDays: '{days} day(s) together',
     insuranceGroups: {
       shortTermProtection: 'Term Protection',
       longTermProtection: 'Whole / Long-term Protection',
@@ -698,7 +706,7 @@ export const en: Translations = {
     rateInverseFormat: '≈ 1 {default} = {inverse} {code}',
     rateAriaLabel: 'Exchange rate for {code} to {baseCode}',
     basePill: 'Base',
-    usedCountNote: '{n} record(s) so far; editing the rate keeps them unchanged',
+    usedCountNote: { one: '{n} record so far; editing the rate keeps that record unchanged', other: '{n} records so far; editing the rate keeps them unchanged' },
     customRow: {
       codeAriaLabel: 'Currency code',
       codePlaceholder: 'VND',
@@ -875,7 +883,7 @@ export const en: Translations = {
       trendIncome: 'Income',
       trendNet: 'Cumulative net',
       trendChartLabel: 'Daily income and spending trend',
-      pieChartLabel: 'Breakdown chart, {count} segments',
+      pieChartLabel: 'Breakdown chart, {count} segment(s)',
     },
   },
 
@@ -930,12 +938,10 @@ export const en: Translations = {
     sectionPersonal: 'Personal',
     addToHomeScreen: 'Add to Home Screen',
     displayName: 'Display name',
-    // TODO(i18n): native review pending (#1328) — MT-quality draft.
     avatarVisibility: {
       title: 'Show my avatar',
       description: 'Off shows the first letter of your name instead',
     },
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     soloLockHint: 'While solo, every record is yours.',
     defaultSplitLabel: 'Default split',
     inviteCta: 'Invite partner',
@@ -963,6 +969,48 @@ export const en: Translations = {
     recurringSettings: 'Recurring Rules',
     sectionData: 'Data',
     trust: 'Your data',
+    shortcutsGuide: 'Log with Shortcuts',
+    shortcutKey: {
+      navLabel: 'Key for Shortcuts',
+      title: 'Key for Shortcuts',
+      back: 'Back',
+      pageHeading: 'Key for Shortcuts',
+      pageSubtitle: 'An iPhone Shortcut uses this key to send expenses to your pending list. They go into the ledger only after you confirm them. Only you can see your pending list.',
+      empty: 'No key yet.',
+      generate: 'Create key',
+      failed: "That didn't work. Please try again later.",
+      current: {
+        heading: 'Current key',
+        hintLabel: 'Ends in',
+        createdLabel: 'Created',
+        lastUsedLabel: 'Last used',
+        neverUsed: 'Not used yet',
+      },
+      fresh: {
+        heading: 'Your new key',
+        body: 'The key is shown only this once and is gone when you leave this page. Copy it now and paste it into your Shortcut.',
+        inputLabel: 'New key for Shortcuts',
+        copy: 'Copy',
+        copied: 'Copied',
+        copyFailed: "Couldn't copy automatically. Tap the key, select it and copy it yourself.",
+      },
+      shareWarning: {
+        heading: "Don't share a Shortcut that contains your key",
+        body: "Anyone with the key can send expenses to your pending list. If you've shared a Shortcut with your key in it, create a new key.",
+      },
+      regenerate: {
+        cta: 'Create a new key',
+        confirmTitle: 'Create a new key?',
+        confirmBody: 'Your current key stops working right away. Shortcuts that use it need the new key before they can send again.',
+        confirmLabel: 'Create new key',
+      },
+      revoke: {
+        cta: 'Revoke key',
+        confirmTitle: 'Revoke this key?',
+        confirmBody: 'Shortcuts that use this key stop sending right away. You can create a new one later.',
+        confirmLabel: 'Revoke',
+      },
+    },
     exportData: 'Export data (CSV)',
     pastTimes: 'Past chapters',
     trips: 'Trips',
@@ -1092,15 +1140,18 @@ export const en: Translations = {
           honeydue: 'Honeydue',
           spendee: 'Spendee',
           cwmoney: 'CWMoney',
+          andromoney: 'AndroMoney',
+          manebo: 'Manebo (まねーぼ)',
+          splitwise: 'Splitwise',
           generic: 'Generic CSV',
         },
         uploadPrompt: 'Drop a file here, or use the button below',
         uploadButton: 'Choose CSV file',
         parsing: 'Parsing…',
         fileSelected: 'Selected: {name}',
-        summary: '{total} rows · {valid} valid · {invalid} failed',
+        summary: '{total} row(s) · {valid} valid · {invalid} failed',
         sourceDetected: 'Detected source: {source}',
-        invalidNote: 'Failed rows are skipped; the error log keeps them for later fixing',
+        invalidNote: 'Skipped rows stay in the error log, so you can look at them later.',
         retryCta: 'Choose another file',
         parseError: "Couldn't parse that file. Check the format or try another one.",
       },
@@ -1109,7 +1160,7 @@ export const en: Translations = {
         subtitle: "Match each source category to one in this ledger",
         sourceColumn: 'Source category',
         targetColumn: 'Maps to',
-        rowCount: '{count} rows',
+        rowCount: { one: '{count} row', other: '{count} rows' },
         keepOriginal: 'Other',
       },
       step3: {
@@ -1117,7 +1168,6 @@ export const en: Translations = {
         subtitle: 'Set a default for this batch; you can adjust rows later',
         payerLabel: 'Default payer',
         payerHint: 'You can edit each row after the import',
-        // TODO(i18n): native review pending (#1016) — MT-quality draft.
         payerSoloHint: 'While solo, you are the payer on every row',
         splitLabel: 'Default split',
         splitOptions: {
@@ -1139,14 +1189,15 @@ export const en: Translations = {
         },
         typeExpense: 'Expense',
         typeIncome: 'Income',
-        moreRows: '{count} more rows not shown',
-        confirmCta: 'Import {count} rows',
+        moreRows: { one: '{count} more row not shown', other: '{count} more rows not shown' },
+        confirmCta: { one: 'Import {count} row', other: 'Import {count} rows' },
         confirming: 'Importing…',
-        summary: '{count} rows will be written · {invalid} failed rows are kept in the log',
+        summary: { one: '{count} row will be written · {invalid}', other: '{count} rows will be written · {invalid}' },
+        summaryInvalid: { one: '{n} failed row is kept in the log', other: '{n} failed rows are kept in the log' },
       },
       result: {
         successHeading: 'Import complete',
-        successBody: 'Added {count} records',
+        successBody: { one: 'Added {count} record', other: 'Added {count} records' },
         rollbackHint: 'You can roll this back within 24 hours',
         rollbackCta: 'Roll back this import',
         rollbackConfirm: 'Roll this batch back? Every record from this import will be removed.',
@@ -1166,6 +1217,7 @@ export const en: Translations = {
         submitFailed: 'Could not write the batch. Please try again.',
         rollbackFailed: 'Rollback failed. Please try again.',
         noValidRows: 'This file has no rows we can import',
+        missingColumns: 'This file is missing these columns: {columns}. Check that you exported as CSV and picked the right app',
       },
     },
   },
@@ -1175,7 +1227,6 @@ export const en: Translations = {
     partnerLeftBody: "Everything until now is still here. From this point on, this ledger is just for you.",
     welcomeSoloHeading: 'Welcome back to one person',
     welcomeSoloBody: 'Earlier records stay in the ledger you shared, and you can look back any time. Take your time from here.',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     removedPartnerHeading: 'Back to one person',
     removedPartnerBody: 'Your ledger stays, all of it. Take your time from here.',
     dismissAria: 'Dismiss',
@@ -1223,6 +1274,18 @@ export const en: Translations = {
     empty: "No past chapters yet. The first one is just beginning.",
     exportHint: 'To keep a copy of your own, you can export the expenses, income and settlements from these chapters as a CSV.',
     exportCta: 'Export expenses, income and settlements',
+    hideName: {
+      title: 'My name in ledgers I left',
+      hint: 'In ledgers you\'ve left, your name in chapters that have ended, and on their outing lists, can show as "Partner who left".',
+      cta: 'Change my name',
+      confirmTitle: 'Change your name in ledgers you left?',
+      confirmBody: 'In ledgers you\'ve left, your name in chapters that have already ended, and on their outing lists, will show as "Partner who left". Chapters that end later won\'t change. This can\'t be undone.',
+      confirmCount: 'Chapters: {chapters} · Outing lists: {outings}',
+      confirmLabel: 'Change',
+      pending: 'Working…',
+      done: 'Your name now shows as "Partner who left".',
+      failed: 'Couldn\'t change it. Please try again later.',
+    },
   },
 
   csvExport: {
@@ -1295,7 +1358,7 @@ export const en: Translations = {
       savingsMaturedBadge: 'Premiums fully paid',
       activeBadge: 'Active',
       sumInsuredShort: 'Sum {amount}',
-      yearsLeft: '{n} yrs left',
+      yearsLeft: '{n} yr(s) left',
       expired: 'Expired',
       singleYearLabel: '1-year term',
       daysLeftWarning: '{n} d left',
@@ -1325,9 +1388,9 @@ export const en: Translations = {
       timelineInvested: 'Paid in',
       timelineTarget: 'Target',
       summaryAnnualPremium: 'Annual premiums',
-      summaryPolicyCount: '{count} policies',
+      summaryPolicyCount: { one: '{count} policy', other: '{count} policies' },
       summaryNextRenewal: 'Next renewal',
-      summaryDaysUntil: 'in {days} days',
+      summaryDaysUntil: { one: 'in {days} day', other: 'in {days} days' },
     },
   },
 
@@ -1344,7 +1407,7 @@ export const en: Translations = {
       intervalEveryQuarter: 'Quarterly',
       intervalEveryHalfYear: 'Every 6 months',
       intervalEveryYear: 'Yearly',
-      intervalEveryNMonths: 'Every {n} months',
+      intervalEveryNMonths: { one: 'Every {n} month', other: 'Every {n} months' },
       dayLabel: 'Day {day}',
       nextDate: 'Next {date}',
     },
@@ -1753,7 +1816,7 @@ export const en: Translations = {
     },
     notesSection: 'Notes',
     recentExpenses: 'Recent expenses',
-    timelineEntries: 'Timeline · {count} entries',
+    timelineEntries: { one: 'Timeline · {count} entry', other: 'Timeline · {count} entries' },
     addOtherExpense: 'Other expense',
     refuel: 'Refuel',
     relatedInsurance: 'Related insurance',
@@ -1862,11 +1925,11 @@ export const en: Translations = {
       cost: 'Cost',
       location: 'Location',
       waterEvery: 'Watering cycle',
-      waterEveryValue: 'Every {n} days',
+      waterEveryValue: { one: 'Every {n} day', other: 'Every {n} days' },
       companionDays: 'Days together',
       daysSuffix: 'days',
       sproutedSuffix: ' got',
-      waterEveryFooter: ' · water every {n} days',
+      waterEveryFooter: { one: ' · water every {n} day', other: ' · water every {n} days' },
     },
     house: {
       sectionInfo: 'House info',
@@ -1898,7 +1961,7 @@ export const en: Translations = {
       annualPremiumLabel: 'Annual premium',
       annualPremiumPrefix: 'Annual {amount}',
       contractProgress: 'Contract progress',
-      yearsLeft: '{years} yrs left',
+      yearsLeft: '{years} yr(s) left',
       matured: 'Matured',
       termAndSumLine: '{n}-yr term · Sum insured {sum}',
       kindLabels: {
@@ -1926,7 +1989,7 @@ export const en: Translations = {
       returnEmptyAwaiting: 'Maturity reached · Has the payout arrived?',
       heroNotStartedWithDate: 'What you put in each year, comes back on {date}',
       heroNotStarted: 'What you put in each year, comes back later',
-      heroPartialWithYears: '{pct}% returned · {years} yrs to maturity',
+      heroPartialWithYears: '{pct}% returned · {years} yr(s) to maturity',
       heroPartial: '{pct}% returned',
       heroMatured: 'Matured · {total} returned in total',
       heroAwaitingMaturity: 'Maturity reached · Awaiting payout',
@@ -1946,7 +2009,7 @@ export const en: Translations = {
       maturedAwaitingTitle: 'Matured · {date}',
       maturedAwaitingStatus: 'Awaiting',
       maturedAwaitingCta: 'I’ve received it →',
-      maturedAwaitingPremiumNote: '{total} paid in across {count} entries',
+      maturedAwaitingPremiumNote: { one: '{total} paid in across {count} entry', other: '{total} paid in across {count} entries' },
       accountValueLabel: 'Current account value',
       accountValueEditCta: 'Update',
       recurringSectionTitle: 'Recurring income',
@@ -1973,7 +2036,7 @@ export const en: Translations = {
       intervalEveryQuarter: 'Quarterly',
       intervalEveryHalfYear: 'Every 6 months',
       intervalEveryYear: 'Yearly',
-      intervalEveryNMonths: 'Every {n} months',
+      intervalEveryNMonths: { one: 'Every {n} month', other: 'Every {n} months' },
       dayLabel: 'Day {day}',
       nextDate: 'Next {date}',
     },
@@ -2060,9 +2123,7 @@ export const en: Translations = {
       unknown: "Can't join this ledger.",
     },
     meta: {
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
       title: 'Someone invited you to a shared ledger · Futari',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
       description: 'A shared ledger for two. Open the link, sign in, and you can join.',
       ogDescription: 'A shared ledger for two. Open the link, sign in, and you can join.',
     },
@@ -2147,8 +2208,8 @@ export const en: Translations = {
     sectionRetentionTitle: 'Data retention',
     sectionRetentionBody: 'Your account data is retained for as long as your account remains active. Transactions you delete are kept as soft-deleted records for about a year, then cleared automatically. When you request account deletion from the settings page there is a 14-day grace period (calendar days, not business days) during which you can cancel at any time; after that it runs automatically. What happens then depends on whether the ledger is yours alone or shared with a partner:',
     sectionRetentionItems: [
-      'A solo ledger: the transactions, settlements, recurring rules, aibutsu and trip records you wrote on your own are deleted (aibutsu, recurring rules and trip names your partner could see stay so they can look back at them), along with your profile (name, avatar, email). If this ledger was once shared and your partner has since left, the records of your time together stay so they can look back at them, and your name appears as “a partner who left”. Once they delete their account too, those records are deleted with it.',
-      "A shared ledger: the ledger stays with your partner. The transactions, settlements, aibutsu records and monthly review notes the two of you wrote together remain in their ledger; we do not remove them on your behalf, because those records are theirs as well. Your sign-in identity is deleted (Google / Apple account link, email, avatar, push devices), and your name appears in their ledger as “a partner who left”. The same applies to a ledger you left earlier: the records you wrote during that time stay in your partner's ledger.",
+      'A solo ledger: the transactions, settlements, recurring rules, aibutsu and trip records you wrote on your own are deleted (aibutsu, recurring rules and trip names your partner could see stay so they can look back at them), along with your profile (name, avatar, email). If this ledger was once shared and your partner has since left, the records of your time together stay so they can look back at them, and your name appears as "Partner who left". Once they delete their account too, those records are deleted with it.',
+      "A shared ledger: the ledger stays with your partner. The transactions, settlements, aibutsu records and monthly review notes the two of you wrote together remain in their ledger; we do not remove them on your behalf, because those records are theirs as well. Your sign-in identity is deleted (Google / Apple account link, email, avatar, push devices), and your name appears in their ledger as \"Partner who left\". The same applies to a ledger you left earlier: the records you wrote during that time stay in your partner's ledger.",
       'If you would like the content in a shared ledger removed as well, talk it over with your partner before deleting your account, or write to us first.',
       'Data you delete (including what is removed when you delete your account) can remain in encrypted backups made before the deletion for up to about 60 days, and disappears as those backups are cleared. We do not use backups to bring it back; backups are only used if the whole service has to be restored, and in that case we apply those deletions again.',
     ],
@@ -2250,20 +2311,15 @@ export const en: Translations = {
     revealFraming: "One of you is sunrise, the other is moonlight. Different hours, same home. No answer is more right; it's enough to remember what the other one cares about.",
     revealHeaderA: 'You',
     revealHeaderB: 'Partner',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     soloHeading: 'A quiz for two',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
-    soloFallback: 'These three questions are answered by two people. The rest of this month’s review is still there.',
+    soloFallback: "These 3 questions are for two people to answer together. The rest of this month's review is still here.",
     errorNotFound: "Couldn't find this quiz",
     errors: {
       submitFailed: 'Submission failed. Please try again.',
-      alreadyAnswered: "You've already finished",
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      alreadyRevealed: 'This quiz is already open, so the answers are set.',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
+      alreadyAnswered: "You've already answered",
+      alreadyRevealed: "This quiz has already been revealed, so the answers can't be changed.",
       wrongGroup: 'This quiz belongs to a different ledger',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      solo: 'This quiz is answered by two people',
+      solo: 'This quiz is for two people to answer together',
     },
     questions: {
       impulse: {
@@ -2370,8 +2426,8 @@ export const en: Translations = {
       title: 'Here is what we found',
       sourceLabel: 'Source · {source}',
       encodingLabel: 'Encoding · {encoding}',
-      totalRowsLabel: '{count} records',
-      expenseRowsLabel: '~{count} look like expenses',
+      totalRowsLabel: { one: '{count} record', other: '{count} records' },
+      expenseRowsLabel: { one: '~{count} looks like an expense', other: '~{count} look like expenses' },
       dateRangeLabel: '{first} → {last}',
       topCategoriesLabel: 'Categories that show up most',
       empty: 'No rows to preview in this file.',
@@ -2585,7 +2641,7 @@ I will upload the screenshots once you confirm.`,
       formatExample: `date,category,amount,description,currency,kind
 2026-05-30,Food,150,Starbucks,TWD,expense
 2026-05-30,Salary,50000,May,TWD,income`,
-      note: 'Non-TWD rows import at their raw number first; you can adjust the conversion per row after import. Duplicates of the same entry (same date + amount + description) are dropped automatically.',
+      note: "Non-TWD rows import at their raw number first; you can adjust the conversion per row after import. The prompt asks ChatGPT to keep just one copy of any entry that appears twice (same date + amount + description); Futari doesn't remove duplicates on import, so import each file only once.",
       settingsHint: 'No rush — you can import the CSV from settings any time after you sign in.',
     },
     pages: {
@@ -2604,27 +2660,27 @@ I will upload the screenshots once you confirm.`,
             body: 'No asymmetric visibility split by separate accounts; built for one shared home from day one.',
           },
           {
-            title: 'Free, no ads',
-            body: 'The core ledger stays free. We don\'t run ads or auction your data.',
+            title: 'Free, and ad-free',
+            body: 'Nothing to pay from import to everyday logging, no ads on screen, and no business built on your data.',
           },
         ],
-        stepsHeading: 'Three steps',
+        stepsHeading: 'Moving from Honeydue in three steps',
         step1: 'In Honeydue → Settings → Export Data, download the CSV.',
-        step2: 'Upload the CSV here and preview your records.',
-        step3: 'Create a Futari account and finish the move in one tap.',
+        step2: 'Upload the CSV here to preview it. Honeydue dates are month/day/year and negative amounts are expenses; Futari reads the real import the same way.',
+        step3: "Create a Futari account and pick a default payer and split during import. Honeydue's file has neither, so you set them once for the whole batch and edit rows afterwards if you like.",
         // TODO(#599): en faq + comparison copy pending native review
         faq: [
           {
-            question: 'Do I need to clean the data after importing?',
-            answer: 'Categories are mapped during the import flow in one pass, no manual cleanup after.',
+            question: "Will Honeydue's categories line up?",
+            answer: 'Common English names like Food & Dining, Home and Transportation are matched automatically to Futari\'s Dining, Housing and Transit. Everything unmatched is grouped under Other, and before importing you can switch that whole group to another category.',
           },
           {
-            question: 'Is the import free?',
-            answer: 'Futari is completely free. No hidden costs.',
+            question: 'Honeydue changed hands. Does moving over cost anything?',
+            answer: "No. Import is free and the core ledger is free; there's no couples feature you have to unlock.",
           },
           {
-            question: 'Can all my records come over?',
-            answer: 'CSV import supports most records. Special types (like transfers) are flagged for you to confirm.',
+            question: "Do all of Honeydue's columns come across?",
+            answer: "Date, name, category and amount are read, with negative amounts becoming expenses and positive ones income. The Account column isn't kept: Futari is one shared ledger with no separate accounts.",
           },
           {
             question: "Does Futari have Honeydue's shared ledger?",
@@ -2646,30 +2702,30 @@ I will upload the screenshots once you confirm.`,
             body: 'One person logs, the other sees it immediately; no refresh dance.',
           },
           {
-            title: 'Free, no ads',
-            body: 'No ad surfaces, no data brokerage. Budgeting just stays budgeting.',
+            title: 'No ads, no upgrade nudges',
+            body: "No ad surfaces and no data brokerage. You open the app and it's just the two of you and your ledger.",
           },
         ],
-        stepsHeading: 'Three steps',
+        stepsHeading: 'Moving from Spendee in three steps',
         step1: 'In Spendee → More → Export Data, download the CSV.',
-        step2: 'Upload the CSV here and preview your records.',
-        step3: 'Create a Futari account and finish the move in one tap.',
+        step2: 'Upload the CSV here to preview it; the Type column is what tells expenses from income.',
+        step3: 'Create a Futari account. At the category-mapping step, Spendee categories are matched to Futari\'s first (Food & Drinks goes to Dining, for example); anything unmatched sits under Other, and you can switch that group as a whole.',
         formatHintLabel: "What Spendee's CSV looks like",
         formatHintHeaders: 'Date,Wallet,Type,Category name,Amount,Currency,Note',
         formatHintNote: 'The Type column is Expense / Income / Transfer. Transfer rows (inter-wallet moves) are flagged as errors on import, because Futari has no transfer concept; drop them in the preview.',
         // TODO(#599): en faq + comparison copy pending native review
         faq: [
           {
-            question: 'Do I need to clean the data after importing?',
-            answer: 'Categories are mapped during the import flow in one pass, no manual cleanup after.',
+            question: 'Do Spendee wallets and categories come across?',
+            answer: "Categories map to Futari's, for example Food & Drinks to Dining. Wallets aren't kept: Futari is one ledger shared by two people, with no wallets.",
           },
           {
-            question: 'Is the import free?',
-            answer: 'Futari is completely free. No hidden costs.',
+            question: 'Spendee charges to unlock sharing. Will moving cost anything?',
+            answer: 'No. Sharing in Spendee is a paid unlock; in Futari two people sharing one ledger is built in and free, and import costs nothing.',
           },
           {
-            question: 'Can all my records come over?',
-            answer: 'CSV import supports most records. Special types (like transfers) are flagged for you to confirm.',
+            question: 'What happens to Spendee rows in other currencies?',
+            answer: "Rows whose Currency isn't your base currency are imported at the original number first; you can adjust the conversion row by row afterwards. Transfer rows (moves between wallets) are marked as failed and never written to the ledger.",
           },
           {
             question: "Does Futari support Spendee's split feature?",
@@ -2696,7 +2752,7 @@ I will upload the screenshots once you confirm.`,
             body: 'No scores, no marks, no hints that one of you spent too much.',
           },
         ],
-        stepsHeading: 'Three steps',
+        stepsHeading: 'Moving from CWMoney in three steps',
         step1: 'In CWMoney, export your records as Excel or CSV.',
         step2: 'Download the template below and paste your data in.',
         step3: 'Upload the converted CSV, preview it, then create an account to import.',
@@ -2709,12 +2765,12 @@ I will upload the screenshots once you confirm.`,
             answer: "It's a common encoding quirk in CWMoney exports, and their own help center has a page on it. No need to fix it yourself — paste it into the conversion template below and upload the result.",
           },
           {
-            question: 'Do I need to clean the data after importing?',
-            answer: 'Categories are mapped during the import flow in one pass, no manual cleanup after.',
+            question: "Will CWMoney's categories line up?",
+            answer: 'The common Chinese names for food, transport, housing, entertainment and medical are matched automatically to Futari\'s matching categories. Everything unmatched is grouped under Other, and before importing you can switch that whole group to another category.',
           },
           {
-            question: 'Is the import free?',
-            answer: 'Futari is completely free. No hidden costs.',
+            question: "CWMoney's shared ledger is a paid feature. Is Futari's?",
+            answer: 'No. The shared ledger, splitting and real-time sync are built in and free, and import costs nothing.',
           },
           {
             question: "Does Futari match CWMoney's assets feature?",
@@ -2732,7 +2788,7 @@ I will upload the screenshots once you confirm.`,
         differentiators: [
           {
             title: 'Core logging, free forever',
-            body: "You don't need a subscription to log today's spending; Futari's shared ledger, splitting, and settling all live in the free tier.",
+            body: "You don't need a subscription to log today's spending; Futari's shared ledger, splitting, and settling are all free.",
           },
           {
             title: 'Splits, done for you',
@@ -2743,23 +2799,23 @@ I will upload the screenshots once you confirm.`,
             body: "Moneybook's auto-sync works by logging into your bank on your behalf; Futari is manual-first, so what the two of you log is exactly what you chose to log.",
           },
         ],
-        stepsHeading: 'Three steps',
+        stepsHeading: 'Moving from Moneybook in three steps',
         step1: 'In Moneybook (subscriber account), use "Export details" to output your transactions as CSV.',
-        step2: 'Upload the CSV here to preview your history.',
-        step3: 'Create a Futari account and finish the move in one tap.',
+        step2: 'Upload the CSV here to preview it and check that the date range and row count of your transaction details have no gap.',
+        step3: 'Create a Futari account, map categories and set a payer during import, then keep logging together.',
         faq: [
           {
             question: 'Can a free account still export its data?',
             answer: 'Since the paid model launched in April 2026, exporting details is a subscriber-only feature. If you still have an active subscription, it is worth exporting a copy now.',
           },
           {
-            question: "Are Moneybook's columns the same as Futari's?",
+            question: "Does the exported CSV match Futari's format?",
             answer:
-              'Not exactly. After uploading you preview the parsed result first; you can map categories and columns during the actual import, so nothing is written to your ledger blindly.',
+              "Not exactly. Uploading here shows a preview in your browser with the row count, date range and most common categories. In the actual import you set the payer and split for the whole batch, and any row that can't be read is skipped and logged.",
           },
           {
-            question: 'Does importing cost anything?',
-            answer: 'Futari is completely free, with no hidden charges.',
+            question: 'Do I have to subscribe after moving?',
+            answer: 'No. The core ledger, splitting and settling are free, and import costs nothing.',
           },
           {
             question: 'Moneybook syncs banks automatically — does Futari?',
@@ -2779,37 +2835,42 @@ I will upload the screenshots once you confirm.`,
             body: 'AndroMoney is a fine single-person ledger; Futari is built for two people sharing one ledger, where every record is visible to both.',
           },
           {
-            title: 'Realtime sync',
-            body: 'One of you logs it, the other sees it right away — no trading screenshots or files to reconcile.',
+            title: 'No swapping files to reconcile',
+            body: 'AndroMoney backups are something you do by hand. Futari keeps the ledger in the cloud, so when one of you logs, the other sees it right away.',
           },
           {
-            title: 'Free, no ads',
-            body: 'The core ledger stays free. We do not run ads or sell data.',
+            title: 'No choosing between ads and a paid plan',
+            body: "AndroMoney comes with ads or a paid plan. Futari has no ads and the core ledger is free, so there's nothing to upgrade just to get rid of them.",
           },
         ],
-        stepsHeading: 'Three steps',
+        stepsHeading: 'Moving from AndroMoney in three steps',
         step1: 'In AndroMoney, go to Settings → Export and output your data as CSV.',
-        step2: 'Upload the CSV here to preview your history.',
-        step3: 'Create a Futari account and finish the move in one tap.',
+        step2: 'Upload the CSV here to preview the row count. The AndroMoney banner on the first line can stay, and files in Big5 or UTF-8 both work.',
+        step3: 'Create a Futari account, open Settings → Import from another app, choose AndroMoney and upload the same CSV. Categories whose names match are filed automatically and the rest start out under Other. Pick a payer and split once for the whole batch: going from a solo ledger to a shared one adds exactly this step.',
         faq: [
           {
-            question: 'Will I need to tidy up the data after importing?',
+            question: 'Should I keep AndroMoney after moving?',
             answer:
-              'Categories can be mapped during the import flow in one pass — no manual fixes afterward.',
+              "Importing copies; it doesn't touch what's in AndroMoney. Keep the CSV for now and decide about the old app once you've both settled in. For 24 hours after an import you can also roll the whole batch back.",
           },
           {
-            question: 'Does importing cost anything?',
-            answer: 'Futari is completely free, with no hidden charges.',
+            question: 'Does importing an AndroMoney CSV cost anything?',
+            answer: 'No, import is free. The core ledger is free too, with no ads.',
           },
           {
-            question: 'Can all my records come across?',
+            question: "What's new when a solo ledger becomes a shared one?",
             answer:
-              'CSV import is supported and most records carry over. Special types (such as transfers) are flagged for you to confirm.',
+              "Every record needs a payer and a split, and an AndroMoney file has neither, so you set them once for the whole batch: the payer is you or them, and the split is All mine, All theirs or Half each. You can edit rows afterwards. These are records you kept on your own, so if you don't want them to move the balance between you, choose All mine.",
           },
           {
             question: 'AndroMoney has multiple accounts — does Futari?',
             answer:
               'Futari is one shared ledger focused on the two of you; instead of separate accounts, split modes record who paid and how each expense divides.',
+          },
+          {
+            question: 'What happens to AndroMoney transfers, opening balances and foreign currencies?',
+            answer:
+              "Transfers (both the paying and receiving account columns filled) and an account's opening balance aren't income or spending, so those rows are skipped and left in the error log. A row with only the paying column becomes an expense; a row with only the receiving column becomes income, filed under Other. If the currency isn't TWD, the number in the file is written as-is in your base currency, with no conversion and no original currency kept, and decimals are rounded to whole numbers. Adjust those rows one by one afterwards.",
           },
         ],
       },
@@ -2824,32 +2885,32 @@ I will upload the screenshots once you confirm.`,
             body: 'Mobills centers on personal finance; Futari is one ledger two people share — a shared expense is logged once and seen by both.',
           },
           {
-            title: 'Splitting and settling built in',
-            body: 'Half, by ratio, each their own, or one covers it — once you choose, who owes whom is settled automatically.',
+            title: 'Who owes whom, worked out',
+            body: 'Mobills has no splitting step. In Futari you choose a split per entry (half, by ratio, each their own, or one covers it) and the balance settles itself.',
           },
           {
-            title: 'Free, no ads',
-            body: 'The core ledger stays free. We do not run ads or sell data.',
+            title: 'No subscription, no ads',
+            body: "Mobills' advanced features need a subscription. In Futari the core ledger, splitting and settling are free, and there are no ads on screen.",
           },
         ],
-        stepsHeading: 'Three steps',
+        stepsHeading: 'Moving from Mobills in three steps',
         step1: 'In Mobills, export your transactions and download the CSV.',
-        step2: 'Upload the CSV here to preview your history.',
-        step3: 'Create a Futari account and finish the move in one tap.',
+        step2: 'Upload the CSV here and check the date range in the preview to make sure the stretch you want to move is all there.',
+        step3: 'Create a Futari account. Each of you imports your own file and everything lands in the same shared ledger.',
         faq: [
           {
-            question: 'Will I need to tidy up the data after importing?',
+            question: 'What if I import the wrong file?',
             answer:
-              'Categories can be mapped during the import flow in one pass — no manual fixes afterward.',
+              "You can roll the whole batch back within 24 hours of the import. It never leaves a half-finished import behind, and it doesn't touch your original Mobills records.",
           },
           {
-            question: 'Does importing cost anything?',
-            answer: 'Futari is completely free, with no hidden charges.',
+            question: "Mobills' advanced features need a subscription. Does moving?",
+            answer: "No. Importing into Futari is free and the core features don't need a subscription.",
           },
           {
-            question: 'Can all my records come across?',
+            question: 'We both have Mobills records. How do we combine them?',
             answer:
-              'CSV import is supported and most records carry over. Special types (such as transfers) are flagged for you to confirm.',
+              "Each of you imports your own file. Every import lets you set the default payer (you or your partner) and the split, and both sets of records end up in the same shared ledger. If a shared expense was logged on both sides, keep just one copy before importing; Futari doesn't merge duplicates automatically.",
           },
           {
             question: 'Mobills has budgets — does Futari?',
@@ -2870,36 +2931,41 @@ I will upload the screenshots once you confirm.`,
             body: 'Exporting records to CSV in Manebo requires a Premium subscription; Futari never charges for import or export, and your expenses, income and settlements are always yours to take.',
           },
           {
-            title: 'Splitting and settling built in',
-            body: 'Half, by ratio, each their own, or one covers it — once you choose, who owes whom is settled automatically, no reconciling at month-end.',
+            title: 'No month-end reconciling',
+            body: 'Pick a split per entry and the balance builds up by itself; when you want to square up, log a settlement instead of reconciling everything at month-end.',
           },
           {
-            title: 'Free, no ads',
+            title: 'No ads, no unlock pop-ups',
             body: 'The core ledger stays free, the screen has no ads, and there is no upsell popping up mid-flow.',
           },
         ],
-        stepsHeading: 'Three steps',
+        stepsHeading: 'Moving from Manebo in three steps',
         step1: 'In Manebo, go to "Other" → CSV export (a Premium feature) and choose a date range to export.',
-        step2: 'Upload the CSV here to preview your history.',
-        step3: 'Create a Futari account and finish the move in one tap.',
+        step2: 'Upload the CSV here and check the row count to make sure the export covers the stretch you meant. Manebo files in Shift_JIS or UTF-8 both read fine, so there is no need to convert anything first.',
+        step3: 'Create a Futari account, open Settings → Import from another app, choose Manebo (まねーぼ) and upload the same CSV. The export has no payer column, so you set the payer and split once for the whole batch. Whatever the two of you shared in Manebo is already one ledger in Futari.',
         faq: [
           {
             question: "I'm not subscribed to Premium — can I still get my data out?",
             answer: "Manebo's CSV export is a Premium-only feature. You can subscribe for a single month, export, then cancel; importing into Futari itself is free.",
           },
           {
-            question: "Are Manebo's columns compatible with Futari?",
+            question: 'Can I still edit records after importing?',
             answer:
-              'Not exactly. After uploading you will see a preview; during import you can map categories and fields before anything is written to your ledger.',
+              "Yes. Imported records can be edited one by one, just like ones you logged by hand. Rolling back the whole batch is only possible for 24 hours, so it's worth scrolling through it soon after importing.",
           },
           {
-            question: 'Does importing cost anything?',
-            answer: 'Futari is completely free, with no hidden charges.',
+            question: 'Does the Futari side of the import cost anything?',
+            answer: 'No. Premium is only needed for the step where Manebo exports the CSV; importing into Futari and exporting from it are both free.',
           },
           {
             question: 'Manebo supports multiple ledgers — how does Futari handle that?',
             answer:
               'Futari is one shared ledger for two people. Instead of separate books, you choose a split mode per entry and the balance is calculated automatically.',
+          },
+          {
+            question: 'What happens to Manebo transfers, income and categories?',
+            answer:
+              "Rows whose Type (種別) is expense become expenses, income becomes income, and transfer rows are skipped and left in the error log. Income is always filed under Other. Expense categories are names you chose in Manebo, and only names already in Futari's lookup (English and Traditional Chinese for now, not Japanese) are matched automatically; the rest are gathered into one Other group. You can reassign that group as a whole before importing, but not split it back by original name.",
           },
         ],
       },
@@ -2923,24 +2989,24 @@ I will upload the screenshots once you confirm.`,
             body: 'In Simple Daily Money, CSV export is a VIP feature; in Futari, both import and export are free, and your expenses, income and settlements can be exported any time.',
           },
         ],
-        stepsHeading: 'Three steps',
-        step1: 'Screenshot the transactions you want to move in Simple Daily Money (full how-to below).',
-        step2: 'Turn the screenshots into a CSV with ChatGPT — a copy-ready prompt is below.',
-        step3: 'Upload the CSV here, preview it, and create an account to finish the import.',
+        stepsHeading: 'Moving from Simple Daily Money in three steps',
+        step1: "Screenshot the transactions you want to move in Simple Daily Money, page by page; you don't need the VIP export (full how-to below).",
+        step2: 'Turn the screenshots into a CSV with ChatGPT; the free plan is enough. Category text is written into the CSV as it appears, and on import the ones that match land in Futari\'s categories while the rest go to Other.',
+        step3: 'Upload the CSV here and preview it to check the row count and date range, then create an account to finish the import.',
         faq: [
           {
             question: "Simple Daily Money's CSV export needs a VIP subscription — can I move without paying?",
             answer:
-              'Yes. Screenshot your transactions and have ChatGPT turn them into a CSV, then upload — the full steps and a copy-ready prompt are below, and the free ChatGPT plan works.',
+              "Yes. Simple Daily Money's CSV export needs VIP, so if you'd rather not subscribe just to leave, use screenshots instead: capture the transaction screens and have ChatGPT turn them into a CSV. The full steps and a copy-ready prompt are below.",
           },
           {
             question: 'How many screenshots?',
             answer:
-              '5–10 is a good range; scroll to cover the period you want to move. Duplicates of the same entry are dropped automatically.',
+              '5–10 is a good range; scroll to cover the period you want to move. The prompt already asks ChatGPT to keep one copy of any entry that appears twice.',
           },
           {
-            question: 'Does importing cost anything?',
-            answer: 'Futari is completely free, with no hidden charges.',
+            question: 'The free ChatGPT plan is enough. Is there any step on the Futari side that costs money?',
+            answer: 'No. Uploading and previewing, mapping categories and the import are all free, so the whole route from Simple Daily Money screenshots into Futari needs no subscription.',
           },
           {
             question: 'Will the categories ChatGPT produces be off?',
@@ -2972,14 +3038,14 @@ I will upload the screenshots once you confirm.`,
             body: 'No pop-up ads, no unlock screens you can\'t dismiss — the pace of logging is yours to set.',
           },
           {
-            title: 'Data moves freely, in and out',
+            title: 'Leave any time, with everything',
             body: "In Futari, export needs no subscription: your expenses, income and settlements come out as standard UTF-8 CSV, ready to take with you whenever you leave.",
           },
         ],
-        stepsHeading: 'Three steps',
-        step1: 'Screenshot the transactions you want to move in Fortune City (full how-to below).',
-        step2: 'Turn the screenshots into a CSV with ChatGPT — a copy-ready prompt is below.',
-        step3: 'Upload the CSV here, preview it, and create an account to finish the import.',
+        stepsHeading: 'Moving from Fortune City in three steps',
+        step1: "In Fortune City, open your entries and scroll down, screenshotting the transactions you want to move; the city view isn't needed (full how-to below).",
+        step2: "Turn the screenshots into a CSV with ChatGPT. Dates, amounts and categories come across as shown; your city progress in the game doesn't go into the CSV.",
+        step3: 'Upload the CSV here and preview it; if it looks right, create an account and carry these records into your shared ledger.',
         faq: [
           {
             question: "Doesn't Fortune City already have CSV export?",
@@ -2987,12 +3053,12 @@ I will upload the screenshots once you confirm.`,
               "It does, but it's a subscription feature, and the official docs mention the export can open garbled in Excel and need re-encoding. Without a subscription, the screenshot-plus-ChatGPT flow below works just as well.",
           },
           {
-            question: 'How many screenshots?',
-            answer: '5–10 is a good range; scroll to cover the period you want to move. Duplicates of the same entry are dropped automatically.',
+            question: "How do I check I haven't missed anything?",
+            answer: 'After uploading, the preview lists the row count, date range and most common categories. Compare them with what you see in Fortune City, and if a stretch is missing, screenshot just that part and run it through again.',
           },
           {
-            question: 'Does importing cost anything?',
-            answer: 'Futari is completely free, with no hidden charges.',
+            question: 'Fortune City shows a lot of subscription pop-ups. Does Futari?',
+            answer: "No. Futari has no ads and no unlock pop-ups in the middle of what you're doing, and import is free too.",
           },
           {
             question: 'Does my game progress come over too?',
@@ -3008,35 +3074,35 @@ I will upload the screenshots once you confirm.`,
           'Used CashMan for years and want to switch to logging as two? A screenshot + ChatGPT turns your records into a CSV to move into Futari.',
         differentiators: [
           {
-            title: 'Two-person by default',
-            body: 'CashMan is a trusty single-user ledger; Futari was built for two people sharing one ledger from day one, visible to both.',
+            title: 'From a solo ledger to a shared one',
+            body: 'CashMan is a long-time helper for one person. In Futari you both write in the same ledger, and who paid and how it was split is clear on every entry.',
           },
           {
-            title: 'Splits, done for you',
-            body: 'Who paid, how it splits, who owes whom right now — the balance is worked out for you, not held in your head.',
+            title: 'No keeping the tally in your head',
+            body: 'In a solo ledger you keep the tally of who overpaid yourself. In Futari every entry carries its payer and split, and the balance builds up on its own.',
           },
           {
             title: 'Synced and yours to take',
             body: 'Records live in the cloud, so switching phones loses nothing. When you want to leave, export your expenses, income and settlements to CSV.',
           },
         ],
-        stepsHeading: 'Three steps',
-        step1: 'Screenshot the transactions you want to move in CashMan (full how-to below).',
-        step2: 'Turn the screenshots into a CSV with ChatGPT — a copy-ready prompt is below.',
-        step3: 'Upload the CSV here, preview it, and create an account to finish the import.',
+        stepsHeading: 'Moving from CashMan in three steps',
+        step1: 'In CashMan, scroll back from the latest entry and screenshot as you go, down to the earliest day you want to move (full how-to below).',
+        step2: 'Turn the screenshots into a CSV with ChatGPT. CashMan has no usable export, so the screenshots are your export file.',
+        step3: 'Upload the CSV here and preview it to check that all the years are there, then create an account to finish the import.',
         faq: [
           {
             question: 'CashMan has no export — can my data really move?',
             answer:
-              'Yes. Screenshot the transaction view and have ChatGPT turn it into a CSV, then upload — full steps and a copy-ready prompt are below, and the free ChatGPT plan works.',
+              'Yes. With no export, the screenshot is the export: capture the transaction screens and have ChatGPT turn them into a CSV with fixed columns. The full steps and a copy-ready prompt are below.',
           },
           {
-            question: 'How many screenshots?',
-            answer: '5–10 is a good range; scroll to cover the period you want to move. Duplicates of the same entry are dropped automatically.',
+            question: 'What if some rows are cut off in a screenshot?',
+            answer: "Take another screenshot that includes those rows. It's fine if the same entry shows up in two screenshots; the prompt already asks ChatGPT to keep just one.",
           },
           {
-            question: 'Does importing cost anything?',
-            answer: 'Futari is completely free, with no hidden charges.',
+            question: 'CashMan is free. Does Futari cost anything?',
+            answer: "No. The core ledger is free in Futari too, and sharing with your partner, splitting and exporting don't cost extra.",
           },
           {
             question: 'Years of records — can they all move?',
@@ -3053,21 +3119,21 @@ I will upload the screenshots once you confirm.`,
         differentiators: [
           {
             title: 'One ledger, shared by two',
-            body: '1Money centers on personal tracking; Futari is one ledger two people share — a shared expense is logged once and seen by both.',
+            body: '1Money keeps the ledger under one person; in Futari, a shared expense is logged once, with the payer and the split marked on it.',
           },
           {
-            title: 'Splitting and settling built in',
-            body: 'Half, by ratio, each their own, or one covers it — once you choose, who owes whom is settled automatically.',
+            title: 'Know who owes whom as you log',
+            body: "Pick a split per entry and the balance updates itself, so you don't need a second spreadsheet to reconcile.",
           },
           {
             title: 'Multi-currency stays clear',
             body: 'Trips and foreign-currency spending still log cleanly, so looking back stays just as clear.',
           },
         ],
-        stepsHeading: 'Three steps',
-        step1: 'Screenshot the transactions you want to move in 1Money (full how-to below).',
-        step2: 'Turn the screenshots into a CSV with ChatGPT — a copy-ready prompt is below.',
-        step3: 'Upload the CSV here, preview it, and create an account to finish the import.',
+        stepsHeading: 'Moving from 1Money in three steps',
+        step1: 'In 1Money, screenshot the transactions you want to move, keeping the currency next to each amount in the frame (full how-to below).',
+        step2: "Turn the screenshots into a CSV with ChatGPT; each entry's currency goes into the currency column and comes along.",
+        step3: 'Upload the CSV here and preview it; if the row count and date range match, create an account to finish the import. Rows in a currency other than TWD import at their raw number first, and you can adjust the conversion afterwards.',
         faq: [
           {
             question: '1Money has no full export — can my data really move?',
@@ -3075,12 +3141,12 @@ I will upload the screenshots once you confirm.`,
               'Even without a full export, screenshot it and have ChatGPT turn it into a CSV — full steps and a copy-ready prompt are below, and the free ChatGPT plan works.',
           },
           {
-            question: 'How many screenshots?',
-            answer: '5–10 is a good range; scroll to cover the period you want to move. Duplicates of the same entry are dropped automatically.',
+            question: 'Is the free ChatGPT plan enough?',
+            answer: 'Yes. The prompt already fixes the output format, so the free plan can follow it as is. If you have a lot of records, screenshot and convert them in batches.',
           },
           {
-            question: 'Does importing cost anything?',
-            answer: 'Futari is completely free, with no hidden charges.',
+            question: "1Money's advanced features are paid. What about Futari?",
+            answer: 'The core ledger, the shared ledger, splitting and settling are all free, and import costs nothing.',
           },
           {
             question: 'Will multi-currency records be off?',
@@ -3100,31 +3166,31 @@ I will upload the screenshots once you confirm.`,
             body: 'iCost is iOS-only; Futari runs on iOS, Android and the web, so it doesn’t matter what phone your partner uses.',
           },
           {
-            title: 'Splitting and settling built in',
-            body: 'Half, by ratio, each their own, or one covers it — once you choose, who owes whom is settled automatically.',
+            title: 'Shared costs, sorted per entry',
+            body: "Mark who paid and how it's split on each entry, and the balance stays current; no separate spreadsheet needed.",
           },
           {
-            title: 'Free, no ads',
-            body: 'The core ledger stays free. We do not run ads or sell data.',
+            title: 'Free on every platform',
+            body: 'iCost has in-app purchases. In Futari the core ledger is free and ad-free, whether you use iOS, Android or a browser.',
           },
         ],
-        stepsHeading: 'Three steps',
-        step1: 'Screenshot the transactions you want to move in iCost (full how-to below).',
-        step2: 'Turn the screenshots into a CSV with ChatGPT — a copy-ready prompt is below.',
-        step3: 'Upload the CSV here, preview it, and create an account to finish the import.',
+        stepsHeading: 'Moving from iCost in three steps',
+        step1: 'On your iPhone, open iCost and screenshot the transactions you want to move (full how-to below).',
+        step2: 'Hand the screenshots from your iPhone to ChatGPT to turn into a CSV; a copy-ready prompt is below.',
+        step3: 'Upload the CSV here and preview it, then create an account to finish; your partner can join from an iPhone or an Android phone.',
         faq: [
           {
-            question: 'iCost has no export — can my data really move?',
+            question: 'iCost is iOS-only and has no export. Can my data still move?',
             answer:
-              'Yes. Screenshot the transaction view and have ChatGPT turn it into a CSV, then upload — full steps and a copy-ready prompt are below, and the free ChatGPT plan works.',
+              'Yes. iCost has no usable export right now, so use screenshots instead: capture the transaction screens, have ChatGPT turn them into a CSV with fixed columns, then upload it below to preview.',
           },
           {
-            question: 'How many screenshots?',
-            answer: '5–10 is a good range; scroll to cover the period you want to move. Duplicates of the same entry are dropped automatically.',
+            question: 'What does the CSV from ChatGPT look like?',
+            answer: "Six fixed columns: date, category, amount, description, currency and kind, with kind set to expense or income. There's an example below, and Futari recognises the file from those columns when you upload it.",
           },
           {
-            question: 'Does importing cost anything?',
-            answer: 'Futari is completely free, with no hidden charges.',
+            question: 'iCost has in-app purchases. What about Futari?',
+            answer: 'Today the core ledger in Futari is free and ad-free, and import costs nothing.',
           },
           {
             question: 'My partner is on Android — can we still share it?',
@@ -3154,29 +3220,34 @@ I will upload the screenshots once you confirm.`,
             body: 'Record in the local currency while travelling; the balance in your base currency is converted for you, with nothing to upgrade.',
           },
         ],
-        stepsHeading: 'Three steps',
+        stepsHeading: 'Moving from Splitwise in three steps',
         step1: 'Open the group or friendship in Splitwise and use “Export spreadsheet” to download it.',
-        step2: 'Upload the CSV here and preview your history.',
-        step3: 'Create a Futari account to finish the move.',
+        step2: 'Upload the CSV here to preview the row count and the most common categories.',
+        step3: 'Create a Futari account, open Settings → Import from another app, choose Splitwise and upload the same CSV. Each transaction comes in as one expense for its total (Cost), and you set the payer and split once for the whole batch. Keep your Splitwise spreadsheet as a backup you can look things up in.',
         faq: [
           {
             question: 'How do I move my Splitwise data to Futari?',
             answer:
-              'Export the group or friendship as a spreadsheet, upload the CSV here to preview it, then create an account to finish the import.',
+              "The date, description, category and total come across, one expense per transaction. Settle-up (Payment) rows and the Total balance row are not imported and stay in the error log, and the who-owes-whom balance from Splitwise doesn't come along either. Categories whose names match (Groceries or Rent, say) are filed automatically and the rest start out together under Other. If you both exported the same group, import only one copy: Futari does not de-duplicate.",
           },
           {
             question: 'Are the columns the same as Futari’s?',
             answer:
-              'Not exactly. A Splitwise export puts each transaction on one row, with a Cost column plus a column per person for their share. You preview the parsed result first, and you can map columns and categories during import — nothing is written to your ledger before that.',
+              "Not exactly, but it reads in. Futari uses the date, description, category, total (Cost) and currency; the per-person share columns are not read, so you set the payer and split once for the whole batch. To keep this older history from touching today's balance, choose All mine; with Half each, every row in the batch counts toward the balance between you two.",
           },
           {
-            question: 'Does importing cost anything?',
-            answer: 'Futari is completely free, with no hidden charges.',
+            question: "Splitwise's free plan allows 4 entries a day. What about Futari?",
+            answer: "There's no daily entry limit on the core ledger, and import costs nothing.",
           },
           {
             question: 'We also use it for trips — does Futari have something for that?',
             answer:
               'Yes. A Futari trip keeps one journey’s spending in its own ledger, in the local currency, and folds it back into the main ledger when the trip ends.',
+          },
+          {
+            question: 'What happens to Splitwise rows in another currency?',
+            answer:
+              "When the Currency column isn't TWD, the number in the file is written as-is in your base currency, with no conversion and no original currency kept, and decimals are rounded to whole numbers. You can edit the amounts row by row afterwards.",
           },
         ],
       },
@@ -3191,31 +3262,31 @@ I will upload the screenshots once you confirm.`,
             body: 'Sui Shou Ji needs a separate shared book; in Futari the ledger is already shared by two — no extra setup.',
           },
           {
-            title: 'Splitting and settling built in',
-            body: 'Half, by ratio, each their own, or one covers it — once you choose, who owes whom is settled automatically.',
+            title: 'Sharing, and splitting too',
+            body: "Half, by ratio, each their own or one covers it: choose one per entry. Sui Shou Ji's shared ledger has no such layer; Futari builds it in.",
           },
           {
-            title: 'Free, no ads',
-            body: 'The core ledger stays free. We do not run ads or sell data.',
+            title: 'No membership, no ads',
+            body: "Sui Shou Ji has ads and a membership plan. Futari's core ledger is free and ad-free, and sharing it with your partner doesn't require a membership.",
           },
         ],
-        stepsHeading: 'Three steps',
-        step1: 'Screenshot the transactions you want to move in Sui Shou Ji (full how-to below).',
-        step2: 'Turn the screenshots into a CSV with ChatGPT — a copy-ready prompt is below.',
-        step3: 'Upload the CSV here, preview it, and create an account to finish the import.',
+        stepsHeading: 'Moving from Sui Shou Ji in three steps',
+        step1: 'In Sui Shou Ji, screenshot the transaction details you want to move; no membership needed first (full how-to below).',
+        step2: 'Ask ChatGPT to read the screenshots and produce a CSV; the free plan works, and the prompt is below to copy and paste.',
+        step3: 'Upload the CSV here and preview it, then create an account; sharing between the two of you needs no extra setup.',
         faq: [
           {
-            question: 'How do I move my Sui Shou Ji data to Futari?',
+            question: 'Exporting from Sui Shou Ji needs a membership. Can my data still move?',
             answer:
-              'Screenshot the transaction view and have ChatGPT turn it into a CSV, then upload — full steps and a copy-ready prompt are below, and the free ChatGPT plan works.',
+              "Exporting from Sui Shou Ji needs a membership. If you'd rather not join just to move, use screenshots instead: capture the transaction screens, have ChatGPT turn them into a CSV, then upload it below.",
           },
           {
-            question: 'How many screenshots?',
-            answer: '5–10 is a good range; scroll to cover the period you want to move. Duplicates of the same entry are dropped automatically.',
+            question: 'How far back do the screenshots need to go?',
+            answer: 'Scroll down to the earliest day you want to move. 5–10 screenshots usually covers it; with a lot of records, capture and convert in batches and upload each CSV in turn.',
           },
           {
-            question: 'Does importing cost anything?',
-            answer: 'Futari is completely free, with no hidden charges.',
+            question: 'Do I need a membership for the things it unlocks?',
+            answer: 'No. The core ledger, sharing between two people and splitting are free in Futari, with no membership, and import costs nothing.',
           },
           {
             question: 'Sui Shou Ji has shared books — is Futari the same?',
@@ -3238,9 +3309,7 @@ I will upload the screenshots once you confirm.`,
       description: 'Sign in with Google and you land in your shared ledger, where partners log spending and fuel costs together and look after insurance and shared things.',
       ogDescription: 'One tap to sign in with Google and open your shared household ledger.',
       invite: {
-        // TODO(i18n): native review pending (#1016) — MT-quality draft.
         title: 'Someone invited you to a shared ledger · Futari',
-        // TODO(i18n): native review pending (#1016) — MT-quality draft.
         description: 'Someone invited you to a shared ledger for two. Sign in to join.',
         ogDescription: 'A shared ledger for two. Sign in to join.',
       },
@@ -3291,8 +3360,8 @@ I will upload the screenshots once you confirm.`,
         ogDescription: 'Where Manebo users go next: export CSV and import into Futari.',
       },
       'simple-daily-money': {
-        title: 'Move from Simple Daily Money to Futari · sync as a couple, no VIP',
-        description: 'One ledger on both phones? Simple Daily Money sharing is view-only and CSV export needs VIP. Screenshot it, let ChatGPT make a CSV, move to Futari free.',
+        title: 'Simple Daily Money lifetime VIP: can you still switch? · Futari',
+        description: 'Your VIP stays with Simple Daily Money; your records can move. Turn screenshots into a CSV with ChatGPT and bring them to Futari. Free, nothing to unlock.',
         ogDescription: 'Leaving Simple Daily Money — screenshot → ChatGPT → CSV → Futari.',
       },
       // TODO(#839): en seo copy below pending native review
@@ -3393,6 +3462,11 @@ I will upload the screenshots once you confirm.`,
       title: 'Split trip costs with friends: one link, no app | Futari',
       description: 'See who paid and who owes whom on a group trip. Start an outing, share the link, and friends join by name. No download, no sign-up, up to 20 people.',
       ogDescription: 'Start an outing, share the link, and friends pick their name to log expenses with you. No download, no sign-up.',
+    },
+    featureShortcuts: {
+      title: 'Log spending with iPhone Shortcuts: open New entry after Apple Pay | Futari',
+      description: 'After an Apple Pay payment, an iPhone Shortcut opens Futari\'s New entry with the amount filled in. You tap save. No payment account is connected.',
+      ogDescription: 'After you pay, an iPhone Shortcut opens Futari\'s New entry with the amount, category and description filled in. You tap Save.',
     },
   },
   useCase: {
@@ -3508,8 +3582,8 @@ I will upload the screenshots once you confirm.`,
             answer: 'Log each expense and mark how it\'s split. Futari accumulates the running balance automatically, so you always know where you stand without waiting until the end of the month.',
           },
           {
-            question: 'Is Futari free?',
-            answer: 'Yes — the shared ledger, split modes, and real-time sync are all free.',
+            question: 'Do both of us have to pay?',
+            answer: "No. The shared ledger, the split modes and real-time sync are all free, and inviting your partner doesn't require anything extra to be switched on.",
           },
         ],
       },
@@ -3520,11 +3594,11 @@ I will upload the screenshots once you confirm.`,
         painPoints: [
           {
             heading: '"Do we keep separate accounts or combine everything?"',
-            body: 'There\'s no standard answer. Some couples fully merge, some split partially, some stay separate with a shared pot for joint costs. Futari supports all of these — it adapts to how you decide to handle things.',
+            body: "There's no standard answer for newlywed finances. Some couples put everything together, some share only joint costs, some stay on a strict AA split. Futari's split modes cover 50/50, by ratio, and one person covering it, chosen per expense, so the ledger fits however you decide.",
           },
           {
             heading: '"The car, insurance, savings for a house — how do we keep all of it straight?"',
-            body: 'Post-wedding expenses go beyond groceries. Futari lets you link spending to shared assets — car costs, insurance premiums, home maintenance — so everything stays categorised.',
+            body: "Costs after the wedding go beyond everyday spending: assets, insurance, big purchases. Futari lets you link each expense to a specific asset, so the car and the insurance premium each have their own place and don't blur together.",
           },
           {
             heading: '"Travel spending always gets mixed up with everyday costs."',
@@ -3538,7 +3612,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             question: 'Should we combine our finances or keep them separate?',
-            answer: 'Futari is a shared ledger, not a merged account. Every expense is logged with who paid and how it\'s split — you don\'t have to merge your finances to see the full picture together.',
+            answer: "Futari is one ledger the two of you share, not a merged account. Every expense records who paid and how it's split, so you don't have to combine your money to see it together. Split 50/50, by ratio, or let one person cover a whole category.",
           },
           {
             question: 'What kinds of assets can we record in Futari?',
@@ -3553,11 +3627,11 @@ I will upload the screenshots once you confirm.`,
         painPoints: [
           {
             heading: '"How much have we spent on the cat this month?"',
-            body: 'Vet bills, vaccines, treats, toys, grooming — costs spread across categories make it hard to see the total. Futari lets you link every expense to your pet, so you can filter and see the full picture.',
+            body: "Vet bills, vaccines, treats, toys and grooming land in different categories, so finding out what the cat cost this month means adding it up yourself. Record them under your pet and its page shows this month's number; to look further back, filter by that pet and only its expenses are left.",
           },
           {
             heading: '"I\'ve been covering most of it — does my partner even notice?"',
-            body: 'When two people share a pet, one often ends up paying more. Futari logs each expense with its split and builds up the balance automatically, so neither person has to hold it in their head.',
+            body: "Vet visits and food runs usually go on one person's card. Record who paid and what the other person owes, and the balance stays put; when you want to settle up, log a settlement instead of trusting a hunch that you've paid more.",
           },
           {
             heading: '"We have two cats. Can we keep their costs separate?"',
@@ -3571,11 +3645,11 @@ I will upload the screenshots once you confirm.`,
           },
           {
             question: 'How do I log vet bills in Futari?',
-            answer: 'Create your pet as an asset in Futari, then link each vet visit or purchase to that asset. Costs automatically categorise to that pet — filter by asset any time to see the total.',
+            answer: "Add a pet with a name and a species and you're set. Then, for every checkup, medicine or grooming, pick that pet when you log the expense. To see all its vet costs, open its page or filter by that pet.",
           },
           {
-            question: 'Can we keep more than one pet\'s costs separate?',
-            answer: 'Yes. Each pet is its own asset entry, with its own expense history. No mixing between animals.',
+            question: 'Food and litter are bought on repeat. Can I set that up?',
+            answer: 'Yes. Make the monthly food purchase a recurring expense and choose your pet. When the date comes, a confirmation card shows up on the home screen: tap Looks good if the amount is the same, or Edit if the price changed. Nothing is written to the ledger in the background.',
           },
         ],
       },
@@ -3622,8 +3696,8 @@ I will upload the screenshots once you confirm.`,
             body: 'Fixed shared costs are easy to lose track of because they feel routine. Futari logs each payment as it happens — you\'ll always know what\'s been covered and what hasn\'t.',
           },
           {
-            heading: '"Should we split 50/50 or by income?"',
-            body: 'There\'s no single right answer. Futari supports 50/50, income-ratio splits, and one-person-covers-it modes. Set it once and the maths takes care of itself.',
+            heading: '"The rooms aren\'t the same size. Should electricity still be 50/50?"',
+            body: 'Flatmates rarely split exactly in half: the bigger room pays a bit more, the person home all day takes more of the electricity. Futari can split by ratio, and once the ratio is set you can apply it to each expense without redoing the maths.',
           },
           {
             heading: '"One of us fronts most things and it\'s hard to keep count."',
@@ -3636,12 +3710,12 @@ I will upload the screenshots once you confirm.`,
             answer: 'Futari is a shared ledger built for two people. It supports multiple split modes and real-time sync — so shared living costs are always visible to both without needing group chat reconciliation.',
           },
           {
-            question: 'How do we work out who owes what for shared bills?',
-            answer: 'Log each shared expense and mark how it\'s split. Futari accumulates the balance automatically — you always know where you stand without waiting for month-end.',
+            question: 'How do we keep shared bills from turning into an argument?',
+            answer: "Log it when you pay and pick how it's split: rent by room ratio, shared supplies 50/50. If one of you fronts a cost, the running balance remembers it, so who pays next and how much is still owed is just a glance away.",
           },
           {
-            question: 'Is Futari free?',
-            answer: 'Yes — the shared ledger, split modes, and real-time sync are all free.',
+            question: "We're flatmates, not a couple. Can we still share a ledger?",
+            answer: "Yes. A ledger is for exactly two people, and you can invite your flatmate to join; you don't have to be partners. If one of you moves out and leaves the ledger, the shared history stays in a past chapter you can look back on.",
           },
         ],
       },
@@ -3665,16 +3739,16 @@ I will upload the screenshots once you confirm.`,
         ],
         faq: [
           {
-            question: 'How do we log monthly fixed costs together?',
-            answer: 'Log each recurring bill in Futari and mark how it\'s split. Both of you can see every payment in real time — no need for separate spreadsheets or status updates.',
+            question: 'One of us pays the fixed bills. How does the other person see them?',
+            answer: 'Log every fixed bill with who paid, in the same ledger. The other person opens it and sees who covered what this month, no more asking whether the internet got paid. Later, filter by category or payer to look back.',
           },
           {
             question: 'Does Futari have recurring bill reminders?',
-            answer: 'Futari supports recurring expense rules. Set up a bill once and the app will prompt you to confirm it each billing period so nothing gets forgotten.',
+            answer: "Yes. Set rent, internet or insurance as a recurring expense, monthly, quarterly, every six months or yearly. When the date arrives, a confirmation card appears on the home screen, and it's only written to the ledger once you confirm, so fixed bills don't slip through.",
           },
           {
-            question: 'Is Futari free?',
-            answer: 'Yes — the shared ledger, split modes, and real-time sync are all free.',
+            question: 'Some bills change every month. What then?',
+            answer: 'Utilities and phone bills can still be recurring expenses. When the card appears, tap Edit and enter this period\'s real amount; if there\'s no bill this time, tap Skip.',
           },
         ],
       },
@@ -3684,7 +3758,7 @@ I will upload the screenshots once you confirm.`,
         heroSubtitle: 'A new car, appliances, a travel fund — large one-off expenses don\'t belong mixed in with daily spending. Futari links each big purchase to a shared asset so you always know what you\'ve invested.',
         painPoints: [
           {
-            heading: '"How much have we spent on the car in total?"',
+            heading: '"What has this car actually cost us, all in?"',
             body: 'Purchase price, insurance, registration, maintenance — car costs spread across months and categories. Futari links every car-related expense to your vehicle asset, so the total is always one filter away.',
           },
           {
@@ -3693,21 +3767,21 @@ I will upload the screenshots once you confirm.`,
           },
           {
             heading: '"I covered a large expense — but is the split actually fair?"',
-            body: 'Large purchases are where imbalance quietly builds. Futari logs each contribution with its split and updates the balance automatically — so fairness is measured in numbers, not feelings.',
+            body: 'Large purchases are where one person quietly starts feeling short-changed. Log the payer and the split on each one and the balance updates, so you both look at numbers instead of trying to remember whose card it was.',
           },
         ],
         faq: [
           {
             question: 'How do we log a big shared purchase together?',
-            answer: 'Log the expense in Futari and link it to the relevant shared asset (car, appliance, etc.). Mark how it\'s split, and both of you see it immediately. Filter by asset any time to see cumulative spend.',
+            answer: 'Agree the split first, then log it: one person covers it, 50/50 or by ratio all work. Record the amount, payer and split on the day, and your partner sees it right away. If you change your mind about the split, edit that entry and the balance recalculates.',
           },
           {
             question: 'How do I log car costs in Futari?',
-            answer: 'Create your car as an asset in Futari, then link each related expense — purchase, insurance, fuel, maintenance — to that asset. The total cost of ownership is always visible in one place.',
+            answer: "Set the car up as an asset and log the purchase, insurance, maintenance and fuel under it. Cars have a fuel log, so fuel economy and fuel spend are visible, and the car's page shows this month's and this chapter's spend.",
           },
           {
-            question: 'Is Futari free?',
-            answer: 'Yes — the shared ledger, split modes, and real-time sync are all free.',
+            question: 'One of us paid for something big. How do we square up?',
+            answer: "Record the person who paid as the payer and choose the split where the other person covers their share; the balance then shows what's owed. When it's paid back, log a settlement and the balance goes down or back to zero.",
           },
         ],
       },
@@ -3732,15 +3806,15 @@ I will upload the screenshots once you confirm.`,
         faq: [
           {
             question: 'How do we log dining costs as a couple?',
-            answer: 'Log each meal in Futari, mark who paid and how it\'s split. Both of you see the running total for dining in real time — no spreadsheet needed.',
+            answer: "Log it right after you eat: amount, who paid, how the meal is split. If you take turns treating each other, choose the option where the payer covers the whole thing; if you split it, choose half each. At month-end, filter by the dining category to see this month's total.",
           },
           {
             question: 'Can I log takeout and delivery in Futari?',
             answer: 'Yes. Futari\'s food and dining categories cover restaurants, takeout, delivery, and groceries. Filter by category any time to see the full dining picture.',
           },
           {
-            question: 'Is Futari free?',
-            answer: 'Yes — the shared ledger, split modes, and real-time sync are all free.',
+            question: "Will Futari warn us if we're eating out too much?",
+            answer: "No. Everyday spending has no budget cap and no overspend alerts. Futari just lists the month's dining total, and whether to change anything is a conversation for the two of you.",
           },
         ],
       },
@@ -3750,8 +3824,8 @@ I will upload the screenshots once you confirm.`,
         heroSubtitle: 'Formula, nappies, checkups, classes, toys — parenting costs are more frequent and more scattered than most parents expect. Futari links every expense to your child so both parents always know what\'s been spent.',
         painPoints: [
           {
-            heading: '"How much have we spent on the baby this month?"',
-            body: 'Medical bills, food, clothing, classes — parenting costs spread across categories. Futari lets you link every child-related expense to your child asset, so you can filter and see the total at any time.',
+            heading: '"What did the baby cost us this month? Give me a minute to add it up."',
+            body: "Medical bills, food, clothing, classes: parenting costs spread across categories and are hard to see as a whole. Record each expense under your child and their page shows this month's spend; to look further back, filter by that child and only their expenses are left.",
           },
           {
             heading: '"I handle most of the checkups — does my partner know the cost?"',
@@ -3759,21 +3833,21 @@ I will upload the screenshots once you confirm.`,
           },
           {
             heading: '"We have two kids — we want their costs kept separate."',
-            body: 'Futari supports multiple asset entries. Each child has their own record, their own expense history, and their costs never mix.',
+            body: 'Create one record per child and log formula, tuition and checkups under each. The two totals are never added together, so you can see exactly what the older and the younger one cost.',
           },
         ],
         faq: [
           {
             question: 'How do we log childcare costs together?',
-            answer: 'Create your child as an asset in Futari, then link each related expense. Both parents see every cost in real time, split automatically — no month-end reconciliation needed.',
+            answer: 'Add your child, then pick them when you log an expense, and both of you see it in real time. You choose the split each time: 50/50, by ratio, or the payer covers it. No month-end reconciliation needed.',
           },
           {
             question: 'Parenting expenses span lots of categories — can Futari handle that?',
             answer: 'Yes. Futari has broad expense categories — medical, food, shopping — and each expense can also be linked to a child asset. Two dimensions of visibility for every cost.',
           },
           {
-            question: 'Is Futari free?',
-            answer: 'Yes — the shared ledger, split modes, and real-time sync are all free.',
+            question: "How does Futari keep my child's details?",
+            answer: "The ledger is open only to the two of your accounts and connections use HTTPS. Sensitive fields such as a child's legal name or ID number are encrypted separately before they are stored in the database.",
           },
         ],
       },
@@ -3784,7 +3858,7 @@ I will upload the screenshots once you confirm.`,
         painPoints: [
           {
             heading: '"We said we\'d go AA, but we never know who owes what."',
-            body: 'The hard part of AA isn\'t the decision — it\'s the bookkeeping. Futari logs each expense with who paid and how it\'s split, then accumulates the balance automatically. You always know where you stand.',
+            body: "The hard part of AA isn't deciding the split, it's remembering. Log the payer and the split at the moment you pay and the balance builds up, so you can both see how far apart you are right now.",
           },
           {
             heading: '"We take turns paying, but the amounts are never equal."',
@@ -3802,11 +3876,11 @@ I will upload the screenshots once you confirm.`,
           },
           {
             question: 'How do I log taking-turns payments in Futari?',
-            answer: 'Log each payment in Futari and mark who paid and how it\'s split (50/50 or one person covers). The balance accumulates over time, so you always know the current state — even when turns are uneven.',
+            answer: "Log whoever paid as the payer and choose 50/50; do the same when it's the other person's turn. When the turns match but the amounts don't, the balance shows the gap, and a settlement clears it.",
           },
           {
-            question: 'Is Futari free?',
-            answer: 'Yes — the shared ledger, split modes, and real-time sync are all free.',
+            question: 'Can we log AA dinners with friends too?',
+            answer: 'Yes. Your own AA split lives in the main ledger; for a dinner with several people, open an outing and send the link to your group. Friends join without installing anything, and when it ends you get suggested transfers, at most one fewer than the number of people.',
           },
         ],
       },
@@ -3826,7 +3900,7 @@ I will upload the screenshots once you confirm.`,
     answer: 'Start an outing in Futari and drop its link in the group chat. Each friend opens it in their phone\'s browser, picks their name and logs what they paid, with nothing to download and no sign-up. Every expense is split evenly between the people it\'s for. When it\'s time to settle up, Futari lists who pays whom, using at most one fewer transfer than there are people.',
     example: {
       heading: 'Splitting trip costs: a worked example',
-      intro: '{outing}: {count} people, {expenses} expenses, each split between everyone.',
+      intro: '{outing}: {count} people, {expenses} expense(s), each split between everyone.',
       cols: { item: 'Expense', paidBy: 'Paid by', amount: 'Amount' },
       total: 'That\'s {total} in total, or about {share} per person.',
       settleLead: 'To settle up, Futari suggests these {n} transfers:',
@@ -3887,6 +3961,122 @@ I will upload the screenshots once you confirm.`,
     },
   },
 
+  featureShortcuts: {
+    heroKicker: 'Shortcuts',
+    heroTitle: 'After you pay, let your iPhone open New entry',
+    heroSubtitle: 'An iPhone Shortcut opens Futari\'s New entry once you\'ve paid, with the amount, category and description already filled in. Look it over, change what you need, then tap Save.',
+    breadcrumbLabel: 'Log with Shortcuts',
+    howToStepName: 'Step {n}',
+    answerQuestion: 'How do I quickly log an Apple Pay payment in Futari?',
+    answer: 'Futari doesn\'t connect to any payment account and doesn\'t read your payment data. The work is done by an iPhone Shortcut: after you pay, it opens Futari\'s New entry with the amount, category and description filled in. You check it and tap Save yourself, and only then is anything written to your ledger. This works only with the Shortcuts app on iPhone.',
+    vars: {
+      amount: 'Amount',
+      merchant: 'Merchant',
+    },
+    applePay: {
+      heading: 'Apple Pay: open New entry after you tap to pay',
+      intro: 'Before you start: Futari is installed on your iPhone and you are signed in. This uses a Wallet automation, so each Apple Pay payment opens a filled-in New entry.',
+      steps: [
+        {
+          title: 'Create a Wallet automation',
+          body: 'Open the Shortcuts app, go to Automation, tap + and choose Wallet. On the screen that follows, tick the cards you want to log; you can leave all the categories ticked. Tap Next, then New Shortcut. Finally, on the automation\'s settings row, choose Run Immediately, so you do not have to tap a notification first.',
+        },
+        {
+          title: 'Round the amount (recommended)',
+          body: 'Recommended: add a Round Number action and set its input to Shortcut Input, then choose Amount. If the amount carries decimals (for example 120.00), Futari leaves the amount blank, so rounding first is safer. "120", "1,280" and full-width digits work; "120.00", "NT$120.00" and "120 dollars" leave it blank.',
+        },
+        {
+          title: 'URL-encode the merchant name',
+          body: 'Add a URL Encode action and set its input to Shortcut Input, then choose Merchant. Without encoding, spaces and non-Latin characters break the link in the middle and the description comes out blank or cut short. The description is optional: to leave it out, skip this step and remove the whole &note=… part of the link.',
+        },
+        {
+          title: 'Build the link with a Text action',
+          body: 'Add a Text action and paste the link below, replacing [Amount] with the result of step 2 and [Merchant] with the result of step 3 (if you skipped step 2, use Shortcut Input, then Amount). To use another category, change the id after category= (see the category table below).',
+        },
+        {
+          title: 'Open the URL',
+          body: 'Add an Open URLs action and give it the text from the previous step. From then on, each Apple Pay payment opens Futari\'s New entry. Check it and tap save.',
+        },
+      ],
+      urlLabel: 'Link (app)',
+      platformNote: 'This works only with the Shortcuts app on iPhone.',
+      foreignNote: 'Foreign currency: when you pay in another currency, the Shortcut passes the foreign amount, and Futari fills it in as an amount in your ledger\'s main currency. Change it in New entry to the amount you were actually charged.',
+    },
+    linePay: {
+      heading: '',
+      intro: '',
+      noteVar: '',
+      steps: [],
+    },
+    web: {
+      heading: 'No app installed: use the web link',
+      body: 'If you use Futari in a browser or from your Home Screen instead of the app, swap the link for the one below. Open URLs then opens it in Safari. You need to have signed in to Futari in Safari first. Whatever follows the # stays in your browser and is not sent to the server.',
+      urlLabel: 'Link (web)',
+    },
+    params: {
+      heading: 'What the link can carry',
+      intro: 'All three parameters are optional. If one value is not valid, only that field is left empty and the others are still filled in.',
+      cols: {
+        param: 'Parameter',
+        rule: 'Rule',
+        fallback: 'If not valid',
+      },
+      rows: [
+        {
+          param: 'amount',
+          rule: 'A whole number from 1 to 9,999,999. Thousands commas (1,200) and full-width digits are fine. Decimals, negative numbers and forms like 1e5 are rejected.',
+          fallback: 'Amount stays empty; type it in',
+        },
+        {
+          param: 'category',
+          rule: 'One of the ids in the table below, all lowercase and spelled exactly.',
+          fallback: 'Falls back to Dining',
+        },
+        {
+          param: 'note',
+          rule: 'Becomes the description, up to 100 characters.',
+          fallback: 'Description stays empty; fill it in before saving',
+        },
+      ],
+      categoriesHeading: 'Category ids',
+      catCols: {
+        id: 'id',
+        name: 'Shown as',
+      },
+      fixedNote: 'The link carries only these three values. The date (today), who paid (you), the split and the currency follow the usual New entry defaults, and putting them in the link changes nothing. It also does not file the expense under a trip in progress; pick the trip on screen if you want that.',
+    },
+    whenNot: {
+      heading: 'When New entry does not appear',
+      intro: 'The Shortcut only opens Futari. In these three cases Futari quietly ignores it and leaves your screen alone:',
+      items: [
+        'Another window is open (for example, you are editing an entry): the Shortcut is ignored and your half-finished edit is untouched. Close the window and run the Shortcut again.',
+        'You are viewing a past chapter: past chapters are read-only, so switch back to the current chapter first.',
+        'You are not signed in: after you sign in you land on the home page and the filled-in values are not kept. Run the Shortcut again.',
+      ],
+    },
+    trouble: {
+      heading: 'Common problems',
+      cols: {
+        symptom: 'What you see',
+        cause: 'Why',
+      },
+      rows: [
+        {
+          symptom: 'New entry opens but the amount is blank',
+          cause: 'The amount is not a whole number. Usually the Round Number step is missing, or the amount carries a currency symbol or unit.',
+        },
+        {
+          symptom: 'The description is blank or cut short',
+          cause: 'The merchant name was not passed through URL Encode.',
+        },
+        {
+          symptom: 'The category is Dining, not the one I wrote',
+          cause: 'The category id is misspelled or uses capital letters.',
+        },
+      ],
+    },
+  },
+
   errors: {
     actions: {
       group_not_found: 'Ledger not found',
@@ -3931,6 +4121,7 @@ I will upload the screenshots once you confirm.`,
       split_ratio_invalid: 'Split ratio must be a whole number from 1 to 99',
       split_type_invalid: 'Invalid split method',
       profile_not_found: 'Profile not found',
+      display_name_reserved: 'This name is reserved. Please choose another one.',
       fx_rate_not_set: 'No {from} → {to} exchange rate set',
       fx_rate_not_positive: 'Exchange rate must be a positive number',
       currency_unsupported: 'Unsupported currency',
@@ -3957,6 +4148,9 @@ I will upload the screenshots once you confirm.`,
       rule_recipient_not_member: 'The income recipient on this rule has left this ledger. Edit the rule to choose a new recipient, then resume.',
       pending_income_not_found: 'This pending income was already handled or can\'t be found',
       pending_income_handled_elsewhere: 'This pending income was handled on another device',
+      shortcut_pending_handled_elsewhere: 'This one was handled on another device or has expired',
+      shortcut_pending_needs_note: 'This one has no description. Edit it before recording.',
+      shortcut_pending_invalid: "This couldn't be recorded. Check the amount and date.",
       review_month_locked: 'This month\'s note is locked and can\'t be changed',
       review_message_locked: 'This note is locked and can\'t be changed',
       asset_not_found: 'Aibutsu not found',

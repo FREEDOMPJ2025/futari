@@ -43,6 +43,70 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 _Nothing unreleased yet._
 
+## [1.8.0] - 2026-10-19
+
+主題：**品牌頁．讓陌生人信任**——登入前的品牌頁整體升級（award review 第 6 輪 7.45 通過）；iPhone 捷徑能把付款送進待確認；匯入多了三個來源。
+完整 diff：[v1.7.4...v1.8.0](https://github.com/redtear1115/oikos/compare/v1.7.4...v1.8.0)
+
+### 使用者可見變化
+
+- **品牌頁加上「紀錄化成光點」的動態（#1527、#1528）**
+  使用者：首頁的紀錄化成光點飄進插畫，各種寬度都看得到；內頁列表的小圓點捲進畫面時亮起；減少動態時維持靜態。
+  技術：純 CSS（`landing-motion.css`、`brand-inner.ts`），只動 transform／opacity，scroll-driven 包在 `@supports`；不碰 LCP 元素。
+- **首頁桌面版不再被手機畫面擋住（#1528）**
+  使用者：「一起記錄」按鈕在桌面寬度點得到；1024–1279 px 看得到插畫裡的兩人；右上角的大燈籠浮水印拿掉。
+  技術：手機畫面改從 `xl`（1280）出現並加 `pointer-events-none`；768–1023 左欄 400 px。
+- **品牌頁版面與換行整理（#1528）**
+  使用者：中文內文依詞換行；搬遷頁說明、登入邀請與首頁搬遷入口不再是白卡片；出遊連結列回到內容欄；內頁標題欄在桌面版固定在左側。
+  技術：`Phrase` 的 `body` 模式在詞界放 `<wbr>`（只處理中文）；`.bi-*` 細線列；use-case／migrate 外層改 `overflow: clip`。
+- **品牌頁鍵盤焦點看得清楚（#1528）**
+  使用者：焦點外框改深色，高對比模式下也看得到；上傳框有焦點外框，「下載轉換模板」連結更好點。
+  技術：`.brand` 的 `--focus-ring-color` 改墨色，連結與 `<summary>` 帶透明 outline；dashboard 不變。
+- **iPhone 捷徑可以把花費送進「待確認」（#1536、#1777）**
+  使用者：設定頁產生捷徑金鑰（只顯示一次），捷徑送來的花費出現在只有自己看得到的待確認卡，確認後才記帳。
+  技術：migration `0098`（金鑰只存 SHA-256、RLS＋REVOKE、每日清理 cron）；`POST /api/shortcut/pending` 一律 401、限流。
+- **新增公開的「捷徑記帳」教學頁（#1750、#1751）**
+  使用者：`/features/shortcuts` 四語說明 Apple Pay 付款後用捷徑打開填好的「記一筆」，步驟名稱對齊 iPhone 實機。
+  技術：新頁面＋HowTo JSON-LD、sitemap；設定頁連結在 Android 殼隱藏。
+- **匯入精靈新增 AndroMoney、まねーぼ、Splitwise（#1791、#1799、#1800）**
+  使用者：選對應按鈕就能匯入；轉帳、期初餘額與結清不會匯入；少了欄位時用檔案上的欄名說明，例如 Type（種別）。
+  技術：三個 mapper 與標題偵測；`detectHeaderLang` 只看單一語言專有的欄名。
+- **CSV 匯入的日期不再早一天（#1793）**
+  使用者：匯入的紀錄是檔案裡寫的那一天，月初那筆不再掉到上個月；已匯入的舊紀錄不會自動改。
+  技術：改用本地日期 `localYmd`，伺服端只收 `YYYY-MM-DD`。
+- **搬遷頁預覽更準確（#1801、#1528）**
+  使用者：預覽的筆數、日期範圍與分類跟匯入精靈一致；讀不懂的檔案改顯示錯誤，不再出現「約 0 筆支出」。
+  技術：`computePreviewStats` 沿用各來源的 mapper；沒有資料列或不到兩欄時進錯誤狀態。
+- **「已離開的夥伴」依讀者語系顯示（#1782、#1784、#1787）**
+  使用者：章節、月回顧、出遊名單與 CSV 以讀者語系顯示這個名字，頭像改成中性圓；四語的這個字樣不能當暱稱。
+  技術：migration `0099` 加標記欄位，讀取端只看標記；`handle_new_user` 擋保留字樣（兩個 project 都要手動套）。
+- **使用情境頁與搬遷頁的內容各頁改寫（#1676、#1766）**
+  使用者：9 個使用情境頁與 14 個搬遷頁的問答、步驟改成各自的內容；簡單記帳搬遷頁的搜尋標題直接回答「永久 VIP」。
+  技術：只改 `useCase.pages`、`migrate.pages`、`seo.migrate` 的字串，移除與程式不符的說法。
+- **英文單複數與文案審稿（#1745、#1798、#1280、#1790、#1796、#1775）**
+  使用者：英文數量為 1 時不再出現「1 rows」「Every 1 days」；標成機翻的 en／ja 文案換成審過的版本。
+  技術：數量字串改 `{ one, other }` 走 `pickPlural`。
+
+### 技術變更
+
+- **每週清理 cron 不再被已確認的定期卡片擋下（#1689）**
+  技術：migration `0097` 重新排程 `cleanup-soft-deleted`，先刪指向即將清除之交易的已確認卡片。
+- **保單讀取端不再回傳已刪帳號的標記名字（#1788）**
+  技術：`asset.ts`、`aibutsu.ts` 的 Profiles join 對 `is_tombstone` 回 NULL。
+- **錯誤頁、登入回呼、CSV 匯入與推播註冊失敗送進 Sentry（#1767、#1768）**
+  技術：`reportClientError` 帶 `area`／`route`（token 遮罩）；登入回呼帶 `error_code`；預期內錯誤不送。
+- **`record_created` 補齊所有記帳管道（#1764）**
+  技術：定期確認、加油、旅行結算、愛物購入、匯入、捷徑都發 `record_created`，以 `via` 區分；10-17 前後計數不可比。
+- **App Store 故事圖第 1、2 張對調（#1759）**
+  使用者：商店第 1 張改成「誰先付的，不用再算」，下次送審換圖後才看得到。
+  技術：只改 `store-screens.html` 的順序並重新輸出。
+
+### Security
+
+- **離開的人可以把舊帳本裡的名字換成「已離開的夥伴」（#1619）**
+  使用者：「過去的時光」多一列，確認後已結束章節與出遊名單上的自己顯示「已離開的夥伴」；單向不能還原。
+  技術：`hideMyNameInLeftLedgers` 鎖自己的 Profiles 列後單一 UPDATE，不收 id；無 migration。
+
 ## [1.7.4] - 2026-10-16
 
 主題：**被找到．出遊帶朋友進來**——出遊頁更容易被搜尋和 AI 找到；朋友能用分享面板或 QR 加入，結束後也看得到兩人帳本的邀請。
@@ -1914,7 +1978,8 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 - **每頁 `generateMetadata` 接 OG image（#487）**：`public/og-image.png` 從 #282 ship 但未 wire 進 metadata，造成 prod HTML 缺 `og:image` / `twitter:image`；本版 4 個 public page 各加 `openGraph.images` + `twitter.images`，`alt` 用 `t.title` locale-aware，無需新增 i18n key。
 - **`settings.local.json` 列入 gitignore（#478）**：避免本地 hook / 權限設定外洩。
 
-[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.7.4...HEAD
+[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/redtear1115/oikos/compare/v1.7.4...v1.8.0
 [1.7.4]: https://github.com/redtear1115/oikos/compare/v1.7.3...v1.7.4
 [1.7.3]: https://github.com/redtear1115/oikos/compare/v1.7.2...v1.7.3
 [1.7.2]: https://github.com/redtear1115/oikos/compare/v1.7.1...v1.7.2

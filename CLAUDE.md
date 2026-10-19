@@ -15,7 +15,7 @@ This is **Next.js 16** with breaking changes. APIs, conventions, and file struct
 
 ## 目前狀態
 
-**Latest released: v1.7.4** — 版本歷史見 [CHANGELOG.md](CHANGELOG.md)（1.0.0 起算；v0.x 只在 git tag）
+**Latest released: v1.8.0** — 版本歷史見 [CHANGELOG.md](CHANGELOG.md)（1.0.0 起算；v0.x 只在 git tag）
 
 ## Backlog / 未釋出版本
 
@@ -23,8 +23,7 @@ This is **Next.js 16** with breaking changes. APIs, conventions, and file struct
 
 | 版本 | 主題 |
 |---|---|
-| [v1.8.0](https://github.com/redtear1115/oikos/milestone/89) | 品牌頁．讓陌生人信任 |
-| [v1.9.0](https://github.com/redtear1115/oikos/milestone/90) | 原生殼．Android 推播與捷徑 |
+| [v1.9.0](https://github.com/redtear1115/oikos/milestone/90) | 原生殼．Android 推播與分享 |
 | [v2.0.0](https://github.com/redtear1115/oikos/milestone/92) | 順心堂．Futari 加入堂口 |
 | [v3.0.0](https://github.com/redtear1115/oikos/milestone/2) | 買斷層．長線一起守 |
 | [v4.0.0](https://github.com/redtear1115/oikos/milestone/3) | 訂閱層．AI 與資產管家 |
@@ -163,6 +162,7 @@ Branch 架構與 Vercel 對應見 [README.md](README.md)。
 - **每條 PR 在 merge 前補 CHANGELOG**：在該 PR 裡把條目寫進 `CHANGELOG.md` 的 `[Unreleased]`（三行短條目，見 CHANGELOG.md 開頭），verifier 驗證時一併核對條目與 diff；沒有使用者或營運看得到的變化（純測試、revert、release PR）就加 `no-changelog` label。`.claude/hooks/require-changelog.sh` 會在 `gh pr merge` 前檢查並擋下。原因：v1.6.3 累積 25 條 merge 都沒寫條目，切版時只能回頭從 diff 重建。
   - **失效的樣子**：hook 遇到自己無法判斷的情況（`gh` 沒登入、指令形式認不出來、設定沒載入）會放行，不會擋 merge——所以它壞掉時沒有任何錯誤，只會在切版時看到 `[Unreleased]` 又是空的。release skill 對空 `[Unreleased]` 的警告是最後一道防線。
 - **issue / PR 必須指定 milestone**：開 issue 或開 PR 時一律加上 `--milestone` 參數，不得省略。milestone 選當前正在開發的版本；若不確定歸屬，選最近的未關閉 milestone。
+  - **要送原生殼的版本，在 milestone 描述開頭標 `[shell]`**（不改標題：release skill 用標題 `vX.Y.Z` 找 milestone）。release skill 第 7 步會對照這個標記和原生 trigger 掃描結果，不一致就停下來問。
   - **Tracker issue（列出一串 child issue 的那種）放在最後一個完成的 child 所在的 milestone**，也就是 open child 裡最晚的那個，讓 tracker 跟最後一件一起關。child 被移到更晚的 milestone 時，tracker 跟著移。失效的樣子：tracker 停在當前 milestone，切版時它擋著 milestone 關不掉，或每一版都被手動往後搬一次。
 
 ---

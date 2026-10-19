@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 
 // ─── #1603: a former member's stale pin no longer locks them out — dev DB ───
 //
@@ -35,6 +36,9 @@ function loadEnvLocal() {
   }
 }
 loadEnvLocal()
+// Each test seeds over the network (incl. an auth.users row, #1710); the default
+// 5 s is too tight against dev.
+vi.setConfig({ testTimeout: 60_000 })
 
 let pin: string | undefined
 vi.mock('next/headers', () => ({
@@ -78,8 +82,13 @@ async function seedGroup(memberA: string, memberB: string | null, epochs: {
 
 async function seedProfiles(n: number) {
   const ids = Array.from({ length: n }, () => randomUUID())
-  await db.insert(profiles).values(ids.map((id, i) => ({ id, displayName: `TEST_1603_${i}` })))
-  cleanups.push(async () => { await db.delete(profiles).where(inArray(profiles.id, ids)) })
+  const people = ids.map((id, i) => ({ id, displayName: `TEST_1603_${i}` }))
+  await db.insert(profiles).values(people)
+  await seedAuthUsers(people)
+  cleanups.push(async () => {
+    await deleteAuthUsers(ids)
+    await db.delete(profiles).where(inArray(profiles.id, ids))
+  })
   return ids
 }
 
@@ -169,7 +178,7 @@ describe('past-times list (#1603)', () => {
     const s = await seedLeave()
     const rows = await listEpochsForViewer(s.a)
     expect(rows.map((r) => r.id)).toEqual([s.x.epochIds[2], s.x.epochIds[1]])
-    expect(rows[1]).toMatchObject({ groupId: s.x.groupId, memberAName: 'TEST_1603_1', memberBName: 'TEST_1603_0' })
+    expect(rows[1]).toMatchObject({ groupId: s.x.groupId, memberAName: { name: 'TEST_1603_1', isLeftLabel: false }, memberBName: { name: 'TEST_1603_0', isLeftLabel: false } })
   })
 
   it('an invite acceptor still sees the solo chapter on the ledger they kept', async () => {

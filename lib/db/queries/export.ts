@@ -5,6 +5,7 @@
 import { sql, type SQL } from 'drizzle-orm'
 import { db } from '@/lib/db/client'
 import { withChapterNames } from '@/lib/db/queries/epoch'
+import { leftAwareName } from '@/lib/leftPartnerLabel'
 import type { SplitType } from '@/lib/balance'
 import { viewerShares, type Slot, type ViewerShares } from '@/lib/exportShares'
 
@@ -39,7 +40,9 @@ export interface ExportChapter {
   memberAId: string
   memberBId: string | null
   /** Closed chapter: the snapshot frozen at its close (null: none taken).
-   *  Open chapter: the live name. Never a live name for a closed chapter. */
+   *  Open chapter: the live name. Never a live name for a closed chapter.
+   *  #1782 — a slot marked as the left label is the export locale's label
+   *  (the file leaves the app, so it must read in the viewer's language). */
   memberAName: string | null
   memberBName: string | null
   /** Trusted current slot of each person (see lib/exportShares.ts). */
@@ -59,6 +62,8 @@ interface ChapterDbRow extends Record<string, unknown> {
   member_b_id: string | null
   member_a_name: string | null
   member_b_name: string | null
+  member_a_name_is_left_label: boolean
+  member_b_name_is_left_label: boolean
   a_slot: Slot | null
   b_slot: Slot | null
   base_currency: string
@@ -155,7 +160,12 @@ export interface LedgerExport {
  *
  * Order: event date desc, then created_at desc.
  */
-export async function getLedgerExportForViewer(viewerId: string): Promise<LedgerExport> {
+export async function getLedgerExportForViewer(
+  viewerId: string,
+  /** #1782 — `t.common.leftPartnerLabel` of the locale the file is exported
+   *  in: a marked name slot is written as this. */
+  leftPartnerLabel: string,
+): Promise<LedgerExport> {
   return db.transaction(async (tx) => {
     const chapterRows = await tx.execute<ChapterDbRow>(sql`
       SELECT
@@ -164,6 +174,7 @@ export async function getLedgerExportForViewer(viewerId: string): Promise<Ledger
         to_char(e."ended_at" AT TIME ZONE 'Asia/Taipei', ${sql.raw(TAIPEI_YMD)}) AS end_date,
         to_char(e."ended_at" AT TIME ZONE 'UTC', ${sql.raw(ISO_UTC)}) AS ended_at_iso,
         e."member_a_id", e."member_b_id", e."member_a_name", e."member_b_name",
+        e."member_a_name_is_left_label", e."member_b_name_is_left_label",
         g."base_currency"::text AS base_currency,
         -- A person's slot is trusted only if they are named on EVERY chapter
         -- of the ledger from this one through the open one, and hold a slot
@@ -253,6 +264,8 @@ export async function getLedgerExportForViewer(viewerId: string): Promise<Ledger
         memberBId: c.member_b_id,
         memberAName: c.member_a_name,
         memberBName: c.member_b_name,
+        memberANameIsLeftLabel: c.member_a_name_is_left_label,
+        memberBNameIsLeftLabel: c.member_b_name_is_left_label,
       })),
       tx,
     )
@@ -263,8 +276,8 @@ export async function getLedgerExportForViewer(viewerId: string): Promise<Ledger
       endDate: c.end_date,
       memberAId: c.memberAId,
       memberBId: c.memberBId,
-      memberAName: c.memberAName,
-      memberBName: c.memberBName,
+      memberAName: leftAwareName(c.memberAName, leftPartnerLabel),
+      memberBName: leftAwareName(c.memberBName, leftPartnerLabel),
       memberASlotNow: c.a_slot,
       memberBSlotNow: c.b_slot,
       baseCurrency: c.base_currency,

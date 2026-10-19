@@ -1,0 +1,499 @@
+{
+  "cases": {
+    "honeydue, picked": {
+      "source": "honeydue",
+      "rows": [
+        {
+          "category": "dining",
+          "description": "Costco",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-01-15",
+          "amount": 250,
+          "type": "expense"
+        },
+        {
+          "category": "dining",
+          "description": "Coffee",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-01-16",
+          "amount": 81,
+          "type": "expense"
+        },
+        {
+          "category": "other",
+          "description": "Salary",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-01-20",
+          "amount": 4000,
+          "type": "income"
+        },
+        {
+          "category": "clothing",
+          "description": "",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-01-21",
+          "amount": 30,
+          "type": "expense"
+        }
+      ],
+      "errors": [
+        {
+          "rowIndex": 4,
+          "errors": [
+            "row 5: missing or unparseable date"
+          ]
+        }
+      ],
+      "warnings": [
+        {
+          "rowIndex": 3,
+          "errors": [
+            "row 4: description is empty"
+          ]
+        }
+      ],
+      "stats": {
+        "total": 5,
+        "valid": 4,
+        "invalid": 1,
+        "dateRange": {
+          "from": "2026-01-15",
+          "to": "2026-01-21"
+        },
+        "topCategories": [
+          {
+            "key": "dining",
+            "count": 2
+          },
+          {
+            "key": "other",
+            "count": 1
+          },
+          {
+            "key": "clothing",
+            "count": 1
+          }
+        ]
+      }
+    },
+    "honeydue, auto-detected": {
+      "source": "honeydue",
+      "rows": [
+        {
+          "category": "housing",
+          "description": "Rent",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-02-03",
+          "amount": 9000,
+          "type": "expense"
+        }
+      ],
+      "errors": [],
+      "warnings": [],
+      "stats": {
+        "total": 1,
+        "valid": 1,
+        "invalid": 0,
+        "dateRange": {
+          "from": "2026-02-03",
+          "to": "2026-02-03"
+        },
+        "topCategories": [
+          {
+            "key": "housing",
+            "count": 1
+          }
+        ]
+      }
+    },
+    "spendee, picked (transfer row, currency)": {
+      "source": "spendee",
+      "rows": [
+        {
+          "category": "other",
+          "description": "latte",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-01-15",
+          "amount": 120,
+          "type": "expense",
+          "originalCurrency": "TWD",
+          "originalAmount": 120
+        },
+        {
+          "category": "other",
+          "description": "5-month",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-02-01",
+          "amount": 40000,
+          "type": "income",
+          "originalCurrency": "TWD",
+          "originalAmount": 40000
+        },
+        {
+          "category": "entertainment",
+          "description": "train",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-02-03",
+          "amount": 25,
+          "type": "expense",
+          "originalCurrency": "EUR",
+          "originalAmount": 25
+        }
+      ],
+      "errors": [
+        {
+          "rowIndex": 2,
+          "errors": [
+            "row 3: missing transaction type (expense/income)"
+          ]
+        }
+      ],
+      "warnings": [],
+      "stats": {
+        "total": 4,
+        "valid": 3,
+        "invalid": 1,
+        "dateRange": {
+          "from": "2026-01-15",
+          "to": "2026-02-03"
+        },
+        "topCategories": [
+          {
+            "key": "other",
+            "count": 2
+          },
+          {
+            "key": "entertainment",
+            "count": 1
+          }
+        ]
+      }
+    },
+    "cwmoney, picked (中文 headers)": {
+      "source": "cwmoney",
+      "rows": [
+        {
+          "category": "dining",
+          "description": "午餐",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-03-01",
+          "amount": 120,
+          "type": "expense"
+        },
+        {
+          "category": "transit",
+          "description": "捷運",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-03-02",
+          "amount": 35,
+          "type": "expense"
+        },
+        {
+          "category": "housing",
+          "description": "房租",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-03-03",
+          "amount": 12000,
+          "type": "expense"
+        }
+      ],
+      "errors": [],
+      "warnings": [],
+      "stats": {
+        "total": 3,
+        "valid": 3,
+        "invalid": 0,
+        "dateRange": {
+          "from": "2026-03-01",
+          "to": "2026-03-03"
+        },
+        "topCategories": [
+          {
+            "key": "dining",
+            "count": 1
+          },
+          {
+            "key": "transit",
+            "count": 1
+          },
+          {
+            "key": "housing",
+            "count": 1
+          }
+        ]
+      }
+    },
+    "cwmoney, auto-detected (日期 + 金額)": {
+      "source": "cwmoney",
+      "rows": [
+        {
+          "category": "entertainment",
+          "description": "電影",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-03-05",
+          "amount": 300,
+          "type": "expense"
+        }
+      ],
+      "errors": [],
+      "warnings": [],
+      "stats": {
+        "total": 1,
+        "valid": 1,
+        "invalid": 0,
+        "dateRange": {
+          "from": "2026-03-05",
+          "to": "2026-03-05"
+        },
+        "topCategories": [
+          {
+            "key": "entertainment",
+            "count": 1
+          }
+        ]
+      }
+    },
+    "cwmoney, i_* schema": {
+      "source": "cwmoney",
+      "rows": [
+        {
+          "category": "dining",
+          "description": "晚餐",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-03-01",
+          "amount": 150,
+          "type": "expense"
+        },
+        {
+          "category": "other",
+          "description": "月薪",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-03-02",
+          "amount": 50000,
+          "type": "income"
+        }
+      ],
+      "errors": [],
+      "warnings": [],
+      "stats": {
+        "total": 2,
+        "valid": 2,
+        "invalid": 0,
+        "dateRange": {
+          "from": "2026-03-01",
+          "to": "2026-03-02"
+        },
+        "topCategories": [
+          {
+            "key": "dining",
+            "count": 1
+          },
+          {
+            "key": "other",
+            "count": 1
+          }
+        ]
+      }
+    },
+    "futari_generic via generic button": {
+      "source": "futari_generic",
+      "rows": [
+        {
+          "category": "dining",
+          "description": "lunch",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-04-01",
+          "amount": 200,
+          "type": "expense"
+        },
+        {
+          "category": "other",
+          "description": "bonus",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-04-02",
+          "amount": 900,
+          "type": "income"
+        },
+        {
+          "category": "dining",
+          "description": "snack",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-04-03",
+          "amount": 15,
+          "type": "expense",
+          "originalCurrency": "USD",
+          "originalAmount": 15
+        }
+      ],
+      "errors": [
+        {
+          "rowIndex": 3,
+          "errors": [
+            "row 4: missing transaction type (expense/income)"
+          ]
+        }
+      ],
+      "warnings": [],
+      "stats": {
+        "total": 4,
+        "valid": 3,
+        "invalid": 1,
+        "dateRange": {
+          "from": "2026-04-01",
+          "to": "2026-04-03"
+        },
+        "topCategories": [
+          {
+            "key": "dining",
+            "count": 2
+          },
+          {
+            "key": "other",
+            "count": 1
+          }
+        ]
+      }
+    },
+    "generic with a headerMap": {
+      "source": "generic",
+      "rows": [
+        {
+          "category": "dining",
+          "description": "tea",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-05-01",
+          "amount": 45,
+          "type": "expense"
+        },
+        {
+          "category": "other",
+          "description": "gift",
+          "paidBy": "viewer",
+          "splitType": "half",
+          "date": "2026-05-02",
+          "amount": 1000,
+          "type": "income"
+        }
+      ],
+      "errors": [],
+      "warnings": [],
+      "stats": {
+        "total": 2,
+        "valid": 2,
+        "invalid": 0,
+        "dateRange": {
+          "from": "2026-05-01",
+          "to": "2026-05-02"
+        },
+        "topCategories": [
+          {
+            "key": "dining",
+            "count": 1
+          },
+          {
+            "key": "other",
+            "count": 1
+          }
+        ]
+      }
+    },
+    "a file with a banner line, picked as CWMoney (no skip for other sources)": {
+      "source": "cwmoney",
+      "rows": [],
+      "errors": [
+        {
+          "rowIndex": 0,
+          "errors": [
+            "row 1: missing or unparseable date",
+            "row 1: missing or unparseable amount",
+            "row 1: missing transaction type (expense/income)"
+          ]
+        },
+        {
+          "rowIndex": 1,
+          "errors": [
+            "row 2: missing or unparseable date",
+            "row 2: missing or unparseable amount",
+            "row 2: missing transaction type (expense/income)"
+          ]
+        },
+        {
+          "rowIndex": 2,
+          "errors": [
+            "row 3: missing or unparseable date",
+            "row 3: missing or unparseable amount",
+            "row 3: missing transaction type (expense/income)"
+          ]
+        }
+      ],
+      "warnings": [
+        {
+          "rowIndex": 0,
+          "errors": [
+            "row 1: description is empty"
+          ]
+        },
+        {
+          "rowIndex": 1,
+          "errors": [
+            "row 2: description is empty"
+          ]
+        },
+        {
+          "rowIndex": 2,
+          "errors": [
+            "row 3: description is empty"
+          ]
+        }
+      ],
+      "stats": {
+        "total": 3,
+        "valid": 0,
+        "invalid": 3,
+        "dateRange": null,
+        "topCategories": []
+      }
+    },
+    "header row only": {
+      "source": "spendee",
+      "rows": [],
+      "errors": [],
+      "warnings": [],
+      "stats": {
+        "total": 0,
+        "valid": 0,
+        "invalid": 0,
+        "dateRange": null,
+        "topCategories": []
+      }
+    }
+  },
+  "headers": [
+    "honeydue",
+    "spendee",
+    "cwmoney",
+    "futari_generic",
+    "honeydue",
+    "generic",
+    "generic",
+    "generic"
+  ]
+}

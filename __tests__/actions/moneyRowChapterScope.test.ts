@@ -30,10 +30,10 @@ import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 // and the edited row stays in the chapter it was edited in.
 //
 // Local throwaway database only; refuses to run against anything that is not
-// localhost. Start one with:
-//   docker run -d --name pg-1290s1 -e POSTGRES_PASSWORD=pg -p 127.0.0.1:55530:5432 postgres:17
-//   DATABASE_URL_DIRECT=postgres://postgres:pg@127.0.0.1:55530/postgres npx drizzle-kit push --force
-//   DATABASE_URL=postgres://postgres:pg@127.0.0.1:55530/postgres npx vitest run __tests__/actions/moneyRowChapterScope.test.ts
+// localhost. Run it with:
+//   DATABASE_URL=<stand-in url> npx vitest run __tests__/actions/moneyRowChapterScope.test.ts
+// The Postgres + Supabase stand-in recipe lives in __tests__/actions/_standinCli.mts
+// (drizzle-kit push is not enough: no auth schema, no SQL functions).
 // ──────────────────────────────────────────────────────────────────────────
 
 function loadEnvLocal() {

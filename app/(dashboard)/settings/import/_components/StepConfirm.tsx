@@ -1,9 +1,11 @@
 'use client'
 
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { getCategory } from '@/lib/categories'
 import { getIncomeCategory } from '@/lib/incomeCategories'
 import type { ImportRow } from '@/lib/csvImport'
+import { localYmd } from '@/lib/local-date'
 import { SectionCard } from './SectionCard'
 import { WizardNavButtons } from './WizardNavButtons'
 
@@ -19,6 +21,7 @@ const PREVIEW_LIMIT = 20
 
 export function StepConfirm({ rows, invalidCount, onBack, onConfirm, submitting }: Props) {
   const t = useTranslations()
+  const locale = useLocale()
   const tImport = t.settings.import.step4
 
   const preview = rows.slice(0, PREVIEW_LIMIT)
@@ -28,9 +31,9 @@ export function StepConfirm({ rows, invalidCount, onBack, onConfirm, submitting 
     <div className="space-y-4">
       <SectionCard title={tImport.title} subtitle={tImport.subtitle}>
         <div className="text-xs mb-3" style={{ color: 'var(--ink-2)' }}>
-          {tImport.summary
+          {pickPlural(locale, rows.length, tImport.summary)
             .replace('{count}', String(rows.length))
-            .replace('{invalid}', String(invalidCount))}
+            .replace('{invalid}', pickPlural(locale, invalidCount, tImport.summaryInvalid).replace('{n}', String(invalidCount)))}
         </div>
 
         <div className="overflow-x-auto -mx-2">
@@ -58,7 +61,7 @@ export function StepConfirm({ rows, invalidCount, onBack, onConfirm, submitting 
                     style={{ borderTop: '1px solid var(--hairline)' }}
                   >
                     <td className="py-2 px-2 whitespace-nowrap" style={{ color: 'var(--ink-2)' }}>
-                      {row.date.toISOString().slice(0, 10)}
+                      {localYmd(row.date)}
                     </td>
                     <td className="py-2 px-2 max-w-[140px] truncate">{row.description || '—'}</td>
                     <td className="py-2 px-2 whitespace-nowrap">
@@ -84,7 +87,7 @@ export function StepConfirm({ rows, invalidCount, onBack, onConfirm, submitting 
 
         {remaining > 0 && (
           <div className="text-xs mt-3 text-center" style={{ color: 'var(--ink-3)' }}>
-            {tImport.moreRows.replace('{count}', String(remaining))}
+            {pickPlural(locale, remaining, tImport.moreRows).replace('{count}', String(remaining))}
           </div>
         )}
       </SectionCard>
@@ -96,7 +99,7 @@ export function StepConfirm({ rows, invalidCount, onBack, onConfirm, submitting 
         nextLabel={
           submitting
             ? tImport.confirming
-            : tImport.confirmCta.replace('{count}', String(rows.length))
+            : pickPlural(locale, rows.length, tImport.confirmCta).replace('{count}', String(rows.length))
         }
         loading={submitting}
         disabled={rows.length === 0}

@@ -34,7 +34,7 @@ import { getViewerWriteContext } from '@/lib/actionContext'
 import { revalidateAfterTransactionMutation } from '@/lib/revalidate'
 import { convertWholeUnits, type CurrencyCode } from '@/lib/currency'
 import { listRatesForGroup } from '@/lib/db/queries/currencyRates'
-import { captureServer, isUserFirstNonDeletedRecord } from '@/lib/analytics/server'
+import { settleInsertedRecord, announceRecordCreated } from '@/lib/transactionWriteEffects'
 import { action, actionError } from '@/lib/action-errors'
 
 export interface CreateTransactionInput {
@@ -139,34 +139,31 @@ export const createTransaction = action(async (
         tripId: input.tripId ?? null,
       })
       .returning({ id: cashTransactions.id })
-    await recalcGroupBalance(group.id, tx)
+    // Balance recompute + the viewer's "first record" signal for the #43
+    // phase C card (see lib/transactionWriteEffects.ts).
+    const { isFirstRecord } = await settleInsertedRecord(tx, user.id, group.id)
 
-    // Per-user "first record" signal for the #43 phase C card. See
-    // isUserFirstNonDeletedRecord docstring for the partner-as-payer caveat.
-    const isFirstTransaction = await isUserFirstNonDeletedRecord(tx, user.id, group.id)
-
-    return { id: inserted.id, isFirstTransaction }
+    return { id: inserted.id, isFirstTransaction: isFirstRecord }
   })
-
-  revalidateAfterTransactionMutation({ assetId: validated.assetId })
 
   // Milestone signal (#734): the user's first manual record *of their own
   // purchase*. Not the activation metric — it misses anyone who only records
   // for their partner; use `record_created >= 1` for that (#1127, and the
-  // isUserFirstNonDeletedRecord docstring).
-  if (result.isFirstTransaction) {
-    await captureServer(user.id, 'first_record_created', { via: 'manual' })
-  }
-
-  // Daily-active signal (#811): every new record, regardless of whether it's
-  // the first. This is the true DAU denominator for a ledger PWA.
-  await captureServer(user.id, 'record_created', {
-    split_type: validated.splitType,
-    category: validated.category,
-    has_asset: !!validated.assetId,
-    has_trip: !!(input.tripId),
-    currency: inputCurrency,
+  // isUserFirstNonDeletedRecord docstring). `record_created` is the
+  // daily-active signal (#811): every new record, first or not.
+  await announceRecordCreated({
+    userId: user.id,
+    isFirstRecord: result.isFirstTransaction,
     via: 'manual',
+    revalidate: { assetId: validated.assetId },
+    recordProps: {
+      split_type: validated.splitType,
+      category: validated.category,
+      has_asset: !!validated.assetId,
+      has_trip: !!(input.tripId),
+      currency: inputCurrency,
+      group_id: group.id,
+    },
   })
 
   return result

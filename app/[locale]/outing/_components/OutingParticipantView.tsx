@@ -103,7 +103,7 @@ export function OutingParticipantView({ view, needsBind, signedIn, signInHref, l
                 key={p.id}
                 className={`flex items-center justify-between gap-3 py-2.5${i === shown.length - 1 ? '' : ' border-b border-hairline'}`}
               >
-                <span className="text-sm truncate text-ink">
+                <span className={`text-sm truncate ${p.isLeftLabel ? 'text-ink-2' : 'text-ink'}`}>
                   {p.displayName}
                   {p.id === view.youParticipantId && <span className="ml-1.5 text-xs text-ink-3">{c.youTag}</span>}
                 </span>

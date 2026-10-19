@@ -1,6 +1,7 @@
 'use client'
 
 import { useTranslations, useLocale } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { formatLedgerAmountParts } from '@/lib/currency'
 import { useBaseCurrency } from '@/app/(dashboard)/_components/MemberContext'
 
@@ -63,7 +64,7 @@ export function SoloMonthHero({ monthKey, total, count }: Props) {
       </div>
 
       <div className="text-xs text-ink-3 text-center mt-2">
-        {t.dashboard.soloHero.countLabel.replace('{count}', String(count))}
+        {pickPlural(locale, count, t.dashboard.soloHero.countLabel).replace('{count}', String(count))}
       </div>
     </div>
   )

@@ -147,6 +147,7 @@ blocked_on: 外部依賴敘述                            # 只有 status=blocke
 
 - [recurring](recurring-design.md) — 自訂定期收支：規則 → cron 產 pending → 用戶 confirm 落 transaction
 - [inbox-layer](inbox-layer-design.md) — 統一所有「非親手建立」資料的 review flow（recurring / LINE / 帳單匯入 共用 Inbox）
+- [shortcut-pending](shortcut-pending-design.md) — iPhone 捷徑帶個人金鑰送出花費 → 只有本人看得到的待確認卡 → 記下才落 transaction（#1536）
 - [cloud-invoice](cloud-invoice-design.md) — 雲端發票匯入（blocked on 財政部 APP_ID）
 - [csv-import](csv-import-design.md) — 通用 CSV 匯入歷史紀錄（換 app 用戶的歷史資料保留 + import_batch undo）
 - [migrate-pages](migrate-pages-design.md) — 競品搬遷 SEO 頁的 CMS/資料驅動架構（`sources.ts` registry + 單一 `[source]/page.tsx`）；非匯出 App 的截圖→ChatGPT→CSV（`futari_generic` parser）

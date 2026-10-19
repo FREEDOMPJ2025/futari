@@ -37,8 +37,8 @@ export function UseCaseFaq({
       <dl className={s.faq}>
         {items.map(({ question, answer }) => (
           <div key={question}>
-            <dt className="text-base font-medium">{question}</dt>
-            <dd className="text-sm">{answer}</dd>
+            <dt className="text-base font-medium"><Phrase body text={question} /></dt>
+            <dd className="text-sm"><Phrase body text={answer} /></dd>
           </div>
         ))}
       </dl>

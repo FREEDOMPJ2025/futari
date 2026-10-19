@@ -93,13 +93,33 @@ export async function GET(request: Request) {
   if (error) {
     // Never pass the raw error through — it can carry the auth code. Only the
     // classification fields go to Sentry and PostHog.
+    //
+    // error_code (#1768): GoTrue / supabase-js error codes are bounded
+    // snake_case constants (`flow_state_not_found`, `bad_code_verifier`, …) and
+    // say *why* the exchange failed, which name + status alone cannot. The
+    // check is on shape, not an allowlist: the SDK also emits codes outside its
+    // own `ErrorCode` union (`pkce_code_verifier_not_found`), and those are the
+    // ones we most need to see. Anything that is not a short lowercase
+    // identifier becomes 'other', so free text can never ride along in this
+    // field. The tag key is `error_code`, never `code`: `code` is the secret
+    // OAuth query param of this very route.
+    const errorCode =
+      typeof error.code === 'string' && /^[a-z0-9_]{1,64}$/.test(error.code)
+        ? error.code
+        : error.code
+          ? 'other'
+          : 'none'
     await recordAuthFailure(aid, 'exchange_error', {
       error_name: error.name,
       error_status: error.status,
+      error_code: errorCode,
     })
     Sentry.captureException(
       new Error(`exchangeCodeForSession failed: ${error.name}`),
-      { tags: { area: 'auth', op: 'exchange_code' }, extra: { status: error.status } },
+      {
+        tags: { area: 'auth', op: 'exchange_code', error_code: errorCode },
+        extra: { status: error.status },
+      },
     )
     return NextResponse.redirect(new URL(signInOnError, origin))
   }

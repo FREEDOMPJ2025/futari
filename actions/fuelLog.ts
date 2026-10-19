@@ -94,6 +94,7 @@ export const createFuelLog = action(async (input: FuelLogInputRaw): Promise<{ id
   if (result.firstRecord) {
     await captureServer(user.id, 'first_record_created', { via: 'fuel_log' })
   }
+  await captureServer(user.id, 'record_created', { via: 'fuel_log', group_id: group.id })
 
   return { id: result.id }
 })

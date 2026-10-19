@@ -7,6 +7,7 @@ import { InstallGuideRow } from './InstallGuideRow'
 import { SupportRow } from './SupportRow'
 import { TesterFeedbackRow } from './TesterFeedbackRow'
 import { AndroidTesterInviteRow } from './AndroidTesterInviteRow'
+import { ShortcutsGuideRow } from './ShortcutsGuideRow'
 import { LogoutButton } from './LogoutButton'
 import { DeleteAccountButton } from './DeleteAccountButton'
 
@@ -92,6 +93,7 @@ export async function SettingsContent({
         />
         <div className="mt-3" />
         <LinkRow href="/settings/trust" label={t.settings.trust} />
+        <ShortcutsGuideRow />
       </Section>
 
       {partner && (

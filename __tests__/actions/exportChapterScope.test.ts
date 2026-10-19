@@ -136,7 +136,7 @@ async function join(groupId: string, memberA: string, joiner: string, at: Date) 
 // there go through the route only).
 const exportedDescriptions = async (groupId: string, viewerId: string) => {
   const { getLedgerExportForViewer } = await import('@/lib/db/queries/export')
-  const { dbRows } = await getLedgerExportForViewer(viewerId)
+  const { dbRows } = await getLedgerExportForViewer(viewerId, '已離開的夥伴')
   const ids = dbRows.filter((r) => r.kind === 'expense' && r.groupId === groupId).map((r) => r.id)
   if (ids.length === 0) return []
   const rows = await db.select({ d: cashTransactions.description }).from(cashTransactions)
@@ -292,6 +292,8 @@ describe.skipIf(!isLocalDb)('chapter scope: export, suggestions, import history'
 //   W3  G3: [A3+B3] ─B3 leaves─▶ [A3 solo] ─C3 joins─▶ [A3+C3] ─A3⇄C3 swap
 //           ─A3 leaves─▶ [C3 solo] ─C3 re-invites B3─▶ [C3+B3] ─(e) B3⇄C3 swap
 //   W4  G4: [A4+R4] ─A4 removes R4─▶ [A4 solo]   (R4 has no ledger at all)
+//   W5  G5: [A5+B5] ─A5⇄B5 swap─ A5 leaves ─▶ [B5 solo] ─C5 joins─▶ [B5+C5]
+//           ─B5⇄C5 swap─ B5 leaves ─▶ [C5 solo] ─A5 rejoins─▶ [C5+A5]   (#1706)
 //   Z   a signed-in person with no chapter anywhere
 //
 // Leaves, removals and swaps are the real actions, the account deletion the
@@ -375,6 +377,7 @@ const people2 = {
   A2: randomUUID(), B2: randomUUID(), C2: randomUUID(),
   A3: randomUUID(), B3: randomUUID(), C3: randomUUID(),
   A4: randomUUID(), R4: randomUUID(),
+  A5: randomUUID(), B5: randomUUID(), C5: randomUUID(),
   Z: randomUUID(),
 }
 const NAME = {
@@ -472,6 +475,7 @@ describe.skipIf(!isLocalDb)('#1460 export across ledgers', () => {
       { id: p.A2, displayName: `${P}_A2` }, { id: p.B2, displayName: `${P}_B2` }, { id: p.C2, displayName: `${P}_C2` },
       { id: p.A3, displayName: `${P}_A3` }, { id: p.B3, displayName: `${P}_B3` }, { id: p.C3, displayName: `${P}_C3` },
       { id: p.A4, displayName: `${P}_A4` }, { id: p.R4, displayName: `${P}_R4` },
+      { id: p.A5, displayName: `${P}_A5` }, { id: p.B5, displayName: `${P}_B5` }, { id: p.C5, displayName: `${P}_C5` },
       { id: p.Z, displayName: `${P}_Z` },
     ])
     // #1701 — live people have an auth.users row. Without one, a solo ledger
@@ -496,6 +500,11 @@ describe.skipIf(!isLocalDb)('#1460 export across ledgers', () => {
     })
     await db.insert(settlements).values({
       groupId: w2.G1, paidBy: p.B1, amount: 300, note: M('W1 settle B1 to A1'), settledAt: at(30), createdAt: at(30),
+    })
+    // #1706 (M6) — a soft-deleted settlement inside the same chapter.
+    await db.insert(settlements).values({
+      groupId: w2.G1, paidBy: p.B1, amount: 7, note: M('W1 settle deleted'),
+      settledAt: at(33), createdAt: at(33), deletedAt: at(34),
     })
     await db.insert(incomeTransactions).values({
       groupId: w2.G1, recipientId: p.B1, amount: 1, category: 'salary', source: M('W1 income deleted'),
@@ -552,6 +561,25 @@ describe.skipIf(!isLocalDb)('#1460 export across ledgers', () => {
     })
     unwrapAction(await as(p.A4, () => removePartner()))
     await cash(w2.G4, p.A4, 'W4 A4 after removal', await dbNow(), { splitType: 'all_mine' })
+
+    // ── W5 (#1706, M8): member_a's presence breaks while the ratio parity comes
+    // back. Two swaps flip the stored ratio twice (70 → 30 → 70) and A5 ends in
+    // slot b, so reading A5's CURRENT slot against the stored ratio is inverted
+    // for the A5+B5 chapter, though both chapter members' slots look "fine".
+    w2.G5 = await newLedger(p.A5, p.B5, t0, `${P}_G5`)
+    w2.W5 = await cash(w2.G5, p.A5, 'W5 weighted', at(24), { splitType: 'weighted', splitRatioA: 70 })
+    // B5 owed A5 300 on that row; this one makes the ledger even again, because
+    // leaving needs a zero balance.
+    await cash(w2.G5, p.B5, 'W5 offset', at(25), { amount: 600 })
+    unwrapAction(await as(p.B5, () => proposeSwap()))
+    unwrapAction(await as(p.A5, () => confirmSwap()))          // flip #1: B5 is member_a
+    unwrapAction(await as(p.A5, () => leaveGroup()))           // member_b leaves
+    await join(w2.G5, p.B5, p.C5, await dbNow())
+    unwrapAction(await as(p.C5, () => proposeSwap()))
+    unwrapAction(await as(p.B5, () => confirmSwap()))          // flip #2: C5 is member_a
+    unwrapAction(await as(p.B5, () => leaveGroup()))
+    await join(w2.G5, p.C5, p.A5, await dbNow())               // A5 back, as member_b
+    await cash(w2.G5, p.A5, 'W5 in C5+A5', await dbNow(), { splitType: 'all_mine' })
   })
 
   afterAll(async () => {
@@ -583,6 +611,9 @@ describe.skipIf(!isLocalDb)('#1460 export across ledgers', () => {
     expect(await g(w2.G3)).toMatchObject({ memberA: p.C3, memberB: p.B3 })      // B3 back, slot b
     expect(await ratioOf(w2.W3)).toBe(30)
     expect(await g(w2.G4)).toMatchObject({ memberA: p.A4, memberB: null })
+    // W5: two swaps put the stored ratio back where it started, A5 holds slot b.
+    expect(await g(w2.G5)).toMatchObject({ memberA: p.C5, memberB: p.A5 })
+    expect(await ratioOf(w2.W5)).toBe(70)
     const r4Ledgers = await db.select({ id: oikosGroups.id }).from(oikosGroups)
       .where(sql`${oikosGroups.memberA} = ${p.R4} OR ${oikosGroups.memberB} = ${p.R4}`)
     expect(r4Ledgers).toEqual([])
@@ -624,6 +655,13 @@ describe.skipIf(!isLocalDb)('#1460 export across ledgers', () => {
       expect(rowsWith(f, 'W1 older than the first chapter')).toHaveLength(1)
       expect(markers(f)).not.toContain('W1 edit v1')
       expect(markers(f)).not.toContain('W1 income deleted')
+      // #1706 (M6) — nor a soft-deleted settlement.
+      expect(markers(f)).not.toContain('W1 settle deleted')
+      expect(rowsWith(f, 'W1 settle B1 to A1')).toHaveLength(1)
+    })
+
+    it('a former member\'s file carries no soft-deleted settlement either (#1706)', async () => {
+      expect(markers(await exportFor(people2.B1))).not.toContain('W1 settle deleted')
     })
 
     it('a removed partner with no ledger at all exports the closed chapter they were in', async () => {
@@ -649,7 +687,7 @@ describe.skipIf(!isLocalDb)('#1460 export across ledgers', () => {
     it('for a current member, each ledger\'s expense rows are exactly viewerChaptersClause\'s', async () => {
       const { getLedgerExportForViewer } = await import('@/lib/db/queries/export')
       for (const [viewer, groupId] of [[people2.A1, w2.G1], [people2.C1, w2.G1], [people2.B1, w2.GB1], [people2.B3, w2.G3]]) {
-        const { dbRows } = await getLedgerExportForViewer(viewer)
+        const { dbRows } = await getLedgerExportForViewer(viewer, '已離開的夥伴')
         const mine = dbRows.filter((r) => r.kind === 'expense' && r.groupId === groupId).map((r) => r.id).sort()
         const byClause = (await db.select({ id: cashTransactions.id }).from(cashTransactions).where(and(
           eq(cashTransactions.groupId, groupId),
@@ -700,6 +738,19 @@ describe.skipIf(!isLocalDb)('#1460 export across ledgers', () => {
   })
 
   describe('split shares (rev3: continuous presence)', () => {
+    // #1706 (M8) — the break is on the chapter's member_a. E1 is A5(a) + B5(b);
+    // A5 is named on E1 and on today's chapter but not on the ones between
+    // (B5 solo, B5+C5, C5 solo), and holds slot b now. The two swaps put the
+    // stored ratio back to 70, so a current-slot reading says A5 bore 30.
+    it('(f) member_a is absent from a middle chapter and rejoins → blank for A5 and for B5; never an inverted share', async () => {
+      expect(sharesOf(await exportFor(people2.A5), 'W5 weighted')).toEqual(['', ''])
+      expect(sharesOf(await exportFor(people2.B5), 'W5 weighted')).toEqual(['', ''])
+    })
+
+    it('(f) scope: A5 gets the A5+B5 chapter and the C5+A5 one, nothing from the chapters in between', async () => {
+      expect(markers(await exportFor(people2.A5))).toEqual(['W5 in C5+A5', 'W5 offset', 'W5 weighted'])
+    })
+
     it('(a) B leaves, C joins A, A and C swap → B\'s file shows 30% / 70%', async () => {
       expect(sharesOf(await exportFor(people2.B1), 'W1 weighted')).toEqual(['30%', '70%'])
     })

@@ -1,0 +1,244 @@
+{
+ "honeydue, picked:honeydue": {
+  "source": "honeydue",
+  "stats": {
+   "totalRows": 5,
+   "estimatedExpenseRows": 3,
+   "dateRange": {
+    "first": "1/15/2026",
+    "last": "not-a-date"
+   },
+   "topCategories": [
+    {
+     "name": "Groceries",
+     "count": 1
+    },
+    {
+     "name": "Food & Dining",
+     "count": 1
+    },
+    {
+     "name": "Income",
+     "count": 1
+    },
+    {
+     "name": "Shopping",
+     "count": 1
+    },
+    {
+     "name": "Home",
+     "count": 1
+    }
+   ]
+  }
+ },
+ "honeydue, auto-detected:unknown": {
+  "source": "honeydue",
+  "stats": {
+   "totalRows": 1,
+   "estimatedExpenseRows": 1,
+   "dateRange": {
+    "first": "2/3/2026",
+    "last": "2/3/2026"
+   },
+   "topCategories": [
+    {
+     "name": "Rent",
+     "count": 1
+    }
+   ]
+  }
+ },
+ "honeydue, auto-detected:icost": {
+  "source": "honeydue",
+  "stats": {
+   "totalRows": 1,
+   "estimatedExpenseRows": 1,
+   "dateRange": {
+    "first": "2/3/2026",
+    "last": "2/3/2026"
+   },
+   "topCategories": [
+    {
+     "name": "Rent",
+     "count": 1
+    }
+   ]
+  }
+ },
+ "spendee, picked (transfer row, currency):spendee": {
+  "source": "spendee",
+  "stats": {
+   "totalRows": 4,
+   "estimatedExpenseRows": 0,
+   "dateRange": {
+    "first": "2026-01-15",
+    "last": "2026-02-03"
+   },
+   "topCategories": [
+    {
+     "name": "Coffee",
+     "count": 1
+    },
+    {
+     "name": "Salary",
+     "count": 1
+    },
+    {
+     "name": "Transfer",
+     "count": 1
+    },
+    {
+     "name": "Travel",
+     "count": 1
+    }
+   ]
+  }
+ },
+ "cwmoney, picked (中文 headers):cwmoney": {
+  "source": "cwmoney",
+  "stats": {
+   "totalRows": 3,
+   "estimatedExpenseRows": 0,
+   "dateRange": {
+    "first": "2026-03-03",
+    "last": "20260302"
+   },
+   "topCategories": [
+    {
+     "name": "飲食",
+     "count": 1
+    },
+    {
+     "name": "交通",
+     "count": 1
+    },
+    {
+     "name": "居住",
+     "count": 1
+    }
+   ]
+  }
+ },
+ "cwmoney, auto-detected (日期 + 金額):unknown": {
+  "source": "cwmoney",
+  "stats": {
+   "totalRows": 1,
+   "estimatedExpenseRows": 0,
+   "dateRange": {
+    "first": "2026-03-05",
+    "last": "2026-03-05"
+   },
+   "topCategories": [
+    {
+     "name": "娛樂",
+     "count": 1
+    }
+   ]
+  }
+ },
+ "cwmoney, auto-detected (日期 + 金額):icost": {
+  "source": "cwmoney",
+  "stats": {
+   "totalRows": 1,
+   "estimatedExpenseRows": 0,
+   "dateRange": {
+    "first": "2026-03-05",
+    "last": "2026-03-05"
+   },
+   "topCategories": [
+    {
+     "name": "娛樂",
+     "count": 1
+    }
+   ]
+  }
+ },
+ "cwmoney, i_* schema:cwmoney": {
+  "source": "cwmoney",
+  "stats": {
+   "totalRows": 2,
+   "estimatedExpenseRows": 0,
+   "dateRange": null,
+   "topCategories": []
+  }
+ },
+ "futari_generic via generic button:unknown": {
+  "source": "unknown",
+  "stats": {
+   "totalRows": 4,
+   "estimatedExpenseRows": 0,
+   "dateRange": {
+    "first": "2026-04-01",
+    "last": "2026-04-04"
+   },
+   "topCategories": [
+    {
+     "name": "dining",
+     "count": 2
+    },
+    {
+     "name": "other",
+     "count": 2
+    }
+   ]
+  }
+ },
+ "futari_generic via generic button:icost": {
+  "source": "icost",
+  "stats": {
+   "totalRows": 4,
+   "estimatedExpenseRows": 0,
+   "dateRange": {
+    "first": "2026-04-01",
+    "last": "2026-04-04"
+   },
+   "topCategories": [
+    {
+     "name": "dining",
+     "count": 2
+    },
+    {
+     "name": "other",
+     "count": 2
+    }
+   ]
+  }
+ },
+ "generic with a headerMap:unknown": {
+  "source": "unknown",
+  "stats": {
+   "totalRows": 2,
+   "estimatedExpenseRows": 0,
+   "dateRange": null,
+   "topCategories": []
+  }
+ },
+ "generic with a headerMap:icost": {
+  "source": "icost",
+  "stats": {
+   "totalRows": 2,
+   "estimatedExpenseRows": 0,
+   "dateRange": null,
+   "topCategories": []
+  }
+ },
+ "a file with a banner line, picked as CWMoney (no skip for other sources):cwmoney": {
+  "source": "cwmoney",
+  "stats": {
+   "totalRows": 3,
+   "estimatedExpenseRows": 0,
+   "dateRange": null,
+   "topCategories": []
+  }
+ },
+ "header row only:spendee": {
+  "source": "spendee",
+  "stats": {
+   "totalRows": 0,
+   "estimatedExpenseRows": 0,
+   "dateRange": null,
+   "topCategories": []
+  }
+ }
+}

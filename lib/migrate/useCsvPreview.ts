@@ -2,10 +2,11 @@
 
 import { useCallback, useState } from 'react'
 import {
-  computeStats,
+  computePreviewStats,
   decodeBytes,
   detectCsvSource,
   parseCsvText,
+  parseHintsFor,
   type CsvRow,
   type CsvStats,
   type DetectedEncoding,
@@ -25,6 +26,10 @@ export interface CsvPreviewState {
   error: string | null
 }
 
+/** `error` for a file that parsed to nothing table-shaped; also the `reason`
+ *  of the `migrate_preview_failed` event, so it reads apart from a thrown message. */
+export const NOT_A_CSV_TABLE = 'not_a_csv_table'
+
 const INITIAL: CsvPreviewState = {
   status: 'idle',
   file: null,
@@ -41,7 +46,10 @@ const INITIAL: CsvPreviewState = {
  * the /migrate pages are anonymous SEO entries; account creation + the real
  * import flow live behind auth. `hint` lets the caller bias the page towards
  * a known source (e.g. /migrate/honeydue passes 'honeydue') when the header
- * sniffer can't tell.
+ * sniffer can't tell, and selects that source's decode / banner hints.
+ *
+ * A file with no data rows or fewer than two columns ends in `status: 'error'`,
+ * not 'ready' (#1528 A6). Anything wider than that stays a preview.
  */
 export function useCsvPreview({ hint = 'unknown' }: { hint?: MigrateSource } = {}) {
   const [state, setState] = useState<CsvPreviewState>(INITIAL)
@@ -50,10 +58,24 @@ export function useCsvPreview({ hint = 'unknown' }: { hint?: MigrateSource } = {
     setState({ ...INITIAL, status: 'parsing', file })
     try {
       const buffer = await file.arrayBuffer()
-      const { text, encoding } = decodeBytes(buffer)
-      const { headers, rows } = parseCsvText(text)
+      // The page's own source declares how its file is read (AndroMoney: skip
+      // the banner line; まねーぼ: Shift_JIS fallback) — same hints as the
+      // wizard, so the preview and the import see the same columns. Other pages
+      // get no hints and parse exactly as before.
+      const hints = parseHintsFor(hint)
+      const { text, encoding } = decodeBytes(buffer, hints)
+      const { headers, rows } = parseCsvText(text, hints)
       const detectedSource = detectCsvSource(headers) ?? hint
-      const stats = computeStats(rows)
+      // Not CSV-shaped (a lone column, e.g. plain text) or no data rows (#1528
+      // A6): same terminal state as a file that throws, so the page shows its
+      // error and no import button. Deliberately narrow: a real CSV whose
+      // columns we don't recognise (even one that maps to 0 records here) still
+      // previews with the CTA, because the signed-in wizard can map columns by hand.
+      if (rows.length === 0 || headers.length < 2) {
+        setState({ ...INITIAL, status: 'error', file, error: NOT_A_CSV_TABLE })
+        return
+      }
+      const stats = computePreviewStats(headers, rows, hint)
       setState({
         status: 'ready',
         file,

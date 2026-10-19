@@ -2,11 +2,13 @@ import type { CSSProperties } from 'react'
 import type { Translations } from '@/lib/i18n/locales/zh-TW'
 import type { CsvStats, DetectedEncoding, MigrateSource } from '@/lib/csvImport'
 import { MIGRATE_SOURCES } from '@/lib/migrate/sources'
+import { pickPlural } from '@/lib/i18n/plural'
 
 type MigrateStrings = Translations['migrate']
 
 interface Props {
   t: MigrateStrings
+  locale: string
   source: MigrateSource
   encoding: DetectedEncoding | null
   stats: CsvStats | null
@@ -17,7 +19,7 @@ interface Props {
  * (`MigrateTool`) owns the file-picker + hook state and decides when to
  * mount this card.
  */
-export function MigratePreviewCard({ t, source, encoding, stats }: Props) {
+export function MigratePreviewCard({ t, locale, source, encoding, stats }: Props) {
   if (!stats || stats.totalRows === 0) {
     return (
       <div
@@ -36,8 +38,8 @@ export function MigratePreviewCard({ t, source, encoding, stats }: Props) {
   const encodingLabel = encoding
     ? t.preview.encodingLabel.replace('{encoding}', encoding.toUpperCase())
     : null
-  const totalRows = t.preview.totalRowsLabel.replace('{count}', String(stats.totalRows))
-  const expenseRows = t.preview.expenseRowsLabel.replace('{count}', String(stats.estimatedExpenseRows))
+  const totalRows = pickPlural(locale, stats.totalRows, t.preview.totalRowsLabel).replace('{count}', String(stats.totalRows))
+  const expenseRows = pickPlural(locale, stats.estimatedExpenseRows, t.preview.expenseRowsLabel).replace('{count}', String(stats.estimatedExpenseRows))
   const dateRange = stats.dateRange
     ? t.preview.dateRangeLabel
         .replace('{first}', stats.dateRange.first)

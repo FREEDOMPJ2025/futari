@@ -3,6 +3,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vites
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './actions/_authUser'
 import type { ReactElement } from 'react'
 
 // ─── Integration: a former member's read-only look-back (#1612) ─────────────
@@ -172,12 +173,14 @@ beforeAll(async () => {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL not set; cannot run integration test. Ensure .env.local has DATABASE_URL.')
   }
-  await db.insert(profiles).values([
+  const rows = [
     { id: A, displayName: LIVE.aName, avatarUrl: LIVE.aAvatar },
     { id: B, displayName: 'TEST_1612_B_LIVE' },
     { id: B2, displayName: 'TEST_1612_B2_LIVE' },
     { id: C, displayName: LIVE.cName, avatarUrl: 'https://img.example/test-1612-c.jpg' },
-  ])
+  ]
+  await db.insert(profiles).values(rows)
+  await seedAuthUsers(rows)
 
   const [g] = await db.insert(oikosGroups).values({
     name: LIVE.ledgerName, memberA: A, memberB: C, currentEpochStartedAt: d('2026-06-01'),
@@ -282,6 +285,7 @@ afterAll(async () => {
       await db.delete(groupEpochs).where(inArray(groupEpochs.groupId, groupIds))
       await db.delete(oikosGroups).where(inArray(oikosGroups.id, groupIds))
     }
+    await deleteAuthUsers(people)
     await db.delete(profiles).where(inArray(profiles.id, people))
   } catch (e) {
     console.error('cleanup failed', e)
@@ -406,7 +410,7 @@ describe('#1612 — 2. the layout renders from the viewer and the chapter row', 
     expect(v.isSolo).toBe(false)
     expect(v.viewerIsA).toBe(false)
     expect(v.canAccessGuardian).toBe(false)
-    expect(v.chapter?.partner).toEqual({ id: A, displayName: 'TEST_1612_A_AT_CLOSE', initial: 'T', avatarUrl: null })
+    expect(v.chapter?.partner).toEqual({ id: A, displayName: 'TEST_1612_A_AT_CLOSE', initial: 'T', avatarUrl: null, isLeftLabel: false })
     expect(v.group).toMatchObject({ id: w.g, name: '家計簿' })
     expectNoLiveState(await layoutFor())
   })
@@ -642,7 +646,8 @@ describe('#1612 — 5c. a NULL frozen name reads as 「對方」 everywhere', ()
     expect(month.props.partner).toMatchObject({ displayName: '對方', avatarUrl: null })
     expect(month.props.payerName).toBe('對方')
     const listed = (await listEpochsForViewer(B2))[0]
-    expect(listed.memberAName).toBeNull() // no live read; the page shows 「對方」
+    // #1782: names are { name, isLeftLabel }; a NULL frozen name stays NULL (no live read; the page shows 「對方」).
+    expect(listed.memberAName).toEqual({ name: null, isLeftLabel: false })
     expectNoLiveState(await payloadOf(month))
   })
 })

@@ -14,10 +14,11 @@
  */
 
 import { type MigrateSlug } from '@/lib/migrate/sources'
+import { ANDROMONEY_HEADERS, MANEBO_HEADERS, normalizeHeader } from './headerAliases'
 
 /**
  * The sources that have a header-sniff signature *and* a dedicated mapper
- * (`mapHoneydue` / `mapSpendee` / `mapCwmoney` in `./index.ts`). This array is
+ * (`mapHoneydue` / `mapSpendee` / `mapCwmoney` / … in `./index.ts`). This array is
  * the authority for "can we parse this source's CSV" — `detectCsvSource`, the
  * mapper switch, and the sign-in import-resume axis
  * (`importResumeSourceFromParam` in `lib/analytics/attribution.ts`) all derive
@@ -25,7 +26,14 @@ import { type MigrateSlug } from '@/lib/migrate/sources'
  * else. It is deliberately *not* the /migrate page list: most migrate pages
  * exist without a parser.
  */
-export const KNOWN_CSV_SOURCES = ['honeydue', 'spendee', 'cwmoney'] as const
+export const KNOWN_CSV_SOURCES = [
+  'honeydue',
+  'spendee',
+  'cwmoney',
+  'andromoney',
+  'manebo',
+  'splitwise',
+] as const
 
 export type KnownCsvSource = (typeof KNOWN_CSV_SOURCES)[number]
 /**
@@ -63,9 +71,25 @@ export type DetectedSource = (typeof DETECTED_SOURCES)[number]
  * than guessing — callers decide how to label unknown files.
  */
 export function detectCsvSource(headers: readonly string[]): KnownCsvSource | null {
-  const lowered = headers.map(h => h.trim().toLowerCase())
+  const lowered = headers.map(normalizeHeader)
   const has = (name: string) => lowered.includes(name)
   const hasAll = (...names: string[]) => names.every(has)
+  const hasAny = (names: readonly string[]) => names.some(has)
+
+  // The three sources below are matched on whole, trimmed, lowercased headers
+  // and sit BEFORE the CWMoney check on purpose: that check is a substring test
+  // on 日期 / 金額, which AndroMoney's and まねーぼ's zh-Hant titles (日期 …
+  // 金額) also satisfy. Order is the whole fix — moved below it, those files
+  // are read by `mapCwmoney` and every row (opening balance, income, transfer)
+  // comes out as an expense, with no error.
+  // AndroMoney: both account columns — `Expense(Transfer Out)` and `Income(Transfer In)`.
+  if (hasAny(ANDROMONEY_HEADERS.out) && hasAny(ANDROMONEY_HEADERS.in)) return 'andromoney'
+  // まねーぼ: the Type column plus both account columns.
+  if (hasAny(MANEBO_HEADERS.type) && hasAny(MANEBO_HEADERS.to) && hasAny(MANEBO_HEADERS.account)) {
+    return 'manebo'
+  }
+  // Splitwise: Cost + Currency and no Amount column (the member columns follow).
+  if (hasAll('cost', 'currency') && !has('amount')) return 'splitwise'
 
   // CWMoney: 中文欄位（日期 + 金額 + 類別）
   if (headers.some(h => h.includes('日期')) && headers.some(h => h.includes('金額'))) {

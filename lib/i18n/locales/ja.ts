@@ -93,16 +93,14 @@ export const ja: Translations = {
     cta: 'ふたりで記録する',
     ctaHint: '無料 · ふたりで一冊の家計簿 · Google または Apple で続ける',
     alreadyHaveAccount: 'アカウントをお持ちの方',
-    // TODO(i18n): native review pending (#1413) — MT-quality draft.
     appStoreCta: 'App Store でダウンロード',
     appStoreCtaHint: 'iPhone・iPad どちらでも使えます',
-    androidBetaCta: 'Android版テストに参加する',
+    androidBetaCta: 'Android ベータ版に参加',
     androidBetaCtaHint: 'Play ストアで使っている Google アカウントでテストグループに参加すると、アプリをインストールできるようになります。',
     useWebVersion: 'まずはウェブ版を使う',
     trustEncrypted: 'ふたりだけに開放',
     trustFree: '無料で使える',
-    // TODO(i18n): native review pending (#1333) — MT-quality draft.
-    trustPwa: 'iPhone App · Web PWA',
+    trustPwa: 'iPhone App · ウェブ版',
     trust: {
       narrative: 'あなたたちの記録は、二人だけのもの。広告もデータ販売もありません。',
       encryption: {
@@ -213,6 +211,7 @@ export const ja: Translations = {
     done: '完了',
     me: '自分',
     partner: '相手',
+    leftPartnerLabel: '退出したパートナー',
     you: 'あなた',
     all: 'すべて',
     error: 'エラーが発生しました',
@@ -304,6 +303,18 @@ export const ja: Translations = {
   },
 
   dashboard: {
+    shortcutPending: {
+      sectionLabel: 'ショートカットから届いた確認待ち',
+      primaryAction: '記録する',
+      editAction: '修正する',
+      editOnlyAction: '修正して記録',
+      skipAction: 'スキップ',
+      noNoteHint: '内容がありません。修正してから記録してください。',
+      skipConfirmTitle: 'この確認待ちをスキップしますか？',
+      skipConfirmDescription: '家計簿には記録されず、カードも消えます。',
+      expandAll: 'すべて展開（あと {n} 件）',
+      collapse: '折りたたむ',
+    },
     continuity: {
       reviewTitle: '月の振り返り',
       reviewLatest: '{month}の振り返り · 見てみる',
@@ -316,10 +327,8 @@ export const ja: Translations = {
       tripAria: '旅行：旅行の一覧へ',
     },
     soloHero: {
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
       monthLabel: '{month}の記録',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      countLabel: '{count} 件',
+      countLabel: { one: '{count}件', other: '{count}件' },
     },
     addExpense: '記録を追加',
     addIncome: '収入を記録',
@@ -338,7 +347,7 @@ export const ja: Translations = {
       singleStartedAt: '{date} から · この旅行を開く',
       singleStartedAtWithCurrency: '{date} から · {currency} · この旅行を開く',
       singleAriaLabel: '旅行を開く：{name}',
-      multipleHeading: '{count} 件の旅行が進行中',
+      multipleHeading: { one: '{count} 件の旅行が進行中', other: '{count} 件の旅行が進行中' },
       multipleCta: 'まとめて見る ›',
       multipleAriaLabel: '進行中の {count} 件の旅行を見る',
       emptyCta: '旅行を始める',
@@ -372,10 +381,8 @@ export const ja: Translations = {
     generating: '生成中…',
     sharedAndCopied: '共有しました。リンクもコピー済み',
     copied: 'リンクをコピーしました',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     shareTitle: 'Futari で一緒に家計簿をつける',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
-    shareText: '二人のための共有家計簿です。リンクを開くと参加できます。',
+    shareText: 'ふたりの家計簿です。リンクを開くと参加できます。',
   },
 
   addSheet: {
@@ -699,7 +706,7 @@ export const ja: Translations = {
     rateInverseFormat: '≈ 1 {default} = {inverse} {code}',
     rateAriaLabel: '{code} の {baseCode} に対する為替レート',
     basePill: '基準',
-    usedCountNote: '{n} 件の記録あり。レートを変えても既存の金額は変わりません',
+    usedCountNote: { one: '{n} 件の記録あり。レートを変えても既存の金額は変わりません', other: '{n} 件の記録あり。レートを変えても既存の金額は変わりません' },
     customRow: {
       codeAriaLabel: '通貨コード',
       codePlaceholder: 'VND',
@@ -931,12 +938,10 @@ export const ja: Translations = {
     sectionPersonal: '個人',
     addToHomeScreen: 'ホーム画面に追加',
     displayName: '表示名',
-    // TODO(i18n): native review pending (#1328) — MT-quality draft.
     avatarVisibility: {
       title: 'アバターを表示する',
       description: 'オフにすると名前の頭文字が表示されます',
     },
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     soloLockHint: 'ひとりのあいだは、記録はすべて自分の分になります。',
     defaultSplitLabel: 'デフォルトの分担方法',
     inviteCta: '相手を招待',
@@ -964,6 +969,48 @@ export const ja: Translations = {
     recurringSettings: '定期支出/収入設定',
     sectionData: 'データ',
     trust: 'データの安心',
+    shortcutsGuide: 'ショートカットで記録',
+    shortcutKey: {
+      navLabel: 'ショートカット用キー',
+      title: 'ショートカット用キー',
+      back: '戻る',
+      pageHeading: 'ショートカット用キー',
+      pageSubtitle: 'iPhoneのショートカットはこのキーを使って、支出をあなたの「確認待ち」に送ります。確認してはじめて家計簿に記録されます。確認待ちはあなたにだけ表示されます。',
+      empty: 'キーはまだありません。',
+      generate: 'キーを作成',
+      failed: 'うまくいきませんでした。しばらくしてからもう一度お試しください',
+      current: {
+        heading: '現在のキー',
+        hintLabel: '末尾',
+        createdLabel: '作成日時',
+        lastUsedLabel: '最終使用',
+        neverUsed: 'まだ使われていません',
+      },
+      fresh: {
+        heading: '新しいキー',
+        body: 'キーが表示されるのはこの一度だけで、このページを離れると見られなくなります。今コピーして、ショートカットに貼り付けてください。',
+        inputLabel: '新しいショートカット用キー',
+        copy: 'コピー',
+        copied: 'コピーしました',
+        copyFailed: '自動でコピーできませんでした。キーをタップして選択し、手動でコピーしてください',
+      },
+      shareWarning: {
+        heading: 'キーを含むショートカットは共有しないでください',
+        body: 'キーを持っている人は、あなたの確認待ちに支出を送れます。キーを含むショートカットを共有したことがある場合は、キーを作り直してください。',
+      },
+      regenerate: {
+        cta: 'キーを作り直す',
+        confirmTitle: 'キーを作り直しますか？',
+        confirmBody: '今のキーはすぐに使えなくなります。このキーを使うショートカットは、新しいキーに差し替えるまで送信できません。',
+        confirmLabel: '作り直す',
+      },
+      revoke: {
+        cta: 'キーを無効にする',
+        confirmTitle: 'このキーを無効にしますか？',
+        confirmBody: 'このキーを使うショートカットはすぐに送信できなくなります。あとで新しいキーを作成できます。',
+        confirmLabel: '無効にする',
+      },
+    },
     exportData: 'データを書き出す（CSV）',
     pastTimes: '過ぎた時間',
     trips: '旅行',
@@ -1093,6 +1140,9 @@ export const ja: Translations = {
           honeydue: 'Honeydue',
           spendee: 'Spendee',
           cwmoney: 'CWMoney',
+          andromoney: 'AndroMoney',
+          manebo: 'まねーぼ（Manebo）',
+          splitwise: 'Splitwise',
           generic: '汎用 CSV',
         },
         uploadPrompt: 'ここにファイルをドロップ、または下のボタンから選択',
@@ -1101,7 +1151,7 @@ export const ja: Translations = {
         fileSelected: '選択中：{name}',
         summary: '合計 {total} 件 · 有効 {valid} 件 · 失敗 {invalid} 件',
         sourceDetected: '検出された取り込み元：{source}',
-        invalidNote: '失敗した行はスキップされ、エラーログに残ります',
+        invalidNote: 'スキップした行はエラーログに残るので、あとで確認できます。',
         retryCta: '別のファイルを選ぶ',
         parseError: '解析できませんでした。ファイル形式を確認してください。',
       },
@@ -1110,7 +1160,7 @@ export const ja: Translations = {
         subtitle: '取り込み元のカテゴリを、家計簿のカテゴリに対応づけます',
         sourceColumn: '取り込み元のカテゴリ',
         targetColumn: '対応するカテゴリ',
-        rowCount: '{count} 件',
+        rowCount: { one: '{count} 件', other: '{count} 件' },
         keepOriginal: 'その他',
       },
       step3: {
@@ -1118,7 +1168,6 @@ export const ja: Translations = {
         subtitle: 'この取り込み全体のデフォルトを設定します',
         payerLabel: 'デフォルト支払者',
         payerHint: '取り込み後に行ごとに調整できます',
-        // TODO(i18n): native review pending (#1016) — MT-quality draft.
         payerSoloHint: 'ひとりのあいだは、支払者はすべて自分になります',
         splitLabel: 'デフォルト分担',
         splitOptions: {
@@ -1140,14 +1189,15 @@ export const ja: Translations = {
         },
         typeExpense: '支出',
         typeIncome: '収入',
-        moreRows: '他 {count} 件は表示されていません',
-        confirmCta: '{count} 件を取り込む',
+        moreRows: { one: '他 {count} 件は表示されていません', other: '他 {count} 件は表示されていません' },
+        confirmCta: { one: '{count} 件を取り込む', other: '{count} 件を取り込む' },
         confirming: '取り込み中…',
-        summary: '{count} 件を保存します · 失敗 {invalid} 件はログに残ります',
+        summary: { one: '{count} 件を保存します · {invalid}', other: '{count} 件を保存します · {invalid}' },
+        summaryInvalid: { one: '失敗 {n} 件はログに残ります', other: '失敗 {n} 件はログに残ります' },
       },
       result: {
         successHeading: '取り込み完了',
-        successBody: '{count} 件を保存しました',
+        successBody: { one: '{count} 件を保存しました', other: '{count} 件を保存しました' },
         rollbackHint: '24 時間以内なら一括で取り消せます',
         rollbackCta: 'この取り込みを取り消す',
         rollbackConfirm: '取り消しますか？この取り込みで追加された記録はすべて戻されます',
@@ -1167,6 +1217,7 @@ export const ja: Translations = {
         submitFailed: '保存できませんでした。少し時間をおいてお試しください。',
         rollbackFailed: '取り消しに失敗しました。少し時間をおいてお試しください。',
         noValidRows: 'このファイルには取り込める記録がありません',
+        missingColumns: 'このファイルには次の列がありません：{columns}。書き出し形式が CSV か、選んだアプリが合っているか確認してください',
       },
     },
   },
@@ -1176,8 +1227,7 @@ export const ja: Translations = {
     partnerLeftBody: 'ここまでの記録はすべて残っています。ここからは、ひとりの時間です。',
     welcomeSoloHeading: 'おかえり、ひとりの時間に',
     welcomeSoloBody: 'これまでの記録は元の家計簿に残っていて、いつでも見返せます。これから、ゆっくりで大丈夫。',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
-    removedPartnerHeading: 'ひとりの時間に戻りました',
+    removedPartnerHeading: 'ひとりに戻りました',
     removedPartnerBody: '家計簿はぜんぶ、そのまま残っています。これから、ゆっくりで大丈夫。',
     dismissAria: '閉じる',
     newLedgerName: '家計簿',
@@ -1224,6 +1274,18 @@ export const ja: Translations = {
     empty: 'まだ過ぎた時間はありません。最初の時間が始まったばかりです。',
     exportHint: '手元に記録を残したいときは、これらの時間の支出・収入・精算を CSV で書き出せます。',
     exportCta: '支出・収入・精算を書き出す',
+    hideName: {
+      title: '離れた家計簿での自分の名前',
+      hint: '離れた家計簿のうち、終わった時間と、その時間のおでかけの参加者一覧で、あなたの名前を「退出したパートナー」と表示できます。',
+      cta: '名前を変える',
+      confirmTitle: '離れた家計簿での名前を変えますか？',
+      confirmBody: '離れた家計簿のうち、すでに終わった時間と、その時間のおでかけの参加者一覧で、あなたの名前は「退出したパートナー」と表示されます。このあと終わる時間は変わりません。この変更は元に戻せません。',
+      confirmCount: '変わるのは、時間 {chapters} 件と、おでかけの参加者一覧 {outings} 件です。',
+      confirmLabel: '変更する',
+      pending: '処理中…',
+      done: '名前を「退出したパートナー」に変更しました。',
+      failed: '変更できませんでした。しばらくしてからもう一度お試しください。',
+    },
   },
 
   csvExport: {
@@ -1326,9 +1388,9 @@ export const ja: Translations = {
       timelineInvested: '払込累計',
       timelineTarget: '目標',
       summaryAnnualPremium: '年間保険料',
-      summaryPolicyCount: '保険 {count} 件',
+      summaryPolicyCount: { one: '保険 {count} 件', other: '保険 {count} 件' },
       summaryNextRenewal: '次回更新',
-      summaryDaysUntil: 'あと {days} 日',
+      summaryDaysUntil: { one: 'あと {days} 日', other: 'あと {days} 日' },
     },
   },
 
@@ -1345,7 +1407,7 @@ export const ja: Translations = {
       intervalEveryQuarter: '四半期ごと',
       intervalEveryHalfYear: '半年ごと',
       intervalEveryYear: '毎年',
-      intervalEveryNMonths: '{n} ヶ月ごと',
+      intervalEveryNMonths: { one: '{n} ヶ月ごと', other: '{n} ヶ月ごと' },
       dayLabel: '{day} 日',
       nextDate: '次回 {date}',
     },
@@ -1754,7 +1816,7 @@ export const ja: Translations = {
     },
     notesSection: 'メモ',
     recentExpenses: '最近の支出',
-    timelineEntries: 'タイムライン · {count} 件',
+    timelineEntries: { one: 'タイムライン · {count} 件', other: 'タイムライン · {count} 件' },
     addOtherExpense: 'その他の支出',
     refuel: '給油',
     relatedInsurance: '関連する保険',
@@ -1863,11 +1925,11 @@ export const ja: Translations = {
       cost: '購入金額',
       location: '置き場所',
       waterEvery: '水やり周期',
-      waterEveryValue: '{n} 日ごと',
+      waterEveryValue: { one: '{n} 日ごと', other: '{n} 日ごと' },
       companionDays: '一緒の日数',
       daysSuffix: '日',
       sproutedSuffix: ' に迎入',
-      waterEveryFooter: ' · {n} 日ごとに水やり',
+      waterEveryFooter: { one: ' · {n} 日ごとに水やり', other: ' · {n} 日ごとに水やり' },
     },
     house: {
       sectionInfo: '家の情報',
@@ -1947,7 +2009,7 @@ export const ja: Translations = {
       maturedAwaitingTitle: '満期日になりました · {date}',
       maturedAwaitingStatus: '入金待ち',
       maturedAwaitingCta: '受領しました →',
-      maturedAwaitingPremiumNote: '累計 {total} を {count} 件で記録',
+      maturedAwaitingPremiumNote: { one: '累計 {total} を {count} 件で記録', other: '累計 {total} を {count} 件で記録' },
       accountValueLabel: '現在の口座価値',
       accountValueEditCta: '更新',
       recurringSectionTitle: '定期入金',
@@ -1974,7 +2036,7 @@ export const ja: Translations = {
       intervalEveryQuarter: '四半期ごと',
       intervalEveryHalfYear: '半年ごと',
       intervalEveryYear: '毎年',
-      intervalEveryNMonths: '{n} ヶ月ごと',
+      intervalEveryNMonths: { one: '{n} ヶ月ごと', other: '{n} ヶ月ごと' },
       dayLabel: '{day} 日',
       nextDate: '次回 {date}',
     },
@@ -2061,11 +2123,9 @@ export const ja: Translations = {
       unknown: '家計簿に参加できません',
     },
     meta: {
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      title: '二人で家計簿をつけませんか · Futari',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      description: '二人のための共有家計簿です。リンクを開いてサインインすると参加できます。',
-      ogDescription: '二人のための共有家計簿です。リンクを開いてサインインすると参加できます。',
+      title: '家計簿に招待されました · Futari',
+      description: 'ふたりの家計簿です。リンクを開いてサインインすると参加できます。',
+      ogDescription: 'ふたりの家計簿です。リンクを開いてサインインすると参加できます。',
     },
   },
 
@@ -2250,19 +2310,14 @@ export const ja: Translations = {
     revealFraming: '君は朝日、相手は月明かり。違う時間に、同じ家を照らしている。どっちの答えが正しいわけじゃない。相手が気にしていることを、覚えていればそれでいい。',
     revealHeaderA: 'あなた',
     revealHeaderB: '相手',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     soloHeading: 'ふたりの問答',
-    // TODO(i18n): native review pending (#1016) — MT-quality draft.
     soloFallback: 'この 3 問は、ふたりで答えるものです。今月のふりかえりの他の部分は、そのまま見られます。',
     errorNotFound: 'この問答が見つかりません',
     errors: {
       submitFailed: '送信できませんでした。少し待ってから試してください',
-      alreadyAnswered: 'もう答え終わっているよ',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
-      alreadyRevealed: 'この問答はもう開いたから、答えは変えられないよ',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
+      alreadyAnswered: 'もう答え終わっています',
+      alreadyRevealed: 'この問答はもう明かされているので、答えは変えられません',
       wrongGroup: 'この問答は、この家計簿のものではありません',
-      // TODO(i18n): native review pending (#1016) — MT-quality draft.
       solo: 'この問答は、ふたりで答えるものです',
     },
     questions: {
@@ -2370,8 +2425,8 @@ export const ja: Translations = {
       title: 'なかみをちらっと確認',
       sourceLabel: '出どころ · {source}',
       encodingLabel: 'エンコーディング · {encoding}',
-      totalRowsLabel: '{count} 件のレコード',
-      expenseRowsLabel: '支出らしきもの {count} 件',
+      totalRowsLabel: { one: '{count} 件のレコード', other: '{count} 件のレコード' },
+      expenseRowsLabel: { one: '支出らしきもの {count} 件', other: '支出らしきもの {count} 件' },
       dateRangeLabel: '{first} 〜 {last}',
       topCategoriesLabel: 'よく出てくるカテゴリ',
       empty: 'このファイルには表示できる中身がありませんでした。',
@@ -2584,7 +2639,7 @@ I will upload the screenshots once you confirm.`,
       formatExample: `date,category,amount,description,currency,kind
 2026-05-30,食費,150,スターバックス,TWD,expense
 2026-05-30,給与,50000,5月,TWD,income`,
-      note: 'TWD 以外の行はまず元の数字で取り込まれます。換算は取り込み後に行ごとに調整できます。同じ取引（同じ日付＋金額＋説明）の重複は自動で取り除かれます。',
+      note: 'TWD 以外の行はまず元の数字で取り込まれます。換算は取り込み後に行ごとに調整できます。同じ取引（同じ日付＋金額＋説明）が重複したときは 1 件だけ残すようプロンプトで ChatGPT に頼んでいます。取り込み時に Futari が重複を取り除くことはないので、同じファイルは一度だけ取り込んでください。',
       settingsHint: '今すぐでなくても大丈夫です。サインインしたあと、設定からいつでも CSV を取り込めます。',
     },
     pages: {
@@ -2603,27 +2658,27 @@ I will upload the screenshots once you confirm.`,
             body: 'アカウントごとに見えるものが違う、ということはありません。最初からひとつの家のために設計されています。',
           },
           {
-            title: '無料・広告なし',
-            body: '基本の家計簿機能はずっと無料。広告も、データの転売もしません。',
+            title: '無料で、広告もなし',
+            body: '取り込みから毎日の記録まで料金はかからず、画面に広告もなく、データで稼ぐこともしません。',
           },
         ],
-        stepsHeading: '3 ステップ',
+        stepsHeading: 'Honeydue からの引っ越し 3 ステップ',
         step1: 'Honeydue アプリ → 設定 → データを書き出す、で CSV をダウンロード。',
-        step2: 'CSV をここにアップロードして、家計の履歴を確認。',
-        step3: 'Futari のアカウントを作って、ワンタップで引っ越し完了。',
+        step2: 'CSV をここにアップロードして確認します。Honeydue の日付は月/日/年で、マイナスの金額は支出。実際の取り込みでも Futari は同じ規則で読み取ります。',
+        step3: 'Futari のアカウントを作り、取り込み時にデフォルト支払者と分担を選びます。Honeydue のファイルにはどちらもないので、まとめて一度だけ指定し、あとから行ごとに直せます。',
         // TODO(#599): ja faq + comparison copy pending native review
         faq: [
           {
-            question: '取り込んだあとにデータの整理が必要ですか？',
-            answer: '取り込みの流れの中でカテゴリを対応づけられます。あとから手で直す必要はありません。',
+            question: 'Honeydue のカテゴリは合いますか？',
+            answer: 'Food & Dining、Home、Transportation のような一般的な英語名は、Futari の食事・住居・交通に自動で振り分けられます。合わないものはすべて「その他」にまとまり、取り込み前にそのグループごと別のカテゴリに切り替えられます。',
           },
           {
-            question: '取り込みは有料ですか？',
-            answer: 'Futari は完全に無料です。隠れた費用もありません。',
+            question: 'Honeydue は運営が変わりました。移るのにお金はかかりますか？',
+            answer: 'かかりません。取り込みは無料で、基本の家計簿機能も無料です。あとから解放が必要なふたり向けの機能もありません。',
           },
           {
-            question: '今までの記録をぜんぶ持ってこられますか？',
-            answer: 'CSV 形式での取り込みに対応しています。振替などの特殊な記録は確認用にマークが付きます。',
+            question: 'Honeydue の列はすべて持ってこられますか？',
+            answer: '日付・名前・カテゴリ・金額は読み取られ、マイナスは支出、プラスは収入になります。Account 列は残りません。Futari は口座を分けない、ひとつの共有家計簿です。',
           },
           {
             question: 'Honeydue の共有家計簿の機能は Futari にもありますか？',
@@ -2645,30 +2700,30 @@ I will upload the screenshots once you confirm.`,
             body: '片方が記録すれば、もう片方にもすぐ見える。更新を待つ必要はありません。',
           },
           {
-            title: '無料・広告なし',
-            body: '広告もデータの転売もない。家計簿は家計簿のままで。',
+            title: '広告も、アップグレードの誘導もなし',
+            body: '広告もデータの転売もありません。開けば、ふたりの家計簿がそこにあるだけです。',
           },
         ],
-        stepsHeading: '3 ステップ',
+        stepsHeading: 'Spendee からの引っ越し 3 ステップ',
         step1: 'Spendee → More → Export Data で CSV をダウンロード。',
-        step2: 'CSV をここにアップロードして、家計の履歴を確認。',
-        step3: 'Futari のアカウントを作って、ワンタップで引っ越し完了。',
+        step2: 'CSV をここにアップロードして確認します。支出か収入かは Type 列で見分けます。',
+        step3: 'Futari のアカウントを作ります。カテゴリの対応づけの段階では、Spendee のカテゴリがまず Futari のカテゴリに自動で振り分けられ（たとえば Food & Drinks は食事）、合わないものは「その他」にまとまるので、そのグループごと切り替えられます。',
         formatHintLabel: 'Spendee の CSV はこんなフォーマット',
         formatHintHeaders: 'Date,Wallet,Type,Category name,Amount,Currency,Note',
         formatHintNote: 'Type 列は Expense / Income / Transfer の 3 種類。Transfer（口座間の振替）はインポート時にエラーとして表示されます——Futari は振替の概念を持たないため、プレビューで該当行を削除してください。',
         // TODO(#599): ja faq + comparison copy pending native review
         faq: [
           {
-            question: '取り込んだあとにデータの整理が必要ですか？',
-            answer: '取り込みの流れの中でカテゴリを対応づけられます。あとから手で直す必要はありません。',
+            question: 'Spendee のウォレットとカテゴリは持ってこられますか？',
+            answer: 'カテゴリは Futari のカテゴリに対応づけられます（たとえば Food & Drinks は食事）。ウォレットは残りません。Futari はふたりで使うひとつの家計簿で、ウォレットは分けません。',
           },
           {
-            question: '取り込みは有料ですか？',
-            answer: 'Futari は完全に無料です。隠れた費用もありません。',
+            question: 'Spendee は共有の解放が有料です。移っても課金が必要ですか？',
+            answer: '不要です。Spendee の共有は課金で解放する機能ですが、Futari ではふたりでひとつの家計簿を使う機能が最初から無料で入っていて、取り込みも無料です。',
           },
           {
-            question: '今までの記録をぜんぶ持ってこられますか？',
-            answer: 'CSV 形式での取り込みに対応しています。振替などの特殊な記録は確認用にマークが付きます。',
+            question: 'Spendee で他の通貨の記録は、取り込むとどうなりますか？',
+            answer: 'Currency が基準通貨でない行は、元の数字のまま先に取り込まれます。換算はあとから行ごとに調整できます。Transfer（ウォレット間の移動）は失敗行として扱われ、家計簿には書き込まれません。',
           },
           {
             question: 'Spendee の精算機能は Futari にもありますか？',
@@ -2695,7 +2750,7 @@ I will upload the screenshots once you confirm.`,
             body: 'スコアもランクも、使いすぎを匂わせる演出もありません。',
           },
         ],
-        stepsHeading: '3 ステップ',
+        stepsHeading: 'CWMoney からの引っ越し 3 ステップ',
         step1: 'CWMoney で Excel または CSV 形式の家計データを書き出す。',
         step2: '下の変換テンプレートをダウンロードして、データを貼り付ける。',
         step3: '変換した CSV をアップロードして、なかみを見てからアカウントを作って取り込む。',
@@ -2708,12 +2763,12 @@ I will upload the screenshots once you confirm.`,
             answer: 'CWMoney の書き出しファイルによくあるエンコードの癖で、公式サポートにも説明ページがあります。自分で直す必要はありません——下の変換テンプレートに貼り付けて整えてからアップロードしてください。',
           },
           {
-            question: '取り込んだあとにデータの整理が必要ですか？',
-            answer: '取り込みの流れの中でカテゴリを対応づけられます。あとから手で直す必要はありません。',
+            question: 'CWMoney のカテゴリは合いますか？',
+            answer: '食事・交通・住居・娯楽・医療にあたる一般的な中国語名は、Futari の同じカテゴリに自動で振り分けられます。合わないものはすべて「その他」にまとまり、取り込み前にそのグループごと別のカテゴリに切り替えられます。',
           },
           {
-            question: '取り込みは有料ですか？',
-            answer: 'Futari は完全に無料です。隠れた費用もありません。',
+            question: 'CWMoney の共有家計簿は有料機能です。移ると課金が必要ですか？',
+            answer: '不要です。Futari のふたり向け家計簿・分担・リアルタイム同期は最初から無料で入っていて、取り込みも無料です。',
           },
           {
             question: 'CWMoney の資産機能は Futari にもありますか？',
@@ -2742,23 +2797,23 @@ I will upload the screenshots once you confirm.`,
             body: 'Moneybook の自動同期は銀行口座への代理ログインが前提です。Futari は手入力が中心なので、記録されるのはふたりが選んで書いたことだけです。',
           },
         ],
-        stepsHeading: '3 ステップ',
+        stepsHeading: 'Moneybook からの引っ越し 3 ステップ',
         step1: 'Moneybook（契約中のアカウント）で「明細エクスポート」から取引を CSV で書き出します。',
-        step2: 'CSV をここにアップロードして、記録をプレビューします。',
-        step3: 'Futari のアカウントを作成し、ワンタップで引っ越し完了。',
+        step2: 'CSV をここにアップロードして、取引明細の期間と件数に抜けがないか確認します。',
+        step3: 'Futari のアカウントを作り、取り込み時にカテゴリを対応づけて支払者を指定したら、パートナーと続きを記録していきます。',
         faq: [
           {
             question: '無料アカウントでもデータを書き出せますか？',
             answer: '2026 年 4 月の有料化以降、明細エクスポートは契約中のアカウント限定の機能です。まだ契約が続いているうちに、一度書き出しておくことをおすすめします。',
           },
           {
-            question: 'Moneybook と Futari の項目は同じですか？',
+            question: '書き出した CSV は Futari の形式と合いますか？',
             answer:
-              '完全に同じではありません。アップロード後にまず解析結果をプレビューでき、実際の取り込み時にカテゴリや項目を対応づけられるので、いきなり家計簿に書き込まれることはありません。',
+              '完全には同じではありません。ここにアップロードするとブラウザ上でプレビューされ、件数・期間・よく使うカテゴリが見られます。実際の取り込みでは、支払者と分担をまとめて指定し、読み取れなかった行はスキップして記録が残ります。',
           },
           {
-            question: '取り込みは有料ですか？',
-            answer: 'Futari は完全無料で、隠れた費用はありません。',
+            question: '移ったあとも課金が必要ですか？',
+            answer: '不要です。Futari の基本の家計簿・分担・精算は無料で、取り込みも無料です。',
           },
           {
             question: 'Moneybook は銀行と自動連携しますが、Futari も？',
@@ -2778,37 +2833,42 @@ I will upload the screenshots once you confirm.`,
             body: 'AndroMoney は優れたひとり向け家計簿。Futari は二人で一つの家計簿を共有する設計で、記録はお互いに見えます。',
           },
           {
-            title: 'リアルタイム同期',
-            body: '片方が記録すると、もう片方にすぐ表示。スクリーンショットやファイルをやり取りして照合する必要はありません。',
+            title: 'ファイルを送り合って照合しなくていい',
+            body: 'AndroMoney のバックアップは手作業です。Futari は家計簿をクラウドに置くので、片方が記録すればもう片方にすぐ見えます。',
           },
           {
-            title: '無料・広告なし',
-            body: '基本の家計簿機能はずっと無料。広告もデータの売買もしません。',
+            title: '広告版か有料版かを選ばなくていい',
+            body: 'AndroMoney には広告つきの版と有料版があります。Futari は広告がなく基本の家計簿機能が無料なので、広告を消すためにアップグレードする必要はありません。',
           },
         ],
-        stepsHeading: '3 ステップ',
+        stepsHeading: 'AndroMoney からの引っ越し 3 ステップ',
         step1: 'AndroMoney の 設定 → エクスポート で、データを CSV として書き出します。',
-        step2: 'CSV をここにアップロードして、記録をプレビューします。',
-        step3: 'Futari のアカウントを作成し、ワンタップで引っ越し完了。',
+        step2: 'CSV をここにアップロードして件数を確認します。1 行目の AndroMoney のヘッダー行は消さなくて大丈夫で、文字コードは Big5 でも UTF-8 でも読み取れます。',
+        step3: 'Futari のアカウントを作り、「設定 → 他のアプリから取り込む」で AndroMoney を選んで、同じ CSV をアップロードします。名前が合うカテゴリは自動で振り分けられ、残りはいったん「その他」に入ります。支払者と分担はまとめて一度だけ選びます。ひとりの家計簿からふたりの家計簿に変わるとき、増えるのはこのステップだけです。',
         faq: [
           {
-            question: '取り込み後にデータを整理し直す必要はありますか？',
+            question: '移ったあとも AndroMoney は残しておくべきですか？',
             answer:
-              'カテゴリは取り込みの流れの中で一度に対応づけられ、あとから手作業で直す必要はありません。',
+              '取り込みはコピーなので、AndroMoney の中のデータには触れません。CSV はひとまず取っておき、ふたりとも慣れてから古いアプリをどうするか決めれば十分です。取り込みから 24 時間以内なら、一括で取り消すこともできます。',
           },
           {
-            question: '取り込みは有料ですか？',
-            answer: 'Futari は完全無料で、隠れた費用はありません。',
+            question: 'AndroMoney の CSV を取り込むのに費用はかかりますか？',
+            answer: 'かかりません。取り込みは無料で、基本の家計簿機能も無料、広告もありません。',
           },
           {
-            question: '今までの記録はすべて持ってこられますか？',
+            question: 'ひとりの家計簿からふたりの家計簿になると、何が増えますか？',
             answer:
-              'CSV 取り込みに対応し、ほとんどの記録が移せます。振替などの特殊な種類は、確認用に印が付きます。',
+              'どの記録にも支払者と分担が必要ですが、AndroMoney のファイルにはどちらもないため、取り込み時にまとめて一度だけ指定します。支払者は自分か相手、分担は「すべて自分」「すべて相手」「半々」から選び、取り込んだあとで行ごとに直せます。これはひとりで付けてきた家計簿なので、ふたりの間の残高を動かしたくないなら「すべて自分」を選びます。',
           },
           {
             question: 'AndroMoney の複数口座は、Futari にもありますか？',
             answer:
               'Futari はふたりの共同収支に集中した一つの家計簿です。口座を分けるのではなく、按分モードで「誰が払って、どう分けるか」を記録します。',
+          },
+          {
+            question: 'AndroMoney の振替・初期残高・外貨は、取り込みでどうなりますか？',
+            answer:
+              '振替（支払い側と受取り側の口座欄が両方埋まっている行）と口座の初期残高は収支ではないので、その行はスキップされ、エラーログに残ります。支払い側の欄だけがある行は支出、受取り側の欄だけがある行は収入として取り込まれ、収入のカテゴリは「その他」になります。通貨が TWD でない行は、ファイルの数字がそのまま基準通貨の金額として入り、換算も元の通貨の保持もありません。小数は整数に丸められるので、取り込んだあとで行ごとに直してください。',
           },
         ],
       },
@@ -2823,32 +2883,32 @@ I will upload the screenshots once you confirm.`,
             body: 'Mobills は個人の家計が中心。Futari は二人で共有する一つの家計簿で、共同の支出は一度記録すれば両方に見えます。',
           },
           {
-            title: '按分と精算を内蔵',
-            body: '半分ずつ、比率で、それぞれ負担、片方がまとめて——選べば、どちらがいくら貸しているか自動で精算します。',
+            title: 'どちらがいくら持つか、自動で計算',
+            body: 'Mobills には分担の仕組みがありません。Futari では記録ごとに分け方（折半・割合・それぞれ負担・片方が全額）を選べば、残高が自動で精算されます。',
           },
           {
-            title: '無料・広告なし',
-            body: '基本の家計簿機能はずっと無料。広告もデータの売買もしません。',
+            title: '課金なし、広告なし',
+            body: 'Mobills の上位機能はサブスクリプションが必要です。Futari の基本の家計簿・分担・精算は無料で、画面に広告もありません。',
           },
         ],
-        stepsHeading: '3 ステップ',
+        stepsHeading: 'Mobills からの引っ越し 3 ステップ',
         step1: 'Mobills で取引履歴を書き出し、CSV をダウンロードします。',
-        step2: 'CSV をここにアップロードして、記録をプレビューします。',
-        step3: 'Futari のアカウントを作成し、ワンタップで引っ越し完了。',
+        step2: 'CSV をここにアップロードして、プレビューで期間を確認します。移したい範囲がそろっているかを見てください。',
+        step3: 'Futari のアカウントを作ります。ふたりがそれぞれ自分のファイルを取り込めば、記録はどちらも同じ共有家計簿に入ります。',
         faq: [
           {
-            question: '取り込み後にデータを整理し直す必要はありますか？',
+            question: '違うファイルを取り込んでしまったら？',
             answer:
-              'カテゴリは取り込みの流れの中で一度に対応づけられ、あとから手作業で直す必要はありません。',
+              '取り込みから 24 時間以内なら、一括で取り消せます。中途半端な状態で残ることはなく、Mobills 側の元の記録にも触れません。',
           },
           {
-            question: '取り込みは有料ですか？',
-            answer: 'Futari は完全無料で、隠れた費用はありません。',
+            question: 'Mobills の上位機能は有料です。移っても課金が必要ですか？',
+            answer: '不要です。Futari への取り込みは無料で、基本の機能にサブスクリプションは要りません。',
           },
           {
-            question: '今までの記録はすべて持ってこられますか？',
+            question: 'ふたりとも Mobills に記録があります。どうやってまとめますか？',
             answer:
-              'CSV 取り込みに対応し、ほとんどの記録が移せます。振替などの特殊な種類は、確認用に印が付きます。',
+              'それぞれが自分のファイルを取り込みます。取り込みのたびにデフォルト支払者（自分か相手）と分担を指定でき、どちらの記録も同じ共有家計簿に入ります。共通の支出を両方が記録していた場合は、取り込み前にどちらか一方だけ残してください。Futari は重複を自動では統合しません。',
           },
           {
             question: 'Mobills には予算機能がありますが、Futari にも？',
@@ -2869,36 +2929,41 @@ I will upload the screenshots once you confirm.`,
             body: 'まねーぼ では記録を CSV で書き出すのにプレミアム契約が必要です。Futari は取り込みも書き出しも無料で、支出・収入・精算はいつでも持ち出せます。',
           },
           {
-            title: '按分と精算を内蔵',
-            body: '半分ずつ、比率で、それぞれ負担、片方がまとめて——選べば、どちらがいくら貸しているか自動で精算します。月末に照合し直す必要はありません。',
+            title: '月末の照合が要らない',
+            body: '記録ごとに分け方を選べば、残高は自動で積み上がります。精算したくなったら精算を一件記録するだけで、月末にまとめて照合する必要はありません。',
           },
           {
-            title: '無料・広告なし',
+            title: '広告も、解放の割り込みもなし',
             body: '基本の家計簿機能はずっと無料。画面に広告は出ませんし、途中で割り込んでくる課金の誘導もありません。',
           },
         ],
-        stepsHeading: '3 ステップ',
+        stepsHeading: 'まねーぼ からの引っ越し 3 ステップ',
         step1: 'まねーぼ の「その他」→ CSV エクスポート（プレミアム機能）から、期間を選んで CSV を書き出します。',
-        step2: 'CSV をここにアップロードして、記録をプレビューします。',
-        step3: 'Futari のアカウントを作成し、ワンタップで引っ越し完了。',
+        step2: 'CSV をここにアップロードして、まず件数を見て、書き出した範囲に間違いがないか確認します。まねーぼ の書き出しファイルは Shift_JIS でも UTF-8 でも読み取れるので、先に変換する必要はありません。',
+        step3: 'Futari のアカウントを作り、「設定 → 他のアプリから取り込む」で「まねーぼ（Manebo）」を選んで、同じ CSV をアップロードします。書き出しファイルに支払者の列はないため、支払者と分担はまとめて一度だけ指定します。まねーぼ でふたりで共有していた記録は、Futari では最初からひとつの家計簿です。',
         faq: [
           {
             question: 'プレミアムに契約していなくても、データを取り出せますか？',
             answer: 'まねーぼ の CSV 書き出しはプレミアム限定の機能です。1 か月だけ契約して書き出し、そのあと解約するという方法もあります。Futari 側の取り込みは無料です。',
           },
           {
-            question: 'まねーぼ の項目は Futari と同じですか？',
+            question: '取り込んだあとも修正できますか？',
             answer:
-              '完全には同じではありません。アップロード後に解析結果をプレビューし、正式に取り込む前にカテゴリや項目を調整できます。',
+              'できます。取り込んだ記録も、手で入れた記録と同じように一件ずつ修正できます。一括で取り消せるのは 24 時間以内だけなので、取り込んだらなるべく早く見返しておくと安心です。',
           },
           {
-            question: '取り込みは有料ですか？',
-            answer: 'Futari は完全無料で、隠れた費用はありません。',
+            question: 'Futari 側の取り込みに費用はかかりますか？',
+            answer: 'かかりません。プレミアムが必要なのは まねーぼ で CSV を書き出す段階だけです。Futari への取り込みも、Futari からの書き出しも無料です。',
           },
           {
             question: 'まねーぼ は複数の家計簿に対応していますが、Futari は？',
             answer:
               'Futari はふたりが共有するひとつの家計簿です。家計簿を複数に分ける代わりに、各記録に按分モードを設定すると残高が自動で精算されます。',
+          },
+          {
+            question: 'まねーぼ の振替・収入・カテゴリは、取り込みでどうなりますか？',
+            answer:
+              '種別（Type）が expense の行は支出、income の行は収入として取り込まれ、transfer（振替）の行はスキップされてエラーログに残ります。収入のカテゴリはすべて「その他」です。支出のカテゴリは まねーぼ で自分でつけた名前なので、Futari の対応表にある名前（今のところ英語と繁体字中国語で、日本語の名前は含まれません）だけが自動で振り分けられ、合わない分は「その他」ひとつにまとまります。取り込む前にそのグループごと別のカテゴリへ振り替えられますが、元の名前ごとに分けることはできません。',
           },
         ],
       },
@@ -2922,24 +2987,24 @@ I will upload the screenshots once you confirm.`,
             body: '簡単家計簿では CSV 書き出しは VIP 機能です。Futari は取り込みも書き出しも無料で、支出・収入・精算はいつでも書き出せます。',
           },
         ],
-        stepsHeading: '3 ステップ',
-        step1: '簡単家計簿で移したい取引をスクリーンショット（下に詳しい手順）。',
-        step2: 'ChatGPT でスクショを CSV に整えます——下にコピーできるプロンプトがあります。',
-        step3: 'CSV をここにアップロードし、プレビューしてからアカウントを作成して取り込み完了。',
+        stepsHeading: '簡単家計簿からの引っ越し 3 ステップ',
+        step1: '簡単家計簿で移したい取引をページごとにスクリーンショット。VIP の書き出しは使いません（下に詳しい手順）。',
+        step2: 'ChatGPT でスクショを CSV に整えます。無料版で十分です。カテゴリの文字はそのまま CSV に入り、取り込み時に合うものは Futari のカテゴリに、それ以外は「その他」に入ります。',
+        step3: 'CSV をここにアップロードして、件数と期間が合っているか確認してから、アカウントを作成して取り込みを完了します。',
         faq: [
           {
             question: '簡単家計簿の CSV 書き出しは VIP 契約が必要です。課金しなくても移せますか？',
             answer:
-              'はい。取引画面をスクショして ChatGPT で CSV に整えてアップロードします。下に手順とコピーできるプロンプトがあり、無料版の ChatGPT でできます。',
+              'はい。簡単家計簿の CSV 書き出しは VIP が必要ですが、移るためだけに契約したくなければスクショを使います。取引画面を撮って ChatGPT で CSV に整えます。下に手順とコピーできるプロンプトがあります。',
           },
           {
             question: 'スクショは何枚必要ですか？',
             answer:
-              '5〜10 枚が目安です。移したい期間をカバーするようスクロールしてください。同じ取引の重複は自動で取り除かれます。',
+              '5〜10 枚が目安です。移したい期間をカバーするようスクロールしてください。同じ取引が重複した場合は、プロンプトで ChatGPT に 1 件だけ残すよう頼んでいます。',
           },
           {
-            question: '取り込みは有料ですか？',
-            answer: 'Futari は完全無料で、隠れた費用はありません。',
+            question: '無料版の ChatGPT で足りるとのことですが、Futari 側で費用がかかる段階はありますか？',
+            answer: 'ありません。アップロードとプレビュー、カテゴリの対応づけ、取り込みはすべて無料です。簡単家計簿のスクショから Futari まで、どこにもサブスクリプションは要りません。',
           },
           {
             question: 'ChatGPT が作るカテゴリはずれませんか？',
@@ -2971,14 +3036,14 @@ I will upload the screenshots once you confirm.`,
             body: '割り込んでくる広告も、閉じられない課金画面もありません。記録するペースはふたりが決めます。',
           },
           {
-            title: 'データの出し入れが自由',
+            title: 'いつでも、まるごと持ち出せる',
             body: 'Futari では書き出しに契約は不要で、支出・収入・精算を標準の UTF-8 CSV で書き出せます。いつか離れるときも、そのまま持ち出せます。',
           },
         ],
-        stepsHeading: '3 ステップ',
-        step1: '記帳城市で移したい取引をスクリーンショット（下に詳しい手順）。',
-        step2: 'ChatGPT でスクショを CSV に整えます——下にコピーできるプロンプトがあります。',
-        step3: 'CSV をここにアップロードし、プレビューしてからアカウントを作成して取り込み完了。',
+        stepsHeading: '記帳城市からの引っ越し 3 ステップ',
+        step1: '記帳城市で記録を開き、下にスクロールしながら移したい取引をスクリーンショット。街の画面は撮らなくて大丈夫です（下に詳しい手順）。',
+        step2: 'ChatGPT でスクショを CSV に整えます。日付・金額・カテゴリは画面のまま持ち込まれ、ゲーム内の街の進行状況は CSV には入りません。',
+        step3: 'CSV をここにアップロードして確認し、問題なければアカウントを作成して、これらの記録をふたりの家計簿に引き継ぎます。',
         faq: [
           {
             question: '記帳城市には CSV 書き出しがあるのでは？',
@@ -2986,12 +3051,12 @@ I will upload the screenshots once you confirm.`,
               'あります。ただしサブスク限定の機能で、公式ヘルプにも Excel で開くと文字化けする場合があり、エンコードの変換が必要になることがあると記載されています。契約していない場合は、下のスクショ＋ChatGPT の方法でも同じように移せます。',
           },
           {
-            question: 'スクショは何枚必要ですか？',
-            answer: '5〜10 枚が目安です。移したい期間をカバーするようスクロールしてください。同じ取引の重複は自動で取り除かれます。',
+            question: '漏れがないか、どう確かめますか？',
+            answer: 'アップロード後のプレビューに、件数・期間・よく使うカテゴリが出ます。記帳城市で見える数字と照らし合わせて、抜けた期間があればその部分だけ撮り直して、もう一度整えてください。',
           },
           {
-            question: '取り込みは有料ですか？',
-            answer: 'Futari は完全無料で、隠れた費用はありません。',
+            question: '記帳城市は課金のポップアップが多いと聞きます。Futari にもありますか？',
+            answer: 'ありません。Futari には広告も、操作の途中に割り込む解放のポップアップもなく、取り込みも無料です。',
           },
           {
             question: 'ゲームの進行状況も一緒に移りますか？',
@@ -3007,35 +3072,35 @@ I will upload the screenshots once you confirm.`,
           '長年使ってきた CashMan をふたりで記録するスタイルに変えたい？スクショ＋ChatGPT で記録を CSV に整えて Futari へ。',
         differentiators: [
           {
-            title: 'ふたり向けが標準',
-            body: 'CashMan は頼れるひとり向け家計簿。Futari は最初から二人で一つの家計簿を共有する設計で、両方に見えます。',
+            title: 'ひとりの家計簿から、ふたりの家計簿へ',
+            body: 'CashMan はひとりで使う長年の相棒です。Futari ではふたりが同じ家計簿に書き込み、誰が払ってどう分けたかが記録ごとにはっきりします。',
           },
           {
-            title: '按分は自動で計算',
-            body: '誰が払って、どう分けて、今どちらがいくら貸しているか。残高は自動で計算され、頭の中で覚える必要はありません。',
+            title: '頭の中で貸し借りを覚えなくていい',
+            body: 'ひとりの家計簿では、どちらが多く出したかを自分で覚えておく必要があります。Futari は記録ごとに支払者と分担が付き、残高は自動で積み上がります。',
           },
           {
             title: '同期され、いつでも持ち出せる',
             body: '記録はクラウドにあるので機種変更でも消えません。離れるときは、支出・収入・精算を CSV で書き出せます。',
           },
         ],
-        stepsHeading: '3 ステップ',
-        step1: 'CashMan で移したい取引をスクリーンショット（下に詳しい手順）。',
-        step2: 'ChatGPT でスクショを CSV に整えます——下にコピーできるプロンプトがあります。',
-        step3: 'CSV をここにアップロードし、プレビューしてからアカウントを作成して取り込み完了。',
+        stepsHeading: 'CashMan からの引っ越し 3 ステップ',
+        step1: 'CashMan で最新の取引から過去へさかのぼってスクロールしながら、移したい一番古い日までスクリーンショット（下に詳しい手順）。',
+        step2: 'ChatGPT でスクショを CSV に整えます。CashMan には使える書き出しがないので、スクショがそのまま書き出しファイルになります。',
+        step3: 'CSV をここにアップロードして、何年分も揃っているか確認してから、アカウントを作成して取り込みを完了します。',
         faq: [
           {
             question: 'CashMan に書き出し機能がなくても、本当に移せますか？',
             answer:
-              'はい。取引画面をスクショして ChatGPT で CSV に整えてアップロードします。下に手順とコピーできるプロンプトがあり、無料版の ChatGPT でできます。',
+              'はい。書き出しがないなら、スクショが書き出しです。取引画面を撮って、ChatGPT に決まった列の CSV に整えてもらいます。下に手順とコピーできるプロンプトがあります。',
           },
           {
-            question: 'スクショは何枚必要ですか？',
-            answer: '5〜10 枚が目安です。移したい期間をカバーするようスクロールしてください。同じ取引の重複は自動で取り除かれます。',
+            question: 'スクショで一部の行が切れてしまったら？',
+            answer: 'その行が入るように撮り直せば大丈夫です。同じ取引が 2 枚のスクショに写っていても問題ありません。プロンプトで ChatGPT に 1 件だけ残すよう頼んであります。',
           },
           {
-            question: '取り込みは有料ですか？',
-            answer: 'Futari は完全無料で、隠れた費用はありません。',
+            question: 'CashMan は無料です。Futari にも費用はかかりますか？',
+            answer: 'かかりません。Futari も基本の家計簿機能は無料で、パートナーとの共有・分担・書き出しに追加料金はありません。',
           },
           {
             question: '何年分もの記録もすべて移せますか？',
@@ -3052,21 +3117,21 @@ I will upload the screenshots once you confirm.`,
         differentiators: [
           {
             title: 'ひとつの家計簿を、ふたりで',
-            body: '1Money は個人の記録が中心。Futari は二人で共有する一つの家計簿で、共同の支出は一度記録すれば両方に見えます。',
+            body: '1Money は家計簿をひとりの名前で持ちます。Futari では共通の支出を一度だけ記録し、支払った人と分担もいっしょに付きます。',
           },
           {
-            title: '按分と精算を内蔵',
-            body: '半分ずつ、比率で、それぞれ負担、片方がまとめて——選べば、どちらがいくら貸しているか自動で精算します。',
+            title: '記録するだけで貸し借りがわかる',
+            body: '記録ごとに分け方を選べば残高が自動で更新されるので、照合のためにもう一枚スプレッドシートを作る必要はありません。',
           },
           {
             title: '多通貨もすっきり',
             body: '旅行や外貨の支出もきれいに記録でき、あとから見返しても分かりやすいままです。',
           },
         ],
-        stepsHeading: '3 ステップ',
-        step1: '1Money で移したい取引をスクリーンショット（下に詳しい手順）。',
-        step2: 'ChatGPT でスクショを CSV に整えます——下にコピーできるプロンプトがあります。',
-        step3: 'CSV をここにアップロードし、プレビューしてからアカウントを作成して取り込み完了。',
+        stepsHeading: '1Money からの引っ越し 3 ステップ',
+        step1: '1Money で移したい取引をスクリーンショット。金額の横の通貨も画面に入れてください（下に詳しい手順）。',
+        step2: 'ChatGPT でスクショを CSV に整えます。各取引の通貨は currency 列に入り、いっしょに持ち込まれます。',
+        step3: 'CSV をここにアップロードして、件数と期間が合っているか確認してから、アカウントを作成して取り込みを完了します。TWD 以外の行は元の数字で先に取り込まれ、換算はあとから調整できます。',
         faq: [
           {
             question: '1Money に完全な書き出しがなくても、本当に移せますか？',
@@ -3074,12 +3139,12 @@ I will upload the screenshots once you confirm.`,
               '完全な書き出しがなくても、取引をスクショして ChatGPT で CSV に整えれば移せます。下に手順とコピーできるプロンプトがあり、無料版の ChatGPT でできます。',
           },
           {
-            question: 'スクショは何枚必要ですか？',
-            answer: '5〜10 枚が目安です。移したい期間をカバーするようスクロールしてください。同じ取引の重複は自動で取り除かれます。',
+            question: '無料版の ChatGPT で足りますか？',
+            answer: '足ります。プロンプトで出力の形をあらかじめ決めてあるので、無料版でもそのまま使えます。記録が多い場合は、分けて撮って分けて整えれば大丈夫です。',
           },
           {
-            question: '取り込みは有料ですか？',
-            answer: 'Futari は完全無料で、隠れた費用はありません。',
+            question: '1Money の上位機能は有料です。Futari はどうですか？',
+            answer: '基本の家計簿・ふたりで使う家計簿・分担・精算はすべて無料で、取り込みも無料です。',
           },
           {
             question: '多通貨の記録はずれませんか？',
@@ -3099,31 +3164,31 @@ I will upload the screenshots once you confirm.`,
             body: 'iCost は iOS 限定。Futari は iOS／Android／Web で使えるので、相手がどの端末でも一緒に使えます。',
           },
           {
-            title: '按分と精算を内蔵',
-            body: '半分ずつ、比率で、それぞれ負担、片方がまとめて——選べば、どちらがいくら貸しているか自動で精算します。',
+            title: '共通の出費を、記録ごとに振り分け',
+            body: '記録ごとに誰が払ってどう分けたかを付ければ、残高はそのつど更新されます。別のスプレッドシートは要りません。',
           },
           {
-            title: '無料・広告なし',
-            body: '基本の家計簿機能はずっと無料。広告もデータの売買もしません。',
+            title: 'どのプラットフォームでも無料',
+            body: 'iCost にはアプリ内課金があります。Futari は基本の家計簿が無料で広告もなく、iOS でも Android でもブラウザでも同じです。',
           },
         ],
-        stepsHeading: '3 ステップ',
-        step1: 'iCost で移したい取引をスクリーンショット（下に詳しい手順）。',
-        step2: 'ChatGPT でスクショを CSV に整えます——下にコピーできるプロンプトがあります。',
-        step3: 'CSV をここにアップロードし、プレビューしてからアカウントを作成して取り込み完了。',
+        stepsHeading: 'iCost からの引っ越し 3 ステップ',
+        step1: 'iPhone で iCost を開き、移したい取引をスクリーンショット（下に詳しい手順）。',
+        step2: 'iPhone で撮ったスクショを ChatGPT に渡して CSV に整えます。下にコピーできるプロンプトがあります。',
+        step3: 'CSV をここにアップロードして確認し、アカウントを作成して完了です。パートナーは iPhone でも Android でも参加できます。',
         faq: [
           {
-            question: 'iCost に書き出し機能がなくても、本当に移せますか？',
+            question: 'iCost は iOS 専用で書き出しもありません。データは移せますか？',
             answer:
-              'はい。取引画面をスクショして ChatGPT で CSV に整えてアップロードします。下に手順とコピーできるプロンプトがあり、無料版の ChatGPT でできます。',
+              'はい。iCost には今のところ使える書き出しがないので、スクショを使います。取引画面を撮って ChatGPT に決まった列の CSV に整えてもらい、下にアップロードして確認します。',
           },
           {
-            question: 'スクショは何枚必要ですか？',
-            answer: '5〜10 枚が目安です。移したい期間をカバーするようスクロールしてください。同じ取引の重複は自動で取り除かれます。',
+            question: 'ChatGPT が作る CSV はどんな形ですか？',
+            answer: 'date、category、amount、description、currency、kind の 6 列で、kind には expense か income を入れます。下に例があり、アップロードすると Futari がこれらの列からファイルを見分けます。',
           },
           {
-            question: '取り込みは有料ですか？',
-            answer: 'Futari は完全無料で、隠れた費用はありません。',
+            question: 'iCost にはアプリ内課金があります。Futari は？',
+            answer: '現時点で Futari の基本の家計簿は無料で広告もなく、取り込みも無料です。',
           },
           {
             question: '相手が Android でも一緒に使えますか？',
@@ -3153,29 +3218,34 @@ I will upload the screenshots once you confirm.`,
             body: '旅先では現地通貨のまま記録でき、基準通貨の残高は自動で換算されます。アップグレードは不要です。',
           },
         ],
-        stepsHeading: '移行は 3 ステップ',
+        stepsHeading: 'Splitwise からの引っ越し 3 ステップ',
         step1: 'Splitwise でグループかフレンドのページを開き、「Export spreadsheet」で書き出します。',
-        step2: 'CSV をここにアップロードして、これまでの明細をプレビューします。',
-        step3: 'Futari のアカウントを作成して、移行を完了します。',
+        step2: 'CSV をここにアップロードして、件数とよく出るカテゴリをプレビューします。',
+        step3: 'Futari のアカウントを作り、「設定 → 他のアプリから取り込む」で Splitwise を選んで、同じ CSV をアップロードします。1 件の取引は合計金額（Cost）の支出 1 件として入り、支払者と分担はまとめて一度だけ指定します。Splitwise のスプレッドシートはバックアップとして手元に残しておけば、いつでも見返せます。',
         faq: [
           {
             question: 'Splitwise のデータはどうやって Futari へ移しますか？',
             answer:
-              'グループかフレンドのページからスプレッドシートを書き出し、CSV をここにアップロードしてプレビューし、アカウントを作成すれば取り込みが完了します。',
+              '日付・説明・カテゴリ・合計金額が取り込まれ、1 取引が支出 1 件になります。精算（Payment）の行と Total balance の行は取り込まれず、エラーログに残ります。Splitwise 上の「誰がいくら借りているか」の残高も引き継がれません。名前が合うカテゴリ（Groceries、Rent など）は自動で振り分けられ、それ以外はいったん「その他」にまとまります。ふたりとも同じグループを書き出した場合は、片方だけを取り込んでください。Futari は重複を自動では除きません。',
           },
           {
             question: '書き出した列は Futari と同じですか？',
             answer:
-              '同じではありません。Splitwise の書き出しは 1 明細 1 行で、合計金額（Cost）の列に加えて各メンバーの負担額の列が並びます。アップロード後にまず解析結果をプレビューし、取り込み時に列とカテゴリを対応づけられます。その前に家計簿へ書き込まれることはありません。',
+              '完全には同じではありませんが、読み込めます。Futari が読むのは日付・説明・カテゴリ・合計（Cost）・通貨で、人ごとの負担額の列は読まないため、支払者と分担は取り込み時にまとめて一度だけ指定します。過去の分を今の残高に影響させたくないときは「すべて自分」を選びます。「半々」だと、この取り込み分の全行がふたりの間の残高に加わります。',
           },
           {
-            question: '取り込みに費用はかかりますか？',
-            answer: 'Futari は完全無料で、隠れた費用はありません。',
+            question: 'Splitwise の無料プランは 1 日 4 件までです。Futari は？',
+            answer: '基本の家計簿には 1 日あたりの件数制限はありません。取り込みも無料です。',
           },
           {
             question: '旅行の記録にも使っています。Futari に同じようなものはありますか？',
             answer:
               'あります。Futari の旅行用の家計簿は 1 回の旅の支出を現地通貨のまま切り分けて記録し、旅が終わると本体の家計簿にまとめて戻します。',
+          },
+          {
+            question: 'Splitwise の外貨の明細は、取り込むと金額がどうなりますか？',
+            answer:
+              'Currency 列が TWD でない行は、ファイルの数字がそのまま基準通貨の金額として入ります。換算はされず、元の通貨も残りません。小数は整数に丸められます。取り込んだあとで行ごとに金額を直せます。',
           },
         ],
       },
@@ -3190,31 +3260,31 @@ I will upload the screenshots once you confirm.`,
             body: '隨手記は共有用の家計簿を別に作る必要があります。Futari は最初からふたりの家計簿なので、追加の設定はいりません。',
           },
           {
-            title: '按分と精算を内蔵',
-            body: '半分ずつ、比率で、それぞれ負担、片方がまとめて——選べば、どちらがいくら貸しているか自動で精算します。',
+            title: '共有も、分担もある',
+            body: '折半・割合・それぞれ負担・片方が全額のどれかを記録ごとに選びます。隨手記の共有家計簿にはこの層がありませんが、Futari には最初から入っています。',
           },
           {
-            title: '無料・広告なし',
-            body: '基本の家計簿機能はずっと無料。広告もデータの売買もしません。',
+            title: '有料会員でなくても、広告もなし',
+            body: '隨手記には広告と会員プランがあります。Futari は基本の家計簿が無料で広告もなく、パートナーと共有するのに会員になる必要もありません。',
           },
         ],
-        stepsHeading: '3 ステップ',
-        step1: '隨手記で移したい取引をスクリーンショット（下に詳しい手順）。',
-        step2: 'ChatGPT でスクショを CSV に整えます——下にコピーできるプロンプトがあります。',
-        step3: 'CSV をここにアップロードし、プレビューしてからアカウントを作成して取り込み完了。',
+        stepsHeading: '隨手記からの引っ越し 3 ステップ',
+        step1: '隨手記で移したい取引の明細をスクリーンショット。先に会員になる必要はありません（下に詳しい手順）。',
+        step2: 'ChatGPT にスクショを読み取らせて CSV に整えます。無料版で足り、プロンプトは下からコピーして貼るだけです。',
+        step3: 'CSV をここにアップロードして確認し、アカウントを作成します。ふたりの共有に追加の設定は要りません。',
         faq: [
           {
-            question: '隨手記のデータはどう Futari に移しますか？',
+            question: '隨手記は書き出しに会員資格が必要です。データは移せますか？',
             answer:
-              '取引画面をスクショして ChatGPT で CSV に整えてアップロードします。下に手順とコピーできるプロンプトがあり、無料版の ChatGPT でできます。',
+              '隨手記のデータ書き出しには会員資格が必要です。移るためだけに入会したくなければ、スクショを使います。取引画面を撮って ChatGPT で CSV に整え、下にアップロードしてください。',
           },
           {
-            question: 'スクショは何枚必要ですか？',
-            answer: '5〜10 枚が目安です。移したい期間をカバーするようスクロールしてください。同じ取引の重複は自動で取り除かれます。',
+            question: 'スクショはどこまでさかのぼって撮ればいいですか？',
+            answer: '移したい一番古い日までスクロールして撮ります。たいてい 5〜10 枚で足ります。記録が多い場合は、分けて撮って分けて CSV に整え、順番にアップロードしてください。',
           },
           {
-            question: '取り込みは有料ですか？',
-            answer: 'Futari は完全無料で、隠れた費用はありません。',
+            question: '会員でないと使えない機能は、移っても必要ですか？',
+            answer: '不要です。Futari の基本の家計簿、ふたりでの共有、分担は無料で、会員登録は要りません。取り込みも無料です。',
           },
           {
             question: '隨手記には共有の家計簿がありますが、Futari も同じですか？',
@@ -3237,11 +3307,9 @@ I will upload the screenshots once you confirm.`,
       description: 'Google アカウントでサインインすると、ふたりで共有する家計簿に入ります。日常の支出や燃費、保険、資産までパートナーと一緒に整える PWA。',
       ogDescription: 'Google でワンタップサインインして、ふたりの家計簿を開きます。',
       invite: {
-        // TODO(i18n): native review pending (#1016) — MT-quality draft.
-        title: '二人で家計簿をつけませんか · Futari',
-        // TODO(i18n): native review pending (#1016) — MT-quality draft.
-        description: '二人のための共有家計簿に招待されました。サインインすると参加できます。',
-        ogDescription: '二人のための共有家計簿です。サインインすると参加できます。',
+        title: '家計簿に招待されました · Futari',
+        description: 'ふたりの家計簿に招待されました。サインインすると参加できます。',
+        ogDescription: 'ふたりの家計簿です。サインインすると参加できます。',
       },
     },
     terms: {
@@ -3290,8 +3358,8 @@ I will upload the screenshots once you confirm.`,
         ogDescription: 'Manebo ユーザーの次の住みか。CSV を書き出して Futari へ。',
       },
       'simple-daily-money': {
-        title: '簡単家計簿から Futari へ｜ふたりで同期・VIP 不要',
-        description: 'ふたりのスマホで同じ家計簿を同期したい？簡単家計簿の共有は閲覧のみ、CSV 書き出しは VIP 限定。スクショを ChatGPT で CSV に整えて、Futari へ無料でお引っ越し。ふたりとも追加・編集できます。',
+        title: '簡単家計簿の永久 VIP、引っ越しても大丈夫？｜Futari は無料',
+        description: '買った VIP は簡単家計簿に残りますが、記録は持っていけます。スクショを ChatGPT で CSV に整えて、Futari へ無料でお引っ越し。割り勘・同期・書き出しも追加料金なし。',
         ogDescription: '簡単家計簿からのお引っ越し——スクショ→ChatGPT→CSV→Futari。',
       },
       'fortune-city': {
@@ -3391,6 +3459,11 @@ I will upload the screenshots once you confirm.`,
       title: '友だちとのおでかけの割り勘｜リンク 1 つでアプリ不要 | Futari',
       description: '友だちとのおでかけで、誰が何を払って誰が誰に送るかを 1 か所に。おでかけを作ってリンクを送れば、友だちは名前を選ぶだけで記録できます。ダウンロード不要、登録不要、最大 20 人。',
       ogDescription: 'おでかけを作ってリンクを送れば、友だちは名前を選ぶだけで一緒に記録できます。ダウンロードも登録も不要です。',
+    },
+    featureShortcuts: {
+      title: 'iPhoneのショートカットで記録：Apple Pay の支払い後に「記録を追加」を開く | Futari',
+      description: 'iPhone のショートカットで、Apple Pay の支払い後に Futari の「記録を追加」を開き、金額を入れた状態で確認して保存できます。Futari は支払いアカウントに接続せず、支払いデータも読み取りません。',
+      ogDescription: '支払いのあと、iPhone のショートカットが Futari の「記録を追加」を開きます。金額・カテゴリ・内容は入力済みで、保存はあなたが押します。',
     },
   },
   useCase: {
@@ -3506,8 +3579,8 @@ I will upload the screenshots once you confirm.`,
             answer: '支出を記録して分担方法を明記するのがポイントです。Futari は残高を自動で積み上げるので、どちらが多く出しているかいつでも確認できます。',
           },
           {
-            question: 'Futari は有料ですか？',
-            answer: '基本機能は完全無料です。共同家計簿・複数の分担モード・リアルタイム同期がすべて含まれています。',
+            question: 'ふたりとも課金が必要ですか？',
+            answer: 'いいえ。共同家計簿・複数の分担モード・リアルタイム同期はすべて無料で、パートナーを招待するのに追加の手続きも要りません。',
           },
         ],
       },
@@ -3518,11 +3591,11 @@ I will upload the screenshots once you confirm.`,
         painPoints: [
           {
             heading: '「別々にする？それとも合わせる？」',
-            body: '正解はありません。完全統合・一部共有・別々 AA など、夫婦によってさまざま。Futari はどの方法にも対応し、決めたやり方に合わせて使えます。',
+            body: '新婚の家計に決まった正解はありません。すべて合わせるカップル、共通の出費だけ合わせるカップル、あくまで割り勘を続けるカップルといろいろです。Futari の分担モードは折半・割合・片方の全額負担に対応していて、支出ごとに選べます。ふたりの決め方に家計簿のほうが合わせます。',
           },
           {
             heading: '「車・保険・将来の住宅費、全部一緒に把握したい。」',
-            body: '結婚後の費用は日常の買い物だけではありません。Futari では支出を車・家・保険などの愛するものに紐づけて記録できます。',
+            body: '結婚後の費用は日常の買い物だけではありません。愛するもの、保険、大きな出費もあります。Futari では支出を特定の愛するものに紐づけられるので、車の費用も保険料もそれぞれの場所に収まり、混ざりません。',
           },
           {
             heading: '「旅行費と日常費が混ざって、帰ってから精算できない。」',
@@ -3536,7 +3609,7 @@ I will upload the screenshots once you confirm.`,
           },
           {
             question: '家計を合算すべき？別々にすべき？',
-            answer: 'Futari は共同家計簿であり、口座の統合ではありません。誰が払ったか・どう分担するかを記録するだけで、ふたりで同じ全体像を見ることができます。',
+            answer: 'Futari はふたりで共有するひとつの家計簿で、口座を統合するものではありません。支出ごとに誰が払ったか・どう分担するかを記録するので、お金を合算しなくてもふたりで同じ全体像を見られます。折半、割合、特定の支出だけ片方が全額負担、といった選び方ができます。',
           },
           {
             question: 'Futari ではどんなものを記録できますか？',
@@ -3551,11 +3624,11 @@ I will upload the screenshots once you confirm.`,
         painPoints: [
           {
             heading: '「今月、猫にいくら使った？」',
-            body: '病院代・ワクチン・おやつ・おもちゃ・トリミング——カテゴリがバラバラで全体像がつかめません。Futari では支出をペットに紐づけてフィルタリングできます。',
+            body: '病院代・ワクチン・おやつ・おもちゃ・トリミングは別々のカテゴリに散らばるので、今月猫にいくらかかったかは自分で足し算するしかありません。支出をペットの名前で記録しておけば、そのペットのページに今月の金額が出ます。さらに前を見たいときは、絞り込みでそのペットを選べば、そのペットの支出だけが残ります。',
           },
           {
             heading: '「ほとんど自分が払ってる。パートナーはわかってるかな？」',
-            body: 'ふたりで飼っているのに、片方が多く払いがちなことがあります。Futari の分担機能で残高を自動記録。「今月どっちが多く出した？」を確認せずに済みます。',
+            body: '通院やフードの買い出しは、いつも同じ人のカードで払いがちです。誰が払って相手がいくら持つかを記録しておけば、残高が残り続けます。精算したくなったら精算を記録するだけで、「たぶん自分のほうが多く出している」という記憶に頼らずに済みます。',
           },
           {
             heading: '「猫が2匹いて、費用を別々に記録したい。」',
@@ -3568,12 +3641,12 @@ I will upload the screenshots once you confirm.`,
             answer: 'Futari はふたりで使うことを前提に設計された家計簿です。ペットを「愛するもの」として登録し、支出を紐づけることができます。カップルがペットを一緒に飼う場面を考慮した数少ないアプリのひとつです。',
           },
           {
-            question: '動物病院代をわかりやすく記録するには？',
-            answer: 'Futari でペットを愛するものとして作成し、診察や購入のたびにその項目に紐づけます。費用が自動で分類されるので、「この子に今月いくら使ったか」がフィルタ一発でわかります。',
+            question: '動物病院代は、どう記録すれば後で見返しやすいですか？',
+            answer: 'ペットを名前と種類で追加すれば準備完了です。診察・薬・トリミングのたびに、記録するときにそのペットを選びます。病院代をまとめて見たいときは、そのペットのページを開くか、絞り込みでそのペットを選んでください。',
           },
           {
-            question: '2匹以上いても別々に記録できますか？',
-            answer: 'できます。それぞれのペットを個別に登録すれば、費用履歴が独立して残ります。',
+            question: 'フードや猫砂のように毎月買うものも設定できますか？',
+            answer: 'できます。毎月買うフードを定期支出にして、ペットを選んでおきます。日付になるとホームに確認カードが出るので、金額が同じなら「このままで」、値段が変わっていれば「修正」をタップします。バックグラウンドで勝手に記録されることはありません。',
           },
         ],
       },
@@ -3620,8 +3693,8 @@ I will upload the screenshots once you confirm.`,
             body: '固定費はルーティンで見落としがち。Futari で支払ったタイミングに記録しておけば、いつでも何が支払われているかがわかります。',
           },
           {
-            heading: '「折半と収入比、どっちにする？毎回悩む。」',
-            body: '正解はひとつじゃありません。Futari は折半・収入比・片方負担に対応。一度設定すれば自動計算です。',
+            heading: '「部屋の広さが違うのに、電気代も折半でいいのかな？」',
+            body: 'ルームシェアでは、きっちり半分ずつにならないことがよくあります。広い部屋の人が少し多く、一日中家にいる人が電気代を多めに、といった具合です。Futari は割合での分担ができ、割合を決めておけば以降の記録にそのまま使えるので、毎回計算し直さなくて済みます。',
           },
           {
             heading: '「片方が多く立て替えていて、いくら返せばいいかわからない。」',
@@ -3631,15 +3704,15 @@ I will upload the screenshots once you confirm.`,
         faq: [
           {
             question: 'ルームメイトとの費用分担に使えるアプリは？',
-            answer: 'Futari はふたりで使うことを前提に設計された共同家計簿です。複数の分担モードとリアルタイム同期に対応し、LINEで追いかけなくても費用を把握できます。',
+            answer: 'Futari はふたり用に作られた家計簿です。同居の費用を複数の分担モードで記録でき、リアルタイム同期でどちらからも同じ内容が見えます。グループチャットで追いかける必要はありません。',
           },
           {
-            question: '同居費用をわかりやすく記録するには？',
-            answer: 'その場で支出を記録し、誰が払ったか・どう分担するかをメモしましょう。Futari が残高を自動累計するので、月末を待たずに状況を把握できます。',
+            question: 'ルームシェアの出費は、どう記録すればもめませんか？',
+            answer: '払ったその場で記録して、分け方を選びます。家賃は部屋の割合で、共用の日用品は折半、というように。立て替えた分は Futari の残高が覚えているので、次にどちらが払うか、いくら足りないかは残高を見ればわかります。',
           },
           {
-            question: 'Futari は有料ですか？',
-            answer: '基本機能は完全無料です。共同家計簿・複数の分担モード・リアルタイム同期がすべて含まれています。',
+            question: '恋人同士ではなくても、ひとつの家計簿を共有できますか？',
+            answer: 'できます。家計簿はふたりで使う前提で、同居人を招待すればいっしょに記録できます。パートナーである必要はありません。どちらかが引っ越して家計簿を離れても、それまでの記録は過ぎた時間として残り、いつでも見返せます。',
           },
         ],
       },
@@ -3663,16 +3736,16 @@ I will upload the screenshots once you confirm.`,
         ],
         faq: [
           {
-            question: '毎月の固定費をパートナーと一緒に記録するには？',
-            answer: 'Futari で固定費を記録し、誰が払ったか・どう分担するかをメモしましょう。ふたりがリアルタイムで確認できるので、別途報告は不要です。',
+            question: '固定費はいつも片方が払っています。もう片方にも見えるようにするには？',
+            answer: '固定費もすべて、払った人を付けて同じ家計簿に記録します。もう片方が開けば今月誰が何を払ったかがわかり、「ネット代は払った？」と聞く必要がありません。あとで振り返るときも、絞り込みでカテゴリや支払い者を選べます。',
           },
           {
             question: 'Futari に固定費のリマインダー機能はありますか？',
-            answer: 'Futari は定期支出ルールに対応しています。毎月発生する支出を設定すると、タイミングで確認を促してくれます。',
+            answer: 'あります。家賃・ネット代・保険料を定期支出にして、周期は毎月・四半期ごと・半年ごと・毎年から選べます。日付になるとホームに確認カードが出て、確認したときはじめて家計簿に記録されるので、固定費を忘れません。',
           },
           {
-            question: 'Futari は有料ですか？',
-            answer: '基本機能は完全無料です。共同家計簿・複数の分担モード・リアルタイム同期がすべて含まれています。',
+            question: '毎月金額が変わる支払いはどうしますか？',
+            answer: '光熱費や通信費のように毎回金額が変わるものも、定期支出にできます。カードが出たら「修正」をタップして今回の実際の金額を入れます。今回その支払いがなければ「スキップ」をタップしてください。',
           },
         ],
       },
@@ -3691,21 +3764,21 @@ I will upload the screenshots once you confirm.`,
           },
           {
             heading: '「大きな出費を自分が負担したが、分担が公平か不安。」',
-            body: '大きな支出こそバランスが大切です。Futari の分担機能で大きな費用も記録し、残高を自動更新。感覚ではなく数字で公平さを確認できます。',
+            body: '大きな出費は、どちらかが少し損をしている気持ちになりやすい場面です。一件ごとに支払った人と分担を記録すれば残高が更新されるので、誰のカードだったかをさかのぼらず、ふたりで数字を見て話せます。',
           },
         ],
         faq: [
           {
             question: '大きな共同購入をふたりで記録するには？',
-            answer: 'Futari で支出を記録し、対応する愛するもの（車・家電など）に紐づけ、分担方法を設定。ふたりがリアルタイムで確認でき、資産ごとの累計支出もフィルタで確認できます。',
+            answer: '先に分け方を決めてから記録します。片方が全額、折半、割合のどれでも構いません。支払った当日に金額・支払った人・分担を記録すれば、相手にもすぐ見えます。あとで分け方を変えたくなったら、その一件を修正すれば残高が再計算されます。',
           },
           {
-            question: '車の費用を Futari でどう記録しますか？',
-            answer: 'Futari で車を愛するものとして登録し、購入費・保険・燃料・メンテナンスなど関連する支出をその車に紐づけます。所有コストの全体がひとつの場所で把握できます。',
+            question: '購入費やガソリン代など、車の費用はどこにまとめますか？',
+            answer: '車を愛するものとして登録し、購入費・保険・メンテナンス・ガソリン代をその車の下に記録します。車には給油記録があり、燃費と燃料代が見えます。車のページには今月とこの章の合計が表示されます。',
           },
           {
-            question: 'Futari は有料ですか？',
-            answer: '基本機能は完全無料です。共同家計簿・複数の分担モード・リアルタイム同期がすべて含まれています。',
+            question: '片方が大きな金額を立て替えました。あとでどう精算しますか？',
+            answer: '立て替えた人を支払者にして、相手が負担する分担を選ぶと、相手がいくら持つかが残高に出ます。返してもらったら精算を一件記録すれば、残高が減るかゼロに戻ります。',
           },
         ],
       },
@@ -3730,15 +3803,15 @@ I will upload the screenshots once you confirm.`,
         faq: [
           {
             question: 'カップルで食費を一緒に記録するには？',
-            answer: 'Futari で毎回の食事を記録し、誰が払ったか・どう分担するかをメモしましょう。飲食カテゴリの月次合計はリアルタイムでふたりが確認できます。',
+            answer: '食べた直後に一件記録します。金額・誰が払ったか・どう分けるかを入れるだけです。交互におごるなら払った人の全額負担を、割り勘なら折半を選びます。月末に食事カテゴリで絞り込めば、今月の合計がわかります。',
           },
           {
             question: 'デリバリーや外食も Futari で記録できますか？',
             answer: 'できます。Futari の飲食カテゴリには外食・テイクアウト・デリバリー・食料品が含まれます。フィルタで全体像をいつでも確認できます。',
           },
           {
-            question: 'Futari は有料ですか？',
-            answer: '基本機能は完全無料です。共同家計簿・複数の分担モード・リアルタイム同期がすべて含まれています。',
+            question: '外食が多すぎると、Futari は知らせてくれますか？',
+            answer: 'いいえ。日常の支出に予算の上限はなく、使いすぎの通知も出しません。食事カテゴリの今月の合計を並べるだけです。見直すかどうかは、ふたりで話して決めてください。',
           },
         ],
       },
@@ -3749,29 +3822,29 @@ I will upload the screenshots once you confirm.`,
         painPoints: [
           {
             heading: '「今月、子どもにいくら使った？」',
-            body: '医療費・食費・衣類・習い事——育児費用はカテゴリがバラバラで全体像がつかめません。Futari で支出を子どもに紐づければ、フィルタ一発で全体が見えます。',
+            body: '医療費・食費・衣類・習い事——育児の費用はカテゴリに散らばって、全体像がつかみにくいものです。支出を子どもの名前で記録しておけば、子どものページに今月の金額が出ます。さらに前を見たいときは、絞り込みでその子を選べば、その子の支出だけが残ります。',
           },
           {
             heading: '「健診はほとんど自分が連れて行く。パートナーはコストを把握してる？」',
             body: '育児費用は片方が先払いしがちです。Futari では育児費用もふたりの家計簿に入るので、ふたりがリアルタイムで把握できます。',
           },
           {
-            heading: '「子どもが2人いて、費用を別々に記録したい。」',
-            body: 'Futari は複数の愛するものに対応。それぞれの子どもを個別に登録し、費用を独立して記録できます。',
+            heading: '「子どもが2人。上の子と下の子にそれぞれいくらかかっているか知りたい。」',
+            body: '子どもごとに一人ずつ登録し、粉ミルク・学費・通院をそれぞれの名前で記録します。ふたりの合計が足されることはなく、上の子と下の子にそれぞれいくらかかったか一目でわかります。',
           },
         ],
         faq: [
           {
             question: '育児費用をパートナーと一緒に記録するには？',
-            answer: 'Futari で子どもを愛するものとして登録し、関連する支出を紐づけます。ふたりがリアルタイムで確認でき、自動で分担計算。月末の確認作業が不要になります。',
+            answer: '子どもを追加して、記録のときにその子を選べば、ふたりにリアルタイムで見えます。分け方は毎回選べます。折半、割合、払った人が全額負担。月末にまとめて照合する必要はありません。',
           },
           {
             question: '育児費用はカテゴリが多いですが、Futari で整理できますか？',
             answer: 'Futari には医療・飲食・買い物など幅広いカテゴリがあります。子どもへの支出は愛するものへの紐づけとカテゴリの両方で整理できます。',
           },
           {
-            question: 'Futari は有料ですか？',
-            answer: '基本機能は完全無料です。共同家計簿・複数の分担モード・リアルタイム同期がすべて含まれています。',
+            question: '子どもの情報は Futari でどう保管されますか？',
+            answer: '家計簿はふたりのアカウントにだけ開かれていて、通信は HTTPS で暗号化されます。子どもの本名や身分証番号のような機微な項目は、別途暗号化してからデータベースに保存します。',
           },
         ],
       },
@@ -3782,7 +3855,7 @@ I will upload the screenshots once you confirm.`,
         painPoints: [
           {
             heading: '「AA 制にしたけど、結局誰が多く払ってるかわからない。」',
-            body: '割り勘の難しさは「決めること」ではなく「覚えておくこと」です。Futari では毎回の支払いを記録し、残高を自動積み上げ。いつでも現在のバランスが確認できます。',
+            body: '割り勘で難しいのは分け方を決めることではなく、覚えておくことです。払った瞬間に支払った人と分担を記録すれば残高が積み上がり、今どれだけ差があるかをふたりがいつでも見られます。',
           },
           {
             heading: '「交互払いにしてるけど、金額が違うから公平かわからない。」',
@@ -3800,11 +3873,11 @@ I will upload the screenshots once you confirm.`,
           },
           {
             question: '交互払いを Futari でどう記録しますか？',
-            answer: '毎回の支払いを記録し、誰が払ったか・どう分担するかをメモします（折半または片方負担）。Futari が残高を積み上げ、交互払いが不均等でも現在のバランスが把握できます。',
+            answer: '払った人を支払者にして、分担は折半を選びます。相手が払った回も同じです。回数は同じでも金額が違うときは、残高が差を示してくれて、精算を記録すればゼロに戻ります。',
           },
           {
-            question: 'Futari は有料ですか？',
-            answer: '基本機能は完全無料です。共同家計簿・複数の分担モード・リアルタイム同期がすべて含まれています。',
+            question: '友だちも一緒の割り勘の食事も記録できますか？',
+            answer: 'できます。ふたりの割り勘はメインの家計簿に、複数人での食事は「おでかけ」を作ってリンクをグループに送ります。友だちはアプリを入れずに参加でき、終わったときに誰が誰に送るかの案が出ます。送金は多くても人数マイナス 1 回です。',
           },
         ],
       },
@@ -3885,6 +3958,122 @@ I will upload the screenshots once you confirm.`,
     },
   },
 
+  featureShortcuts: {
+    heroKicker: 'ショートカット',
+    heroTitle: '支払いのあと、iPhone に「記録を追加」を開いてもらう',
+    heroSubtitle: 'iPhone の「ショートカット」で、支払い後に Futari の「記録を追加」を開きます。金額・カテゴリ・内容は入力済み。確認して、必要なら直して、保存を押します。',
+    breadcrumbLabel: 'ショートカットで記録',
+    howToStepName: 'ステップ {n}',
+    answerQuestion: 'Apple Pay で払ったあと、Futari にすばやく記録するには？',
+    answer: 'Futari は支払いアカウントに接続せず、支払いデータも読み取りません。動くのは iPhone の「ショートカット」です。支払いのあと、Futari の「記録を追加」を金額・カテゴリ・内容が入った状態で開きます。内容を確認して自分で保存を押すまで、家計簿には何も書き込まれません。この方法は iPhone の「ショートカット」アプリでのみ使えます。',
+    vars: {
+      amount: '金額',
+      merchant: '店名',
+    },
+    applePay: {
+      heading: 'Apple Pay：支払うと「記録を追加」が開く',
+      intro: '前提：iPhone に Futari をインストールし、サインイン済みであること。「ウォレット」のオートメーションを使い、Apple Pay で支払うたびに入力済みの「記録を追加」を開きます。',
+      steps: [
+        {
+          title: '「ウォレット」のオートメーションを作る',
+          body: '「ショートカット」アプリで「オートメーション」を開き、＋ から「ウォレット」を選びます。表示された画面で記録したいカードにチェックを入れます。カテゴリはすべてチェックのままで構いません。「次へ」→「新規ショートカット」の順に進み、最後にこのオートメーションの設定行で「すぐに実行」を選ぶと、通知をタップする手間がありません。',
+        },
+        {
+          title: '金額を整数に丸める（おすすめ）',
+          body: 'おすすめ：「数値を丸める」アクションを追加し、入力に「ショートカットの入力」の「金額」を選びます。金額に小数（例：120.00）が付くと、Futari は金額欄を空欄にするため、先に丸めておくと安心です。「120」「1,280」「１２０」は使えますが、「120.00」「NT$120.00」「120円」は空欄になります。',
+        },
+        {
+          title: '店名を URL エンコードする',
+          body: '「URLエンコード」アクションを追加し、入力に「ショートカットの入力」の「店名」を選びます。エンコードしないと、日本語や空白でリンクが途中で切れ、内容が空欄になったり途中までになったりします。内容は省略できます。付けない場合はこの手順を飛ばし、リンクの &note=… の部分をすべて削除してください。',
+        },
+        {
+          title: '「テキスト」でリンクを組み立てる',
+          body: '「テキスト」アクションを追加し、下のリンクを貼り付けて、[金額] を手順2の結果に、[店名] を手順3の結果に置き換えます（手順2を省いた場合は「ショートカットの入力」の「金額」）。カテゴリを変えたいときは、category= のあとの id を書き換えます（下のカテゴリ表を参照）。',
+        },
+        {
+          title: 'URL を開く',
+          body: '「URLを開く」アクションを追加し、入力に前の手順のテキストを選びます。以降、Apple Pay で支払うたびに Futari の「記録を追加」が開きます。確認して保存を押してください。',
+        },
+      ],
+      urlLabel: 'リンク（アプリ）',
+      platformNote: 'この方法は iPhone の「ショートカット」アプリでのみ使えます。',
+      foreignNote: '外貨の支払い：Apple Pay で外貨を支払った場合、ショートカットは外貨の金額を渡し、Futari はそれを家計簿の主通貨の金額として入力します。「記録を追加」で、実際に引き落とされた金額に直してください。',
+    },
+    linePay: {
+      heading: '',
+      intro: '',
+      noteVar: '',
+      steps: [],
+    },
+    web: {
+      heading: 'アプリを入れていない場合：ウェブ用のリンク',
+      body: 'アプリではなくブラウザやホーム画面に追加した状態で使っている場合は、リンクを下のものに替えます。「URLを開く」は Safari で開きます。先に Safari で Futari にサインインしておく必要があります。# 以降の内容はブラウザの中だけにあり、サーバーには送られません。',
+      urlLabel: 'リンク（ウェブ）',
+    },
+    params: {
+      heading: 'リンクに入れられる値',
+      intro: '3つのパラメータはどれも省略できます。ある値が正しくないときは、その欄だけが空になり、ほかは入力されます。',
+      cols: {
+        param: 'パラメータ',
+        rule: 'ルール',
+        fallback: '正しくないとき',
+      },
+      rows: [
+        {
+          param: 'amount',
+          rule: '1〜9,999,999 の整数。3桁区切りのカンマ（1,200）や全角数字も使えます。小数、負の数、1e5 のような書き方は受け付けません。',
+          fallback: '金額は空欄。自分で入力します',
+        },
+        {
+          param: 'category',
+          rule: '下の表にある id のどれか。すべて小文字で、そのとおりに書きます。',
+          fallback: '既定の「食事」になります',
+        },
+        {
+          param: 'note',
+          rule: '「内容」になります。100文字まで。',
+          fallback: '内容は空欄。保存前に自分で入力します',
+        },
+      ],
+      categoriesHeading: 'カテゴリ id',
+      catCols: {
+        id: 'id',
+        name: '表示',
+      },
+      fixedNote: 'リンクで渡せるのはこの3つだけです。日付（今日）、支払った人（あなた）、割り方、通貨は「記録を追加」のいつもの初期値に従い、リンクに書いても反映されません。進行中の旅行に自動で振り分けることもしないので、旅行に入れたいときは画面で選んでください。',
+    },
+    whenNot: {
+      heading: '「記録を追加」が開かないとき',
+      intro: 'ショートカットは Futari を開くだけです。次の3つの場合、Futari は何もせず、画面にも触れません。',
+      items: [
+        '別のウィンドウが開いているとき（たとえば記録を編集中）：ショートカットは無視され、編集中の内容はそのままです。ウィンドウを閉じてから、もう一度実行してください。',
+        '過去の章を見ているとき：過去の章は読み取り専用です。先に現在の章に戻してください。',
+        'サインインしていないとき：サインイン後はホームに戻り、入力済みの内容は残りません。ショートカットをもう一度実行してください。',
+      ],
+    },
+    trouble: {
+      heading: 'よくある状況',
+      cols: {
+        symptom: '状況',
+        cause: '原因',
+      },
+      rows: [
+        {
+          symptom: '開いたが、金額が空欄',
+          cause: '金額が整数ではありません。「数値を丸める」の手順がないか、「円」や通貨記号が付いていることが多いです。',
+        },
+        {
+          symptom: '内容が空欄、または途中まで',
+          cause: '店名が「URLエンコード」を通っていません。',
+        },
+        {
+          symptom: 'カテゴリが「食事」になる',
+          cause: 'category の id の綴りが違うか、大文字が混ざっています。',
+        },
+      ],
+    },
+  },
+
   errors: {
     actions: {
       group_not_found: '家計簿が見つかりません',
@@ -3929,6 +4118,7 @@ I will upload the screenshots once you confirm.`,
       split_ratio_invalid: '分担比率は 1〜99 の整数にしてください',
       split_type_invalid: '分担方法が無効です',
       profile_not_found: 'プロフィールが見つかりません',
+      display_name_reserved: 'この名前は使えません。別の名前にしてください。',
       fx_rate_not_set: '{from} → {to} のレートが設定されていません',
       fx_rate_not_positive: 'レートは正の数で入力してください',
       currency_unsupported: '対応していない通貨です',
@@ -3955,6 +4145,9 @@ I will upload the screenshots once you confirm.`,
       rule_recipient_not_member: 'このルールの収入の受取人はこの家計簿から離れました。受取人を選び直してから再開してください。',
       pending_income_not_found: '確認待ちの収入はすでに処理済みか、見つかりません',
       pending_income_handled_elsewhere: '確認待ちの収入は別の端末で処理されました',
+      shortcut_pending_handled_elsewhere: 'この確認待ちは別の端末で処理されたか、期限が切れました',
+      shortcut_pending_needs_note: 'この確認待ちには内容がありません。修正してから記録してください。',
+      shortcut_pending_invalid: '記録できませんでした。金額と日付を確認してください。',
       review_month_locked: '今月のメッセージはロック済みのため、変更できません',
       review_message_locked: 'メッセージはロック済みのため、変更できません',
       asset_not_found: '愛物が見つかりません',

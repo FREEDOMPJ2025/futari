@@ -23,6 +23,7 @@ import { policyCurrency as resolvePolicyCurrency } from '@/lib/insuranceCurrency
 import { formatLedgerAmountSpaced, type CurrencyCode } from '@/lib/currency'
 import { incomeToFeedRow } from '@/lib/incomeFeedRow'
 import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { formatDateAbsolute } from '@/lib/format-date'
 import type { Translations } from '@/lib/i18n/locales/zh-TW'
 import { loadMoreTransactionsForAsset } from '@/actions/transaction'
@@ -492,7 +493,7 @@ function RecurringRulesSection({
   onAdd: () => void
   onEdit: (rule: RecurringIncomeRuleView) => void
   translations: Translations['assetDetail']['savings']
-  intervalLabels: { 1: string; 3: string; 6: string; 12: string; fallback: string }
+  intervalLabels: { 1: string; 3: string; 6: string; 12: string; fallback: { one: string; other: string } }
   locale: string
   /** A recurring income rule is a ledger amount: the ledger's base currency, not the policy's (#1600). */
   currency: CurrencyCode
@@ -560,7 +561,7 @@ function RecurringRulesSection({
                   <div className="mt-1 text-xs text-ink-3">
                     {translations.recurringRuleSummary
                       .replace('{day}', String(rule.dayOfMonth))
-                      .replace('{interval}', formatInterval(rule.intervalMonths, intervalLabels))}
+                      .replace('{interval}', formatInterval(rule.intervalMonths, intervalLabels, locale))}
                   </div>
                 </button>
               </li>
@@ -574,11 +575,12 @@ function RecurringRulesSection({
 
 function formatInterval(
   months: number,
-  labels: { 1: string; 3: string; 6: string; 12: string; fallback: string },
+  labels: { 1: string; 3: string; 6: string; 12: string; fallback: { one: string; other: string } },
+  locale: string,
 ): string {
   if (months === 1) return labels[1]
   if (months === 3) return labels[3]
   if (months === 6) return labels[6]
   if (months === 12) return labels[12]
-  return labels.fallback.replace('{n}', String(months))
+  return pickPlural(locale, months, labels.fallback).replace('{n}', String(months))
 }

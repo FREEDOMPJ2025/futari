@@ -19,8 +19,10 @@ import { NewFuelLog } from '@/app/(dashboard)/assets/[id]/_components/NewFuelLog
 import { getFuelLogById } from '@/actions/fuelLog'
 import { PendingIncomeStack } from './PendingIncomeStack'
 import { PendingExpenseStack } from './PendingExpenseStack'
+import { PendingShortcutStack } from './PendingShortcutStack'
 import { FirstRecordCard } from './FirstRecordCard'
 import type { PendingIncomeView, PendingExpenseView } from '@/lib/recurringMemberLink'
+import type { ShortcutPendingView } from '@/lib/db/queries/shortcutPending'
 import { useTranslations } from '@/lib/i18n/client'
 import { useToast } from '@/components/Toast'
 import { formatLedgerAmount, type CurrencyCode } from '@/lib/currency'
@@ -73,6 +75,8 @@ export interface DashboardProps {
   expenseMonthKey: string
   pendings: PendingIncomeView[]
   expensePendings: PendingExpenseView[]
+  /** #1536 — the viewer's own cards from an iOS Shortcut; [] for everyone else and on a pinned past chapter. */
+  shortcutPendings?: ShortcutPendingView[]
   feedDataPromise: Promise<DashboardFeedData>
   groupDefaultRatioA: number | null
   /** Group's base currency (default 'twd'). */
@@ -102,6 +106,7 @@ export function Dashboard({
   expenseMonthKey,
   pendings,
   expensePendings,
+  shortcutPendings = [],
   feedDataPromise,
   groupDefaultRatioA,
   baseCurrency = 'twd',
@@ -113,7 +118,7 @@ export function Dashboard({
   reviewCell,
 }: DashboardProps) {
   const router = useRouter()
-  const { isSolo, isPast, viewerIsA } = useMember()
+  const { viewer, isSolo, isPast, viewerIsA } = useMember()
   // #1604 — the filter row follows the viewed chapter: a stayer who is solo
   // today still filters the old duo chapter by 「對方」 (the ex).
   const { partner: viewedPartner, isSolo: viewedIsSolo } = useViewedPartner()
@@ -407,6 +412,37 @@ export function Dashboard({
           />
         </div>
       )}
+      {!isPast && mode === 'expense' && shortcutPendings.length > 0 && (
+        <div className="px-5">
+          <PendingShortcutStack
+            pendings={shortcutPendings}
+            onEdit={(p) => dispatch({
+              type: 'openModal',
+              modal: {
+                kind: 'edit-shortcut-pending',
+                pendingId: p.id,
+                data: {
+                  id: p.id,
+                  amount: p.amount,
+                  description: p.note ?? '',
+                  category: p.category ?? 'other',
+                  // The ledger default: solo is all mine, a duo opens on the
+                  // split slider at the ledger's ratio (AddSheet's create-mode
+                  // default). The save sends what the sheet shows.
+                  splitType: isSolo ? 'all_mine' : 'half',
+                  splitRatioA: null,
+                  payerId: viewer.id,
+                  // Local midnight, so AddSheet's local getFullYear/Month/Date
+                  // round-trip yields the card's Taipei day as is.
+                  transactedAt: `${p.day}T00:00:00`,
+                  assetId: null,
+                  notes: null,
+                },
+              },
+            })}
+          />
+        </div>
+      )}
       {!isPast && mode === 'income' && (
         <div className="px-5">
           <PendingIncomeStack
@@ -445,14 +481,16 @@ export function Dashboard({
       </Suspense>
       <BottomNav onAddClick={() => dispatch({ type: 'openModal', modal: { kind: addOrIncome } })} hideFab={sheetOpen || isPast} />
       <AddSheet
-        open={modal.kind === 'add' || modal.kind === 'edit-tx' || modal.kind === 'edit-pending-expense'}
+        open={modal.kind === 'add' || modal.kind === 'edit-tx' || modal.kind === 'edit-pending-expense' || modal.kind === 'edit-shortcut-pending'}
         onClose={handleClose}
         initial={
           modal.kind === 'edit-tx' ? modal.data
             : modal.kind === 'edit-pending-expense' ? modal.data
+            : modal.kind === 'edit-shortcut-pending' ? modal.data
             : undefined
         }
         pendingExpenseId={modal.kind === 'edit-pending-expense' ? modal.pendingId : undefined}
+        shortcutPendingId={modal.kind === 'edit-shortcut-pending' ? modal.pendingId : undefined}
         prefilledAmount={quickAddPrefill?.amount}
         prefilledCategory={quickAddPrefill?.category}
         prefilledDescription={quickAddPrefill?.description}

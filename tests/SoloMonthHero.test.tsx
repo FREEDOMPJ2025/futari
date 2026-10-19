@@ -6,6 +6,8 @@ vi.mock('@/app/(dashboard)/_components/MemberContext', async (importOriginal) =>
 }))
 import { render, screen } from '@testing-library/react'
 import { I18nWrapper } from './_mocks/i18n'
+import { TranslationsProvider } from '@/lib/i18n/client'
+import { en } from '@/lib/i18n/locales/en'
 import { SoloMonthHero } from '@/app/(dashboard)/dashboard/_components/SoloMonthHero'
 
 const wrap = (ui: React.ReactElement) => render(<I18nWrapper>{ui}</I18nWrapper>)
@@ -44,5 +46,18 @@ describe('SoloMonthHero', () => {
     expect(screen.getByText('0 筆')).toBeTruthy()
     expect(screen.getByText('0')).toBeTruthy()
     expect(screen.getByText('NT$')).toBeTruthy()
+  })
+
+  it('en: countLabel is singular at 1 and plural otherwise (#1784)', () => {
+    const wrapEn = (count: number) => render(
+      <TranslationsProvider value={en} locale="en">
+        <SoloMonthHero monthKey="2026-09" total={100} count={count} />
+      </TranslationsProvider>,
+    )
+    const one = wrapEn(1)
+    expect(screen.getByText('1 entry')).toBeTruthy()
+    one.unmount()
+    wrapEn(7)
+    expect(screen.getByText('7 entries')).toBeTruthy()
   })
 })

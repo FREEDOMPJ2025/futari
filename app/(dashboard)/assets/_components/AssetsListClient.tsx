@@ -12,7 +12,8 @@ import { AssetEmptyState } from './AssetEmptyState'
 import { CarHeroCard } from './CarHeroCard'
 import { ChildCard, PetCard, PlantCard, ItemCard, HouseCard } from './AibutsuCard'
 import { GatedView } from '@/app/(dashboard)/_components/GatedView'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { pickPlural } from '@/lib/i18n/plural'
 import { useMember, useBaseCurrency } from '@/app/(dashboard)/_components/MemberContext'
 import { formatLedgerAmountSpaced, type CurrencyCode } from '@/lib/currency'
 import { sumPremiumByCurrency } from '@/lib/insuranceCurrency'
@@ -124,6 +125,7 @@ function SectionLabel({ label, dotColor }: { label: string; dotColor: string }) 
 /** Guardian summary card — totals + next renewal */
 function GuardianSummary({ insurances }: { insurances: AssetsListItem[] }) {
   const t = useTranslations()
+  const locale = useLocale()
   const i = t.assets.insuranceList
   // #1360 — from useToday(), not the clock, so SSR and hydration agree.
   const today = parseLocalDate(useToday())!
@@ -136,7 +138,7 @@ function GuardianSummary({ insurances }: { insurances: AssetsListItem[] }) {
   const count = insurances.length
   // `{count}` is rendered emphasised, so split the template around it rather
   // than string-replacing — word order differs per locale.
-  const [countBefore, countAfter = ''] = i.summaryPolicyCount.split('{count}')
+  const [countBefore, countAfter = ''] = pickPlural(locale, count, i.summaryPolicyCount).split('{count}')
 
   // Next renewal: single-year policies with future expiry, min expiryDate
   const singleYears = insurances.filter((a) => {
@@ -193,7 +195,7 @@ function GuardianSummary({ insurances }: { insurances: AssetsListItem[] }) {
               {upcoming.a.insurance?.expiryDate ?? '—'}
             </div>
             <div className="mt-1 text-xs text-ink-3">
-              {upcoming.a.name} · {i.summaryDaysUntil.replace('{days}', String(upcoming.days))}
+              {upcoming.a.name} · {pickPlural(locale, upcoming.days, i.summaryDaysUntil).replace('{days}', String(upcoming.days))}
             </div>
           </>
         ) : (

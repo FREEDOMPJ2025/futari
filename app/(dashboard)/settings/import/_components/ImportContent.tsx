@@ -20,7 +20,9 @@ import { StepRules } from './StepRules'
 import { StepConfirm } from './StepConfirm'
 import { ImportResult } from './ImportResult'
 import { ImportHistory } from './ImportHistory'
-import { unwrapAction } from '@/lib/action-errors'
+import { toActionFailure, unwrapAction } from '@/lib/action-errors'
+import { reportClientError } from '@/lib/observability/reportClientError'
+import { localYmd } from '@/lib/local-date'
 
 interface Member {
   id: string
@@ -105,6 +107,15 @@ export function ImportContent({ viewer, partner, viewerIsMemberA, history }: Pro
           ? await processFile(file, { source: 'generic', headerMap: { date: 'Date', amount: 'Amount' } })
           : await processFile(file, { source: requestedSource })
 
+      // Before the empty case: a file missing a required column also has no
+      // valid rows, but only this message says which column to look for.
+      if (result.missingColumns && result.missingColumns.length > 0) {
+        setParseError(
+          t.settings.import.errors.missingColumns.replace('{columns}', result.missingColumns.join(', ')),
+        )
+        return
+      }
+
       if (result.rows.length === 0) {
         setParseError(t.settings.import.errors.noValidRows)
         return
@@ -125,6 +136,9 @@ export function ImportContent({ viewer, partner, viewerIsMemberA, history }: Pro
       wizard.goTo('mapping')
     } catch (err) {
       console.error('CSV parse error', err)
+      // A malformed file yields rows/errors, not a throw (noValidRows above), so
+      // reaching here is unexpected. Never attach the file or its contents.
+      reportClientError(err, { area: 'import', op: 'parse' })
       setParseError(t.settings.import.errors.parseFailed)
     }
   }
@@ -149,7 +163,7 @@ export function ImportContent({ viewer, partner, viewerIsMemberA, history }: Pro
       rows: remappedRows.map((r) => ({
         type: r.type,
         amount: r.amount,
-        date: r.date.toISOString().slice(0, 10),
+        date: localYmd(r.date), // local calendar day; toISOString() is the UTC day (#1793)
         category: r.category,
         description: r.description,
         paidBy: rules.payer,
@@ -184,6 +198,8 @@ export function ImportContent({ viewer, partner, viewerIsMemberA, history }: Pro
         router.refresh()
       } catch (err) {
         console.error('import submit failed', err)
+        // Expected action failures ({ ok:false, code }) are not Sentry material.
+        if (!toActionFailure(err)) reportClientError(err, { area: 'import', op: 'submit' })
         setSubmitError(t.settings.import.errors.submitFailed)
       }
     })
@@ -212,6 +228,7 @@ export function ImportContent({ viewer, partner, viewerIsMemberA, history }: Pro
         router.refresh()
       } catch (err) {
         console.error('rollback failed', err)
+        if (!toActionFailure(err)) reportClientError(err, { area: 'import', op: 'rollback' })
         setSubmitError(t.settings.import.errors.rollbackFailed)
       }
     })

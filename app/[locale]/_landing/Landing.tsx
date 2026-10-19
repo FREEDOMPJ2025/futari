@@ -20,6 +20,7 @@ import { PhonePreview } from './PhonePreview'
 import { TrustSection } from './TrustSection'
 import { Phrase } from '../_components/Phrase'
 import { phraseHtml } from '@/lib/i18n/phrase'
+import './landing-motion.css'
 
 type LandingStrings = Translations['landing']
 
@@ -71,11 +72,20 @@ type Props = {
 // promoted to a two-column hero + 4-column feature row at md+ (>=768px).
 // All copy is i18n-driven via t.landing — see Translations type.
 
+// Body HTML with zh phrase breaks (#1528 F2): `ph` joins the class list only
+// when a break was inserted, so en and ja markup is unchanged.
+function phraseBodyHtml(html: string) {
+  const out = phraseHtml(html, true)
+  return { __html: out, ph: out.includes('<wbr>') ? 'ph ' : '' }
+}
+
 export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkingLabel, useCaseHrefs, migrateHrefs, featureOutingHref, legalLinks, languageSwitcher }: Props) {
+  const body = phraseBodyHtml(t.bodyHtml)
+  const subtitle = phraseBodyHtml(t.featuresSubtitleHtml)
   return (
     <main
       id="main"
-      className="relative min-h-dvh overflow-hidden"
+      className="lp-root relative min-h-dvh overflow-hidden"
       style={{
         background: 'var(--bg-committed)',
         color: 'var(--ink)',
@@ -85,15 +95,6 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
       {/* #949 — installed-app (PWA / Capacitor) signed-in users skip the public
           landing and go straight to the dashboard. No-op in a browser tab. */}
       <LandingStandaloneRedirect dashboardHref={dashboardHref} checkingLabel={checkingLabel} />
-
-      {/* Decorative faint mark — desktop only, hidden on mobile */}
-      <div
-        aria-hidden
-        className="hidden md:block absolute pointer-events-none"
-        style={{ right: -120, top: 40, opacity: 0.06 }}
-      >
-        <FutariMark size={520} />
-      </div>
 
       {/* TOP BAR */}
       <header className="relative z-10 flex items-center justify-between px-6 md:px-12 pt-3 md:pt-6 pb-1">
@@ -141,7 +142,7 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
       <section id="landing-hero" className="relative z-10 px-6 md:px-16 pt-10 md:pt-12 pb-12 md:pb-20 max-w-md md:max-w-none mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:gap-10 md:max-w-[1280px] md:mx-auto">
           {/* Copy block */}
-          <div className="text-center md:text-left md:w-[520px] md:shrink-0">
+          <div className="text-center md:text-left md:w-[400px] lg:w-[520px] md:shrink-0">
             {/* mobile: illustration band leads — replaces the large mark */}
             <div className="md:hidden mb-6 px-1">
               <IllustrationSlot mobile />
@@ -170,7 +171,7 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
                 letterSpacing: '4px',
               }}
             >
-              {t.heroKicker}
+              <Phrase body text={t.heroKicker} />
             </p>
 
             <h1
@@ -207,12 +208,12 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
 
             {/* body — both layouts */}
             <p
-              className="m-0 mt-5 md:mt-7 text-base md:text-lg leading-[1.7] mx-auto md:mx-0"
+              className={`${body.ph}m-0 mt-5 md:mt-7 text-base md:text-lg leading-[1.7] mx-auto md:mx-0`}
               style={{
                 color: 'var(--ink-2)',
                 maxWidth: 320,
               }}
-              dangerouslySetInnerHTML={{ __html: t.bodyHtml }}
+              dangerouslySetInnerHTML={{ __html: body.__html }}
             />
 
             {/* CTA row */}
@@ -285,8 +286,17 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
           {/* Illustration + demoted phone — desktop only */}
           <div className="hidden md:flex flex-1 self-stretch relative min-h-[420px] items-stretch py-2">
             <IllustrationSlot />
-            {/* PhonePreview demoted to secondary product proof — overlaps illo corner */}
-            <div className="hidden lg:block absolute right-[-8px] bottom-6 z-10">
+            {/* PhonePreview demoted to secondary product proof — overlaps illo corner.
+                (#1528 F3) The wrapper's layout box is the unscaled 320x640 phone, so
+                at 1024-1580 it reached up under the header CTA and won hit-testing
+                (a centre click didn't navigate, no error). Two parts: -bottom-8 sits
+                the phone low enough that its tilted top edge clears the header, and
+                pointer-events-none because the mock is aria-hidden and not interactive.
+                (#1528 N1) From xl, not lg: at 1024-1279 the illustration column is
+                too narrow and the mock covered 41-72% of it, hiding the couple, so
+                those widths show the illustration alone and the dots leave the
+                couple's own phone (landing-motion.css keeps the same 1280 switch). */}
+            <div className="hidden xl:block absolute right-[-8px] -bottom-8 z-10 pointer-events-none">
               <PhonePreview t={t} scale={0.78} />
             </div>
           </div>
@@ -324,9 +334,9 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
               </h2>
             </div>
             <p
-              className="hidden md:block m-0 text-sm"
+              className={`${subtitle.ph}hidden md:block m-0 text-sm`}
               style={{ color: 'var(--ink-2)', lineHeight: 1.6, maxWidth: 320 }}
-              dangerouslySetInnerHTML={{ __html: t.featuresSubtitleHtml }}
+              dangerouslySetInnerHTML={{ __html: subtitle.__html }}
             />
           </div>
 
@@ -373,7 +383,7 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
               source="landing_features"
               className="inline-flex items-center min-h-11 underline text-ink-2"
             >
-              {t.featuresOutingLink}
+              <Phrase body text={t.featuresOutingLink} />
               <span aria-hidden="true">&nbsp;→</span>
             </FeatureOutingTextLink>
           </p>
@@ -408,7 +418,7 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
         >
           <ShieldOutlineGlyph />
           <span className="text-xs" style={{ letterSpacing: '0.3px' }}>
-            {t.footerTrust}
+            <Phrase body text={t.footerTrust} />
           </span>
         </div>
         <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
@@ -475,7 +485,7 @@ function MigrateLinksSection({
       className="relative z-10 px-5 md:px-16 py-12 md:py-16"
       style={{ background: 'var(--surface-alt)' }}
     >
-      <div className="max-w-md md:max-w-[1080px] mx-auto">
+      <div className="lp-lamp max-w-md md:max-w-[1080px] mx-auto">
         <div className="text-center md:text-left md:flex md:items-baseline md:justify-between md:gap-10 mb-7 md:mb-9">
           <div>
             <p
@@ -503,40 +513,47 @@ function MigrateLinksSection({
             className="m-0 mt-3 md:mt-0 text-sm"
             style={{ color: 'var(--ink-2)', lineHeight: 1.6, maxWidth: 360 }}
           >
-            {t.migrateSection.subtitle}
+            <Phrase body text={t.migrateSection.subtitle} />
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+        {/* Migrate sells an action (bring your data), so it reads as a ruled
+            list with an ember marker and an arrow — the in-world row of the
+            inner brand pages (#1524), not three tiles (#1528). Use-case above
+            stays prose in columns; this one stays one row per source. */}
+        <ul className="m-0 p-0 list-none border-t border-hairline">
           {items.map((item) => (
-            <LandingCtaLink
-              key={item.source}
-              href={item.href}
-              ctaLocation="footer_migrate"
-              target={item.target}
-              // No custom aria-label: the visible title + body already
-              // self-describe the card, so the accessible name is computed from
-              // them — satisfying WCAG 2.5.3 Label in Name (#919). A bespoke
-              // aria-label ("從 X 搬到 Futari") wouldn't contain the visible
-              // "搬過來" text and failed label-content-name-mismatch.
-              // Migrate keeps the tile grammar: three genuinely parallel
-              // options, so three equal tiles are the honest shape (#1151).
-              // Feedback is a tonal step, not a lift — border darkens on hover,
-              // surface sinks to --surface-alt on press (#1150).
-              className="block p-5 md:p-6 rounded-tile bg-surface border border-hairline text-ink no-underline transition-colors duration-150 ease-out hover:border-ink-3 active:bg-surface-alt motion-reduce:transition-none"
-            >
-              <p
-                className="m-0 text-base font-medium text-ink"
-                style={{ letterSpacing: '-0.1px' }}
+            <li key={item.source} className="border-b border-hairline">
+              <LandingCtaLink
+                href={item.href}
+                ctaLocation="footer_migrate"
+                target={item.target}
+                // No custom aria-label: the visible title + body already
+                // self-describe the row, so the accessible name is computed from
+                // them — satisfying WCAG 2.5.3 Label in Name (#919). A bespoke
+                // aria-label ("從 X 搬到 Futari") wouldn't contain the visible
+                // "搬過來" text and failed label-content-name-mismatch.
+                className="group flex items-start gap-3 py-5 md:py-6 text-ink no-underline text-left transition-opacity duration-150 ease-out active:opacity-60 motion-reduce:transition-none"
               >
-                {item.title}
-              </p>
-              <p className="m-0 mt-1.5 text-sm leading-[1.6] text-ink-2">
-                {item.body}
-              </p>
-            </LandingCtaLink>
+                <span aria-hidden="true" className="mt-2.5 size-2 shrink-0 rounded-full bg-accent" />
+                <div className="grid grid-cols-1 md:grid-cols-3 md:gap-x-6 md:items-baseline min-w-0 flex-1">
+                  <p className="m-0 font-serif text-lg font-medium text-ink underline decoration-transparent underline-offset-4 transition-colors duration-150 ease-out group-hover:decoration-ink motion-reduce:transition-none">
+                    {item.title}
+                  </p>
+                  <p className="m-0 mt-1.5 md:mt-0 md:col-span-2 text-sm leading-[1.6] text-ink-2">
+                    <Phrase body text={item.body} />
+                  </p>
+                </div>
+                <span
+                  aria-hidden="true"
+                  className="shrink-0 self-center text-base text-ink-3 transition-transform duration-150 ease-out group-hover:translate-x-1 motion-reduce:transition-none"
+                >
+                  →
+                </span>
+              </LandingCtaLink>
+            </li>
           ))}
-        </div>
+        </ul>
 
         <div className="mt-6 md:mt-7 text-center md:text-left">
           <Link
@@ -594,7 +611,7 @@ function UseCaseLinksSection({
       className="relative z-10 px-5 md:px-16 py-12 md:py-16"
       style={{ background: 'var(--bg)' }}
     >
-      <div className="max-w-md md:max-w-[1080px] mx-auto">
+      <div className="lp-lamp max-w-md md:max-w-[1080px] mx-auto">
         <div className="text-center md:text-left md:flex md:items-baseline md:justify-between md:gap-10 mb-7 md:mb-9">
           <div>
             <p
@@ -622,11 +639,11 @@ function UseCaseLinksSection({
             className="m-0 mt-3 md:mt-0 text-sm"
             style={{ color: 'var(--ink-2)', lineHeight: 1.6, maxWidth: 360 }}
           >
-            {t.useCaseSection.subtitle}
+            <Phrase body text={t.useCaseSection.subtitle} />
           </p>
         </div>
 
-        {/* Use-case speaks in a different grammar from the migrate tiles below
+        {/* Use-case speaks in a different grammar from the migrate rows below
             (#1151): no card chrome — each situation is a hairline-topped
             editorial entry whose serif name is the link, with a trailing
             arrow. Migrate sells an action (bring your data); this sells
@@ -659,7 +676,7 @@ function UseCaseLinksSection({
                   </span>
                 </span>
                 <span className="block mt-2 text-sm leading-[1.6] text-ink-2">
-                  {item.body}
+                  <Phrase body text={item.body} />
                 </span>
               </LandingCtaLink>
             </li>
@@ -709,7 +726,7 @@ function FeatureEntry({
 }) {
   return (
     <div
-      className="flex gap-5 md:gap-6 py-6 md:py-8"
+      className="lp-feature flex gap-5 md:gap-6 py-6 md:py-8"
       style={{
         borderBottom: isLast ? undefined : '1px solid var(--hairline)',
       }}
@@ -733,7 +750,7 @@ function FeatureEntry({
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2.5 mb-2 md:mb-2.5">
-          <span aria-hidden="true" style={{ color: glyphColor }}>
+          <span aria-hidden="true" className="lp-halo" style={{ color: glyphColor }}>
             {glyph}
           </span>
           <h3
@@ -747,7 +764,7 @@ function FeatureEntry({
           className="m-0 text-sm md:text-base leading-[1.65] md:leading-[1.7]"
           style={{ color: 'var(--ink-2)' }}
         >
-          {body}
+          <Phrase body text={body} />
         </p>
       </div>
     </div>

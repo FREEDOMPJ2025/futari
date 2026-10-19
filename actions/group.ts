@@ -79,6 +79,7 @@ export const createGroup = action(async (name: string) => {
   await captureServer(user.id, 'setup_completed', {
     base_currency: group.baseCurrency,
     solo: group.memberB === null,
+    group_id: group.id,
   })
 
   return group

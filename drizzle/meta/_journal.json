@@ -673,6 +673,27 @@
       "when": 1785200000000,
       "tag": "0096_deletion_keeps_shared_chapter",
       "breakpoints": true
+    },
+    {
+      "idx": 97,
+      "version": "7",
+      "when": 1785300000000,
+      "tag": "0097_cleanup_cron_resolved_cards",
+      "breakpoints": true
+    },
+    {
+      "idx": 98,
+      "version": "7",
+      "when": 1785400000000,
+      "tag": "0098_shortcut_pending",
+      "breakpoints": true
+    },
+    {
+      "idx": 99,
+      "version": "7",
+      "when": 1785500000000,
+      "tag": "0099_left_label_marker",
+      "breakpoints": true
     }
   ]
 }

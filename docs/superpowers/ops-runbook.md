@@ -66,6 +66,21 @@ select hash, created_at from drizzle.__drizzle_migrations order by created_at;
 
 **0065 是怎麼在工具之外套用的**：PR #1332（`feat/1328-hide-avatar`）內文寫「dev 與 prod 都已套用（使用者 2026-09-20 明示同意兩邊一起跑）」，早於該 PR merge、也早於它自己的 journal entry 走一般流程被記錄；確切是手動 SQL 還是透過 Supabase MCP `apply_migration` 執行，repo 內找不到直接證據，沒有查清楚。
 
+### `handle_new_user` 的手動套用（不在 migrations 裡）
+
+`db/triggers/handle_new_user.sql`（註冊時建 `Profiles` 列的 trigger）不在 `drizzle/` 裡，`db:migrate` 不會套它。檔案改過就要在**兩個** Supabase project 各手動套一次，以 admin 身分（`DATABASE_URL_DIRECT`）：
+
+```
+psql "$DATABASE_URL_DIRECT" -1 -v ON_ERROR_STOP=1 -f db/triggers/handle_new_user.sql
+```
+
+- 先 dev，驗證後再 prod；prod 要使用者 OK。
+- 套完核對（必須是 `{search_path=public, pg_temp}`、`t`、`f`、`f`）：
+  `SELECT proconfig, prosecdef, has_function_privilege('anon', oid, 'EXECUTE'), has_function_privilege('authenticated', oid, 'EXECUTE') FROM pg_proc WHERE oid = 'public.handle_new_user()'::regprocedure;`
+- 檔案裡的 `SET search_path` 與 REVOKE / GRANT 不能拿掉：`CREATE OR REPLACE` 會重設函式的 SET 子句，少了它，每次手動套用都會悄悄撤銷 0022 的加固。
+- #1782（v1.8.0）：provider 給的 `full_name` 正規化後等於四語的「已離開的夥伴」標籤時，改用 email 當名字（跟沒有 `full_name` 時同一套 fallback）。
+- 漏套的樣子：沒有任何錯誤；沒套的那個 project 上，provider 名字就是系統標籤的人會以那個名字註冊（看起來像系統標記，只差樣式）。
+
 ---
 
 ## 欄位級加密：本機沒有 prod 金鑰、金鑰輪替 runbook（#881 / #882 / #1287）
@@ -306,9 +321,11 @@ SELECT count(*) FILTER (WHERE ended_at IS NOT NULL) AS closed_epochs FROM "Group
 ```sql
 BEGIN;
 -- 讓 X 不再是這段章節的成員：章節只剩已刪除的 D（墓碑 Profiles 仍在），名字槽維持「已離開的夥伴」。
+-- #1782：名字槽的標記一起設（標記才是讀取端的判斷依據；只寫字面值，英文、日文的讀者會看到繁中字樣）。
 UPDATE "GroupEpochs" e
    SET member_a_id = g.member_a, member_b_id = NULL,
-       member_a_name = '已離開的夥伴', member_b_name = NULL
+       member_a_name = '已離開的夥伴', member_a_name_is_left_label = true,
+       member_b_name = NULL, member_b_name_is_left_label = false
   FROM "OikosGroups" g
  WHERE e.id = :'e' AND e.group_id = :'g' AND g.id = e.group_id
    AND g.member_b IS NULL AND e.ended_at IS NOT NULL
@@ -542,6 +559,7 @@ where n.nspname in ('public', 'drizzle') and c.relkind in ('r', 'p')
    5. `age -d … public.dump.age | pg_restore -d <目標> --section=post-data`。auth 的資料要在 post-data（外鍵）之前、在步驟 4 的 trigger 之前。
 4. **重套 `db/triggers/handle_new_user.sql`**（它不在 migrations 裡，不在 dump 裡）。
    - 漏掉：既有使用者一切正常，**新註冊的人沒有 Profiles 列**，登入後畫面壞掉。
+   - 這個檔案改過之後，dev 與 prod 都要手動套一次（見「`handle_new_user` 的手動套用」）。
 5. **realtime publication**：依 manifest 的 `## publication` 把表加回 `supabase_realtime`。
    - 漏掉：畫面不再即時更新，重新整理才看得到，沒有錯誤。
 6. **Vault 與 cron**：
@@ -596,7 +614,9 @@ where n.nspname in ('public', 'drizzle') and c.relkind in ('r', 'p')
      - (3) 不是 0：多半是 solo 分支的 `_prune_ledger` raise，整個區塊 rollback，每天一筆 `process_account_deletions: failed for <uid>` WARNING，帳號過了 14 天還在（#1377 的樣子）。**不要**為了讓它過去把該帳本改成直接 cascade：那會毀掉離開的人的章節。先修 `_prune_ledger` 失敗的原因。
 9. **角色登入**：`futari_app`、`futari_backup` 照各自的步驟重設密碼、`LOGIN`，更新 env。
 10. **加密金鑰**：manifest 的 `## encrypted_kids` 列出這份備份需要哪些 kid；目標環境的 `ENCRYPTION_KEYS` 必須都有。
-11. 備份之後到壞掉之間的資料（最多約一天）沒有了；要不要通知使用者，是使用者的決定。
+11. **撤銷所有捷徑金鑰（#1536）**：`UPDATE "ShortcutKeys" SET revoked_at = now() WHERE revoked_at IS NULL;`，並請使用者到設定頁重新產生。
+   - 漏掉：備份早於某次撤銷時，那把已撤銷的金鑰會跟著還原、重新有效；拿到它的人又能把卡片送進主人的待確認，沒有任何錯誤。
+12. 備份之後到壞掉之間的資料（最多約一天）沒有了；要不要通知使用者，是使用者的決定。
 
 ### 事故處理
 

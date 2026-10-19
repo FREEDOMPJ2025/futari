@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-10-15
+last_updated: 2026-10-17
 status: shipped
 first_shipped_in: v1.2.0
 updates:
@@ -16,8 +16,9 @@ updates:
   - v1.7.0: 補「`android_beta_invite_*` 是新測量點、基準從部署日重算」這條邊界（#1553）
   - v1.7.2: 補「`android_beta_step_clicked`、`tester_feedback_clicked`、`android_beta_outing_link_clicked`、`android_beta_share_clicked` 是新測量點，`android_beta_invite_clicked` 的語意改變」這條邊界（#1648）
   - v1.7.4: 補「`outing_created`、`outing_link_shared` 是新測量點；出遊分享頁事件 0 筆是沒有訪客、不是沒送出；出遊漏斗在分享那一步換人」這條邊界（#1723）；「`outing_ledger_invite_viewed`／`_clicked` 是新測量點，`entry_source=outing` 從此有兩個入口」（#1728）；補「2026-10-16 起出遊朋友頁路徑讀作 `/outing/r/:id`」（#1742）
+  - v1.8.0: 補「`record_created` 涵蓋所有記帳管道、五個 server 事件帶 `group_id`」這條邊界，2026-10-17 起，前後計數不可比（#1764）
 related_specs: [conversion-analytics, product]
-related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", "#1415", "#1453", "#1552", "#1546", "#1553", "#1648", "#1723", "#1742"]
+related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", "#1415", "#1453", "#1552", "#1546", "#1553", "#1648", "#1723", "#1742", "#1764"]
 ---
 
 # 觀測的邊界與讀數據的紀律
@@ -52,6 +53,10 @@ related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", 
 - **Sentry 的 Issues 空白，不代表沒有錯誤：被 `catch` 住的錯誤只會出現在 Logs。** client 的 `consoleLoggingIntegration`（`instrumentation-client.ts`）把 `console.error` / `console.warn` 轉成 Sentry **Logs**，不會建 Issue。被 `try/catch` 接住、只 `console.error` 的錯誤，就只存在 Logs 資料集裡。
   - **失效的樣子**：Issues 頁面乾乾淨淨，PostHog 卻有失敗事件，看起來像「有東西壞了但沒留下任何錯誤」。#1314 就這樣被誤判成「錯誤內容沒被記錄」：iOS 殼 Google 登入的 `ChunkLoadError` 其實在 Logs 裡躺了四天。
   - 所以：追查 client 端的失敗時，Issues 和 Logs 都要查（`search_events` 用 `dataset: logs`）。要讓某條 catch 路徑被看見，就明確呼叫 `Sentry.captureException`，並先處理訊息裡的 URL query（client scrub 不會處理 exception 的訊息內容）。
+  - **哪些失敗開 Issue、哪些只進 Logs（#1767）。** 開 Issue（明確 `captureException`，tag `area`）：`app/global-error.tsx` `area: 'global-error'`＋`route`（經 `sanitizeAnalyticsUrl` 遮罩，`/invite/:token`、`/en/outing/:token`；**不能送原始 pathname**：邀請與出遊分享 token 在路徑裡，而 Sentry scrub 只改名字像網址的 tag，`route` 不是）＋`digest`（#1768，v1.8.0 起；之前全域錯誤頁的 Issue 沒有任何 tag）；dashboard 六個路由錯誤頁 `area: 'route-error'`＋`route`（`dashboard` / `records` / `trips` / `assets` / `settings` / `review`）＋`digest`；CSV 匯入 `area: 'import'`＋`op`（`parse` / `submit` / `rollback`）；推播註冊 `area: 'push'`＋`op`（`register` 是 `registerPushToken` 的 rejection，`registration_event` 是原生 `registrationError` 事件；**目前只有 iOS 會走到**，`registerPushToken` 在非 iOS 直接 return，Android 要等 #968 實作註冊後才有訊號——在那之前 Android 的 0 筆不代表沒壞）。以上都經 `lib/observability/reportClientError.ts`（動態 import `sentryClient`，不能改成靜態 import，#1520）。**預期內錯誤不送**：server action 回 `{ ok: false, code }`、被 `unwrapAction` 轉回的 `ActionError`（`toActionFailure` 判定），以及「檔案沒有有效資料列」這類驗證結果；帶 `digest` 的 throw 一律算非預期。其餘 `try/catch` + `console.error` 仍只進 Logs。
+  - **登入 callback 換 session 失敗（`area: 'auth'`、`op: 'exchange_code'`）自 v1.8.0 起帶 `error_code`（#1768）**，PostHog `sign_in_failed reason=exchange_error` 同名欄位。值是 Supabase 的錯誤代碼（`flow_state_not_found`、`bad_code_verifier`、`pkce_code_verifier_not_found` 等），只收 `[a-z0-9_]{1,64}`，其他字串記成 `other`、沒有代碼記成 `none`（網路錯誤就是 `none`）。tag 名稱刻意不用 `code`：那是這條路由的 OAuth 祕密參數名。v1.8.0 之前的事件沒有這個欄位，跨部署日比較無效。
+  - **失效的樣子**：使用者看到「出了點問題」的錯誤頁，Sentry Issues 是空的，看起來像沒有錯誤——2026-10-17 盤點近 30 天全站約 32 筆事件，瀏覽器與 Android 殼各 0 筆。推播註冊壞掉（Android FCM，#968）同樣沒有任何訊號。查這類問題用 `area` tag 篩 Issues；沒有結果時再去 Logs 確認，不要直接下結論說沒出錯。
+  - **`react-hydration-errors` inbound filter 會藏起之後的 hydration 回歸。** 該 filter 丟掉約 127 筆（比收進來的多 4 倍），最後一筆 10/12，#1515／#1424 修完後停了。失效的樣子是 Issues 乾淨、dropped events 卻在長：**每個 release 看一次 Sentry 的 dropped events（Stats → Filtered）**，數字回升就是 hydration 又壞了。
 - **Session Replay 在前端鎖死（`disable_session_recording: true`）。** PostHog 專案後台那個開關現在是無效的；要開必須先連同 replay 自己的遮罩（`session_recording.maskAllInputs` + `maskTextSelector: '*'`）一起改 code，因為上面那兩個選項管不到 recorder。
 - **Sentry 的 request、breadcrumb、span、log 裡看不到原始網址、cookie、header、請求 body 與 client IP——但 exception 的訊息內容不經清洗。** 自 v1.5.16 起（#1274），client / server / edge 三份 Sentry config 的 `beforeSend` / `beforeSendTransaction` / `beforeSendSpan` / `beforeBreadcrumb` / `beforeSendLog` 全部走 `lib/observability/sentryScrub.ts`：網址套用與 PostHog 共用的 `lib/analytics/urlSanitizer.ts` 規則（路徑與 query key 保留，邀請 token 變 `:token`，非白名單 query 值變 `<masked>`），header / cookie / `request.data` 整段拿掉。所以「重現某個錯誤時的完整網址或 server action 參數」在 Sentry 上查不到，要從 issue 的路徑形狀與 stack 回推。錯誤訊息（`exception.values[].value`）不在清洗範圍內：丟出含 URL 的 `Error` 前要自己處理（同「catch 住的錯誤只進 Logs」那條的做法）。
   - **失效的樣子是沒有任何錯誤。** 某份 config 漏接一個 hook，原始網址與 cookie 會安靜地重新出現在 Sentry，而沒人會去那裡看；hook 自己 throw 時，`beforeSend*` 那幾個會讓 SDK 丟掉整筆事件，breadcrumb／log 的則漏給呼叫端。唯一會變紅的是 `tests/sentry-scrub-wiring.test.ts`。
@@ -74,6 +79,13 @@ related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", 
   - 證據：90 天內 `record_created ≥ 1` 有 17 人，`first_record_created` 只有 11 人——差的 6 人確實在用產品，卻在活化口徑下被算成沒活化。
   - **失效的樣子不是查詢報錯，是活化率緩慢地、看起來很合理地往下走。** 雙人帳本愈多、其中一方主要替另一方記帳的比例愈高，分子就漏得愈多，而曲線沒有任何不連續。等到有人去追「為什麼活化率降了」，會先去查 onboarding，不會想到是口徑。
   - 小樣本上兩個口徑會**看起來一樣**（2026-09 的新客群裡剛好都是 8 人），所以「我算過，沒差」不能當成安全的理由。
+- **`record_created` 自 2026-10-17 起涵蓋所有記帳管道，之前只有手動新增（#1764，v1.8.0 上線）。** 活化（`record_created ≥ 1`）與 DAU 的口徑因此變寬：任何一條會寫入 `CashTransactions` 的使用者記錄路徑都發，用 `via` 區分。
+  - **`via` 值**：`manual`（記帳 sheet，含 iOS 捷徑帶入的預填；兩者目前分不出來）、`recurring_confirm`（定期支出待確認卡，確認或改一下再確認各一筆）、`fuel_log`（加油，一筆）、`trip_summary`（旅行結束折回主帳的結算列，`endTrip` 每次結束一筆事件，不論折出 1 或 2 列；「接受邀請時替邀請人結束進行中旅行」以邀請人為 distinct_id，**一次結束 N 趟也只發一筆**（`trip_ended` 則是 N 筆），所以不能用它算每趟旅行的結算數）、`asset_purchase`（新增車、房時填了購入價而自動產生的購入列）、`import`（CSV 匯入，**每次匯入一筆事件**，帶 `count` = 寫入的支出列數；只含收入的匯入不發）；`shortcut`（#1536，iOS 捷徑送進「待確認」的卡片，確認或改一下再確認各一筆；與 `manual` 裡「捷徑帶入的預填」不同，那條仍記為 `manual`，不要把兩者加總成「捷徑」）。
+  - **不算記錄、不發**：編輯（soft delete + insert，只是改舊紀錄）、結算（有 `settlement_created`）、收入（有 `income_created`，不併入活化口徑；要把收入算進活化是另一個決定）。
+  - **`first_record_created` 不變**：同一批呼叫點、同一個「viewer 自己付的第一筆」語意，`via` 是上面的子集：沒有 `import`（匯入不發 `first_record_created`）。
+  - **失效的樣子是 2026-10-17 前後的 `record_created` 人數與事件數不連續上跳，看起來像成長。** 之前只有手動新增會發，所以只用定期支出、加油、匯入或旅行結算的人，之前算成沒活化。**部署日前後的 `record_created` 計數不可比**（前 = 只有 manual）；要看趨勢，之前的區間用 `via=manual` 篩選才能和之後的 `manual` 比。匯入一次只算一筆事件，所以事件數不會被大型 CSV 灌水，但要看匯入了多少列請讀 `count`。
+  - **`group_id`**：`setup_completed`、`record_created`、`income_created`、`asset_created`、`import_completed` 同日起帶 `group_id`（業務 key，可配對 `invite_created`／`partner_joined` 等事件，見第一條的例外）。此日期之前的這些事件沒有這個屬性，用它分群時舊資料會被整批排除。
+  - **之後要分出捷徑來源**：捷徑帶入的預填走同一個新增 sheet，若要分開，client 要在開 sheet 時帶來源（例如預填 query 參數）進 `createTransaction` 的輸入，server 再把 `via` 設成 `shortcut`。本次沒做。
 - **iOS Apple 登入的瀏覽器備援，自 v1.6.8 部署起才看得到結局（#1552）。** 原生 Apple 面板失敗（`sign_in_failed reason=apple_native_unavailable`，自此帶 `apple_error_code`，例如沒有登入 Apple ID 的裝置是 1000）之後，流程改走 in-app 瀏覽器。在此之前這條路的結局完全沒有事件：成功只出現在 server 的 `signed_in` / `signed_up`（分不出是不是備援），失敗則什麼都沒有。v1.6.8 起只有這條備援路徑（`via=apple_fallback`）會發：`sign_in_fallback_opened`（開瀏覽器前）、`sign_in_fallback_page_loaded`（Apple 頁面第一次載入）、`sign_in_fallback_callback`（收到 deep link，即將導向 `/auth/callback`）、`sign_in_failed reason=fallback_dismissed`（瀏覽器被關掉、寬限 1500 ms 內沒有 callback，帶 `elapsed_ms` 與 `page_loaded`）、`sign_in_failed reason=callback_ignored`（收到不是登入回呼的 deep link）。iOS Google、Android 的 Google / Apple 走同一個函式但不發這些事件。
   - **跨部署日比較無效**：v1.6.8 之前「備援失敗」是 0 筆，不是沒人失敗。`id_token_rejected` 也一樣：v1.6.8 起才帶 `error_name` / `error_status` / `error_code` / `error_label`，舊事件只有 reason。
   - **`id_token_rejected` 要用 `error_label` 分原因，不要用 `error_code`。** GoTrue 對 nonce 不符、audience 不符、壞 token 一律回 `AuthApiError` / 400 / code 未定義，所以 `error_code` 幾乎永遠是 null。`error_label`（`nonce_mismatch` / `audience` / `bad_id_token` / `nonce_missing` / `other`）是裝置上用錯誤訊息分類出來的（`lib/auth/idTokenErrorLabel.ts`），訊息本身不送出——audience 那種訊息會把 token 的 claim 原文帶回來。**失效的樣子是 `other` 的比例突然變高**：GoTrue 改了措辭，分類器就安靜地把那類原因倒進 `other`，不會有任何錯誤。

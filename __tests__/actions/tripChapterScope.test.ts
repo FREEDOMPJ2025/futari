@@ -37,6 +37,11 @@ function loadEnvLocal() {
   }
 }
 loadEnvLocal()
+// Each test seeds through the real actions plus an auth.users row over the
+// network; the default 5 s is not enough against dev (#1710). When a test
+// timed out, vitest ran afterEach while its action was still writing, and the
+// cleanup below hit the Trips FK and left the rows behind.
+vi.setConfig({ testTimeout: 60_000 })
 
 let mockUserId = ''
 vi.mock('@/lib/supabase/server', () => ({
@@ -113,13 +118,16 @@ afterEach(async () => {
   const { groupId, people } = active
   active = null
   try {
-    await db.delete(cashTransactions).where(eq(cashTransactions.groupId, groupId))
+    // Children of a trip first (TripExpenses, and CashTransactions.trip_id for
+    // the summary rows), then the trips; the ledger's other cash rows go too.
     const tripRows = await db.select({ id: trips.id }).from(trips).where(eq(trips.groupId, groupId))
     const tripIds = tripRows.map((t) => t.id)
     if (tripIds.length) {
       await db.delete(tripExpenses).where(inArray(tripExpenses.tripId, tripIds))
-      await db.delete(trips).where(inArray(trips.id, tripIds))
+      await db.delete(cashTransactions).where(inArray(cashTransactions.tripId, tripIds))
     }
+    await db.delete(cashTransactions).where(eq(cashTransactions.groupId, groupId))
+    if (tripIds.length) await db.delete(trips).where(inArray(trips.id, tripIds))
     await db.delete(groupInvites).where(eq(groupInvites.groupId, groupId))
     await db.delete(groupEpochs).where(eq(groupEpochs.groupId, groupId))
     await db.delete(groupBalance).where(eq(groupBalance.groupId, groupId))

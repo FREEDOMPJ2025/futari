@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import { randomUUID } from 'node:crypto'
-import { loadEnvLocal, seedGroup as seedGroupRow } from '../outing/_setup'
+import { loadEnvLocal, seedGroup as seedGroupRow, deleteSeededAuthUsers } from '../outing/_setup'
 
 // ─── 出遊．朋友從分享連結加入 against the real dev database (#1558 S2) ──────
 //
@@ -61,6 +61,9 @@ async function seedGroup(opts?: Parameters<typeof seedGroupRow>[0]) {
   seededGroups.add(seed.groupId)
   return seed
 }
+
+// Its own hook so a failing purge below cannot leave the auth rows behind.
+afterAll(async () => { await deleteSeededAuthUsers() })
 
 afterAll(async () => {
   const ids = [...seededGroups]
@@ -242,9 +245,9 @@ describe('c. read tiers', () => {
     const o = await seedLinked()
     as(o.userId)
     ok(await addExpense(o.outingId, o.pA, [o.pA, o.f1]))
-    const landing = await getOutingLanding(o.share)
+    const landing = await getOutingLanding(o.share, '已離開的夥伴')
     expect(Object.keys(landing!).sort()).toEqual(['name', 'outingId', 'slots', 'status'])
-    for (const s of landing!.slots) expect(Object.keys(s).sort()).toEqual(['claim', 'displayName', 'id'])
+    for (const s of landing!.slots) expect(Object.keys(s).sort()).toEqual(['claim', 'displayName', 'id', 'isLeftLabel'])
   })
 
   it('participant and member get the full view; a cookie-less visitor gets nothing', async () => {
@@ -252,22 +255,22 @@ describe('c. read tiers', () => {
     const t = await claimAnon(o.share, o.f1, o.outingId)
     withCookie(o.outingId, t)
     const asFriend = await resolveReader(o.outingId)
-    const view = await getOutingFullView(asFriend!.outing, asFriend!.actor)
+    const view = await getOutingFullView(asFriend!.outing, asFriend!.actor, '已離開的夥伴')
     expect(view.isAdmin).toBe(false)
     expect(view.youParticipantId).toBe(o.f1)
     as(o.userId)
     const asMember = await resolveReader(o.outingId)
-    expect((await getOutingFullView(asMember!.outing, asMember!.actor)).isAdmin).toBe(true)
+    expect((await getOutingFullView(asMember!.outing, asMember!.actor, '已離開的夥伴')).isAdmin).toBe(true)
     anon()
     expect(await resolveReader(o.outingId)).toBeNull()
   })
 
   it('invalid and reset tokens → null', async () => {
     const o = await seedLinked()
-    expect(await getOutingLanding('x')).toBeNull()
+    expect(await getOutingLanding('x', '已離開的夥伴')).toBeNull()
     as(o.userId)
     ok(await A.resetOutingShareLink({ outingId: o.outingId }))
-    expect(await getOutingLanding(o.share)).toBeNull()
+    expect(await getOutingLanding(o.share, '已離開的夥伴')).toBeNull()
   })
 })
 

@@ -210,6 +210,7 @@ export const zhCN: Translations = {
     done: '完成',
     me: '我',
     partner: '对方',
+    leftPartnerLabel: '已离开的伙伴',
     you: '你',
     all: '全部',
     error: '发生错误',
@@ -301,6 +302,18 @@ export const zhCN: Translations = {
   },
 
   dashboard: {
+    shortcutPending: {
+      sectionLabel: '快捷指令送来的待确认',
+      primaryAction: '记下',
+      editAction: '改一下',
+      editOnlyAction: '编辑后记下',
+      skipAction: '跳过',
+      noNoteHint: '没有描述，请先编辑再记下',
+      skipConfirmTitle: '跳过这张待确认？',
+      skipConfirmDescription: '跳过后不会记进账本，卡片也会消失。',
+      expandAll: '展开全部（还有 {n} 笔）',
+      collapse: '收起',
+    },
     continuity: {
       reviewTitle: '月回顾',
       reviewLatest: '{month}的回顾 · 看一看',
@@ -314,7 +327,7 @@ export const zhCN: Translations = {
     },
     soloHero: {
       monthLabel: '{month}记下',
-      countLabel: '{count} 笔',
+      countLabel: { one: '{count} 笔', other: '{count} 笔' },
     },
     addExpense: '新增一笔',
     addIncome: '记一笔收入',
@@ -333,7 +346,7 @@ export const zhCN: Translations = {
       singleStartedAt: '{date} 起 · 点开看这趟',
       singleStartedAtWithCurrency: '{date} 起 · {currency} · 点开看这趟',
       singleAriaLabel: '进入旅行：{name}',
-      multipleHeading: '{count} 段旅行进行中',
+      multipleHeading: { one: '{count} 段旅行进行中', other: '{count} 段旅行进行中' },
       multipleCta: '一起翻 ›',
       multipleAriaLabel: '查看 {count} 段进行中的旅行',
       emptyCta: '开始一段旅行',
@@ -691,7 +704,7 @@ export const zhCN: Translations = {
     rateInverseFormat: '≈ 1 {default} = {inverse} {code}',
     rateAriaLabel: '{code} 对 {baseCode} 的汇率',
     basePill: '基础货币',
-    usedCountNote: '已记过 {n} 笔；改汇率不影响旧记录',
+    usedCountNote: { one: '已记过 {n} 笔；改汇率不影响旧记录', other: '已记过 {n} 笔；改汇率不影响旧记录' },
     customRow: {
       codeAriaLabel: '货币代码',
       codePlaceholder: 'VND',
@@ -954,6 +967,48 @@ export const zhCN: Translations = {
     recurringSettings: '定期支出/收入设置',
     sectionData: '数据',
     trust: '数据安全',
+    shortcutsGuide: '用快捷指令记账',
+    shortcutKey: {
+      navLabel: '快捷指令密钥',
+      title: '快捷指令密钥',
+      back: '返回',
+      pageHeading: '快捷指令密钥',
+      pageSubtitle: 'iPhone 快捷指令用这把密钥把花费送进你的待确认，你确认后才会记进账本。待确认只有你自己看得到。',
+      empty: '目前没有密钥。',
+      generate: '生成密钥',
+      failed: '没有成功，请稍后再试',
+      current: {
+        heading: '当前的密钥',
+        hintLabel: '结尾',
+        createdLabel: '生成时间',
+        lastUsedLabel: '最后使用',
+        neverUsed: '还没用过',
+      },
+      fresh: {
+        heading: '新的密钥',
+        body: '密钥只会显示这一次，离开这页就看不到了。现在复制，粘贴到快捷指令里。',
+        inputLabel: '新的快捷指令密钥',
+        copy: '复制',
+        copied: '已复制',
+        copyFailed: '没办法自动复制，请点一下密钥，选中后手动复制',
+      },
+      shareWarning: {
+        heading: '不要分享含密钥的快捷指令',
+        body: '拿到密钥的人，可以把花费送进你的待确认。如果你分享过含密钥的快捷指令，请重新生成一把。',
+      },
+      regenerate: {
+        cta: '重新生成',
+        confirmTitle: '重新生成密钥？',
+        confirmBody: '当前的密钥会立刻失效，用它的快捷指令要换上新的密钥才能发送。',
+        confirmLabel: '重新生成',
+      },
+      revoke: {
+        cta: '撤销密钥',
+        confirmTitle: '撤销这把密钥？',
+        confirmBody: '用这把密钥的快捷指令会立刻无法发送。之后可以再生成一把。',
+        confirmLabel: '撤销',
+      },
+    },
     exportData: '导出数据（CSV）',
     pastTimes: '过去的时光',
     trips: '旅行',
@@ -1083,6 +1138,9 @@ export const zhCN: Translations = {
           honeydue: 'Honeydue',
           spendee: 'Spendee',
           cwmoney: 'CWMoney',
+          andromoney: 'AndroMoney',
+          manebo: 'Manebo（まねーぼ）',
+          splitwise: 'Splitwise',
           generic: '通用 CSV',
         },
         uploadPrompt: '拖文件到这里，或点选下方按钮',
@@ -1091,7 +1149,7 @@ export const zhCN: Translations = {
         fileSelected: '已选：{name}',
         summary: '共 {total} 笔 · 有效 {valid} 笔 · 失败 {invalid} 笔',
         sourceDetected: '检测到来源：{source}',
-        invalidNote: '失败的行会跳过导入，并保留在错误记录供日后修正',
+        invalidNote: '跳过的行会留在错误记录里，之后可以再看。',
         retryCta: '换一个文件',
         parseError: '解析失败，请确认文件格式或换一个文件重试',
       },
@@ -1100,7 +1158,7 @@ export const zhCN: Translations = {
         subtitle: '把来源的类别，对应到账本里的类别',
         sourceColumn: '来源类别',
         targetColumn: '对应到',
-        rowCount: '{count} 笔',
+        rowCount: { one: '{count} 笔', other: '{count} 笔' },
         keepOriginal: '其他',
       },
       step3: {
@@ -1129,14 +1187,15 @@ export const zhCN: Translations = {
         },
         typeExpense: '支出',
         typeIncome: '收入',
-        moreRows: '还有 {count} 笔未显示',
-        confirmCta: '确认导入 {count} 笔',
+        moreRows: { one: '还有 {count} 笔未显示', other: '还有 {count} 笔未显示' },
+        confirmCta: { one: '确认导入 {count} 笔', other: '确认导入 {count} 笔' },
         confirming: '导入中…',
-        summary: '预计写入 {count} 笔 · 失败 {invalid} 笔会保留记录',
+        summary: { one: '预计写入 {count} 笔 · {invalid}', other: '预计写入 {count} 笔 · {invalid}' },
+        summaryInvalid: { one: '失败 {n} 笔会保留记录', other: '失败 {n} 笔会保留记录' },
       },
       result: {
         successHeading: '导入完成',
-        successBody: '已写入 {count} 笔记录',
+        successBody: { one: '已写入 {count} 笔记录', other: '已写入 {count} 笔记录' },
         rollbackHint: '24 小时内可一键还原这次导入',
         rollbackCta: '还原这次导入',
         rollbackConfirm: '确定要还原吗？所有这次导入的记录会一起撤回',
@@ -1156,6 +1215,7 @@ export const zhCN: Translations = {
         submitFailed: '写入时遇到问题，请稍后再试',
         rollbackFailed: '还原失败，请稍后再试',
         noValidRows: '这个文件没有可导入的记录',
+        missingColumns: '这个文件少了这些字段：{columns}。请确认导出时选的是 CSV，也选对了来源',
       },
     },
   },
@@ -1212,6 +1272,18 @@ export const zhCN: Translations = {
     empty: '还没有过去的时光。第一段才刚开始。',
     exportHint: '想自己留一份记录，可以把这些章节里的支出、进账和结算导出成 CSV。',
     exportCta: '导出支出、进账和结算',
+    hideName: {
+      title: '我在已离开账本里的名字',
+      hint: '已离开的账本里，已结束的那几段时光与出游名单上，你的名字可以改成显示「已离开的伙伴」。',
+      cta: '改成「已离开的伙伴」',
+      confirmTitle: '改成「已离开的伙伴」？',
+      confirmBody: '已离开的账本里，目前已结束的那几段时光与出游名单上，你的名字会显示为「已离开的伙伴」。之后才结束的时光不会跟着改。这个改动无法还原。',
+      confirmCount: '这次会改到 {chapters} 段时光、{outings} 份出游名单。',
+      confirmLabel: '确定更改',
+      pending: '处理中…',
+      done: '已改成「已离开的伙伴」。',
+      failed: '没有改成，请稍后再试。',
+    },
   },
 
   csvExport: {
@@ -1314,9 +1386,9 @@ export const zhCN: Translations = {
       timelineInvested: '已投入',
       timelineTarget: '目标',
       summaryAnnualPremium: '年缴保费',
-      summaryPolicyCount: '共 {count} 份保单',
+      summaryPolicyCount: { one: '共 {count} 份保单', other: '共 {count} 份保单' },
       summaryNextRenewal: '下次续约',
-      summaryDaysUntil: '{days} 天后',
+      summaryDaysUntil: { one: '{days} 天后', other: '{days} 天后' },
     },
   },
 
@@ -1333,7 +1405,7 @@ export const zhCN: Translations = {
       intervalEveryQuarter: '每季',
       intervalEveryHalfYear: '每半年',
       intervalEveryYear: '每年',
-      intervalEveryNMonths: '每 {n} 个月',
+      intervalEveryNMonths: { one: '每 {n} 个月', other: '每 {n} 个月' },
       dayLabel: '{day} 号',
       nextDate: '下次 {date}',
     },
@@ -1740,7 +1812,7 @@ export const zhCN: Translations = {
     },
     notesSection: '备注',
     recentExpenses: '近期支出',
-    timelineEntries: '时间轴 · {count} 笔',
+    timelineEntries: { one: '时间轴 · {count} 笔', other: '时间轴 · {count} 笔' },
     addOtherExpense: '其他支出',
     refuel: '加油',
     relatedInsurance: '相关保险',
@@ -1849,11 +1921,11 @@ export const zhCN: Translations = {
       cost: '入手金额',
       location: '位置',
       waterEvery: '浇水周期',
-      waterEveryValue: '每 {n} 天',
+      waterEveryValue: { one: '每 {n} 天', other: '每 {n} 天' },
       companionDays: '陪伴天数',
       daysSuffix: '天',
       sproutedSuffix: ' 入手',
-      waterEveryFooter: ' · 每 {n} 天浇水',
+      waterEveryFooter: { one: ' · 每 {n} 天浇水', other: ' · 每 {n} 天浇水' },
     },
     house: {
       sectionInfo: '房子信息',
@@ -1933,7 +2005,7 @@ export const zhCN: Translations = {
       maturedAwaitingTitle: '满期日已到 · {date}',
       maturedAwaitingStatus: '待入账',
       maturedAwaitingCta: '我已经收到满期金了 →',
-      maturedAwaitingPremiumNote: '累计缴 {total} 已记入 {count} 笔',
+      maturedAwaitingPremiumNote: { one: '累计缴 {total} 已记入 {count} 笔', other: '累计缴 {total} 已记入 {count} 笔' },
       accountValueLabel: '当前账户价值',
       accountValueEditCta: '更新',
       recurringSectionTitle: '定期进账',
@@ -1960,7 +2032,7 @@ export const zhCN: Translations = {
       intervalEveryQuarter: '每季',
       intervalEveryHalfYear: '每半年',
       intervalEveryYear: '每年',
-      intervalEveryNMonths: '每 {n} 个月',
+      intervalEveryNMonths: { one: '每 {n} 个月', other: '每 {n} 个月' },
       dayLabel: '{day} 号',
       nextDate: '下次 {date}',
     },
@@ -2238,10 +2310,10 @@ export const zhCN: Translations = {
     soloFallback: '这 3 题是两个人一起答的。这个月的回顾，其他部分都在。',
     errorNotFound: '找不到这次的问答',
     errors: {
-      submitFailed: '送出失败，等一下再试',
+      submitFailed: '提交失败，稍后再试',
       alreadyAnswered: '你已经答完了',
       alreadyRevealed: '这次问答已经揭晓，答案不能再改了',
-      wrongGroup: '这次的问答不属于这个家计簿',
+      wrongGroup: '这次的问答不属于这个账本',
       solo: '这份问答是两个人一起答的',
     },
     questions: {
@@ -2349,8 +2421,8 @@ export const zhCN: Translations = {
       title: '看一下你的数据长什么样',
       sourceLabel: '来源 · {source}',
       encodingLabel: '编码 · {encoding}',
-      totalRowsLabel: '{count} 条记录',
-      expenseRowsLabel: '约 {count} 条支出',
+      totalRowsLabel: { one: '{count} 条记录', other: '{count} 条记录' },
+      expenseRowsLabel: { one: '约 {count} 条支出', other: '约 {count} 条支出' },
       dateRangeLabel: '{first} ~ {last}',
       topCategoriesLabel: '常出现的分类',
       empty: '这个文件没有可预览的内容。',
@@ -2560,7 +2632,7 @@ export const zhCN: Translations = {
       formatExample: `date,category,amount,description,currency,kind
 2026-05-30,饮食,150,星巴克,TWD,expense
 2026-05-30,工资,50000,五月,TWD,income`,
-      note: 'currency 不是 TWD 的会照原数字先导入，换算可以在导入后逐笔调整。重复出现的同一笔（相同日期＋金额＋描述）会自动去掉。',
+      note: 'currency 不是 TWD 的会按原数字先导入，换算可以在导入后逐笔调整。提示词已让 ChatGPT 把重复出现的同一笔（相同日期＋金额＋描述）只保留一笔；导入时 Futari 不会再去重，同一份文件请只导入一次。',
       settingsHint: '不急着现在弄也没关系——登录后在设置里一样能导入 CSV。',
     },
     pages: {
@@ -2579,26 +2651,26 @@ export const zhCN: Translations = {
             body: '没有「分开账户」的不对称能见度，从一开始就为共同的家设计。',
           },
           {
-            title: '免费、无广告',
-            body: '核心记账永远免费，不靠广告或数据变现。',
+            title: '免费，也没有广告',
+            body: '从导入到每天记账都不收费，界面里没有广告，也不靠数据赚钱。',
           },
         ],
-        stepsHeading: '搬迁三步',
+        stepsHeading: 'Honeydue 搬迁三步',
         step1: '在 Honeydue App → 设置 → 导出数据，下载 CSV。',
-        step2: '把 CSV 上传到这里，预览你的记账历史。',
-        step3: '创建 Futari 账号，一键完成搬迁。',
+        step2: '把 CSV 上传到这里预览。Honeydue 的日期是月/日/年、负数是支出，正式导入时 Futari 会按这个规则读取。',
+        step3: '创建 Futari 账号，导入时选好默认付款人和分摊方式：Honeydue 的文件里没有这两项，整批统一指定，事后可以逐笔修改。',
         faq: [
           {
-            question: '导入后数据需要再整理吗？',
-            answer: '类别可在导入流程中对照调整，一次完成，不需要事后手动修改。',
+            question: 'Honeydue 的分类能对得上吗？',
+            answer: 'Food & Dining、Home、Transportation 这类常见的英文分类名称，会自动归到 Futari 的饮食、居住、交通；对不上的全部归在「其他」一组，导入前可以整组改选别的类别。',
           },
           {
-            question: '导入需要付费吗？',
-            answer: 'Futari 完全免费，没有隐藏费用。',
+            question: 'Honeydue 换了东家，搬过来要付费吗？',
+            answer: '不用。导入不收费，核心记账也是免费的，没有需要另外解锁的双人功能。',
           },
           {
-            question: '原本的记账记录能全部带过来吗？',
-            answer: '支持 CSV 格式导入，大部分记录都能转移。特殊类型（如转账）会标记供你确认。',
+            question: 'Honeydue 的字段都能带进来吗？',
+            answer: '日期、名称、分类、金额都会读进来，负数记为支出、正数记为进账。Account 一栏不会保留：Futari 是一本共同账本，不分账户。',
           },
           {
             question: 'Honeydue 的共同账本功能，Futari 有吗？',
@@ -2620,29 +2692,29 @@ export const zhCN: Translations = {
             body: '一个人记下，另一个人马上看见，不用等对方刷新。',
           },
           {
-            title: '免费、无广告',
-            body: '不靠广告或拍卖数据生活，记账就是记账。',
+            title: '没有广告，也没有升级提示',
+            body: '不靠广告，也不倒卖数据，打开就是你们两个人的账。',
           },
         ],
-        stepsHeading: '搬迁三步',
+        stepsHeading: 'Spendee 搬迁三步',
         step1: '在 Spendee → More → Export Data，下载 CSV。',
-        step2: '把 CSV 上传到这里，预览你的记账历史。',
-        step3: '创建 Futari 账号，一键完成搬迁。',
+        step2: '把 CSV 上传到这里预览，Type 一栏会用来区分支出和进账。',
+        step3: '创建 Futari 账号。类别对应那一步，Spendee 的分类会先自动归到 Futari 的类别（比如 Food & Drinks 归到饮食），对不上的归在「其他」，可以整组改选。',
         formatHintLabel: 'Spendee CSV 的字段长这样',
         formatHintHeaders: 'Date,Wallet,Type,Category name,Amount,Currency,Note',
         formatHintNote: 'Type 字段是「Expense / Income / Transfer」。Transfer（账户间转账）导入时会被标为错误——Futari 不存转账，请在预览阶段删除这几行。',
         faq: [
           {
-            question: '导入后数据需要再整理吗？',
-            answer: '类别可在导入流程中对照调整，一次完成，不需要事后手动修改。',
+            question: 'Spendee 的钱包和分类会一起带过来吗？',
+            answer: '分类会对应到 Futari 的类别，比如 Food & Drinks 对应饮食。钱包不会保留：Futari 是两个人共用的一本账，不分钱包。',
           },
           {
-            question: '导入需要付费吗？',
-            answer: 'Futari 完全免费，没有隐藏费用。',
+            question: 'Spendee 的共享要付费解锁，搬过来也要吗？',
+            answer: '不用。Spendee 的共享需要付费解锁；Futari 两个人共用一本账是免费内置的，导入也不收费。',
           },
           {
-            question: '原本的记账记录能全部带过来吗？',
-            answer: '支持 CSV 格式导入，大部分记录都能转移。特殊类型（如转账）会标记供你确认。',
+            question: 'Spendee 里有多币种的记录，导入后金额会怎样？',
+            answer: 'Currency 一栏不是主币种的行，会按原数字先导入，换算可以在导入后逐笔调整。Transfer（钱包之间的转账）会被标为失败行，不会写进账本。',
           },
           {
             question: 'Spendee 的分摊功能，Futari 支持吗？',
@@ -2669,7 +2741,7 @@ export const zhCN: Translations = {
             body: '没有评分、不打分数、不暗示谁花得太多。',
           },
         ],
-        stepsHeading: '搬迁三步',
+        stepsHeading: 'CWMoney 搬迁三步',
         step1: '在 CWMoney 导出 Excel／CSV 格式的记账数据。',
         step2: '下载下方的转换模板，把数据粘进去。',
         step3: '上传转换后的 CSV，预览并创建账号导入。',
@@ -2681,12 +2753,12 @@ export const zhCN: Translations = {
             answer: '这是 CWMoney 导出文件常见的编码情况，官方帮助中心也有专页处理。不用自己修——把数据粘进下方转换模板整理好再上传就可以。',
           },
           {
-            question: '导入后数据需要再整理吗？',
-            answer: '类别可在导入流程中对照调整，一次完成，不需要事后手动修改。',
+            question: 'CWMoney 的分类能对得上吗？',
+            answer: 'CWMoney 里的饮食、交通、居住、娱乐、医疗这几类，会自动归到 Futari 的同名类别；对不上的全部归在「其他」一组，导入前可以整组改选别的类别。',
           },
           {
-            question: '导入需要付费吗？',
-            answer: 'Futari 完全免费，没有隐藏费用。',
+            question: 'CWMoney 的共同账本是付费功能，搬过来要付费吗？',
+            answer: '不用。Futari 的双人账本、分摊和实时同步都是免费内置的，导入也不收费。',
           },
           {
             question: 'CWMoney 的资产功能，Futari 有对应吗？',
@@ -2713,22 +2785,22 @@ export const zhCN: Translations = {
             body: '麻布的自动同步需要代理登录网银；Futari 以手动记账为主，两个人记下的，就是你们愿意记下的。',
           },
         ],
-        stepsHeading: '搬迁三步',
+        stepsHeading: '麻布记账搬迁三步',
         step1: '在麻布记账（订阅会员）用「明细导出」把交易输出成 CSV。',
-        step2: '把 CSV 上传到这里，预览你的记账历史。',
-        step3: '建立 Futari 账号，一键完成搬迁。',
+        step2: '把 CSV 上传到这里预览，先确认交易明细的日期范围和笔数没有缺一段。',
+        step3: '创建 Futari 账号，导入时对应好类别、指定付款人，之后和伴侣一起接着记。',
         faq: [
           {
             question: '免费账号还能把数据导出来吗？',
             answer: '2026 年 4 月收费制上线后，明细导出属于订阅会员功能。若你们还在订阅期，建议先把明细导出留存一份。',
           },
           {
-            question: '麻布记账的字段和 Futari 一样吗？',
-            answer: '不完全一样。上传后会先预览解析结果，正式导入时可以对照调整分类与字段，不会直接写进账本。',
+            question: '导出的 CSV 和 Futari 的格式对得上吗？',
+            answer: '不完全一样。上传到这一页会先在浏览器里预览，能看到笔数、日期范围和常出现的分类；正式导入时，付款人和分摊方式整批指定，读不出来的行会被跳过并留下记录。',
           },
           {
-            question: '导入需要付费吗？',
-            answer: 'Futari 完全免费，没有隐藏费用。',
+            question: '搬过来之后还要订阅吗？',
+            answer: '不用。Futari 的核心记账、分摊和结算都在免费层，导入也不收费。',
           },
           {
             question: '麻布记账会自动同步银行，Futari 也会吗？',
@@ -2746,34 +2818,39 @@ export const zhCN: Translations = {
             body: 'AndroMoney 是单人记账的好手；Futari 则是为两个人共用一本账设计，记录彼此都看得到。',
           },
           {
-            title: '即时同步',
-            body: '一个人记下，另一个人马上看见，不用互传截图或文件对账。',
+            title: '不用互传文件对账',
+            body: 'AndroMoney 的备份要自己动手；Futari 的账存在云端，一个人记下，另一个人马上就能看到。',
           },
           {
-            title: '免费、无广告',
-            body: '核心记账永远免费，不靠广告或数据变现。',
+            title: '不用在广告版和付费版之间选',
+            body: 'AndroMoney 有含广告的版本和付费版；Futari 没有广告，核心记账免费，不必为了去广告而升级。',
           },
         ],
-        stepsHeading: '搬迁三步',
+        stepsHeading: 'AndroMoney 搬迁三步',
         step1: '在 AndroMoney → 设置 → 导出，把数据输出成 CSV。',
-        step2: '把 CSV 上传到这里，预览你的记账历史。',
-        step3: '建立 Futari 账号，一键完成搬迁。',
+        step2: '把 CSV 上传到这里预览笔数。文件第一行 AndroMoney 的标题行不用先删，Big5 或 UTF-8 编码都能读。',
+        step3: '创建 Futari 账号，到「设置 → 从其他 app 导入」选 AndroMoney，再上传同一份 CSV。名称对得上的分类会自动归好，其余先放进「其他」；付款人和分摊方式整批选一次：从单人账换成两个人的账，多出来的就是这一步。',
         faq: [
           {
-            question: '导入后数据需要再整理吗？',
-            answer: '类别可在导入流程中对照调整，一次完成，不需要事后手动修改。',
+            question: '搬过来之后，AndroMoney 还要留着吗？',
+            answer: '导入是复制，不会动 AndroMoney 里的数据。CSV 先留一份，等两个人都记顺手了，再决定要不要删掉原来的 App。导入后 24 小时内，也可以一键撤销整批。',
           },
           {
-            question: '导入需要付费吗？',
-            answer: 'Futari 完全免费，没有隐藏费用。',
+            question: '导入 AndroMoney 的 CSV 要付费吗？',
+            answer: '不用，导入不收费。核心记账也免费，没有广告。',
           },
           {
-            question: '原本的记账记录能全部带过来吗？',
-            answer: '支持 CSV 格式导入，大部分记录都能转移。特殊类型（如转账）会标记供你确认。',
+            question: '单人账换成双人账，导入时多了什么？',
+            answer: '每笔记录都需要付款人和分摊方式，而 AndroMoney 的文件里没有这两项，所以导入时整批指定一次：付款人选你或对方，分摊方式选「全部我的」「全部对方的」或「一人一半」，导入后再逐笔修改。这批是你一个人记的账，不想让它动到两人之间的余额，就选「全部我的」。',
           },
           {
             question: 'AndroMoney 的多账户，Futari 有对应吗？',
             answer: 'Futari 是一本共同账本，专注在两个人的共同收支；不分多账户，而是用分摊模式记下每笔是谁付、怎么分。',
+          },
+          {
+            question: 'AndroMoney 的转账、期初余额和外币，导入时怎么处理？',
+            answer:
+              '转账（付款和收款两个账户栏都有值）和账户的期初余额不算收支，这两类行会跳过，留在错误记录里。只有付款栏有值的行导入为支出，只有收款栏有值的行导入为进账，进账的类别都归到「其他」。币种不是 TWD 的行，金额按文件里的数字直接当作主币种写入，不做换算，也不另记原币种；小数四舍五入到整数，导入后可以逐笔改。',
           },
         ],
       },
@@ -2787,30 +2864,30 @@ export const zhCN: Translations = {
             body: 'Mobills 以个人理财为主；Futari 是两个人共用的一本账，共同支出记一次，两边都看得到。',
           },
           {
-            title: '分摊与结算内建',
-            body: '对半、按比例、各付各、由一方负担——选好之后，谁欠谁自动算清。',
+            title: '选好分法，余额自动算',
+            body: 'Mobills 没有分摊这一步；在 Futari，每笔选好分法——对半、按比例、各付各的、由一方承担——余额就自动算清。',
           },
           {
-            title: '免费、无广告',
-            body: '核心记账永远免费，不靠广告或拍卖数据生活。',
+            title: '不用订阅，也没有广告',
+            body: 'Mobills 的进阶功能要订阅；Futari 的核心记账、分摊和结算都免费，界面里没有广告。',
           },
         ],
-        stepsHeading: '搬迁三步',
+        stepsHeading: 'Mobills 搬迁三步',
         step1: '在 Mobills 导出交易记录，下载 CSV 文件。',
-        step2: '把 CSV 上传到这里，预览你的记账历史。',
-        step3: '建立 Futari 账号，一键完成搬迁。',
+        step2: '把 CSV 上传到这里，先看预览里的日期范围，确认你要搬的那段时间都在。',
+        step3: '创建 Futari 账号，两个人各自导入各自的文件，记录都会落在同一本共同账本里。',
         faq: [
           {
-            question: '导入后数据需要再整理吗？',
-            answer: '类别可在导入流程中对照调整，一次完成，不需要事后手动修改。',
+            question: '导错了可以重来吗？',
+            answer: '可以。导入完成后 24 小时内能一键撤销整批，不会留下半份数据，也不会动 Mobills 里的原始记录。',
           },
           {
-            question: '导入需要付费吗？',
-            answer: 'Futari 完全免费，没有隐藏费用。',
+            question: 'Mobills 的进阶功能要订阅，搬过来也要吗？',
+            answer: '不用。Futari 导入不收费，核心功能也不需要订阅。',
           },
           {
-            question: '原本的记账记录能全部带过来吗？',
-            answer: '支持 CSV 格式导入，大部分记录都能转移。特殊类型（如转账）会标记供你确认。',
+            question: '我们两个人都有 Mobills 的记录，怎么合到一起？',
+            answer: '各自导入各自的文件就行。每次导入都可以指定默认付款人（你或对方）和分摊方式，两份记录最后落在同一本共同账本里。同一笔共同支出如果两边都记了，导入前先留下其中一份；Futari 不会自动合并重复的记录。',
           },
           {
             question: 'Mobills 有预算功能，Futari 有吗？',
@@ -2829,34 +2906,39 @@ export const zhCN: Translations = {
             body: '在 Manebo，把记录导出成 CSV 需要 Premium 订阅；Futari 的导入与导出都不收费，支出、进账和结算随时带得走。',
           },
           {
-            title: '分摊与结算内建',
-            body: '对半、按比例、各付各、由一方负担——选好之后，谁欠谁自动算清，不用月底再对账。',
+            title: '月底不用再对账',
+            body: '每笔选好分法，余额自动累计；想结清时记一笔结算，不用等到月底才一次对账。',
           },
           {
-            title: '免费、无广告',
+            title: '不弹广告，也不弹解锁窗口',
             body: '核心记账永远免费，画面里没有广告，也没有中途弹出的解锁窗口。',
           },
         ],
-        stepsHeading: '搬迁三步',
+        stepsHeading: 'Manebo 搬迁三步',
         step1: '在 Manebo →「其他」→ CSV 导出（Premium 功能），选择时间范围输出 CSV。',
-        step2: '把 CSV 上传到这里，预览你的记账历史。',
-        step3: '建立 Futari 账号，一键完成搬迁。',
+        step2: '把 CSV 上传到这里，先看笔数，确认导出的范围没错。Manebo 的 Shift_JIS 或 UTF-8 文件都能读，不用先转换编码。',
+        step3: '创建 Futari 账号，到「设置 → 从其他 app 导入」选 Manebo（まねーぼ），再上传同一份 CSV。导出文件里没有付款人这一栏，所以付款人和分摊方式整批指定一次；Manebo 里两个人共有的记录，在 Futari 本来就是同一本账。',
         faq: [
           {
             question: '没有订阅 Premium，数据拿得出来吗？',
             answer: 'Manebo 的 CSV 导出是 Premium 功能。可以订阅一个月、导出后再取消；Futari 这边的导入不收费。',
           },
           {
-            question: 'Manebo 的字段和 Futari 一样吗？',
-            answer: '不完全一样。上传后会先预览解析结果，正式导入时可以对照调整分类与字段，不会直接写进账本。',
+            question: '导入后还能修改吗？',
+            answer: '可以。导入的记录和手动记的一样，能逐笔修改；整批撤销则只在 24 小时内可用，所以导入后建议先翻一遍。',
           },
           {
-            question: '导入需要付费吗？',
-            answer: 'Futari 完全免费，没有隐藏费用。',
+            question: 'Futari 这边的导入要付费吗？',
+            answer: '不用。Premium 只用在 Manebo 导出 CSV 的那一步，Futari 的导入和导出都不收费。',
           },
           {
             question: 'Manebo 支持多账本，Futari 怎么处理？',
             answer: 'Futari 是一本两人共用的账，不分多账本；用分摊模式记下每笔是谁付、怎么分，余额自动算清。',
+          },
+          {
+            question: 'Manebo 的转账、进账和分类，导入后会怎样？',
+            answer:
+              'Type（種別）一栏是 expense 的行导入为支出，income 的导入为进账，transfer（转账）会跳过并留在错误记录里；进账的类别统一归到「其他」。支出的分类是你在 Manebo 里自己起的名字，只有对照表里已有的名称（目前是英文和繁体中文，日文名称不在其中）会自动归好，没对上的合成「其他」一组。导入前可以整组改选别的类别，但没办法按原名称拆开。',
           },
         ],
       },
@@ -2879,22 +2961,22 @@ export const zhCN: Translations = {
             body: '在简单记账，CSV 导出是 VIP 功能；Futari 的导入与导出都免费，支出、进账和结算随时能导出。',
           },
         ],
-        stepsHeading: '搬迁三步',
-        step1: '在简单记账把要搬的交易截图（下方有完整做法）。',
-        step2: '用 ChatGPT 把截图整理成 CSV——下方有可直接复制的提示词。',
-        step3: '把 CSV 上传到这里，预览后建立账号完成导入。',
+        stepsHeading: '简单记账搬迁三步',
+        step1: '在简单记账里把要搬的交易一页一页截图，VIP 才有的导出不用碰（下方有完整做法）。',
+        step2: '用 ChatGPT 把截图整理成 CSV，免费版就够；分类文字会原样写进 CSV，导入时对得上的会归到 Futari 的类别，其余归在「其他」。',
+        step3: '把 CSV 上传到这里预览，确认笔数和日期范围对得上，再创建账号完成导入。',
         faq: [
           {
             question: '简单记账的 CSV 导出要订 VIP，不付费搬得动吗？',
-            answer: '可以。把交易画面截图请 ChatGPT 整理成 CSV 再上传——下方有完整步骤和可复制的提示词，免费版 ChatGPT 就能做。',
+            answer: '可以。简单记账的 CSV 导出要 VIP，不想为了搬家先订阅的话，改用截图：把交易页面截下来让 ChatGPT 整理成 CSV，下方有完整步骤和可复制的提示词。',
           },
           {
             question: '要截几张图？',
-            answer: '建议 5–10 张，往下滚动盖过你想搬的时间范围即可。同一笔重复出现的会自动去掉。',
+            answer: '建议 5–10 张，往下滚动覆盖你想搬的时间范围即可。同一笔重复出现的，提示词已让 ChatGPT 只保留一笔。',
           },
           {
-            question: '导入需要付费吗？',
-            answer: 'Futari 完全免费，没有隐藏费用。',
+            question: 'ChatGPT 免费版够用，Futari 这边有哪一步要收费吗？',
+            answer: '没有。上传预览、类别对应和导入都不收费，从简单记账截图到进入 Futari，整条路不需要订阅任何东西。',
           },
           {
             question: 'ChatGPT 整理的分类会不会跑掉？',
@@ -2921,26 +3003,26 @@ export const zhCN: Translations = {
             body: '没有弹出的广告，也没有关不掉的解锁窗口；记账的节奏由你们决定。',
           },
           {
-            title: '数据自由进出',
+            title: '想离开，也带得走',
             body: '在 Futari，导出不需要订阅，支出、进账和结算会导出成标准 UTF-8 CSV；哪天想离开，也一样带得走。',
           },
         ],
-        stepsHeading: '搬迁三步',
-        step1: '在记账城市把要搬的交易截图（下方有完整做法）。',
-        step2: '用 ChatGPT 把截图整理成 CSV——下方有可直接复制的提示词。',
-        step3: '把 CSV 上传到这里，预览后建立账号完成导入。',
+        stepsHeading: '记账城市搬迁三步',
+        step1: '在记账城市打开账目，往下滚动把要搬的交易截图；城市画面不用截（下方有完整做法）。',
+        step2: '用 ChatGPT 把截图整理成 CSV；日期、金额和分类照画面带过来，游戏里的城市进度不会进入 CSV。',
+        step3: '把 CSV 上传到这里预览，没问题就创建账号，把这些记录接在两个人的账本里。',
         faq: [
           {
             question: '记账城市不是有 CSV 导出吗？',
             answer: '有，但属于订阅功能，而且官方说明提到导出文件在 Excel 打开可能出现乱码、需要自行转存编码。没订阅的话，用下方截图请 ChatGPT 整理的流程一样能搬。',
           },
           {
-            question: '要截几张图？',
-            answer: '建议 5–10 张，往下滚动盖过你想搬的时间范围即可。重复出现的同一笔会自动去掉。',
+            question: '截图整理完，怎么确认没有漏？',
+            answer: '上传后的预览会列出笔数、日期范围和最常出现的分类，和记账城市里的数字对一下；缺了一段就回头补截那一段，再整理一次。',
           },
           {
-            question: '导入需要付费吗？',
-            answer: 'Futari 完全免费，没有隐藏费用。',
+            question: '记账城市的订阅弹窗那么多，Futari 也会有吗？',
+            answer: '不会。Futari 没有广告，也没有中途弹出的解锁窗口；导入同样不收费。',
           },
           {
             question: '记账城市的游戏进度会一起搬吗？',
@@ -2954,34 +3036,34 @@ export const zhCN: Translations = {
         heroSubtitle: '用了很久的 CashMan，想换成两个人一起记？用截图请 ChatGPT 整理成 CSV，就能把记录搬到 Futari。',
         differentiators: [
           {
-            title: '双人账本是默认',
-            body: 'CashMan 是单人记账的老帮手；Futari 一开始就为两个人共用一本账设计，记录彼此都看得到。',
+            title: '从单人账换成双人账',
+            body: 'CashMan 是单人记账的老帮手；换到 Futari，两个人记在同一本账上，谁付的、怎么分都一目了然。',
           },
           {
-            title: '分摊算给你看',
-            body: '谁付的、怎么分、现在谁欠谁，余额自动算清楚，不用自己记。',
+            title: '不用在脑子里记账',
+            body: '单人账里，共同支出得自己记谁多付了；Futari 每笔标好付款人和分法，余额自动累计。',
           },
           {
             title: '云端同步、随时带走',
             body: '记录存在云端，换手机不怕不见；想离开时，支出、进账和结算都能导出 CSV 带走。',
           },
         ],
-        stepsHeading: '搬迁三步',
-        step1: '在 CashMan 把要搬的交易截图（下方有完整做法）。',
-        step2: '用 ChatGPT 把截图整理成 CSV——下方有可直接复制的提示词。',
-        step3: '把 CSV 上传到这里，预览后建立账号完成导入。',
+        stepsHeading: 'CashMan 搬迁三步',
+        step1: '在 CashMan 从最近一笔往回滚动截图，一直截到你想搬的最早那天（下方有完整做法）。',
+        step2: '用 ChatGPT 把截图整理成 CSV；CashMan 没有可用的导出，所以截图就是你的导出文件。',
+        step3: '把 CSV 上传到这里预览，确认几年的记录都在，再创建账号完成导入。',
         faq: [
           {
             question: 'CashMan 没有导出功能，数据真的搬得过来吗？',
-            answer: '可以。把交易画面截图请 ChatGPT 整理成 CSV 再上传——下方有完整步骤和可复制的提示词，免费版 ChatGPT 就能做。',
+            answer: '可以。没有导出时，截图就是导出：把交易页面截下来，让 ChatGPT 按固定字段整理成 CSV，下方有完整步骤和可复制的提示词。',
           },
           {
-            question: '要截几张图？',
-            answer: '建议 5–10 张，往下滚动盖过你想搬的时间范围即可。重复出现的同一笔会自动去掉。',
+            question: '截图里有几行被截掉了怎么办？',
+            answer: '重新截一张把那几行包进去就行；同一笔出现在两张截图里也没关系，提示词已让 ChatGPT 把重复的只保留一笔。',
           },
           {
-            question: '导入需要付费吗？',
-            answer: 'Futari 完全免费，没有隐藏费用。',
+            question: 'CashMan 本身免费，换到 Futari 要付费吗？',
+            answer: '不用。Futari 的核心记账也是免费的，双人共用、分摊和导出都不需要加价。',
           },
           {
             question: '用很久了，几年的记录都能搬吗？',
@@ -2996,33 +3078,33 @@ export const zhCN: Translations = {
         differentiators: [
           {
             title: '两个人共用一本账',
-            body: '1Money 以个人记账为主；Futari 是两个人共用的一本账，共同支出记一次，两边都看得到。',
+            body: '1Money 把账记在一个人名下；换到 Futari，共同支出只记一次，付款人和分法也一起标好。',
           },
           {
-            title: '分摊与结算内建',
-            body: '对半、按比例、各付各、由一方负担——选好之后，谁欠谁自动算清。',
+            title: '记完就知道谁欠谁',
+            body: '每笔选好分法，余额自动更新；两个人不用再靠另一份表格对账。',
           },
           {
             title: '多币种也记得清楚',
             body: '出国或跨币种的支出照样记，回头看账目一样清楚。',
           },
         ],
-        stepsHeading: '搬迁三步',
-        step1: '在 1Money 把要搬的交易截图（下方有完整做法）。',
-        step2: '用 ChatGPT 把截图整理成 CSV——下方有可直接复制的提示词。',
-        step3: '把 CSV 上传到这里，预览后建立账号完成导入。',
+        stepsHeading: '1Money 搬迁三步',
+        step1: '在 1Money 把要搬的交易截图，让金额旁边的币种一起入镜（下方有完整做法）。',
+        step2: '用 ChatGPT 把截图整理成 CSV；每笔的币种会写进 currency 一栏，一起带过来。',
+        step3: '把 CSV 上传到这里预览，笔数和日期范围对得上，就创建账号完成导入；非台币的行会按原数字先导入，换算之后再调。',
         faq: [
           {
             question: '1Money 没有完整导出，数据真的搬得过来吗？',
             answer: '即使没有完整导出，把交易截图请 ChatGPT 整理成 CSV 一样能搬——下方有完整步骤和可复制的提示词，免费版 ChatGPT 就能做。',
           },
           {
-            question: '要截几张图？',
-            answer: '建议 5–10 张，往下滚动盖过你想搬的时间范围即可。重复出现的同一笔会自动去掉。',
+            question: '免费版 ChatGPT 够用吗？',
+            answer: '够用。提示词已经把输出格式定死了，免费版照着做就行；记录很多的话，分批截图、分批整理就行。',
           },
           {
-            question: '导入需要付费吗？',
-            answer: 'Futari 完全免费，没有隐藏费用。',
+            question: '1Money 的进阶功能要付费，搬过来呢？',
+            answer: 'Futari 的核心记账、双人账本、分摊和结算都免费，导入也不收费。',
           },
           {
             question: '多币种的记录会跑掉吗？',
@@ -3040,30 +3122,30 @@ export const zhCN: Translations = {
             body: 'iCost 限 iOS；Futari 是 iOS／Android／Web 都能用的双人账本，另一半用什么手机都行。',
           },
           {
-            title: '分摊与结算内建',
-            body: '对半、按比例、各付各、由一方负担——选好之后，谁欠谁自动算清。',
+            title: '共同开销，各自分好',
+            body: '每笔标好是谁付的、怎么分，余额随记随更新，不用另外拉一张表格。',
           },
           {
-            title: '免费、无广告',
-            body: '核心记账永远免费，不靠广告或拍卖数据生活。',
+            title: '免费，不分平台',
+            body: 'iCost 含内购；Futari 的核心记账免费、没有广告，用 iOS、Android 或浏览器都一样。',
           },
         ],
-        stepsHeading: '搬迁三步',
-        step1: '在 iCost 把要搬的交易截图（下方有完整做法）。',
-        step2: '用 ChatGPT 把截图整理成 CSV——下方有可直接复制的提示词。',
-        step3: '把 CSV 上传到这里，预览后建立账号完成导入。',
+        stepsHeading: 'iCost 搬迁三步',
+        step1: '在 iPhone 上打开 iCost，把要搬的交易截图（下方有完整做法）。',
+        step2: '把 iPhone 上的截图交给 ChatGPT 整理成 CSV——下方有可直接复制的提示词。',
+        step3: '把 CSV 上传到这里预览，再创建账号完成导入；另一半用 iPhone 或 Android 都能一起记。',
         faq: [
           {
-            question: 'iCost 没有导出功能，数据真的搬得过来吗？',
-            answer: '可以。把交易画面截图请 ChatGPT 整理成 CSV 再上传——下方有完整步骤和可复制的提示词，免费版 ChatGPT 就能做。',
+            question: 'iCost 只有 iOS 也没有导出，数据搬得走吗？',
+            answer: '可以。iCost 目前没有可用的导出，所以改走截图：把交易页面截下来，让 ChatGPT 按固定字段整理成 CSV，再上传到下方预览。',
           },
           {
-            question: '要截几张图？',
-            answer: '建议 5–10 张，往下滚动盖过你想搬的时间范围即可。重复出现的同一笔会自动去掉。',
+            question: 'ChatGPT 整理出来的 CSV 长什么样？',
+            answer: '固定六列：date、category、amount、description、currency、kind，kind 填 expense 或 income。下方有示例，上传时 Futari 靠这几列认出这份文件。',
           },
           {
-            question: '导入需要付费吗？',
-            answer: 'Futari 完全免费，没有隐藏费用。',
+            question: 'iCost 有内购，Futari 呢？',
+            answer: 'Futari 目前核心记账免费、没有广告，导入也不收费。',
           },
           {
             question: '另一半用 Android，也能一起用吗？',
@@ -3090,26 +3172,31 @@ export const zhCN: Translations = {
             body: '旅行时用当地币种记下，主币种的余额自动换算好，不必另外升级。',
           },
         ],
-        stepsHeading: '搬迁三步',
+        stepsHeading: 'Splitwise 搬迁三步',
         step1: '在 Splitwise 打开群组或好友页，用「Export spreadsheet」下载表格。',
-        step2: '把 CSV 上传到这里，预览你们的分账历史。',
-        step3: '创建 Futari 账号，一键完成搬迁。',
+        step2: '把 CSV 上传到这里，预览笔数和常出现的分类。',
+        step3: '创建 Futari 账号，到「设置 → 从其他 app 导入」选 Splitwise，再上传同一份 CSV。每笔交易按总金额（Cost）导入为一笔支出，付款人和分摊方式整批指定一次。Splitwise 的表格留着当备份，随时可以回头查。',
         faq: [
           {
             question: 'Splitwise 的数据怎么搬到 Futari？',
-            answer: '在群组或好友页导出表格，再把 CSV 上传到这里预览，创建账号后完成导入。',
+            answer: '日期、说明、分类和总金额会带过来，一笔交易对应一笔支出。结清（Payment）的行和 Total balance 那一行不会导入，留在错误记录里；Splitwise 里「谁欠谁」的余额也不会跟着过来。分类名称对得上的（比如 Groceries、Rent）会自动归好，其余先合成「其他」一组。两个人要是都导出了同一个群组，只导入其中一份，Futari 不会自动去重。',
           },
           {
             question: '导出的字段和 Futari 一样吗？',
-            answer: '不完全一样。Splitwise 的导出每笔交易一行，除了总金额（Cost）还有每个人各自的分摊列。上传后会先预览解析结果，导入时可以对照调整字段与分类，不会直接写进账本。',
+            answer: '不完全一样，但读得进来。Futari 读的是日期、说明、分类、总金额（Cost）和币种；每个人各自的分摊列不会读，所以付款人和分摊方式在导入时整批指定一次。想让这批旧账不影响现在的余额，就选「全部我的」；选「一人一半」的话，这批的每一笔都会算进两人之间的余额。',
           },
           {
-            question: '导入需要付费吗？',
-            answer: 'Futari 完全免费，没有隐藏费用。',
+            question: 'Splitwise 免费版每天只能记 4 笔，Futari 呢？',
+            answer: '核心记账没有每日笔数上限，导入也不收费。',
           },
           {
             question: '我们也用它记旅行的账，Futari 有对应的做法吗？',
             answer: '有。Futari 的旅行账本把一趟旅行的支出独立记，可以用当地币种，结束后折回主账本，日常的账不会被旅行冲掉。',
+          },
+          {
+            question: 'Splitwise 里币种不是 TWD 的账，导入后金额会怎样？',
+            answer:
+              'Currency 一栏不是 TWD 的行，金额按文件里的数字直接写成主币种，不做换算，也不另记原币种；小数四舍五入到整数。这类行导入后可以逐笔改金额。',
           },
         ],
       },
@@ -3123,30 +3210,30 @@ export const zhCN: Translations = {
             body: '随手记要另外开共享账本；Futari 进来就是两个人的账，不必额外设置。',
           },
           {
-            title: '分摊与结算内建',
-            body: '对半、按比例、各付各、由一方负担——选好之后，谁欠谁自动算清。',
+            title: '有共享，也有分摊',
+            body: '对半、按比例、各付各的、由一方承担，每笔选一种；随手记的共享账本没有这一层，Futari 内置。',
           },
           {
-            title: '免费、无广告',
-            body: '核心记账永远免费，不靠广告或拍卖数据生活。',
+            title: '不用会员，没有广告',
+            body: '随手记含广告和会员方案；Futari 核心记账免费、没有广告，两个人共用也不需要开通会员。',
           },
         ],
-        stepsHeading: '搬迁三步',
-        step1: '在随手记把要搬的交易截图（下方有完整做法）。',
-        step2: '用 ChatGPT 把截图整理成 CSV——下方有可直接复制的提示词。',
-        step3: '把 CSV 上传到这里，预览后建立账号完成导入。',
+        stepsHeading: '随手记搬迁三步',
+        step1: '在随手记把要搬的交易明细截图，不必先开通会员（下方有完整做法）。',
+        step2: '让 ChatGPT 读取截图并整理成 CSV，免费版就能做；提示词在下方，复制粘贴即可。',
+        step3: '把 CSV 上传到这里预览，确认后创建账号；两个人的共享不用另外设置。',
         faq: [
           {
-            question: '随手记的数据怎么搬到 Futari？',
-            answer: '把交易画面截图请 ChatGPT 整理成 CSV 再上传——下方有完整步骤和可复制的提示词，免费版 ChatGPT 就能做。',
+            question: '随手记导出要会员，数据还搬得走吗？',
+            answer: '随手记的数据导出需要会员；不想为了搬家开通会员，可以改用截图：把交易页面截下来，让 ChatGPT 整理成 CSV，再上传到下方。',
           },
           {
-            question: '要截几张图？',
-            answer: '建议 5–10 张，往下滚动盖过你想搬的时间范围即可。重复出现的同一笔会自动去掉。',
+            question: '截图要覆盖到多久以前的记录？',
+            answer: '往下滚到你想搬的最早一天为止；一般 5–10 张就够，记录很多的话，分批截图、分批整理成 CSV，再分次上传。',
           },
           {
-            question: '导入需要付费吗？',
-            answer: 'Futari 完全免费，没有隐藏费用。',
+            question: '会员才能用的功能，搬过来也要吗？',
+            answer: '不用。Futari 的核心记账、双人共用和分摊都免费，不需要会员；导入也不收费。',
           },
           {
             question: '随手记有共享账本，跟 Futari 一样吗？',
@@ -3218,8 +3305,8 @@ export const zhCN: Translations = {
         ogDescription: 'Manebo 用户的下一站：导出 CSV，搬进 Futari 情侣共同记账。',
       },
       'simple-daily-money': {
-        title: '从简单记账搬到 Futari｜两人同步记账、不用 VIP',
-        description: '想和伴侣两部手机同步记同一本账？简单记账的共享只能看、CSV 导出要 VIP。截图请 ChatGPT 整理成 CSV，免费搬进 Futari，两个人都能记、都能改。',
+        title: '简单记账买了永久 VIP，搬家会浪费吗？｜Futari 免费双人记账',
+        description: '买过的 VIP 留在简单记账，记录可以带走：截图请 ChatGPT 整理成 CSV，免费搬进 Futari。记账、双人分摊、同步、导出都不用另外解锁，两个人都能记、都能改。',
         ogDescription: '简单记账用户搬家指南：截图→ChatGPT→CSV，搬进 Futari 双人记账。',
       },
       'fortune-city': {
@@ -3319,6 +3406,11 @@ export const zhCN: Translations = {
       title: '出游分账：发一个链接，朋友不用下载就能一起记｜Futari',
       description: '和朋友出游，谁付了什么、谁该转给谁，记在同一个地方。开一个出游、把链接发到群里，朋友点开选自己的名字就能记，不用下载、不用注册，最多 20 人。',
       ogDescription: '开一个出游、把链接发到群里，朋友点开选自己的名字就能一起记账，不用下载、不用注册。',
+    },
+    featureShortcuts: {
+      title: 'iPhone 快捷指令记账：Apple Pay 付款后打开「新增记录」 | Futari',
+      description: '用 iPhone 的快捷指令，在 Apple Pay 付款后打开 Futari 的「新增记录」，金额先填好，由你确认后保存。Futari 不连接付款账户，也不读取付款数据。',
+      ogDescription: '付款后，iPhone 快捷指令打开 Futari 的「新增记录」，金额、分类和描述先填好，保存由你来按。',
     },
   },
   useCase: {
@@ -3434,8 +3526,8 @@ export const zhCN: Translations = {
             answer: '建议把每笔支出记下来并标记分摊方式——对半、按比例、或全额由某人负担。Futari 会自动累计余额，让你随时看到目前谁多出了多少，不需要月底才对账。',
           },
           {
-            question: 'Futari 要收费吗？',
-            answer: '基本功能完全免费，包含双人账本、多种分摊模式与实时同步。',
+            question: '两个人都要付费吗？',
+            answer: '不用。双人账本、多种分摊模式和实时同步都免费，邀请另一半加入也不需要另外开通什么。',
           },
         ],
       },
@@ -3464,7 +3556,7 @@ export const zhCN: Translations = {
           },
           {
             question: '夫妻记账要分开记还是合在一起？',
-            answer: 'Futari 的设计是两个人共用一本账本，每笔支出都清楚标记是谁付的、怎么分摊，而不是把两个人的账强制合并。你们可以选择全额 AA、按比例，或某类支出由某人负担。',
+            answer: 'Futari 的设计是两个人共用一本账，每笔支出都清楚标明是谁付的、怎么分摊，而不是把两个人的账强行合并。你们可以选择对半 AA、按比例，或某类支出由某一方全额承担。',
           },
           {
             question: 'Futari 支援什么样的爱物记录？',
@@ -3479,11 +3571,11 @@ export const zhCN: Translations = {
         painPoints: [
           {
             heading: '「这个月在猫咪身上花了多少？」',
-            body: '医疗费、疫苗、零食、玩具、美容——宠物费用分散在各种类别，很难知道整体花了多少。Futari 让每笔支出都可以关联到你们的毛孩，筛一下就看到全貌。',
+            body: '医疗费、疫苗、零食、玩具、美容分散在不同分类里，想知道猫咪这个月花了多少，得自己加总。把这些支出记在它名下，它的页面就直接显示本月的数字；想回头看更早的，用筛选器选这只，就只剩它的支出。',
           },
           {
             heading: '「我付了大部分，对方记得吗？」',
-            body: '两个人一起养，费用却可能都由某一方先垫。Futari 的分摊功能让每笔支出都清楚标记，余额自动累计，不需要特别去问「这次谁出比较多」。',
+            body: '看病、买粮常常是同一个人先掏钱。每笔记下是谁付的、对方分担多少，余额就一直留着；想结清时记一笔结算，不用凭印象说「我好像出得多」。',
           },
           {
             heading: '「多猫家庭的费用怎么分开记？」',
@@ -3497,11 +3589,11 @@ export const zhCN: Translations = {
           },
           {
             question: '猫咪、狗狗的医疗费要怎么记才清楚？',
-            answer: '在 Futari 建立你们的毛孩作为「爱物」，每次回诊或购买相关用品时关联到这个爱物，费用就会自动归类。想看这只猫这个月花了多少，筛一下就出来了。',
+            answer: '新增一只宠物，填上名字和种类就能用。之后每次看诊、买药、洗澡美容，记账时选这只毛孩；想看它的全部医疗费，打开它的页面，或在筛选器里选这只就能看到。',
           },
           {
-            question: '如果养了两只以上，可以分开记吗？',
-            answer: '可以。Futari 支援多个爱物，每只毛孩都可以独立建立，各自的费用分开记，不会混在一起。',
+            question: '粮食、猫砂这种固定要买的，可以设成定期吗？',
+            answer: '可以。把每月都会买的粮食设成定期支出，并选择这只毛孩；到了日期，首页会出现一张待确认的卡片，金额没变就点「就这样」，这次价格不同就点「改一下」。不会在后台自动写进账本。',
           },
         ],
       },
@@ -3548,8 +3640,8 @@ export const zhCN: Translations = {
             body: '同住费用最容易忘，因为每笔都不大，但累积起来差距不小。Futari 让每笔费用即时记下来，月底不用再翻消息对账。',
           },
           {
-            heading: '「按比例分还是对半分？每次都要重新算。」',
-            body: '没有对错，只有适合你们的方式。Futari 支援对半、按比例、全额等多种分摊模式，选一次设定好，之后自动套用。',
+            heading: '「房间大小不一样，电费还要对半分吗？」',
+            body: '室友之间的分法常常不是对半：房间大的多出一点，整天在家的多分担一点电费。Futari 可以按比例分，比例设好之后，后面的每一笔都能直接套用，不用每次重新心算。',
           },
           {
             heading: '「一方先垫，另一方记不清楚要还多少。」',
@@ -3563,11 +3655,11 @@ export const zhCN: Translations = {
           },
           {
             question: '同住费用怎么记才不会出问题？',
-            answer: '每笔费用当下记下来，标记谁付的、怎么分。Futari 会自动累计余额，任何时候都知道目前的状态，不用等月底才结算。',
+            answer: '付款当下就记，并选好这笔怎么分：房租按各自房间的比例，共用的日用品对半。谁先垫了钱，Futari 的余额会记着；下次轮到谁付、还差多少，看余额就知道。',
           },
           {
-            question: 'Futari 要收费吗？',
-            answer: '基本功能完全免费，包含双人账本、多种分摊模式与实时同步。',
+            question: '室友不是情侣，也能共用一本账吗？',
+            answer: '可以。账本固定是两个人，邀请同住的室友加入就能一起记，不需要是情侣。如果其中一位搬走、退出账本，这段账会留在过去的章节里，随时可以翻回来看。',
           },
         ],
       },
@@ -3591,16 +3683,16 @@ export const zhCN: Translations = {
         ],
         faq: [
           {
-            question: '每月固定支出要怎么和伴侣一起记？',
-            answer: '在 Futari 记下每笔固定支出，标记谁付的、怎么分摊。两个人都能即时看到每笔账，不需要另外说明。',
+            question: '固定支出通常是同一个人在交，怎么让另一个人也看到？',
+            answer: '每笔固定账都记上付款人，放进同一本账。另一个人打开就能看到这个月谁交了什么，不用再问「网费交了没」；之后想回头查，也能在筛选器里按分类或付款人筛出来。',
           },
           {
             question: 'Futari 有定期支出提醒功能吗？',
-            answer: 'Futari 支援定期支出规则，可以设定每月固定发生的账，到时系统会提示确认，让固定账不被遗忘。',
+            answer: '有。把房租、网费、保险费设成定期支出，周期可以是每月、每季、每半年或每年；到了日期，首页会出现待确认的卡片，确认后才记进账本，固定账不会被忘掉。',
           },
           {
-            question: 'Futari 要收费吗？',
-            answer: '基本功能完全免费，包含双人账本、多种分摊模式与实时同步。',
+            question: '固定支出每个月金额不一样，怎么办？',
+            answer: '水电、话费这类每期金额会变的账，照样可以设成定期支出。到期的卡片上点「改一下」，填入这期实际的金额；这期没有这笔，就点「跳过」。',
           },
         ],
       },
@@ -3619,21 +3711,21 @@ export const zhCN: Translations = {
           },
           {
             heading: '「这笔是我出的，但后来算起来好像不公平。」',
-            body: '大笔支出最容易造成不平衡感。Futari 的分摊功能让每笔大额费用清楚标记怎么分，余额自动更新，不靠感觉靠数字。',
+            body: '大额支出最容易让其中一个人觉得吃亏。每一笔记下付款人和分法，余额随之更新，两个人直接看数字，不用回头翻是谁先刷的卡。',
           },
         ],
         faq: [
           {
             question: '大笔支出要怎么和伴侣一起规划记账？',
-            answer: '在 Futari 记下每笔大额支出，关联到对应爱物（如车辆、家电），选好分摊方式，两个人都即时看到。需要回头看这项资产花了多少，筛一下就出来了。',
+            answer: '先说好分法再记：一人全付、对半或按比例都可以。付款当天记下金额、付款人和分法，另一个人马上就能看到；事后想改分法，修改那一笔，余额会跟着重算。',
           },
           {
             question: '购车费用怎么在 Futari 记？',
-            answer: '在 Futari 建立你们的车辆作为爱物，之后每笔相关费用关联到这辆车——购车金、保险、保养都归在一起，清楚看见这台车的总花费。',
+            answer: '把车建成一个爱物，购车款、保险、保养、加油都记在这辆车名下。车辆有加油记录，油耗和油费看得到；车辆页面也会显示本月和这个章节的花费。',
           },
           {
-            question: 'Futari 要收费吗？',
-            answer: '基本功能完全免费，包含双人账本、多种分摊模式与实时同步。',
+            question: '一个人先垫了大额，之后怎么还？',
+            answer: '先垫的人记为付款人，并选择由对方承担的分法，余额就会显示对方欠多少。要还的时候记一笔结算，余额会随之减少或清零。',
           },
         ],
       },
@@ -3657,16 +3749,16 @@ export const zhCN: Translations = {
         ],
         faq: [
           {
-            question: '外食费用要怎么和另一半一起记？',
-            answer: 'Futari 让每笔外食费用即时记下来，标记谁付的、怎么分，两个人都即时看到。月底可以看这个月饮食类的累计，不需要另外整理。',
+            question: '每天外食的小额支出，怎么记才不麻烦？',
+            answer: '吃完当下记一笔：金额、谁付、这顿怎么分。轮流请客的，就选由付款人全额承担；各付一半的，选对半。月底筛选饮食类别，就能看到这个月累计花了多少。',
           },
           {
             question: '外卖费用可以在 Futari 记吗？',
             answer: '可以。Futari 的餐饮分类涵盖各种饮食支出，外卖、外带、堂食都可以记，分类后清楚看见饮食开销的全貌。',
           },
           {
-            question: 'Futari 要收费吗？',
-            answer: '基本功能完全免费，包含双人账本、多种分摊模式与实时同步。',
+            question: '想知道外食是不是花多了，Futari 会提醒吗？',
+            answer: '不会。日常账不设预算上限，也不会弹出超支提醒，只把饮食类这个月的金额列出来；要不要调整，由你们两个人商量。',
           },
         ],
       },
@@ -3677,7 +3769,7 @@ export const zhCN: Translations = {
         painPoints: [
           {
             heading: '「这个月在孩子身上花了多少？我要想一下。」',
-            body: '医疗费、食品、衣物、课程——育儿支出分散在各个类别，很难有整体感。Futari 让每笔支出关联到孩子，筛一下就看到全貌。',
+            body: '医疗费、食品、衣物、课程——育儿支出散在各个类别里，很难有整体感。把每笔支出记在孩子名下，孩子的页面会显示本月的花费；想回头看更早的，用筛选器选这个孩子，就只剩孩子的支出。',
           },
           {
             heading: '「带孩子看诊都是我付的，对方记得吗？」',
@@ -3685,21 +3777,21 @@ export const zhCN: Translations = {
           },
           {
             heading: '「有两个孩子，费用要分开记。」',
-            body: 'Futari 支援多个爱物，每个孩子都可以独立建立，各自的费用分开记，清楚知道每个孩子的开销。',
+            body: '每个孩子各建一个，奶粉、学费、看诊分别记在各自名下；两个孩子的数字不会加在一起，老大和老二各花多少一目了然。',
           },
         ],
         faq: [
           {
-            question: '育儿费用要怎么和另一半一起记？',
-            answer: '在 Futari 建立孩子作为爱物，每笔育儿相关费用关联到这个孩子，两个人即时看到、自动分摊，不需要月底才对账。',
+            question: '孩子的花销，两个人怎么一起记比较不乱？',
+            answer: '新增孩子之后，记账时选这个孩子，两个人都会实时看到。分法每笔自己选：对半、按比例，或由出钱的人全额承担，不用等到月底才对账。',
           },
           {
             question: '婴幼儿费用种类很多，Futari 可以分类吗？',
             answer: 'Futari 有丰富的支出分类，育儿相关费用可以用医疗、餐饮、购物等分类归类，每笔也可以关联到孩子，双重维度让费用清晰。',
           },
           {
-            question: 'Futari 要收费吗？',
-            answer: '基本功能完全免费，包含双人账本、多种分摊模式与实时同步。',
+            question: '孩子的资料，Futari 会怎么保存？',
+            answer: '账本只对你们两人的账号开放，连接使用 HTTPS 加密；孩子的本名、身份证号这类敏感字段，会另外加密后才存进数据库。',
           },
         ],
       },
@@ -3710,7 +3802,7 @@ export const zhCN: Translations = {
         painPoints: [
           {
             heading: '「我们说好 AA，但每次结账都不知道谁欠谁多少。」',
-            body: 'AA 制最难的地方不是「决定分法」，而是「执行起来记不清楚」。Futari 让每笔账即时记下来，余额自动累计，谁欠谁多少一眼就知道。',
+            body: 'AA 制最难的不是定分法，而是记得住。当下记一笔付款人和分法，余额就往上累计，两个人随时看得到「现在差多少」。',
           },
           {
             heading: '「这顿我付，下顿你付——但次数和金额不一样。」',
@@ -3728,11 +3820,11 @@ export const zhCN: Translations = {
           },
           {
             question: '轮流付账要怎么在 Futari 记？',
-            answer: '每次结账时记下这笔费用由谁付、分摊方式是什么（对半或某人全额）。Futari 会累计余额，让你随时知道目前的平衡状态。',
+            answer: '谁付就记谁是付款人，分法选对半，轮到对方付的那顿也一样。次数相同、金额不同的时候，余额会算出差距，想结清就记一笔结算。',
           },
           {
-            question: 'Futari 要收费吗？',
-            answer: '基本功能完全免费，包含双人账本、多种分摊模式与实时同步。',
+            question: '和朋友一起的 AA 聚餐，也能记吗？',
+            answer: '可以。两个人之间的 AA 记在主账本；多人聚餐可以开一个「出游」，把链接发到群里，朋友不用下载就能加入记账，结束时会算出谁该转给谁，笔数最多是人数减一。',
           },
         ],
       },
@@ -3813,6 +3905,122 @@ export const zhCN: Translations = {
     },
   },
 
+  featureShortcuts: {
+    heroKicker: '快捷指令记账',
+    heroTitle: '付完款，让 iPhone 把「新增记录」打开',
+    heroSubtitle: '用 iPhone 的「快捷指令」，在付款后打开 Futari 的「新增记录」。金额、分类和描述先填好，你看过、需要就改，再按保存。',
+    breadcrumbLabel: '快捷指令记账',
+    howToStepName: '步骤 {n}',
+    answerQuestion: 'Apple Pay 付款后，怎么快速记到 Futari？',
+    answer: 'Futari 不连接任何付款账户，也不读取你的付款数据。做事的是 iPhone 的「快捷指令」：付款后它打开 Futari 的「新增记录」，把金额、分类和描述先填好，你确认后自己按保存，记录才会写进账本。这个做法只适用于 iPhone 的「快捷指令」App。',
+    vars: {
+      amount: '金额',
+      merchant: '商家',
+    },
+    applePay: {
+      heading: 'Apple Pay：刷完卡就跳出「新增记录」',
+      intro: '前提：iPhone 已安装 Futari 并登录。下面用「钱包」的自动化，每次用 Apple Pay 付款，就打开一次填好的「新增记录」。',
+      steps: [
+        {
+          title: '新建「钱包」自动化',
+          body: '打开「快捷指令」App，进入「自动化」，点 ＋ 选「钱包」。在「轻点时」画面勾选要记的卡片；类别可以保持全部勾选。点「下一步」→「新建快捷指令」。最后在这个自动化的设置行，运行方式选「立即运行」，这样不必每次先点通知。',
+        },
+        {
+          title: '把金额取整数（建议）',
+          body: '建议加上：加一个「取整数」动作，点「快捷指令输入」选「数量」。如果金额带小数（例如 120.00），Futari 会让金额栏留空；先取整数比较保险。「120」「1,280」「１２０」可以，「120.00」「NT$120.00」「120元」会让金额栏留空。',
+        },
+        {
+          title: '把商家名称做 URL 编码',
+          body: '加一个「URL 编码」动作，输入选「快捷指令输入」→「商家」。中文和空格不先编码，网址会在中间断开，描述会留空或只剩一半。描述可有可无，不想带就跳过这步，并把网址里的 &note=… 整段去掉。',
+        },
+        {
+          title: '用「文本」拼出网址',
+          body: '加一个「文本」动作，粘贴下面的网址，把 [金额] 换成第 2 步的结果、[商家] 换成第 3 步的结果（没加第 2 步，就换成「快捷指令输入」→「数量」）。想换分类，就改 category= 后面的 id（见下方分类表）。',
+        },
+        {
+          title: '打开 URL',
+          body: '加一个「打开 URL」动作，输入选上一步的文本。之后每次用 Apple Pay 付款，Futari 会打开并跳出「新增记录」，确认后按保存。',
+        },
+      ],
+      urlLabel: '网址（App）',
+      platformNote: '这个流程只适用于 iPhone 的「快捷指令」App。',
+      foreignNote: '外币提醒：用 Apple Pay 付外币时，快捷指令给的是外币金额，Futari 会把它当成账本主币种的金额带入。请在「新增记录」里改成实际的金额。',
+    },
+    linePay: {
+      heading: '',
+      intro: '',
+      noteVar: '',
+      steps: [],
+    },
+    web: {
+      heading: '没有装 App：用网页网址',
+      body: '没有装 App、用浏览器或「添加到主屏幕」的人，把网址换成下面这条，「打开 URL」会在 Safari 打开。要先在 Safari 登录过 Futari。# 后面的内容只留在你的浏览器，不会发送到服务器。',
+      urlLabel: '网址（网页）',
+    },
+    params: {
+      heading: '网址可以带哪些值',
+      intro: '三个参数都可以省略；某个值不合格时，只有那一格不带入，其他照样带入。',
+      cols: {
+        param: '参数',
+        rule: '规则',
+        fallback: '不合格时',
+      },
+      rows: [
+        {
+          param: 'amount',
+          rule: '正整数，1 到 9,999,999。可以有千分位逗号（1,200），全角数字也可以。小数、负数、1e5 这类写法都不收。',
+          fallback: '金额留空，自己输入',
+        },
+        {
+          param: 'category',
+          rule: '下表其中一个 id，要全小写、完全一样。',
+          fallback: '用默认的「饮食」',
+        },
+        {
+          param: 'note',
+          rule: '会变成「描述」，最多 100 个字。',
+          fallback: '描述留空，保存前要自己填',
+        },
+      ],
+      categoriesHeading: '分类 id',
+      catCols: {
+        id: 'id',
+        name: '显示',
+      },
+      fixedNote: '网址只能带这三个值。日期（今天）、谁付的（你）、分摊方式与币种，都照「新增记录」平常的默认，写在网址里也不会采用；也不会自动归到进行中的旅行，要归到旅行请在界面上自己选。',
+    },
+    whenNot: {
+      heading: '什么时候不会跳出来',
+      intro: '快捷指令只负责打开。下面三种情况 Futari 会安静地略过，不动你的界面：',
+      items: [
+        '另一个窗口正开着（例如正在改某一笔）：快捷指令会被忽略，改到一半的内容不会被动到。关掉窗口后再运行一次。',
+        '正在看过去的章节：过去章节是只读的，先切回当前的章节。',
+        '还没登录：登录后会停在首页，填好的内容不会保留，再运行一次快捷指令就好。',
+      ],
+    },
+    trouble: {
+      heading: '常见状况',
+      cols: {
+        symptom: '状况',
+        cause: '原因',
+      },
+      rows: [
+        {
+          symptom: '跳出来了，但金额是空的',
+          cause: '金额不是整数。通常是少了「取整数」那一步，或带了「元」「NT$」。',
+        },
+        {
+          symptom: '描述留空或只有一半',
+          cause: '商家名称没有先经过「URL 编码」。',
+        },
+        {
+          symptom: '分类变成「饮食」，不是我写的',
+          cause: 'category 的 id 拼错，或用了大写。',
+        },
+      ],
+    },
+  },
+
   errors: {
     actions: {
       group_not_found: '找不到家计簿',
@@ -3857,6 +4065,7 @@ export const zhCN: Translations = {
       split_ratio_invalid: '分摊比例必须为 1–99 的整数',
       split_type_invalid: '分摊方式无效',
       profile_not_found: '找不到个人资料',
+      display_name_reserved: '这个名字是系统保留的，请换一个名字',
       fx_rate_not_set: '未设置 {from} → {to} 汇率',
       fx_rate_not_positive: '汇率必须是正数',
       currency_unsupported: '不支持的货币',
@@ -3883,6 +4092,9 @@ export const zhCN: Translations = {
       rule_recipient_not_member: '这条规则的收入归属已离开这本账本，请先修改再恢复。',
       pending_income_not_found: '待确认收入已被处理或找不到',
       pending_income_handled_elsewhere: '待确认收入已被其他设备处理',
+      shortcut_pending_handled_elsewhere: '这张待确认已在其他设备处理或已过期',
+      shortcut_pending_needs_note: '这张待确认没有描述，请先编辑再记下',
+      shortcut_pending_invalid: '内容无法记下，请检查金额与日期',
       review_month_locked: '这个月的留言已锁定，无法再修改',
       review_message_locked: '留言已锁定，无法再修改',
       asset_not_found: '找不到该资产',

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { seedAuthUsers, deleteAuthUsers } from './_authUser'
 
 // ─── Regression for #1440 ─────────────────────────────────────────────────
 //
@@ -21,10 +22,10 @@ import { resolve } from 'node:path'
 // the pattern already used in lib/db/queries/asset.ts and _predicates.ts.
 //
 // Local throwaway database only; refuses to run against anything that is not
-// localhost. Start one with:
-//   docker run -d --name pg-1440 -e POSTGRES_PASSWORD=pg -p 127.0.0.1:55610:5432 postgres:17
-//   DATABASE_URL_DIRECT=postgres://postgres:pg@127.0.0.1:55610/postgres npx drizzle-kit push --force
-//   DATABASE_URL=postgres://postgres:pg@127.0.0.1:55610/postgres npx vitest run __tests__/actions/leaveGroup.ownedAssets.test.ts
+// localhost. Run it with:
+//   DATABASE_URL=<stand-in url> npx vitest run __tests__/actions/leaveGroup.ownedAssets.test.ts
+// The Postgres + Supabase stand-in recipe lives in __tests__/actions/_standinCli.mts
+// (drizzle-kit push is not enough: no auth schema, no SQL functions).
 // ──────────────────────────────────────────────────────────────────────────
 
 function loadEnvLocal() {
@@ -45,6 +46,9 @@ function loadEnvLocal() {
   }
 }
 loadEnvLocal()
+// Each test seeds over the network (incl. an auth.users row, #1710); the default
+// 5 s is too tight against dev.
+vi.setConfig({ testTimeout: 60_000 })
 
 const databaseUrl = process.env.DATABASE_URL ?? ''
 const isLocalDb = (() => {
@@ -128,6 +132,10 @@ async function seedDuoGroup(): Promise<SeedRefs> {
     { id: userAId, displayName: 'TEST_1440_userA' },
     { id: userBId, displayName: 'TEST_1440_userB' },
   ])
+  await seedAuthUsers([
+    { id: userAId, displayName: 'TEST_1440_userA' },
+    { id: userBId, displayName: 'TEST_1440_userB' },
+  ])
 
   const [group] = await db.insert(oikosGroups).values({
     name: 'TEST_1440_duo',
@@ -178,6 +186,7 @@ async function cleanup(refs: SeedRefs) {
   }
   await db.delete(groupBalance).where(eq(groupBalance.groupId, refs.oldGroupId))
   await db.delete(oikosGroups).where(eq(oikosGroups.id, refs.oldGroupId))
+  await deleteAuthUsers([refs.userAId, refs.userBId])
   await db.delete(profiles).where(inArray(profiles.id, [refs.userAId, refs.userBId]))
 }
 

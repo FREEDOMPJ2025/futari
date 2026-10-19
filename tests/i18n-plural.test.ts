@@ -28,11 +28,36 @@ describe('outing plural strings', () => {
     expect(pickPlural('en', 1, en.outing.share.unpicked).replace('{n}', '1')).toBe('1 name not picked yet')
     expect(pickPlural('en', 4, en.outing.share.unpicked).replace('{n}', '4')).toBe('4 names not picked yet')
     expect(pickPlural('en', 1, en.outingList.countTag)).toBe('1 person')
+    const solo = (n: number) => pickPlural('en', n, en.dashboard.soloHero.countLabel).replace('{count}', String(n))
+    expect(solo(1)).toBe('1 entry')
+    expect(solo(7)).toBe('7 entries')
+  })
+
+  it('en reads naturally at 1 and 2 for the #1798 strings', () => {
+    const pick = (forms: { one: string; other: string }, n: number, ph: string) =>
+      pickPlural('en', n, forms).replace(ph, String(n))
+    const days = en.assets.insuranceList.summaryDaysUntil
+    expect(pick(days, 1, '{days}')).toBe('in 1 day')
+    expect(pick(days, 2, '{days}')).toBe('in 2 days')
+    const note = en.assetDetail.savings.maturedAwaitingPremiumNote
+    expect(pick(note, 1, '{count}').replace('{total}', '$ 100')).toBe('$ 100 paid in across 1 entry')
+    expect(pick(note, 2, '{count}').replace('{total}', '$ 100')).toBe('$ 100 paid in across 2 entries')
+    const total = en.migrate.preview.totalRowsLabel
+    expect(pick(total, 1, '{count}')).toBe('1 record')
+    expect(pick(total, 2, '{count}')).toBe('2 records')
+    const exp = en.migrate.preview.expenseRowsLabel
+    expect(pick(exp, 1, '{count}')).toBe('~1 looks like an expense')
+    expect(pick(exp, 2, '{count}')).toBe('~2 look like expenses')
   })
 
   it.each([['zh-TW', zhTW], ['zh-CN', zhCN], ['ja', ja]] as const)('%s: one and other are identical', (_l, d) => {
     expect(d.outing.share.unpicked.one).toBe(d.outing.share.unpicked.other)
     expect(d.outing.splitCountTag.one).toBe(d.outing.splitCountTag.other)
     expect(d.outingList.countTag.one).toBe(d.outingList.countTag.other)
+    expect(d.dashboard.soloHero.countLabel.one).toBe(d.dashboard.soloHero.countLabel.other)
+    expect(d.assets.insuranceList.summaryDaysUntil.one).toBe(d.assets.insuranceList.summaryDaysUntil.other)
+    expect(d.assetDetail.savings.maturedAwaitingPremiumNote.one).toBe(d.assetDetail.savings.maturedAwaitingPremiumNote.other)
+    expect(d.migrate.preview.totalRowsLabel.one).toBe(d.migrate.preview.totalRowsLabel.other)
+    expect(d.migrate.preview.expenseRowsLabel.one).toBe(d.migrate.preview.expenseRowsLabel.other)
   })
 })

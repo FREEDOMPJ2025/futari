@@ -168,3 +168,22 @@ describe('no animation bypasses the CSS layer', () => {
     expect(offenders).toEqual([])
   })
 })
+
+/** #1527 — the brand-page motion lives in its own file. Every animation there
+ *  must be declared inside a `no-preference` block, so reduced motion gets the
+ *  static lit state with nothing to override. */
+describe('landing-motion.css — motion only under no-preference', () => {
+  const landing = readFileSync(join(REPO_ROOT, 'app/[locale]/_landing/landing-motion.css'), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+  const inside = blocksAfter(landing, '@media (prefers-reduced-motion: no-preference)').join('\n')
+  const outside = blocksAfter(landing, '@media (prefers-reduced-motion: no-preference)')
+    .reduce((rest, block) => rest.replace(block, ''), landing)
+
+  it('declares animations', () => {
+    expect(inside).toMatch(/animation-name\s*:/)
+  })
+
+  it('declares no animation outside a no-preference block', () => {
+    expect(outside).not.toMatch(/animation(-name)?\s*:/)
+  })
+})
