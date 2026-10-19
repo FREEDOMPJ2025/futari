@@ -522,36 +522,43 @@ function MigrateLinksSection({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+        {/* Migrate sells an action (bring your data), so it reads as a ruled
+            list with an ember marker and an arrow — the in-world row of the
+            inner brand pages (#1524), not three tiles (#1528). Use-case above
+            stays prose in columns; this one stays one row per source. */}
+        <ul className="m-0 p-0 list-none border-t border-hairline">
           {items.map((item) => (
-            <LandingCtaLink
-              key={item.source}
-              href={item.href}
-              ctaLocation="footer_migrate"
-              target={item.target}
-              // No custom aria-label: the visible title + body already
-              // self-describe the card, so the accessible name is computed from
-              // them — satisfying WCAG 2.5.3 Label in Name (#919). A bespoke
-              // aria-label ("從 X 搬到 Futari") wouldn't contain the visible
-              // "搬過來" text and failed label-content-name-mismatch.
-              // Migrate keeps the tile grammar: three genuinely parallel
-              // options, so three equal tiles are the honest shape (#1151).
-              // Feedback is a tonal step, not a lift — border darkens on hover,
-              // surface sinks to --surface-alt on press (#1150).
-              className="block p-5 md:p-6 rounded-tile bg-surface border border-hairline text-ink no-underline transition-colors duration-150 ease-out hover:border-ink-3 active:bg-surface-alt motion-reduce:transition-none"
-            >
-              <p
-                className="m-0 text-base font-medium text-ink"
-                style={{ letterSpacing: '-0.1px' }}
+            <li key={item.source} className="border-b border-hairline">
+              <LandingCtaLink
+                href={item.href}
+                ctaLocation="footer_migrate"
+                target={item.target}
+                // No custom aria-label: the visible title + body already
+                // self-describe the row, so the accessible name is computed from
+                // them — satisfying WCAG 2.5.3 Label in Name (#919). A bespoke
+                // aria-label ("從 X 搬到 Futari") wouldn't contain the visible
+                // "搬過來" text and failed label-content-name-mismatch.
+                className="group flex items-start gap-3 py-5 md:py-6 text-ink no-underline text-left transition-opacity duration-150 ease-out active:opacity-60 motion-reduce:transition-none"
               >
-                {item.title}
-              </p>
-              <p className="m-0 mt-1.5 text-sm leading-[1.6] text-ink-2">
-                <Phrase body text={item.body} />
-              </p>
-            </LandingCtaLink>
+                <span aria-hidden="true" className="mt-2.5 size-2 shrink-0 rounded-full bg-accent" />
+                <div className="grid grid-cols-1 md:grid-cols-3 md:gap-x-6 md:items-baseline min-w-0 flex-1">
+                  <p className="m-0 font-serif text-lg font-medium text-ink underline decoration-transparent underline-offset-4 transition-colors duration-150 ease-out group-hover:decoration-ink motion-reduce:transition-none">
+                    {item.title}
+                  </p>
+                  <p className="m-0 mt-1.5 md:mt-0 md:col-span-2 text-sm leading-[1.6] text-ink-2">
+                    <Phrase body text={item.body} />
+                  </p>
+                </div>
+                <span
+                  aria-hidden="true"
+                  className="shrink-0 self-center text-base text-ink-3 transition-transform duration-150 ease-out group-hover:translate-x-1 motion-reduce:transition-none"
+                >
+                  →
+                </span>
+              </LandingCtaLink>
+            </li>
           ))}
-        </div>
+        </ul>
 
         <div className="mt-6 md:mt-7 text-center md:text-left">
           <Link
@@ -641,7 +648,7 @@ function UseCaseLinksSection({
           </p>
         </div>
 
-        {/* Use-case speaks in a different grammar from the migrate tiles below
+        {/* Use-case speaks in a different grammar from the migrate rows below
             (#1151): no card chrome — each situation is a hairline-topped
             editorial entry whose serif name is the link, with a trailing
             arrow. Migrate sells an action (bring your data); this sells
