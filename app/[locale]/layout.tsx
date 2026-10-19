@@ -29,9 +29,12 @@ const FRAUNCES_LATIN =
 //   Links and <summary> that carry no ring of their own (rows, pills, text links)
 //   would show the browser's blue outline, so they get the same ink ring; :where()
 //   keeps that rule's specificity level with the ink-fill rule, which follows it.
+//   The outline is transparent, not 0: forced colors drops box-shadow and paints a
+//   transparent outline in the system colour, so without it keyboard focus vanished
+//   entirely under High Contrast (no error; the row just shows no ring).
 const BRAND_CSS =
   '.brand{--focus-ring-color:var(--ink)}' +
-  '.brand :where(a,summary):focus-visible{outline:0;box-shadow:0 0 0 2px var(--ink)}' +
+  '.brand :where(a,summary):focus-visible{outline:2px solid transparent;box-shadow:0 0 0 2px var(--ink)}' +
   '.fc-edge:focus-visible,.skip:focus-visible,.oik-btn:focus-visible{box-shadow:0 0 0 2px var(--on-fill),0 0 0 4px var(--ink)}' +
   '.ph{word-break:keep-all;overflow-wrap:anywhere}' +
   '.skip{position:fixed;left:8px;top:8px;z-index:60;padding:12px 16px;border-radius:var(--radius-bubble);background:var(--ink);color:var(--on-fill);transform:translateY(-200%)}' +
