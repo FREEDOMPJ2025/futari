@@ -98,6 +98,12 @@ export function IllustrationSlot({ mobile }: Props) {
         loading="lazy"
         sizes="50vw"
       />
+      {/* #1528 A5 — 768-1023 draws no phone mock, so the beat leaves the
+          couple's own phone here too (same spans, same CSS, as the mobile
+          band). From 1024 the mock takes over and these are display:none. */}
+      <span aria-hidden="true" className="lp-dot lp-dot-1 lp-dot-band-1" />
+      <span aria-hidden="true" className="lp-dot lp-dot-2 lp-dot-band-2" />
+      <span aria-hidden="true" className="lp-dot lp-dot-3 lp-dot-band-3" />
     </div>
   )
 }

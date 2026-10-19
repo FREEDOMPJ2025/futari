@@ -14,6 +14,16 @@
  * that are not .bi-hero/.bi-band sit on the content rail), .bi-pool / .bi-ribbon
  * / .bi-window (one lamp structure per page family).
  * Motion: transform/opacity/background only; off under prefers-reduced-motion.
+ *
+ * S4 (#1528): a row's ember lights as the row scrolls into view (bi-ember-on,
+ * scroll-driven, inside @supports + no-preference; decorative span, transform +
+ * opacity, rest state = lit). The timeline is the row's, not the ember's: an 8px
+ * subject would run its whole range in 8px of scroll. The layout wrapper
+ * (.bi-root) gets overflow:clip because overflow:hidden makes it a scroller that
+ * never scrolls, so every view() timeline would sit at progress 1: silently
+ * static, no error (cf. main.lp-root, #1527). Side effect: the sticky .bi-band
+ * heading rail (1024+) is now live, which overflow:hidden had been defeating.
+ * Comments here stay out of the CSS string below: it ships twice per page.
  */
 export const BI_NAMES = [
   'arrow',
@@ -362,6 +372,18 @@ export const BRAND_INNER_CSS = `.bi-container {
   color: var(--ink-2);
   font-variant-numeric: tabular-nums;
 }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .bi-row, .bi-link, .bi-pill { view-timeline: --bi-row block; }
+    .bi-ember {
+      animation: bi-ember-on cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-timeline: --bi-row;
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+@keyframes bi-ember-on { from { opacity: 0.2; transform: scale(0.4); } }
+@supports (overflow: clip) { .bi-root { overflow: clip; } }
 @media (prefers-reduced-motion: reduce) {
   .bi-ember::after,
   .bi-link,

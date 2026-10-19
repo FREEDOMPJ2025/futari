@@ -3,10 +3,11 @@
  * Idea: every record is a point of light, and the points join into the two
  * people's spectrum. Three beats carry it, all CSS, all transform + opacity:
  *
- *   1. Dots   — the phone mock's three feed rows (desktop) / the couple's own
- *               phone (mobile band) each give off a point of light that drifts
- *               up and dissolves into the illustration's ribbon. Time-based,
- *               once, a beat after load.
+ *   1. Dots   — the phone mock's three feed rows (1024+) / the couple's own
+ *               phone in the illustration (below 1024) each give off a point of
+ *               light that drifts up and dissolves into the illustration's
+ *               ribbon. Time-based, once, a beat after load. Exactly one of the
+ *               two emitters is on screen at any width (#1528 S4).
  *   2. Halos  — the four 「四種光」 rows: the glyph's halo comes on as its row
  *               scrolls into view (scroll-driven, `view()`).
  *   3. Lamps  — the trust / use-case / migrate sections: a warm glow behind the
@@ -36,18 +37,22 @@
 
 .lp-dot {
   position: absolute;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   opacity: 0;
   pointer-events: none;
   /* A tiny lamp: pale-warm core, a ring in the dot's own hue, a soft falloff.
-   * A gradient, not a blur or a shadow, so nothing needs a filter layer. */
+   * A gradient, not a blur or a shadow, so nothing needs a filter layer. The
+   * ring and the falloff are strong on purpose (S4): the artwork is already
+   * full of small baked-in sparkles, and a dot only reads as *the* light when
+   * its ring is clearly bigger and more saturated than they are. */
   background: radial-gradient(
     circle,
-    var(--realtime-flash) 0 22%,
-    currentColor 30% 44%,
-    color-mix(in srgb, currentColor 50%, transparent) 58%,
-    transparent 74%
+    var(--realtime-flash) 0 20%,
+    currentColor 27% 40%,
+    color-mix(in srgb, currentColor 65%, transparent) 50%,
+    color-mix(in srgb, currentColor 26%, transparent) 64%,
+    transparent 78%
   );
 }
 /* Three hues from the asset family, matching the ribbon's terracotta / sage /
@@ -57,29 +62,41 @@
 .lp-dot-3 { color: var(--asset-color-pet); }
 
 /* Where each dot is born, and how far it drifts (--lp-dx/--lp-dy, in the
- * element's own, i.e. pre-scale, pixels). Phone: the three CategoryChips in the
- * feed card (the mock is fixed-size, 320x640, so these are fixed too). It is
- * drawn at scale .78, so the page distance is .78x the number here. From xl up
- * only: below that the illustration column is narrower than the drift and the
- * dots would cross the headline and CTA. */
-.lp-dot-phone-1 { left: 40px; top: 239px; --lp-dx: -244px; --lp-dy: -44px; }
-.lp-dot-phone-2 { left: 40px; top: 286px; --lp-dx: -286px; --lp-dy: -63px; }
-.lp-dot-phone-3 { left: 40px; top: 334px; --lp-dx: -144px; --lp-dy: -50px; }
-@media (max-width: 1279px) {
+ * element's own, i.e. pre-scale, pixels). There are two emitters and exactly one
+ * is on screen at any width, so the beat renders from 320 to 1920 (#1528 A5):
+ *   - the couple's own phone in the illustration (.lp-dot-band-*): below 1024,
+ *     where the phone mock is not drawn (below 768 the illustration is the
+ *     mobile band, from 768 it is the right-hand column);
+ *   - the phone mock's three feed rows (.lp-dot-phone-*): from 1024 up.
+ * The mock is fixed-size, 320x640, drawn at scale .78, so the page distance is
+ * .78x the number here. Its dots start at the three CategoryChips. Between 1024
+ * and ~1130 the column left of the mock is shorter than the full drift and the
+ * dots would cross the headline and CTA, so dx is clamped: the point of arrival
+ * stays on the illustration (left edge x=624) at any viewport width. */
+.lp-dot-phone-1, .lp-dot-phone-2, .lp-dot-phone-3 { left: 28px; width: 56px; height: 56px; }
+.lp-dot-phone-1 { top: 227px; --lp-dx: max(-244px, calc((905px - 100vw) / 0.78)); --lp-dy: -44px; }
+.lp-dot-phone-2 { top: 274px; --lp-dx: max(-286px, calc((905px - 100vw) / 0.78)); --lp-dy: -63px; }
+.lp-dot-phone-3 { top: 322px; --lp-dx: max(-144px, calc((905px - 100vw) / 0.78)); --lp-dy: -50px; }
+@media (max-width: 1023.98px) {
   .lp-dot-phone-1, .lp-dot-phone-2, .lp-dot-phone-3 { display: none; }
 }
-/* Mobile band: the phone the couple is holding in the illustration (about 50%
- * across, 68% down the artwork), up into the ribbon above it. */
-.lp-dot-band-1 { left: calc(50% - 12px); top: calc(68% - 12px); width: 24px; height: 24px; --lp-dx: -64px; --lp-dy: -72px; }
-.lp-dot-band-2 { left: calc(50% - 12px); top: calc(68% - 12px); width: 24px; height: 24px; --lp-dx: 26px;  --lp-dy: -96px; }
-.lp-dot-band-3 { left: calc(50% - 12px); top: calc(68% - 12px); width: 24px; height: 24px; --lp-dx: 92px;  --lp-dy: -64px; }
+/* The couple's phone in the artwork (about 50% across, 68% down: the picture is
+ * scaled to the box height and centred at every width, so this holds in the
+ * mobile band and the desktop column alike), up into the ribbon above it. */
+.lp-dot-band-1, .lp-dot-band-2, .lp-dot-band-3 { left: calc(50% - 17px); top: calc(68% - 17px); width: 34px; height: 34px; }
+.lp-dot-band-1 { --lp-dx: -64px; --lp-dy: -72px; }
+.lp-dot-band-2 { --lp-dx: 26px;  --lp-dy: -96px; }
+.lp-dot-band-3 { --lp-dx: 92px;  --lp-dy: -64px; }
+@media (min-width: 1024px) {
+  .lp-dot-band-1, .lp-dot-band-2, .lp-dot-band-3 { display: none; }
+}
 
 @keyframes lp-dot-drift {
   0%   { opacity: 0; transform: translate(0, 0) scale(0.4); }
-  14%  { opacity: 1; transform: translate(0, 0) scale(1); }
-  52%  { opacity: 1; transform: translate(calc(var(--lp-dx) * 0.3), calc(var(--lp-dy) * 0.75 - 28px)) scale(1.1); }
-  82%  { opacity: 0.7; transform: translate(calc(var(--lp-dx) * 0.9), calc(var(--lp-dy) * 0.95)) scale(1.2); }
-  100% { opacity: 0; transform: translate(var(--lp-dx), var(--lp-dy)) scale(1.4); }
+  12%  { opacity: 1; transform: translate(0, 0) scale(1); }
+  50%  { opacity: 1; transform: translate(calc(var(--lp-dx) * 0.3), calc(var(--lp-dy) * 0.75 - 28px)) scale(1.15); }
+  82%  { opacity: 0.8; transform: translate(calc(var(--lp-dx) * 0.9), calc(var(--lp-dy) * 0.95)) scale(1.25); }
+  100% { opacity: 0; transform: translate(var(--lp-dx), var(--lp-dy)) scale(1.45); }
 }
 
 /* ---------- 2. halos behind the four glyphs ---------- */
@@ -139,11 +156,11 @@
 @media (prefers-reduced-motion: no-preference) {
   .lp-dot {
     animation-name: lp-dot-drift;
-    animation-duration: 2.6s;
+    animation-duration: 3.4s;
     animation-fill-mode: both;
-    animation-delay: 1.4s;
+    animation-delay: 1.2s;
   }
-  .lp-dot-2 { animation-delay: 1.9s; }
+  .lp-dot-2 { animation-delay: 1.8s; }
   .lp-dot-3 { animation-delay: 2.4s; }
 }
 
