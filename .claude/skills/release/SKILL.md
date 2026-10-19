@@ -164,7 +164,30 @@ gh api repos/redtear1115/oikos/milestones --jq '[.[] | select(.title=="vX.Y.Z")]
 - **沒命中** → 標示：**純 web release，原生殼不需動作**（merge 到 `release` 後 Vercel 部署即觸達三平台）。
 - **掃描和 `[shell]` 不一致**（有 `[shell]` 卻沒命中，或沒 `[shell]` 卻命中）→ 停下來問使用者：是原生改動還沒 merge、標記忘了拿掉，還是該補標。失效的樣子：標了 `[shell]` 的版本照「純 web」收尾，原生殼沒送，商店上的殼一直停在舊版，沒有任何錯誤。
 
+再掃商店素材（這不是 build trigger，但 repo 裡改了不會自己到商店）：
+
+```bash
+git log vPREV..HEAD --name-only --pretty=format: | sort -u | grep -E '^docs/store-assets/'
+```
+
+- **有命中** → 收尾 checklist 列出路徑，標示：**商店素材有變，要另外上傳到 App Store Connect / Play Console**，上傳時機（現在或下次 ship-native）問使用者。失效的樣子：repo 裡的截圖換好了，商店上一直是舊圖，沒有任何錯誤。
+
 skill 本身到此為止，**不**改任何原生檔。
+
+### 7b. prod schema 檢查
+
+掃這版有沒有要在 prod 手動跑的資料庫變更：
+
+```bash
+git diff --name-only vPREV..HEAD -- drizzle/ db/triggers/
+```
+
+- **`drizzle/*.sql` 有新檔** → 收尾 checklist 列出 migration 編號，標示：**prod migration 必須在使用者 merge `main → release` 之前套用**。新程式一部署就會讀新欄位／新表，順序反過來 prod 會直接報錯。跑法見 [ops-runbook](../../../docs/superpowers/ops-runbook.md)（先唯讀算出待套用清單，必須剛好等於這幾個）。
+- **`db/triggers/handle_new_user.sql` 有改** → 同一段標示：要在 prod 手動套用（同一份 runbook「`handle_new_user` 的手動套用」）。
+- 每一步 prod 寫入都要使用者個別同意。auto mode 下 classifier 會擋 prod 寫入，請使用者打一句寫明動作的授權（例：「允許你在 prod 執行 drizzle-kit migrate」）；不要建議 `!` 指令，使用者可能在手機上，`!` 跑不了。
+- **沒命中** → 標示：**本版沒有 prod schema 變更**。
+
+skill 本身不跑任何 prod 指令。
 
 ### 8. Commit + 本地 tag
 
@@ -223,6 +246,8 @@ git fetch origin && git merge-base --is-ancestor vX.Y.Z origin/main \
 - harness（auto mode）擋下 `gh pr merge` 時，請使用者在該 session 輸入 `allow gh pr merge <N>`，不要繞路，也不要改由別的 session 代為 merge。
 - tag 只在確認它已經在 `origin/main` 的歷史裡之後才推；這個檢查失敗時，tag 不推、deploy PR 也不開，停下來回報。
 
+第 7b 步有 prod schema 變更時，deploy PR 內文加一行「merge 前要先在 prod 套用：<migration 編號／handle_new_user>」，並在回報裡請使用者**先別 merge**，等 prod 套用和套用後檢查都完成再按。
+
 **到此為止。** `main → release` 的 PR 開好就停，由使用者 merge（Vercel 隨即部署 prod）。
 
 ### 12. 收尾 checklist（印給使用者）
@@ -230,10 +255,13 @@ git fetch origin && git merge-base --is-ancestor vX.Y.Z origin/main \
 ```
 1. release PR：#<N> 已 merge 進 main（verifier：<誰>，head <sha>）；tag vX.Y.Z 已推
 2. deploy PR：#<M> main → release —— 由你 merge，merge 後 Vercel 自動部 prod
+   ※ 第 7b 步有 prod schema 變更時：先套用 <migration 編號／handle_new_user> 並檢查完，才 merge
 3. (optional) gh release create vX.Y.Z --notes-from-tag  或用 CHANGELOG 該段內容
 4. prod 部署後關閉 milestone：gh api -X PATCH repos/redtear1115/oikos/milestones/<number> -f state=closed
    ※ 第 5 步 (b) 已把它從 CLAUDE.md backlog 表移除，這步讓 GitHub 那邊也對齊
 5. 原生影響：<第 7 步的結論>
+6. 商店素材：<第 7 步 docs/store-assets/ 的結論>
+7. prod schema：<第 7b 步的結論>
 ```
 
 ## Gotchas
