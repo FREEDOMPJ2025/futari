@@ -96,15 +96,6 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
           landing and go straight to the dashboard. No-op in a browser tab. */}
       <LandingStandaloneRedirect dashboardHref={dashboardHref} checkingLabel={checkingLabel} />
 
-      {/* Decorative faint mark — desktop only, hidden on mobile */}
-      <div
-        aria-hidden
-        className="hidden md:block absolute pointer-events-none"
-        style={{ right: -120, top: 40, opacity: 0.06 }}
-      >
-        <FutariMark size={520} />
-      </div>
-
       {/* TOP BAR */}
       <header className="relative z-10 flex items-center justify-between px-6 md:px-12 pt-3 md:pt-6 pb-1">
         <div className="flex items-center gap-2">
@@ -300,8 +291,12 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
                 at 1024-1580 it reached up under the header CTA and won hit-testing
                 (a centre click didn't navigate, no error). Two parts: -bottom-8 sits
                 the phone low enough that its tilted top edge clears the header, and
-                pointer-events-none because the mock is aria-hidden and not interactive. */}
-            <div className="hidden lg:block absolute right-[-8px] -bottom-8 z-10 pointer-events-none">
+                pointer-events-none because the mock is aria-hidden and not interactive.
+                (#1528 N1) From xl, not lg: at 1024-1279 the illustration column is
+                too narrow and the mock covered 41-72% of it, hiding the couple, so
+                those widths show the illustration alone and the dots leave the
+                couple's own phone (landing-motion.css keeps the same 1280 switch). */}
+            <div className="hidden xl:block absolute right-[-8px] -bottom-8 z-10 pointer-events-none">
               <PhonePreview t={t} scale={0.78} />
             </div>
           </div>
