@@ -3,8 +3,8 @@
  * Idea: every record is a point of light, and the points join into the two
  * people's spectrum. Three beats carry it, all CSS, all transform + opacity:
  *
- *   1. Dots   — the phone mock's three feed rows (1024+) / the couple's own
- *               phone in the illustration (below 1024) each give off a point of
+ *   1. Dots   — the phone mock's three feed rows (1280+) / the couple's own
+ *               phone in the illustration (below 1280) each give off a point of
  *               light that drifts up and dissolves into the illustration's
  *               ribbon. Time-based, once, a beat after load. Exactly one of the
  *               two emitters is on screen at any width (#1528 S4).
@@ -64,20 +64,22 @@
 /* Where each dot is born, and how far it drifts (--lp-dx/--lp-dy, in the
  * element's own, i.e. pre-scale, pixels). There are two emitters and exactly one
  * is on screen at any width, so the beat renders from 320 to 1920 (#1528 A5):
- *   - the couple's own phone in the illustration (.lp-dot-band-*): below 1024,
+ *   - the couple's own phone in the illustration (.lp-dot-band-*): below 1280,
  *     where the phone mock is not drawn (below 768 the illustration is the
  *     mobile band, from 768 it is the right-hand column);
- *   - the phone mock's three feed rows (.lp-dot-phone-*): from 1024 up.
+ *   - the phone mock's three feed rows (.lp-dot-phone-*): from 1280 up.
  * The mock is fixed-size, 320x640, drawn at scale .78, so the page distance is
- * .78x the number here. Its dots start at the three CategoryChips. Between 1024
- * and ~1130 the column left of the mock is shorter than the full drift and the
- * dots would cross the headline and CTA, so dx is clamped: the point of arrival
- * stays on the illustration (left edge x=624) at any viewport width. */
+ * .78x the number here. Its dots start at the three CategoryChips. The switch
+ * is `xl` in Landing.tsx (`hidden xl:block`), not `lg`: between 1024 and 1279
+ * the mock covered 59-72% of the illustration and hid the couple (#1528 N1).
+ * Keep the two in step: a mock without emitters, or emitters without a mock,
+ * shows as 0 or 6 dots at some width and no error. From 1280 the column left of
+ * the mock is wide enough for the full drift to land on the illustration. */
 .lp-dot-phone-1, .lp-dot-phone-2, .lp-dot-phone-3 { left: 28px; width: 56px; height: 56px; }
-.lp-dot-phone-1 { top: 227px; --lp-dx: max(-244px, calc((905px - 100vw) / 0.78)); --lp-dy: -44px; }
-.lp-dot-phone-2 { top: 274px; --lp-dx: max(-286px, calc((905px - 100vw) / 0.78)); --lp-dy: -63px; }
-.lp-dot-phone-3 { top: 322px; --lp-dx: max(-144px, calc((905px - 100vw) / 0.78)); --lp-dy: -50px; }
-@media (max-width: 1023.98px) {
+.lp-dot-phone-1 { top: 227px; --lp-dx: -244px; --lp-dy: -44px; }
+.lp-dot-phone-2 { top: 274px; --lp-dx: -286px; --lp-dy: -63px; }
+.lp-dot-phone-3 { top: 322px; --lp-dx: -144px; --lp-dy: -50px; }
+@media (max-width: 1279.98px) {
   .lp-dot-phone-1, .lp-dot-phone-2, .lp-dot-phone-3 { display: none; }
 }
 /* The couple's phone in the artwork (about 50% across, 68% down: the picture is
@@ -87,7 +89,7 @@
 .lp-dot-band-1 { --lp-dx: -64px; --lp-dy: -72px; }
 .lp-dot-band-2 { --lp-dx: 26px;  --lp-dy: -96px; }
 .lp-dot-band-3 { --lp-dx: 92px;  --lp-dy: -64px; }
-@media (min-width: 1024px) {
+@media (min-width: 1280px) {
   .lp-dot-band-1, .lp-dot-band-2, .lp-dot-band-3 { display: none; }
 }
 
