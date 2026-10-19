@@ -44,8 +44,8 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ### 使用者可見變化
 
 - **品牌頁的暖光小點更清楚、各種寬度都看得到，內頁的圓點會隨捲動亮起，鍵盤焦點外框更明顯（#1528）**
-  使用者：首頁的三個光點放大、環更亮，768–1279 px 寬也會出現（768–1023 從插畫裡情侶手上的手機升起，1024 起從手機畫面的三筆紀錄升起）；平板寬度的首頁左欄收窄，插畫不再只剩一條細邊；/use-case、/migrate 各列的小圓點在列捲進畫面時亮起；品牌頁鍵盤焦點外框改深色，在米色底上看得清楚；使用「減少動態」時全部維持靜態。
-  技術：`landing-motion.css` 光點改 44/56/34 px、兩組發射點以 `display` 互斥、手機畫面光點的位移用 `max()` 夾在插畫範圍內；內頁 `.bi-ember` 以列為 `view-timeline`（`brand-inner.ts`，僅 transform／opacity）；use-case／migrate 外層 `overflow-hidden` 在支援時改 `clip` 讓 `view()` 綁到文件捲動（副作用：1024 px 以上標題欄的 sticky 開始生效）；`--focus-ring-color` 在 `.brand` 改為墨色，墨色填滿的按鈕改兩層外框。
+  使用者：首頁的三個光點放大、環更亮，768–1279 px 寬也會出現（768–1023 從插畫裡情侶手上的手機升起，1024 起從手機畫面的三筆紀錄升起）；平板寬度的首頁左欄收窄，插畫不再只剩一條細邊；/use-case、/migrate 各列的小圓點在列捲進畫面時亮起；品牌頁鍵盤焦點外框改深色，在米色底上看得清楚；使用「減少動態」時全部維持靜態；/use-case、/migrate 的標題欄在 1024 px 以上會隨捲動固定在左側（原本設計如此，現在才生效）；768–1023 px 的首頁左欄收窄為 400 px。
+  技術：`landing-motion.css` 光點改 44/56/34 px、兩組發射點以 `display` 互斥、手機畫面光點的位移用 `max()` 夾在插畫範圍內；內頁 `.bi-ember` 以列為 `view-timeline`（`brand-inner.ts`，僅 transform／opacity）；use-case／migrate 外層 `overflow-hidden` 在支援時改 `clip` 讓 `view()` 綁到文件捲動（副作用：1024 px 以上標題欄的 sticky 開始生效）；`--focus-ring-color` 在 `.brand` 改為墨色，墨色填滿的按鈕改兩層外框；品牌頁的連結與 `<summary>` 原本顯示瀏覽器預設藍框，改用同一圈墨色外框。
 - **中文品牌頁的內文與列表文字不再斷在詞中間（#1528）**
   使用者：首頁、登入、使用情境、搬遷頁的繁中與簡中內文，換行時依詞斷，不再出現「一起照／顧」「值得被記／住」；日文與英文不變。
   技術：`Phrase` 加 `body` 模式（只處理中文，在詞界放 `<wbr>`，整段一個字串輸出；`splitPhrases` 與 `phraseHtml` 多一個 `zhOnly` 參數，新增轉義後輸出的 `phraseTextHtml`，登入頁來自 RSS 的部落格標題也經過它）；「——」「……」不再從中間拆開；/features/outing 的連結列說明一併套用；沒動 globals.css，已知 Safari 的 `auto-phrase` 缺口由此補上。

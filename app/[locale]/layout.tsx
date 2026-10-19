@@ -26,8 +26,12 @@ const FRAUNCES_LATIN =
 //   pages (WCAG 1.4.11 wants 3:1; dashboard unchanged). Ink here, via inheritance.
 //   Ink-filled controls (CTAs, skip link, sign-in buttons) get a light gap then
 //   the ink ring, since an ink ring on an ink fill would not show at all.
+//   Links and <summary> that carry no ring of their own (rows, pills, text links)
+//   would show the browser's blue outline, so they get the same ink ring; :where()
+//   keeps that rule's specificity level with the ink-fill rule, which follows it.
 const BRAND_CSS =
   '.brand{--focus-ring-color:var(--ink)}' +
+  '.brand :where(a,summary):focus-visible{outline:0;box-shadow:0 0 0 2px var(--ink)}' +
   '.fc-edge:focus-visible,.skip:focus-visible,.oik-btn:focus-visible{box-shadow:0 0 0 2px var(--on-fill),0 0 0 4px var(--ink)}' +
   '.ph{word-break:keep-all;overflow-wrap:anywhere}' +
   '.skip{position:fixed;left:8px;top:8px;z-index:60;padding:12px 16px;border-radius:var(--radius-bubble);background:var(--ink);color:var(--on-fill);transform:translateY(-200%)}' +
