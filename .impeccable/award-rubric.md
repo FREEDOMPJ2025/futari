@@ -54,6 +54,7 @@ Not time-driven: no clock states. No data fixture (public pages are static). Vie
 - 2026-10-03 (#1520): accepted consequence — brand-page PostHog pageviews from visitors who leave before the SDK loads are lost (pageview/bounce discontinuity; GA unaffected). Owner: 「沒關係 效能重要」.
 - 2026-10-03: Ko-fi pill icon-only at every width (accessible label kept) — owner OK. en/ja migrate comparison table fully translated, folded into phase A (#1538). Use-case CTA 「免費開始記帳」 stays. (owner)
 - 2026-10-19 (after round 4, plateau stop): **rubric v2.1 — weighted pass bar lowered from 7.5 to 7.4**; every dimension ≥ 7.0 and every gate still required. Do round-4 fixes 1–6 before v1.8.0: S1 bugs (F3, F4, F1, A4, A6), S2 zh phrase segmentation (F2), S3 de-card, S4 signature strengthening (prototype shown to owner first), then round 5. G1 is measured over a local HTTP/2 origin (≥10 runs/page) because Vercel previews are SSO-protected. (owner)
+- 2026-10-19 (after round 5, 7.3875): not rounded up to 7.4; fix N1 (phone mock hides the couple at 1024–1150) and score round 6. F4-style rechecks compare against sibling rows' box, not a fixed width. (owner)
 
 ## Issues (v1.6.7)
 
@@ -67,3 +68,4 @@ Tracker #1528. Phase A: #1519 table marks, #1520 LCP/G1, #1521 CTA pre-hydration
 | 2 | 2026-10-03 | 681655e | all pass (LCP 2.11–2.47 s) | 6.33 | 7.00 | 6.33 | 7.75 | 6.68 | FAIL — [round-2.md](award-review/round-2.md); P1 row bug fixed after (projected ~6.91) |
 | 3 | 2026-10-04 | c11ba45 (prod) | G1 FAIL (LCP bimodal ~2.0/~4.2 s; landing root + sign-in medians 4.18 s); G2–G5 pass | 6.58 | 7.17 | 6.33 | 7.75 | 6.83 | FAIL — [round-3.md](award-review/round-3.md); scored on production |
 | 4 | 2026-10-18 | e59ec03 (local, HTTP/2) | all pass (LCP unimodal 1.95–2.25 s) | 6.83 | 6.92 | 6.92 | 7.88 | 6.98 | FAIL — [round-4.md](award-review/round-4.md); plateau stop → owner lowered bar to 7.4 (v2.1) |
+| 5 | 2026-10-19 | d720b82 (local, HTTP/2) | all pass | 7.33 | 7.50 | 7.08 | 7.88 | 7.39 (7.3875) | FAIL by 0.0125 — [round-5.md](award-review/round-5.md); owner: fix N1, no rounding |
