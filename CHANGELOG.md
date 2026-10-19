@@ -41,104 +41,71 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+_Nothing unreleased yet._
+
+## [1.8.0] - 2026-10-19
+
+主題：**品牌頁．讓陌生人信任**——登入前的品牌頁整體升級（award review 第 6 輪 7.45 通過）；iPhone 捷徑能把付款送進待確認；匯入多了三個來源。
+完整 diff：[v1.7.4...v1.8.0](https://github.com/redtear1115/oikos/compare/v1.7.4...v1.8.0)
+
 ### 使用者可見變化
 
-- **品牌頁的暖光小點更清楚、各種寬度都看得到，內頁的圓點會隨捲動亮起，鍵盤焦點外框更明顯（#1528）**
-  使用者：首頁的三個光點放大、環更亮，768–1279 px 寬也會出現（768–1279 從插畫裡情侶手上的手機升起，1280 起從手機畫面的三筆紀錄升起）；768–1023 px 的首頁左欄收窄為 400 px，插畫不再只剩一條細邊；/use-case、/migrate 與登入頁各列的小圓點在列捲進畫面時亮起；品牌頁鍵盤焦點外框改深色，在米色底上看得清楚；使用「減少動態」時全部維持靜態；/use-case、/migrate 的標題欄在 1024 px 以上會隨捲動固定在左側（原本設計如此，現在才生效）。
-  技術：`landing-motion.css` 光點改 44/56/34 px、兩組發射點以 `display` 互斥；內頁 `.bi-ember` 以列為 `view-timeline`（`brand-inner.ts`，僅 transform／opacity）；use-case／migrate 外層 `overflow-hidden` 在支援時改 `clip` 讓 `view()` 綁到文件捲動（副作用：1024 px 以上標題欄的 sticky 開始生效）；`--focus-ring-color` 在 `.brand` 改為墨色，墨色填滿的按鈕改兩層外框；品牌頁的連結與 `<summary>` 原本顯示瀏覽器預設藍框，改用同一圈墨色外框（另帶透明 outline，高對比模式下仍看得到焦點）。
-- **品牌頁 1024–1279 px 寬的首頁不再讓手機畫面蓋住插畫裡的情侶（#1528）**
-  使用者：首頁手機畫面改從 1280 px 起才出現（原本 1024 起，在 1024 px 蓋住插畫的 72%、擋住沙發上的兩人）；1024–1279 px 只顯示插畫，光點從情侶手上的手機升起；桌面版右上角淡淡的大燈籠浮水印拿掉（手機畫面不再擋住後變得突兀）。
-  技術：`Landing.tsx` 手機畫面外框 `lg:block` 改 `xl:block`；`landing-motion.css` 兩組光點的切換點同步移到 1280，手機畫面光點不再需要 `max()` 夾位移，發射點仍恆為三個；移除 520 px `FutariMark` 浮水印（#282 起的裝飾）。
-- **中文品牌頁的內文與列表文字不再斷在詞中間（#1528）**
-  使用者：首頁、登入、使用情境、搬遷頁的繁中與簡中內文，換行時依詞斷，不再出現「一起照／顧」「值得被記／住」；日文與英文不變。
-  技術：`Phrase` 加 `body` 模式（只處理中文，在詞界放 `<wbr>`，整段一個字串輸出；`splitPhrases` 與 `phraseHtml` 多一個 `zhOnly` 參數，新增轉義後輸出的 `phraseTextHtml`，登入頁來自 RSS 的部落格標題也經過它）；「——」「……」不再從中間拆開；/features/outing 的連結列說明一併套用；沒動 globals.css，已知 Safari 的 `auto-phrase` 缺口由此補上。
-- **品牌頁桌面版的首頁「一起記錄」按鈕點得到、出遊連結列回到內容欄（#1528）**
-  使用者：1024–1580 px 寬的桌面，首頁右上角「一起記錄」不再被手機畫面蓋住而點不動，手機畫面也移到按鈕下方；/use-case、/use-case/travel、/migrate/splitwise 的出遊連結列不再擠成 240 px 的細條。
-  技術：`Landing.tsx` 手機畫面外框加 `pointer-events-none`、`bottom-6` 改 `-bottom-8`；新增 `FeatureLinkSection`，不再借用沒有標題的 `.bi-band`。
-- **搬遷頁讀不出內容的檔案改顯示錯誤、鍵盤可見焦點、模板連結好點（#1528）**
-  使用者：上傳不是表格的檔案（純文字只有一欄、空檔、只有標題列）不再顯示「1 筆紀錄 · 約 0 筆支出」和匯入按鈕，改顯示既有的「讀不懂這個檔案」並可換檔；以逗號或 Tab 分隔、兩欄以上的 CSV 照舊顯示預覽與匯入按鈕（分號分隔的檔案讀成一欄，也會顯示錯誤；登入後的匯入本來就讀不了）；用鍵盤選到上傳區時會出現深色外框；「下載轉換模板」連結高度 44 px。
-  技術：`useCsvPreview` 在沒有資料列或標題少於兩欄時進 `error`（`migrate_preview_failed` 的 `reason` 為 `not_a_csv_table`），規則刻意放窄，因為登入後的匯入精靈可手動對欄；焦點外框只加在 `CsvFileUploadWidget` 的 `md` 版。
-- **搬遷頁的說明與登入邀請、首頁的搬遷入口不再是白色卡片（#1528）**
-  使用者：/migrate/honeydue 的背景說明和「建立 Futari 帳號」改成與下方「為什麼選 Futari」同一種分隔線列，帶一點暖光小圓點；首頁「本來在用別的記帳工具？」三張卡片改成一列一個來源、右側箭頭。文字、連結與按鈕不變。
-  技術：`MigrateIntroCallout`、`MigratePrimaryCta` 改用 `.bi-band` / `.bi-rows` / `.bi-row` 與 `Ember`；`Landing.tsx` 的 `MigrateLinksSection` 改成分隔線清單，只用既有 utility，沒動 globals.css。
-- **匯入缺欄位的訊息改列檔案上的欄名，例如 Type（種別）（Closes #1799；關聯 #1791、#1796、#1797）**
-  使用者：まねーぼ（日文、繁中檔）與 AndroMoney（繁中、簡中檔）少了必要欄位時，除了英文名稱，也會附上檔案那一種語言的欄名（如 `Type（種別）`、`Expense(Transfer Out)（付款(轉出)）`）；判斷不了檔案語言（只有各語共用的 `日期`、`金額` 等）就只列英文，不會列出檔案裡不可能有的欄名；拿掉 #1797 加的「以英文欄位名稱列出」說明（zh-TW／zh-CN／ja）。
-  技術：`headerAliases.ts` 新增各語欄名表、`detectHeaderLang`（只計「只屬於單一語言」的欄名，跨兩張表比對；平手或沒有證據回 null）與 `describeMissing`；`resolveAndromoneyColumns`、`resolveManeboColumns` 兩個 resolver 的 `missing` 改回傳顯示文字，`resolveSplitwiseColumns` 不變（Splitwise 只有英文）。
-- **搬遷頁預覽卡的筆數、日期範圍、分類改用匯入精靈的判讀（Closes #1801；關聯 #1791、#1795、#1800）**
-  使用者：AndroMoney、まねーぼ、Splitwise 的檔案不再顯示「約 0 筆支出」、從 1010 年起算或排錯的日期範圍；期初餘額、轉帳、結清與 Total balance 不列入；Spendee、CWMoney 與截圖流程的 CSV 同樣算得出支出筆數與日期範圍。
-  技術：新增 `computePreviewStats`（`lib/csvImport/index.ts`）沿用該來源的 mapper 與 validator，沒有 mapper 的檔案仍走 `computeStats` 的欄位猜測；日期範圍改成解析後的 YYYY-MM-DD。
-- **其餘依數量變化的 en 字串補上單複數（Closes #1798；關聯 #1738、#1784）**
-  使用者：en 在數量為 1 時讀成「in 1 day」「across 1 entry」（保單下次續約倒數、滿期待領取的繳費筆數）、「1 record」「~1 looks like an expense」（搬遷頁預覽）；zh／ja 不變。
-  技術：`summaryDaysUntil`、`maturedAwaitingPremiumNote`、`migrate.preview.totalRowsLabel`／`expenseRowsLabel` 改 `{ one, other }` 並走 `pickPlural`；`MigrateTool` 多收 `locale`。
-- **AndroMoney、Manebo、Splitwise 搬遷頁的步驟與問答對齊匯入精靈的實際行為（Closes #1800；關聯 #1791、#1795）**
-  使用者：三頁的步驟 2、3 改寫成實際流程（設定 → 從其他 app 匯入、整批指定付款人與分攤）並各加一題問答，說明轉帳、期初餘額、結清、外幣與分類怎麼處理；預覽不再承諾日期範圍（四語，en／ja 已經 Grok 審閱）。
-  技術：只改 `migrate.pages` 三個 slug 的字串；`contentUpdatedAt` 已是 2026-10-18，snapshot 重跑。
-- **四張文案審稿（Grok）一次套用：單人月卡、離開名字、問答用字、匯入提示（#1784、#1787、#1790、#1796）**
-  使用者：單人月卡 en 讀成「1 entry／7 entries」；en 的離開名字改成 "Partner who left"，ja 的保留名稱錯誤改說「この名前は使えません」；zh-CN 問答引號改「」、en 的 Futari 不再暗示有付費方案、ja 用「タップ」與「家計簿」、en 的按鈕名稱不加引號；匯入的「略過的列」說明改成中性說法，缺欄位訊息註明欄位以英文名稱列出。
-  技術：`dashboard.soloHero.countLabel` 改 `{ one, other }`（`pickPlural`）；保留名稱檢查與 `handle_new_user.sql` 加入新 en 字樣並保留舊字樣（SQL 要手動重套到 dev、prod）；其餘改 `lib/i18n/locales/` 的字串，並同步 after-leaving／account-deletion spec 的 en 譯名。
-- **匯入精靈新增 AndroMoney、Manebo（まねーぼ）、Splitwise 三個來源（#1791）**
-  使用者：選對應按鈕上傳就能匯入；轉帳、期初餘額、Splitwise 的結清與 Total balance 列不會匯入，會列在失敗的列；檔案少了必要欄位時，會直接說少了哪幾個。
-  技術：新增三個 mapper 與標題偵測（排在 CWMoney 之前、整欄比對）；AndroMoney 跳過橫幅行、まねーぼ 以 Shift_JIS 解碼只對選定來源套用，搬遷頁預覽同步。
+- **品牌頁加上「紀錄化成光點」的動態（#1527、#1528）**
+  使用者：首頁的紀錄化成光點飄進插畫，各種寬度都看得到；內頁列表的小圓點捲進畫面時亮起；減少動態時維持靜態。
+  技術：純 CSS（`landing-motion.css`、`brand-inner.ts`），只動 transform／opacity，scroll-driven 包在 `@supports`；不碰 LCP 元素。
+- **首頁桌面版不再被手機畫面擋住（#1528）**
+  使用者：「一起記錄」按鈕在桌面寬度點得到；1024–1279 px 看得到插畫裡的兩人；右上角的大燈籠浮水印拿掉。
+  技術：手機畫面改從 `xl`（1280）出現並加 `pointer-events-none`；768–1023 左欄 400 px。
+- **品牌頁版面與換行整理（#1528）**
+  使用者：中文內文依詞換行；搬遷頁說明、登入邀請與首頁搬遷入口不再是白卡片；出遊連結列回到內容欄；內頁標題欄在桌面版固定在左側。
+  技術：`Phrase` 的 `body` 模式在詞界放 `<wbr>`（只處理中文）；`.bi-*` 細線列；use-case／migrate 外層改 `overflow: clip`。
+- **品牌頁鍵盤焦點看得清楚（#1528）**
+  使用者：焦點外框改深色，高對比模式下也看得到；上傳框有焦點外框，「下載轉換模板」連結更好點。
+  技術：`.brand` 的 `--focus-ring-color` 改墨色，連結與 `<summary>` 帶透明 outline；dashboard 不變。
+- **iPhone 捷徑可以把花費送進「待確認」（#1536、#1777）**
+  使用者：設定頁產生捷徑金鑰（只顯示一次），捷徑送來的花費出現在只有自己看得到的待確認卡，確認後才記帳。
+  技術：migration `0098`（金鑰只存 SHA-256、RLS＋REVOKE、每日清理 cron）；`POST /api/shortcut/pending` 一律 401、限流。
+- **新增公開的「捷徑記帳」教學頁（#1750、#1751）**
+  使用者：`/features/shortcuts` 四語說明 Apple Pay 付款後用捷徑打開填好的「記一筆」，步驟名稱對齊 iPhone 實機。
+  技術：新頁面＋HowTo JSON-LD、sitemap；設定頁連結在 Android 殼隱藏。
+- **匯入精靈新增 AndroMoney、まねーぼ、Splitwise（#1791、#1799、#1800）**
+  使用者：選對應按鈕就能匯入；轉帳、期初餘額與結清不會匯入；少了欄位時用檔案上的欄名說明，例如 Type（種別）。
+  技術：三個 mapper 與標題偵測；`detectHeaderLang` 只看單一語言專有的欄名。
 - **CSV 匯入的日期不再早一天（#1793）**
-  使用者：台灣（UTC 以東）匯入的紀錄，確認畫面和帳本都會是檔案裡寫的那一天，月初那筆也不再掉到上個月；已匯入的舊紀錄不會自動改。
-  技術：送出與確認頁改用本地日期（`localYmd`，取代 `toISOString`），伺服端存成與手動記帳相同的 UTC 正午，並只收 `YYYY-MM-DD`。
-- **使用情境頁與搬遷頁的問答、步驟、差異點各頁改寫成各頁自己的內容（#1676）**
-  使用者：9 個使用情境頁不再共用同一句「Futari 要收費嗎？」與換名詞的範本句，改回答該情境真的會問的事（定期支出、結算、出遊、愛物頁的本月花費）；14 個搬遷頁的步驟、問答與差異點改成該來源自己的說法（匯出格式、分類對應、哪些帶得走），en／ja 補回 zh-TW 的細節（四語；en／ja／zh-CN 待確認）。
-  技術：改 `useCase.pages`、`migrate.pages` 的字串與 `contentUpdatedAt`（2026-10-18），並改共用的 `migrate.chatgptWorkflow.note`；已移除「匯入時可對照調整欄位」「重複的同一筆會自動去掉」「愛物頁有累計」這幾句與程式不符的說法，Splitwise 不再描述目前走不通的匯入步驟（#1791）。
-- **品牌頁加上「紀錄化成光點」的動態（#1527）**
-  使用者：首頁手機畫面裡的紀錄各化成一個光點飄進插畫；「四種光」逐列亮起；信任、使用情境、搬遷段落進入畫面時亮燈。減少動態效果時直接呈現亮著的樣子。
-  技術：純 CSS（`app/[locale]/_landing/landing-motion.css`），只動 transform／opacity，scroll-driven 包在 `@supports (animation-timeline: view())`；沿用 `about-fade-up` 的 easing；不碰 LCP 元素。
-- **「已離開的夥伴」依讀者語系顯示，且只有系統寫的才算（#1782）**
-  使用者：刪除帳號或選擇不留名字的人，在章節、月回顧、出遊名單、公開出遊頁與 CSV 裡以讀者語系顯示（Partner who left／退出したパートナー／已离开的伙伴），頭像改成不含字的中性圓；四語的這個字樣不能再拿來當暱稱或出遊名字。
-  技術：migration `0099` 加四個標記欄位（backfill 只標刪除帳號寫的形狀；`process_account_deletions` 以 0096 本體加賦值），讀取端只看標記（`lib/leftPartnerLabel.ts`），保留名字檢查在 `lib/reservedDisplayName.ts`＋`handle_new_user`（兩個 project 都要手動套）；prod 套用待 release。
-- **清掉標成機翻、尚未審的 en／ja 文案（#1280）**
-  使用者：單人月份改成 “Logged in September” 這類說法；問答揭曉後不再說成已經打開；邀請頁日文改成「被邀請」，不再像是在招人開始記帳；問答錯誤裡的帳本改回「帳本」。
-- **捷徑金鑰與待確認卡的四語文案換成審過的版本（#1777）**
-  使用者：「略過」改「跳過」、展開與收合和定期待確認卡同一套說法；沒有內容的提示改說「描述」；ja「ショートカット用キー」、en「Key for Shortcuts」，避免被讀成鍵盤快捷鍵；ja 統一用「家計簿」。
-  技術：只改 `settings.shortcutKey`、`dashboard.shortcutPending` 與 `errors.actions.shortcut_pending_*` 的字串（Grok 兩輪審稿）；主按鈕維持「記下」。
-- **「已離開帳本裡的名字」確認視窗補上「之後才結束的時光不會跟著改」（#1775）**
-  使用者：確認視窗說清楚只改目前已結束的章節；en／ja 的說明與筆數改成不用複數的寫法（Grok 審）。
-  技術：只改 `pastTimes.hideName` 的 confirmBody（4 語）、en／ja 的 hint 與 confirmCount、en 的 done／failed 引號；測試多鎖住新的那一句。
-- **iPhone 捷徑可以把花費送進「待確認」，確認後才記進帳本（#1536）**
-  使用者：設定頁產生「捷徑金鑰」（只顯示一次、可重新產生或撤銷），捷徑帶著金鑰送出金額與分類；dashboard 出現只有自己看得到的待確認卡，可記下、改一下或略過，30 天沒處理會消失。
-  技術：migration `0098`（`ShortcutKeys` 只存 SHA-256、`ShortcutPendingExpenses`，外鍵指向 `auth.users`、RLS＋REVOKE、每日 cron `cleanup-shortcut-pending`）；`POST /api/shortcut/pending`（Bearer、一律 401、2 KB、限流）；確認走與手動記帳共用的 `lib/transactionWriteEffects.ts`，`record_created via=shortcut`。prod 套用待 release。
-- **簡單記帳搬遷頁的搜尋標題回應「永久 VIP」（#1766）**
-  使用者：Google 搜尋結果上，`/migrate/simple-daily-money` 的標題與說明改成直接回答「買了永久 VIP，搬家會浪費嗎」（四語；en／ja 經 Grok 審）；頁面內文不變。
-  技術：只改 `seo.migrate['simple-daily-money']` 的 title／description；en description 為了 155 字上限（#702）把逗號改成分號。
-- **en 的筆數與天數會依單複數顯示（#1745）**
-  使用者：匯入（含確認頁摘要）、時間軸、保單數、旅行、澆水與定期間隔等英文不再出現「1 rows」「Every 1 days」；中文與日文不變。
-  技術：這些 key 改成 `{ one, other }`，呼叫端走 `pickPlural`（沿用 #1738）；`usedCountNote` 的 `record(s)` 一併拆開；匯入確認頁有兩個數字，拆成 `summary`＋`summaryInvalid`；其餘數量罕為 1 的英文字串（植物陪伴天數、圓餅圖、保單年數與到期天數、匯入第一步摘要、匯出筆數、出遊摘要）改寫成 `(s)`。
-- **捷徑教學頁的四語文案換成審過的版本（#1751）**
-  使用者：Apple Pay 步驟改成 iPhone 實機上的名稱（「錢包」自動化、「取整數」、「數量」，取整數改為建議）；新增畫面一律稱「新增紀錄」，未登入時改說要再執行一次；備註欄統一稱「描述」（zh-CN／ja／en 同）；zh-CN 改用「」引號、ja 用「サインイン」；zh-TW 補上 LINE Pay 需要支援 Apple Intelligence 的 iPhone。
-  技術：只動 `featureShortcuts`、`seo.featureShortcuts`、`settings.shortcutsGuide` 的字串；禁用詞測試改為同時掃後兩組。
-- **新增公開的「捷徑記帳」教學頁，設定頁有連結（#1750）**
-  使用者：`/features/shortcuts` 四語說明如何用 iPhone 的「捷徑」在 Apple Pay 付款後打開填好的「記一筆」（zh-TW 另有 LINE Pay 通知）；Futari 仍不連結付款帳戶，儲存由你按。
-  技術：新增頁面＋HowTo／Breadcrumb JSON-LD、sitemap 與 llms 條目、設定頁 `ShortcutsGuideRow`（Android 殼隱藏）；測試用 `lib/quickAdd.ts` 解析頁上範例網址。
+  使用者：匯入的紀錄是檔案裡寫的那一天，月初那筆不再掉到上個月；已匯入的舊紀錄不會自動改。
+  技術：改用本地日期 `localYmd`，伺服端只收 `YYYY-MM-DD`。
+- **搬遷頁預覽更準確（#1801、#1528）**
+  使用者：預覽的筆數、日期範圍與分類跟匯入精靈一致；讀不懂的檔案改顯示錯誤，不再出現「約 0 筆支出」。
+  技術：`computePreviewStats` 沿用各來源的 mapper；沒有資料列或不到兩欄時進錯誤狀態。
+- **「已離開的夥伴」依讀者語系顯示（#1782、#1784、#1787）**
+  使用者：章節、月回顧、出遊名單與 CSV 以讀者語系顯示這個名字，頭像改成中性圓；四語的這個字樣不能當暱稱。
+  技術：migration `0099` 加標記欄位，讀取端只看標記；`handle_new_user` 擋保留字樣（兩個 project 都要手動套）。
+- **使用情境頁與搬遷頁的內容各頁改寫（#1676、#1766）**
+  使用者：9 個使用情境頁與 14 個搬遷頁的問答、步驟改成各自的內容；簡單記帳搬遷頁的搜尋標題直接回答「永久 VIP」。
+  技術：只改 `useCase.pages`、`migrate.pages`、`seo.migrate` 的字串，移除與程式不符的說法。
+- **英文單複數與文案審稿（#1745、#1798、#1280、#1790、#1796、#1775）**
+  使用者：英文數量為 1 時不再出現「1 rows」「Every 1 days」；標成機翻的 en／ja 文案換成審過的版本。
+  技術：數量字串改 `{ one, other }` 走 `pickPlural`。
 
 ### 技術變更
 
-- **保單的要保人／被保人讀取端不再回傳已刪帳號的標記名字（#1788）**
-  使用者：目前畫面沒有變化（這條路徑今天走不到）；守住日後不會有 en／ja 讀者在保單上看到未翻譯的「已離開的夥伴」。
-  技術：`lib/db/queries/asset.ts`、`aibutsu.ts` 的兩個 Profiles join 對 `is_tombstone` 回 NULL，不再回傳標記字樣；`insuranceTombstone1788` 整合測試涵蓋頁面層與讀取層。
-- **全站錯誤頁與登入回呼失敗在 Sentry 帶上 tag（#1768）**
-  使用者：無畫面變化；全站錯誤頁與登入失敗時，我們看得出是哪一頁、Supabase 回了哪個錯誤碼。
-  技術：`global-error` 經 `reportClientError` 帶 `area`／`route`（只取 pathname，邀請與出遊 token 遮成 `:token`）／`digest`，`reportClientError` 對 `/` 開頭的 `route` 一律再過 `sanitizeAnalyticsUrl`；`/auth/callback` 交換失敗在 Sentry tag 與 `sign_in_failed` 加 `error_code`（只收小寫 snake_case，其餘記 `other`／`none`）。
-- **dashboard 錯誤頁、CSV 匯入與推播註冊失敗送進 Sentry Issues（#1767）**
-  使用者：無畫面變化；使用者看到錯誤頁或匯入失敗時，我們才收得到訊號。
-  技術：六個路由 `error.tsx`、匯入的 parse／submit／rollback、iOS 推播註冊經 `reportClientError`（動態 import，帶 `area` tag）送出；預期內的 `{ ok: false, code }` 不送。
-- **App Store 故事圖第 1、2 張對調（#1759）**
-  使用者：商店搜尋結果的第 1 張改成「誰先付的，不用再算。」＋餘額卡，品牌插畫移到第 2 張；要等下次送審換圖後才看得到。
-  技術：只改 `scripts/og/store-screens.html` 的 frame 順序並重新輸出 iPhone／iPad 兩組；圖片與舊版逐像素相同，只是對調。
 - **每週清理 cron 不再被已確認的定期卡片擋下（#1689）**
-  技術：新 migration `0097` 重新排程 `cleanup-soft-deleted`，本體沿用 `0069`，最前面多刪「指向即將清除之交易」的已確認卡片；否則編輯過的定期交易滿一年後，外鍵讓整批清理每週失敗。prod 套用待 release。
-- **`record_created` 補齊所有記帳管道，server 事件帶 `group_id`（#1764）**
-  技術：定期支出確認、加油、旅行結算、愛物購入、CSV 匯入（每次一筆、帶 `count`）也發 `record_created`，以 `via` 區分；`setup_completed`、`income_created`、`asset_created`、`import_completed` 同帶 `group_id`；2026-10-17 前後計數不可比，見 observability-design.md。
+  技術：migration `0097` 重新排程 `cleanup-soft-deleted`，先刪指向即將清除之交易的已確認卡片。
+- **保單讀取端不再回傳已刪帳號的標記名字（#1788）**
+  技術：`asset.ts`、`aibutsu.ts` 的 Profiles join 對 `is_tombstone` 回 NULL。
+- **錯誤頁、登入回呼、CSV 匯入與推播註冊失敗送進 Sentry（#1767、#1768）**
+  技術：`reportClientError` 帶 `area`／`route`（token 遮罩）；登入回呼帶 `error_code`；預期內錯誤不送。
+- **`record_created` 補齊所有記帳管道（#1764）**
+  技術：定期確認、加油、旅行結算、愛物購入、匯入、捷徑都發 `record_created`，以 `via` 區分；10-17 前後計數不可比。
+- **App Store 故事圖第 1、2 張對調（#1759）**
+  使用者：商店第 1 張改成「誰先付的，不用再算」，下次送審換圖後才看得到。
+  技術：只改 `store-screens.html` 的順序並重新輸出。
 
 ### Security
 
-- **離開的人可以把自己在舊帳本裡的名字換成「已離開的夥伴」（#1619）**
-  使用者：「過去的時光」多一列（沒有帳本的人在 `/onboarding/past-times`），確認後已離開帳本的已結束章節與那些章節的出遊名單上，自己的名字改顯示「已離開的夥伴」；單向不能還原，只處理當下已結束的章節。
-  技術：`hideMyNameInLeftLedgers` 不收 id，先鎖自己的 `Profiles` 列再以單一 UPDATE 改 `GroupEpochs` 名字快照與 `OutingParticipants.display_name`（以章節篩，不動 `profile_id`）；無 migration；「已離開的夥伴」不再等於帳號已刪除。
+- **離開的人可以把舊帳本裡的名字換成「已離開的夥伴」（#1619）**
+  使用者：「過去的時光」多一列，確認後已結束章節與出遊名單上的自己顯示「已離開的夥伴」；單向不能還原。
+  技術：`hideMyNameInLeftLedgers` 鎖自己的 Profiles 列後單一 UPDATE，不收 id；無 migration。
 
 ## [1.7.4] - 2026-10-16
 
@@ -2011,7 +1978,8 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 - **每頁 `generateMetadata` 接 OG image（#487）**：`public/og-image.png` 從 #282 ship 但未 wire 進 metadata，造成 prod HTML 缺 `og:image` / `twitter:image`；本版 4 個 public page 各加 `openGraph.images` + `twitter.images`，`alt` 用 `t.title` locale-aware，無需新增 i18n key。
 - **`settings.local.json` 列入 gitignore（#478）**：避免本地 hook / 權限設定外洩。
 
-[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.7.4...HEAD
+[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/redtear1115/oikos/compare/v1.7.4...v1.8.0
 [1.7.4]: https://github.com/redtear1115/oikos/compare/v1.7.3...v1.7.4
 [1.7.3]: https://github.com/redtear1115/oikos/compare/v1.7.2...v1.7.3
 [1.7.2]: https://github.com/redtear1115/oikos/compare/v1.7.1...v1.7.2
