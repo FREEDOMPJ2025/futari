@@ -68,7 +68,7 @@ Between rounds 4 and 5, four PRs merged, each independently verified: S1 #1809, 
 
 ### New
 
-- **N1 (P3; existed before this round):** at 1024–1150 px the phone mock covers 59–72 % of the hero illustration and hides the couple. From 1280 up it covers ≤ 41 %. Recheck: the couple is visible at 1024 and coverage is ≤ 45 %.
+- **N1 (P3; existed before this round):** at 1024–1279 px the phone mock covers 41–72 % of the hero illustration (72 % at 1024, 59 % at 1100, 52 % at 1150) and hides the couple. From 1280 up it covers ≤ 41 %. Recheck: the couple is visible at 1024 and coverage is ≤ 45 %.
 - **A7 (P4):** the ember in sign-in's 「開發日誌」 `<summary>` is outside a `.bi-row` / `.bi-link` / `.bi-pill`. It has no timeline, so it stays statically lit.
 - **A8 (P4):** the Ko-fi iframe is a Tab stop and shows no ring on the frame element.
 - **A9 (P4, by design):** a two-column CSV with unknown headers still previews, because the signed-in wizard maps columns by hand.

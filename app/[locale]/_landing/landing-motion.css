@@ -71,7 +71,7 @@
  * The mock is fixed-size, 320x640, drawn at scale .78, so the page distance is
  * .78x the number here. Its dots start at the three CategoryChips. The switch
  * is `xl` in Landing.tsx (`hidden xl:block`), not `lg`: between 1024 and 1279
- * the mock covered 59-72% of the illustration and hid the couple (#1528 N1).
+ * the mock covered 41-72% of the illustration and hid the couple (#1528 N1).
  * Keep the two in step: a mock without emitters, or emitters without a mock,
  * shows as 0 or 6 dots at some width and no error. From 1280 the column left of
  * the mock is wide enough for the full drift to land on the illustration. */
