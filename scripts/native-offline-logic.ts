@@ -81,3 +81,30 @@ export function shouldResetEscalationAfterShown(shownMs: number, firedSinceCommi
 export function shouldResetEscalationAfterBackground(backgroundMs: number): boolean {
   return backgroundMs > ESCALATION_RESET_BACKGROUND_MS
 }
+
+/**
+ * 主框架導覽「只換 #fragment」（頁內錨點）：不建立新文件，文件建立時回報 commit 的腳本不會
+ * 執行，看門狗一旦啟動就永遠等不到解除（#1680）。此時不該啟動，也不動既有的啟動狀態。
+ *
+ * - `target`：導覽目標網址（原始，含 fragment）。
+ * - `current`：決策當下 `webView.url`。不是 expectedUrl、也不是 commit 回報的 href：
+ *   Next.js 的 pushState 會更新 webView.url、但不會更新另外兩者，頁內錨點常發生在
+ *   pushState 之後（`/b` 上的 `#sec`）。
+ * - `isReload`：reload 是真的重新載入，即使網址帶 fragment 也要啟動。
+ *
+ * 條件（全部成立才略過）：target 帶 fragment、current 存在、不是 reload、去掉 fragment 後
+ * （scheme / host / port / path / query）與 current 相同。
+ *
+ * 只有 Swift 鏡射這條。Java 不需要：Android 的頁內導覽根本不會經過 `shouldInterceptRequest`，
+ * 看門狗不會被它啟動（#1680）。
+ *
+ * 失效的樣子：沒有任何錯誤。誤略過一次真正的載入（例如 `/a#x` → `/a`、reload）就不會啟動，
+ * 退回 #1672 之前的空白畫面，而且是靜默的；誤啟動則是卡著一個資源的頁面上點錨點，6 秒後
+ * 正常頁面被換成離線頁。
+ */
+export function isFragmentOnlyNavigation(target: string, current: string | null, isReload: boolean): boolean {
+  if (isReload || current === null) return false
+  if (!target.includes('#')) return false
+  const strip = (s: string) => (s.includes('#') ? s.slice(0, s.indexOf('#')) : s)
+  return strip(target) === strip(current)
+}

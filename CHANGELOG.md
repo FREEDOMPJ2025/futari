@@ -44,6 +44,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - **Android 殼裡的分享打開系統分享面板（#1749）**
   使用者：在 Android App 裡分享出遊連結、夥伴邀請與測試邀請，會跳出系統分享面板，不再只是複製。
   技術：加 `@capacitor/share`，`lib/shareSheet.ts` 在 runtime 判斷 Android 殼與 plugin；舊殼沒有 plugin 時照舊複製；需隨 v1.9.0 重送原生殼。
+### 使用者可見變化
+
+- **iOS 殼內點頁內錨點不再有機會跳成離線頁（#1680）**
+  使用者：頁面還有資源載入中時點「跳到主要內容」之類的錨點，已顯示的頁面不會在 6 秒後被換成離線頁。
+  技術：載入看門狗在目標網址只差 `#fragment`（且非 reload）時不啟動；規則在 `native-offline-logic.ts`，只有 Swift 鏡射，需隨下一版 iOS 殼上架。
 
 ## [1.8.0] - 2026-10-19
 
