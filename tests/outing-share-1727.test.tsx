@@ -21,6 +21,8 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ refresh: vi.fn(), push: vi.fn(), prefetch: vi.fn() }),
   usePathname: () => '/outings/o1',
 }))
+const plugin = vi.hoisted(() => ({ share: vi.fn() }))
+vi.mock('@capacitor/share', () => ({ Share: plugin }))
 const track = vi.hoisted(() => vi.fn())
 vi.mock('@/lib/analytics/track', () => ({ track }))
 const actions = vi.hoisted(() => ({
@@ -64,8 +66,18 @@ beforeEach(() => {
 })
 afterEach(() => {
   delete (navigator as { share?: unknown }).share
+  delete (window as { Capacitor?: unknown }).Capacitor
+  plugin.share.mockReset()
   share = undefined
 })
+/** The Android shell: no navigator.share; the Share plugin present or not (#1749). */
+const androidShell = (withPlugin: boolean) => {
+  ;(window as { Capacitor?: unknown }).Capacitor = {
+    isNativePlatform: () => true,
+    getPlatform: () => 'android',
+    isPluginAvailable: (n: string) => withPlugin && n === 'Share',
+  }
+}
 const withShareSheet = (impl: () => Promise<void> = async () => {}) => {
   share = vi.fn(impl)
   Object.defineProperty(navigator, 'share', { value: share, configurable: true, writable: true })
@@ -131,7 +143,44 @@ describe('with a share sheet (iPhone, iOS shell, phone browsers)', () => {
   })
 })
 
-describe('without a share sheet (Android shell, most desktops)', () => {
+describe('Android shell with @capacitor/share (#1749)', () => {
+  it('counts as a share sheet: prefetches the link and opens the plugin sheet, method=share', async () => {
+    androidShell(true)
+    plugin.share.mockResolvedValue({ activityType: 'x' })
+    wrap(<ShareLinkCard outingId="o1" outingName={NAME} />)
+    await screen.findByText(URL1) // prefetched on mount, like a browser with Web Share
+    expect(actions.getOutingShareLink).toHaveBeenCalledTimes(1)
+
+    fireEvent.click(shareButton())
+    await waitFor(() => expect(plugin.share).toHaveBeenCalledWith({ title: NAME, text: MESSAGE, url: URL1 }))
+    await waitFor(() => expect(sharedEvents()).toEqual([['outing_link_shared', { method: 'share' }]]))
+    expect(writeText).not.toHaveBeenCalled()
+  })
+
+  it('dismissing the sheet ("Share canceled") sends nothing and says nothing', async () => {
+    androidShell(true)
+    plugin.share.mockRejectedValue(new Error('Share canceled')) // SharePlugin.java:79
+    wrap(<ShareLinkCard outingId="o1" outingName={NAME} />)
+    await screen.findByText(URL1)
+    await act(async () => { fireEvent.click(shareButton()) })
+    expect(plugin.share).toHaveBeenCalled()
+    expect(sharedEvents()).toEqual([])
+    expect(screen.getByRole('status').textContent).toBe('')
+  })
+
+  it('a shell built without the plugin keeps copying the message', async () => {
+    androidShell(false)
+    wrap(<ShareLinkCard outingId="o1" outingName={NAME} />)
+    await act(async () => {})
+    expect(actions.getOutingShareLink).not.toHaveBeenCalled()
+    await act(async () => { fireEvent.click(shareButton()) })
+    expect(plugin.share).not.toHaveBeenCalled()
+    expect(writeText).toHaveBeenCalledWith(`${MESSAGE}\n${URL1}`)
+    expect(sharedEvents()).toEqual([['outing_link_shared', { method: 'copy' }]])
+  })
+})
+
+describe('without a share sheet (an Android shell built before the plugin, most desktops)', () => {
   it('fetches nothing up front; the tap copies the message with the link', async () => {
     wrap(<ShareLinkCard outingId="o1" outingName={NAME} />)
     await act(async () => {})

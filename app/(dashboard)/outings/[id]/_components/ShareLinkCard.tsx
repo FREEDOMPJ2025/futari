@@ -8,6 +8,7 @@ import { unwrapAction } from '@/lib/action-errors'
 import { describeError } from '@/lib/errors'
 import { getOutingShareLink, resetOutingShareLink } from '@/actions/outing'
 import { trackOutingLinkShared } from '@/lib/analytics/outingEvents'
+import { hasShareSheet, isShareCancel, openShareSheet, preloadShareSheet } from '@/lib/shareSheet'
 
 /** `<origin>/<locale>/outing/<token>` — the public join page (S3). */
 export function outingShareUrl(origin: string, locale: string, token: string): string {
@@ -36,18 +37,6 @@ function writeClipboard(text: Promise<string>): Promise<void> {
 
 type Note = 'copied' | 'copyFailed' | 'reset' | 'messageCopied' | null
 
-/** True when the browser has a system share sheet. iOS Safari, the iOS shell
- *  (WKWebView) and most phone browsers do; the Android shell's WebView does
- *  not, and neither do many desktop browsers, so those copy instead. Read
- *  after mount only: the server render can't know. */
-function hasShareSheet(): boolean {
-  return typeof navigator !== 'undefined' && typeof navigator.share === 'function'
-}
-
-function isAbort(e: unknown): boolean {
-  return e instanceof Error && e.name === 'AbortError'
-}
-
 /**
  * The share link and everything that sends it (#1558, #1727), shared by the
  * share card and the 「還有幾個名字沒人選」 line so both reach the same state.
@@ -60,6 +49,13 @@ function isAbort(e: unknown): boolean {
  * the link, using the same in-gesture clipboard write as 複製連結.
  * Failure looks like: on iPhone the share button does nothing (the share was
  * refused for running outside the tap), or a stale link goes out after a reset.
+ *
+ * The Android shell's WebView has no Web Share, so there the sheet is the
+ * `@capacitor/share` plugin (#1749, `lib/shareSheet.ts`); it counts as a share
+ * sheet here and gets the same prefetch. The plugin chunk is loaded with the
+ * card (`preloadShareSheet`), so the tap doesn't wait on it; the native bridge
+ * doesn't need web user activation anyway. A shell built before the plugin
+ * existed reports no sheet and keeps copying.
  */
 export function useOutingShare(outingId: string, outingName: string, enabled = true) {
   const t = useTranslations()
@@ -88,6 +84,7 @@ export function useOutingShare(outingId: string, outingName: string, enabled = t
     // `enabled` is false when the viewer can't share (not editable): nothing is fetched.
     if (!enabled || !hasShareSheet()) return
     setCanShareSheet(true)
+    preloadShareSheet()
     let alive = true
     const refresh = () => {
       fetchUrl().then((u) => { if (alive) { latestUrl.current = u; setUrl(u) } }, () => {})
@@ -141,10 +138,10 @@ export function useOutingShare(outingId: string, outingName: string, enabled = t
     setNote(null)
     setError('')
     // Called synchronously in the tap: Safari refuses a share that isn't.
-    navigator.share({ title: outingName, text: message, url: ready }).then(
+    openShareSheet({ title: outingName, text: message, url: ready }).then(
       () => trackOutingLinkShared('share'),
       (e) => {
-        if (isAbort(e)) return // closed the sheet: nothing was sent, nothing to say
+        if (isShareCancel(e)) return // closed the sheet: nothing was sent, nothing to say
         // Refused or broken: the link is on screen; offer it by hand.
         setNote('copyFailed')
       },
