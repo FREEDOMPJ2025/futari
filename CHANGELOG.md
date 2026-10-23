@@ -61,7 +61,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 - **只有排程能觸發每晚推播（#968）**
   使用者：無感；拿到公開 anon key 的人不能再隨時讓所有人的手機收到推播。
-  技術：edge function 先比對 bearer 是否等於自己的 service role key（常數時間），不符回 401；prod 部署後要確認下一次 cron 回 200。
+  技術：gateway 驗 JWT 簽章（`supabase/config.toml` 釘 `verify_jwt = true`），函式再查 `role=service_role`、`ref`、`exp`，不符回 401；部署後讀回 `verify_jwt`、確認下一次 cron 回 200。
 
 - **Android 殼在同意推播前不產生推播 ID；Firebase 設定檔不會進 repo（#968）**
   使用者：之後的 Android 殼要等你允許通知，才建立推播用的裝置 ID；不用 Firebase 分析。

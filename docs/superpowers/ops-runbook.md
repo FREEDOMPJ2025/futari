@@ -570,7 +570,7 @@ where n.nspname in ('public', 'drizzle') and c.relkind in ('r', 'p')
      SELECT vault.create_secret(:'srk', 'oikos_service_role_key', 'Auth bearer for notify-recurring-push cron');
      \unset srk
      ```
-   - 再依 manifest 的 `## cron` 逐一 `SELECT cron.schedule('<jobname>', '<schedule>', convert_from(decode('<base64 command>', 'base64'), 'UTF8'));`。還原到**新的** project 時，command 裡的 Edge Function 網址是舊 project 的，要改。
+   - 再依 manifest 的 `## cron` 逐一 `SELECT cron.schedule('<jobname>', '<schedule>', convert_from(decode('<base64 command>', 'base64'), 'UTF8'));`。還原到**新的** project 時，command 裡的 Edge Function 網址是舊 project 的，要改；Vault 的 `oikos_service_role_key` 也要換成新 project 自己的 legacy service_role JWT，舊 project 的那把過不了新 project 的 gateway（見〈呼叫者驗證〉）。
    - 漏掉：定期收支推播不再送出，**帳號刪除也不再自動執行**——隱私權政策承諾的 14 天就此失效，而且沒有任何錯誤。
 7. **重新套用備份日之後處理過的刪除**：
    - **先** `npm run db:migrate`（指向目標 project），**再**手動跑一次 `SELECT public.process_account_deletions();`。順序不能反：備份早於 `0096`（#1701）時，備份裡的 `process_account_deletions` 是舊本體，留下的人（單人狀態）的刪除會走整本 cascade，把本來要留給離開的人的共同章節整本硬刪。先 migrate 才會換成新本體，並建好 `sweep-orphan-ledgers` job（也要核對 `cron.job` 有它：`SELECT jobname, schedule FROM cron.job WHERE jobname = 'sweep-orphan-ledgers';` → `0 15 * * *`）。
@@ -664,7 +664,7 @@ pg_cron job 要帶 `service_role` bearer token 呼叫 Edge Function 時，**toke
 
 **How**：
 
-1. 操作者每個 project 跑一次 `SELECT vault.create_secret('<service_role_key>', '<secret_name>', '<purpose>')`
+1. 操作者每個 project 跑一次 `SELECT vault.create_secret('<service_role_key>', '<secret_name>', '<purpose>')`。`notify-recurring-push` 的值是**該 project 自己的 legacy service_role JWT**（`eyJ…`），不是 `sb_secret_…`；原因見下一節〈呼叫者驗證〉。
 2. cron body 內用 `SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = '<secret_name>'` 讀回組進 header——完整範例見 [drizzle/0056_recurring_push_cron_vault.sql](../../drizzle/0056_recurring_push_cron_vault.sql)（它取代了用 ALTER 寫壞的 0055）
 3. 需要 extensions：`pg_cron`、`pg_net`、`supabase_vault`（`SELECT * FROM pg_extension WHERE extname IN ('pg_net','pg_cron','supabase_vault')` 驗證；缺了到 Dashboard → Database → Extensions 開）
 
@@ -676,13 +676,63 @@ pg_cron job 要帶 `service_role` bearer token 呼叫 Edge Function 時，**toke
 
 ### 呼叫者驗證
 
-函式只接受 `Authorization: Bearer <值>` 的值**完全等於**函式自己的 `SUPABASE_SERVICE_ROLE_KEY`（雜湊後常數時間比對，`callerAuth.ts`），其他一律 401，在任何 DB 查詢之前。Gateway 的 JWT 檢查本身也接受公開的 anon key，沒有這道檢查時，任何拿到 anon key 的人都能隨時讓每個家庭的手機收到推播。
+兩層，缺一不可：
 
-- 所以 Vault 的 `oikos_service_role_key`（cron 送的值，見上一節）必須跟函式環境的 `SUPABASE_SERVICE_ROLE_KEY` 是同一個字串。輪替 service role key，或改用新版 API key（`sb_secret_…`）時，Vault 要在同一步更新。
-- **失效的樣子**：cron 照常在 16:10 UTC 觸發，`net._http_response.status_code` 是 401 而不是 200；沒有人收到推播，其他地方都沒有錯誤。
-- dev 資料庫的這個 cron 也打 prod 的網址（0056 寫死），dev 的 service role key 本來就過不了，所以 dev 的 `net._http_response` 不能拿來判斷。
+1. **Gateway 驗簽章**：`supabase/config.toml` 釘住 `[functions.send-recurring-push] verify_jwt = true`。簽章不對的 JWT 到不了函式（2026-10-23 在 dev 量過：自己簽的 HS256 回 401 `UNAUTHORIZED_LEGACY_JWT`，就算同時帶了有效的 `apikey: sb_publishable_…`；`alg: none` 回 401 `UNAUTHORIZED_UNSUPPORTED_TOKEN_ALGORITHM`）。
+2. **函式驗聲明**（`callerAuth.ts`，在任何 DB 查詢之前）：`Authorization` 必須是 `Bearer <三段 JWT>`，payload 的 `role` 是 `service_role`、`ref` 等於函式 `SUPABASE_URL`（`https://<ref>.supabase.co`）裡的 project ref、`exp` 還沒到。不符回 401，函式 log 只有一行 `[auth] reject reason=<原因>`，不記 header 或 token 的任何部分；通過時不記 log。
 
-**prod 部署後的檢查（必做）**：部署當天 16:10 UTC 那次執行之後、6 小時內（pg_net 預設只留 6 小時），用 admin service 唯讀查：
+為什麼要第 2 層：gateway 也放行公開的 anon key（同一把簽章，`role` 是 `anon`），以及當 bearer 送的 `sb_publishable_…`。只有第 1 層時，任何拿到公開 key 的人都能隨時讓每個家庭的手機收到推播。`ref` 檢查只是確認 token 是發給這個 project 的設定檢查，**不是防偽造**——防偽造完全靠第 1 層。
+
+- cron 送的是 Vault 的 `oikos_service_role_key`：該 project 的 **legacy service_role JWT**（`eyJ…` 開頭，不是 `sb_secret_…`）。還原到新 project 時，Vault 要放新 project 自己的那把，否則 gateway 就擋掉。例外：dev 的 Vault 目前是 `sb_…` key（2026-10-23 量到）。dev 的 cron 打的是 prod 網址，所以沒有影響；但 dev 不能拿 Vault 的值做驗收，見下面〈dev 部署後的驗收〉第 2 步。
+- 函式環境的 `SUPABASE_SERVICE_ROLE_KEY` 跟 Vault 的值**不相等、也不需要相等**：hosted runtime 給的是新版 `sb_` secret key，函式只拿它建 DB client。
+- dev 資料庫的這個 cron 也打 prod 的網址（0056 寫死）；dev 的 JWT 過不了 prod 的 gateway，所以 dev 的 `net._http_response` 是 401，不能拿來判斷。
+
+**撤回紀錄（2026-10-23）**：S4b 第一版要求 bearer **完全等於**函式的 `SUPABASE_SERVICE_ROLE_KEY`（雜湊後常數時間比對），這一節也因此寫過「Vault 的值必須跟函式的 `SUPABASE_SERVICE_ROLE_KEY` 是同一個字串」「改用 `sb_secret_…` 時 Vault 要在同一步更新」。dev 部署證明前提不成立：hosted runtime 的 `SUPABASE_SERVICE_ROLE_KEY`（以及 `SUPABASE_SECRET_KEYS` 的 `default`）是 41 字元的新版 `sb_` secret key，prod 的 cron 送的是 legacy JWT（prod Vault 量到 219 字元 `eyJ…`），兩者永遠對不上。照那版上 prod 的樣子：cron 照常在 16:10 UTC 觸發，`net._http_response.status_code` 是 401 而不是 200，沒有人收到推播，其他地方都沒有錯誤。不要再加回「等於 `SUPABASE_SERVICE_ROLE_KEY`」的比對路徑。
+
+**失效的樣子**（共同症狀都是 cron 401、沒有推播、其他地方沒有錯誤；差別在函式 log）：
+
+- 函式 log 沒有任何 `[auth]` 行：被 gateway 擋了。Vault 的值不是這個 project 的有效 JWT（別的 project 的 key、JWT secret 換過、貼壞了），或 legacy key 已經停用（見下方「legacy key 退場」）。
+- `reason=no_ref_config`：函式的 `SUPABASE_URL` 不是 `https://<20 碼 ref>.supabase.co` 的形狀，函式一律拒絕（fail closed）。
+- `reason=not_jwt`：Vault 放的是 `sb_…` key，不是 legacy JWT。
+- `reason=role`：Vault 放的是 anon key。
+
+#### 不准關掉 verify_jwt
+
+部署這個函式**不要加 `--no-verify-jwt`**，也不要在 Dashboard 關掉這個函式的 JWT 驗證開關。關掉之後，任何人自己寫一個 `role: service_role` 的 token 就能通過第 2 層。`tests/push-caller-auth-968.test.ts` 釘住 `config.toml` 和 repo 裡的部署指令，但擋不住 Dashboard 的開關，而且關掉的樣子是**什麼都沒壞**：cron 照樣 200、推播照常，只是任何人都能觸發。所以每次部署後都要讀回：
+
+- Management API `GET /v1/projects/{ref}/functions/send-recurring-push`，回應的 `verify_jwt` 必須是 `true`；或在 Dashboard 這個函式的設定頁確認 JWT 驗證是開的。
+- 讀到 `false`：立刻用一般指令重新部署（不帶旗標，CLI 會讀 `config.toml` 的 `verify_jwt = true`），再讀回一次。
+- `supabase/config.toml` 只放 functions 設定，**不要跑 `supabase config push`**（會把 CLI 的本機預設推到 hosted project 的 auth 等設定上）。
+
+#### dev 部署後的驗收（必做，prod 部署前）
+
+1. 讀回 `verify_jwt: true`（上面）。
+2. legacy service_role → 200：**dev 不能用 Vault 的值測**。2026-10-23 量到 dev 的 Vault `oikos_service_role_key` 是 41 字元的 `sb_…` secret key，prod 的是 219 字元的 legacy JWT（`eyJ…`）；dev 的 cron 本來就打 prod 網址（0056），所以 dev 的 Vault 值對推播沒有作用。改從 CLI 取 dev 的 legacy service_role key，放在 shell 變數裡直接呼叫，不印出來：
+
+   ```bash
+   SR=$(supabase projects api-keys --project-ref ufhcprrauwsxdmscbkrf -o json | jq -r '.[] | select(.name=="service_role") | .api_key')
+   curl -s -o /dev/null -w '%{http_code}\n' -X POST -H "Authorization: Bearer $SR" -H 'Content-Type: application/json' -d '{}' \
+     https://ufhcprrauwsxdmscbkrf.supabase.co/functions/v1/send-recurring-push
+   ```
+
+   會真的對 dev 有待確認卡的裝置送出推播。2026-10-23 實測：200 `{"sent":0}`。
+3. dev 的 anon key、`sb_publishable_…`（兩者都是公開值）當 bearer → 401；函式 log 分別是 `reason=role`、`reason=not_jwt`。
+4. 自己簽的 HS256 JWT（payload 寫 `role: service_role`、正確的 `ref`）與 `alg: none` → gateway 直接 401，函式沒有 log。**偽造 token 的測試只在 dev 跑，絕不對 prod 送。**
+
+#### prod 部署前的檢查（必做）
+
+這個設計只認 legacy JWT。部署前用 admin service 唯讀確認 prod 的 Vault 值仍是 legacy JWT，只查長度與前三碼，不讀值：
+
+```sql
+SELECT length(decrypted_secret), left(decrypted_secret, 3)
+FROM vault.decrypted_secrets WHERE name = 'oikos_service_role_key';
+```
+
+預期 `219 | eyJ`（2026-10-23 量到的值）。如果是 `sb_` 開頭，cron 送的就不是 JWT，這版函式會把它當 `not_jwt` 擋掉。**這時不要部署**，改走 #1834。
+
+#### prod 部署後的檢查（必做）
+
+先照上面讀回 prod 的 `verify_jwt: true`。然後在部署當天 16:10 UTC 那次執行之後、6 小時內（pg_net 預設只留 6 小時），用 admin service 唯讀查：
 
 ```sql
 SELECT id, status_code, timed_out, created
@@ -693,10 +743,13 @@ LIMIT 5;
 ```
 
 - 只看狀態碼；**不要 select `headers`、`content`**。
-- 200：通過。401：立刻回滾，重新部署前一版函式（在前一版 commit 的 detached worktree 裡跑 `supabase functions deploy send-recurring-push --project-ref <prod ref>`；沒有 schema 變動）。回滾之後再查 Vault 與函式的 key 為什麼不一致。
+- 200：通過。401：立刻回滾，重新部署上一個在 prod 回過 200 的版本（在那個 commit 的 detached worktree 裡跑 `supabase functions deploy send-recurring-push --project-ref <prod ref>`，不帶其他旗標；沒有 schema 變動），部署後一樣讀回 `verify_jwt`。回滾之後看函式 log 的 `[auth] reject reason=` 對照上面「失效的樣子」找原因。
 - 查不到任何列：多半是已經超過 6 小時被清掉，不代表 cron 沒跑；隔天再查一次。
-- 經使用者同意，也可以不等 cron，用同一個 Vault secret 手動 `net.http_post` 一次，再照上面只查狀態碼。
-- dev 部署後先手動驗：anon key → 401、service role key → 200。
+- 經使用者同意，也可以不等 cron，用同一個 Vault secret 手動 `net.http_post` 一次（header 用 `'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'oikos_service_role_key' LIMIT 1)`，網址是 prod 的函式網址），再照上面只查狀態碼。
+
+#### legacy key 退場（2026 年底）
+
+Supabase 預計在 2026 年底停用 legacy JWT API key（anon／service_role）。停用那天起，cron 送的 legacy JWT 會在 gateway 被擋：cron 401、函式沒有 `[auth]` log、沒有人收到推播。在那之前要做 #1834：cron 改送 `apikey: sb_secret_…`，函式改 `verify_jwt = false`、在函式內驗 secret key——這個檢查要**取代**現在的聲明檢查，不是加在旁邊：`verify_jwt = false` 時聲明檢查等於沒有檢查，任何人都能偽造。到時 `supabase/config.toml`、`callerAuth.ts` 的頂端說明、這一節與 `tests/push-caller-auth-968.test.ts` 的 config 釘選要一起改。
 
 ### FCM 金鑰（Supabase function secrets）
 

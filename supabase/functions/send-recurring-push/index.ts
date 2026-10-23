@@ -2,7 +2,7 @@ import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supa
 import { create, getNumericDate } from 'https://deno.land/x/djwt@v3.0.2/mod.ts'
 import { taipeiDateISO } from './taipeiDate.ts'
 import { tokensOfCurrentMembers, type PushTarget, type TokenRow } from './memberTokens.ts'
-import { isServiceRoleCaller } from './callerAuth.ts'
+import { checkServiceRoleJwt, projectRefFromUrl } from './callerAuth.ts'
 import { pkcs8DerFromPem } from './pem.ts'
 import {
   FCM_FETCH_TIMEOUT_MS,
@@ -26,6 +26,8 @@ import {
 } from './staleTokens.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
+// null (custom domain, unset) makes every call fail closed: reason=no_ref_config.
+const PROJECT_REF = projectRefFromUrl(SUPABASE_URL)
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const APNS_KEY_ID = Deno.env.get('APNS_KEY_ID')!
 const APNS_TEAM_ID = Deno.env.get('APNS_TEAM_ID')!
@@ -223,8 +225,13 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('method not allowed', { status: 405 })
 
   // #968 S4b (F8) — only the notify-recurring-push cron, which sends the
-  // service-role key from Vault. Checked before any DB work or secret read.
-  if (!(await isServiceRoleCaller(req.headers.get('authorization'), SUPABASE_SERVICE_ROLE_KEY))) {
+  // legacy service_role JWT from Vault. The gateway (verify_jwt = true in
+  // supabase/config.toml) has verified its signature; this checks the claims.
+  // Checked before any DB work or secret read. Log only the reason, never
+  // anything taken from the header.
+  const caller = checkServiceRoleJwt(req.headers.get('authorization'), PROJECT_REF, Math.floor(Date.now() / 1000))
+  if (!caller.ok) {
+    console.warn(`[auth] reject reason=${caller.reason}`)
     return new Response('unauthorized', { status: 401 })
   }
 
