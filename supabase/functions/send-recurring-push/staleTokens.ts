@@ -31,8 +31,16 @@
  *   than a mass of dead phones.
  *
  * Nothing keys on `error.message` (free text, may change, and may echo the
- * token). If Google ever drops the fieldViolations detail, 400s stop deleting
- * (the safe direction) and those tokens just keep failing with a log line.
+ * token).
+ *
+ * Caveat (verifier, 2026-10-23): the `fieldViolations` / `message.token` shape
+ * is NOT in Firebase's error-codes page. Its documented invalid-token example is
+ * a 400 INVALID_ARGUMENT carrying only an FcmError detail, which looks exactly
+ * like a payload error. So with the documented shape, 400s never delete (the
+ * safe direction): such tokens keep failing with one log line per night, and if
+ * they outnumber the rest the breaker also pauses 404 cleanup. Confirm the real
+ * body by sending to a fake token during the dev test, and adjust then. Format
+ * checks on PushTokens (#1827) keep garbage tokens out in the first place.
  *
  * Failure looks like (if the rule were looser): one bad deploy of the payload
  * makes every FCM send return 400 INVALID_ARGUMENT, every Android token is
