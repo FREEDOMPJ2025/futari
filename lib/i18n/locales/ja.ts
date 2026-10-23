@@ -2187,7 +2187,7 @@ export const ja: Translations = {
 
   privacyPage: {
     heading: 'プライバシーポリシー',
-    lastUpdated: '最終更新：2026年10月15日',
+    lastUpdated: '最終更新：2026年10月23日',
     intro: '本ページは、Futari が個人データをどのように収集・使用・保護するかについて説明します。',
     sectionCollectTitle: '収集するデータ',
     sectionCollectItems: [
@@ -2223,6 +2223,7 @@ export const ja: Translations = {
       'PostHog（プロダクト分析：匿名の操作イベントを収集、個人識別情報は含まれません）',
       'Google Analytics 4（流入元の分析：IP は匿名化、クロスサイトのパーソナライズは無効）',
       'Google Drive（暗号化したデータベースのバックアップの保存先）',
+      'Apple プッシュ通知サービス・Google Firebase Cloud Messaging（プッシュ通知：端末のプッシュ通知用トークンと固定の通知文のみを受け取り、家計簿の内容は含まれません）',
     ],
     sectionRightsTitle: '利用者の権利',
     sectionRightsBody: '設定ページからいつでもサインアウトまたはアカウントを削除できます。個人データのエクスポートやお問い合わせは、',

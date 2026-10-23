@@ -5748,7 +5748,7 @@ export const zhTW: Translations = {
 
   privacyPage: {
     heading: '隱私權政策',
-    lastUpdated: '最後更新：2026 年 10 月 15 日',
+    lastUpdated: '最後更新：2026 年 10 月 23 日',
     intro: '本頁說明 Futari 如何蒐集、使用與保護您的個人資料。',
     sectionCollectTitle: '蒐集的資料',
     sectionCollectItems: [
@@ -5784,6 +5784,7 @@ export const zhTW: Translations = {
       'PostHog（產品分析，收集匿名操作事件，不含個人識別資訊）',
       'Google Analytics 4（流量來源分析，IP 匿名化，不啟用跨站個人化）',
       'Google Drive（存放加密的資料庫備份）',
+      'Apple 推播通知服務、Google Firebase 雲端通訊（推播通知，只收到裝置的推播識別碼與固定的通知文字，不含帳本內容）',
     ],
     sectionRightsTitle: '您的權利',
     sectionRightsBody: '您可隨時透過設定頁登出或刪除帳號。如需匯出或查詢您的個人資料，',
