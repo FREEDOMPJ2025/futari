@@ -62,6 +62,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - **只有排程能觸發每晚推播（#968）**
   使用者：無感；拿到公開 anon key 的人不能再隨時讓所有人的手機收到推播。
   技術：edge function 先比對 bearer 是否等於自己的 service role key（常數時間），不符回 401；prod 部署後要確認下一次 cron 回 200。
+### Security
+
+- **Android 殼在同意推播前不產生推播 ID；Firebase 設定檔不會進 repo（#968）**
+  使用者：之後的 Android 殼要等你允許通知，才建立推播用的裝置 ID；不用 Firebase 分析。
+  技術：manifest 關 FCM auto-init 與 Analytics；`.gitignore`＋guard 測試擋金鑰進 repo；release 缺 `google-services.json` 即失敗，上傳前驗 AAB 的 versionName ≥ 1.9.0 與 `google_app_id`。
 
 ## [1.8.0] - 2026-10-19
 

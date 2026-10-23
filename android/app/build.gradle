@@ -65,3 +65,25 @@ try {
 } catch(Exception e) {
     logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }
+
+// #968: release builds must carry google-services.json (gitignored; copied from
+// the vault by the ship-native skill). Debug keeps the skip above so local and
+// emulator builds work without it.
+// Failure looks like: nothing red without this check. bundleRelease succeeds,
+// the AAB uploads, and Android push silently never registers on that shell,
+// while web already treats versionName >= 1.9.0 as FCM-capable.
+def googleServicesFile = file('google-services.json')
+def requireGoogleServices = tasks.register('requireGoogleServicesJson') {
+    description = 'Fails release builds when app/google-services.json is missing or empty (#968).'
+    doLast {
+        if (!googleServicesFile.isFile() || googleServicesFile.text.trim().isEmpty()) {
+            throw new GradleException(
+                "android/app/google-services.json is missing or empty (#968). Release builds need it for Android push. " +
+                "Copy android/google-services.json from the mounted Futari Secrets vault into android/app/ " +
+                "(never the FCM service-account JSON), then rebuild. See the ship-native skill, step 3B.")
+        }
+    }
+}
+tasks.matching { it.name == 'preReleaseBuild' }.configureEach {
+    dependsOn requireGoogleServices
+}

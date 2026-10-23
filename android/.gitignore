@@ -61,8 +61,8 @@ captures/
 .externalNativeBuild
 .cxx/
 
-# Google Services (e.g. APIs or Firebase)
-# google-services.json
+# Google Services (e.g. APIs or Firebase): google-services.json is ignored by
+# the repo-root .gitignore (#968), not here.
 
 # Freeline
 freeline.py
