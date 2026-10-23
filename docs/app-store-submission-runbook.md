@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-09-21
+last_updated: 2026-10-23
 ---
 
 # App Store / Play Store 上架 Runbook — Futari（首次送審）
@@ -196,6 +196,24 @@ your own Apple ID. Account deletion is available in Settings → 刪除帳號.
 - Android：`android/app/build.gradle` 的 `versionName` / `versionCode`（已附同義註解）。
 
 > 目前無自動 bump（release skill 只動 `package.json`）。薄殼罕重送，手動 bump 可接受；archive / `bundleRelease` 前先確認計數已 +1。
+
+### Android 推播門檻（`FCM_MIN_ANDROID_SHELL`，#968）
+
+Android 推播走 FCM，需要殼裡帶 Firebase（`google-services.json`）。web 是即時打到所有已安裝殼的，
+它只能從殼的 `versionName` 判斷「這顆殼有沒有 Firebase」，所以 `versionName` 在 Android 上多了一個角色：
+
+- **門檻 = 第一顆帶 Firebase 的 Android 殼的 `versionName` = `1.9.0`**（web 端常數 `FCM_MIN_ANDROID_SHELL`）。
+  web 只對 `versionName ≥ 1.9.0` 的 Android 殼要推播權限、註冊 FCM；更舊的殼什麼都不做。
+- **v1.9.0 的 Android 殼 `versionName` 定為 `1.9.0`。** 這是上面「`versionName` 只在想讓使用者看到新版號時才動」
+  的明列例外，使用者 2026-10-23 核准；只涵蓋這一次，之後改 `versionName` 仍要使用者明講。
+- **之後每一顆 Android release 都必須帶 `google-services.json`，`versionName` 也不得低於門檻。**
+  兩者由兩道關擋：release build 缺檔或空檔直接失敗（`android/app/build.gradle` 的 `requireGoogleServicesJson`）；
+  上傳前從 AAB 讀 `versionName` 與 `google_app_id`，不合就停（ship-native skill §3B 步驟 3）。
+- 門檻常數與 skill 檢查裡的 `FCM_MIN_ANDROID_SHELL=1.9.0` 是同一個值，改一處要改兩處；實務上不該改
+  （調低會讓沒有 Firebase 的舊殼去註冊推播）。
+- **失效的樣子**：沒有紅燈。殼帶了 Firebase 但 `versionName` 還是 1.7.x → build、上傳、審核全過，web 把它當舊殼，
+  Android 使用者永遠收不到推播也不會被問權限。反過來，殼沒帶 Firebase 卻 ≥ 1.9.0 → web 去註冊，
+  `register()` 在原生端找不到 Firebase 設定，輕則註冊失敗、重則 App 閃退（Capacitor push plugin 在沒有 Firebase 設定時呼叫 `register()` 已知會崩）。
 
 ---
 
@@ -497,6 +515,15 @@ CAP_SERVER_URL="https://<branch>.vercel.app/?x-vercel-protection-bypass=<SECRET>
   - **撤回**：本段原本寫「2026-09-13 實測 JDK 25 + Gradle 8.14.3 + AGP 8.13 下 `assembleDebug` 245 個 task 全過，不要為了湊 21 另外裝 JDK」。那是錯的——當天 daemon log 只跑了無 task 的 `gradlew`，沒有編譯任何 build script；2026-09-14 實跑 `bundleRelease` 即炸上述錯誤。推論路徑的錯在於把「daemon 起得來」當成「能建置」。
   - PATH 上的 `jarsigner` / `keytool` 可能是 macOS 的 stub（回 `Unable to locate a Java Runtime`），簽章驗證用 `"$JAVA_HOME/bin/jarsigner"` / `"$JAVA_HOME/bin/keytool"`。
 - 乾淨 checkout / worktree 做 iOS 工作前先 `npx cap sync ios`
+- **Android release 要 `android/app/google-services.json`（#968）。** Firebase client 設定檔被 gitignore（repo 公開），
+  每次 `bundleRelease` 前從加密 dmg 的 `android/google-services.json` 複製進來；同資料夾的 FCM service account 金鑰
+  永遠不進 repo 樹。release 變體缺檔或空檔時 `:app:requireGoogleServicesJson` 以 `GradleException` 失敗；
+  debug 變體照舊略過（只在 info log 記一行），本機與模擬器 build 不需要它。
+  `tests/no-tracked-secrets-968.test.ts` 擋下被追蹤的 `google-services.json` 與任何含 service account／私鑰形狀的檔案。
+  - **失效的樣子**（護欄之前）：沒有紅燈。google-services plugin 只在檔案存在時套用，缺檔的 release AAB 照樣建出來、
+    簽章驗證通過、上傳成功——那顆殼的 Android 推播就是不會註冊。
+  - 殼的 manifest 關掉 `firebase_messaging_auto_init_enabled`、開 `firebase_analytics_collection_deactivated`：
+    使用者同意推播、web 呼叫 `register()` 之前，不產生 FCM token 或 Firebase installation ID。
 - **`webDir`（`out/`）現在有一個檔案：殼內離線頁 `offline.html`（#1225）。** `server.url` 架構下沒網路就載不到網站，所以 `server.errorPath` 指向這份打包進殼的靜態頁。它由 `scripts/build-native-offline-page.ts` 在 `capacitor:copy:before` hook 產生（文案來源 `lib/i18n/locales/*.ts › nativeOfflinePage`，四語烤在同一個檔、靠 `navigator.language` 選）。
   - **失效的樣子**：什麼紅燈都沒有。`cap sync` 成功、archive 成功、web 部署全綠——只有真機斷網冷啟動時是一片空白，而且 Sentry 收不到（那個情境沒有任何 JS 在跑）。護欄在 `__tests__/nativeOfflinePage.test.ts` 與 native-smoke 的檔案存在檢查，不在 build log。
 - **殼內載入看門狗與會自己回去的離線頁（#1672）。** Capacitor 沒有載入逾時：網路「卡住」（連得上、不回應）時，WebView 是空白背景等 10–25 秒才出 `offline.html`。Android 的 `FutariWebViewClient`（`MainActivity.onCreate` 裝上）與 iOS 的 `FutariBridgeViewController`（`SceneDelegate` 實例化）在主框架載入開始時起算 6 秒（連續觸發依序放寬 15、30 秒，之後維持 30 秒、不關閉），server-origin 文件 commit 就解除；到時 `stopLoading()`，並確保只有一次錯誤頁導覽。離線頁在背景探測網站，通了就 `location.replace` 回去；連續 2 次「回去又被丟回來」就停下，只剩手動按鈕。規則是純函式：`scripts/native-offline-logic.ts`（有單元測試）；Java／Swift 各鏡射一份，三處要一起改。

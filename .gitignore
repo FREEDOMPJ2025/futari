@@ -80,6 +80,15 @@ android/.idea/
 *.keystore
 *.jks
 
+# Firebase / Google credentials (#968). The repo is public: none of these may
+# ever be committed. google-services.json is copied from the encrypted vault
+# into android/app/ only for a release build (ship-native skill); the FCM
+# service-account key lives only in the vault and in Supabase secrets.
+# tests/no-tracked-secrets-968.test.ts fails if one is tracked anyway (git add -f).
+**/google-services.json
+*service-account*.json
+*-firebase-adminsdk-*.json
+
 # Capacitor / iOS (Xcode)
 ios/App/DerivedData/
 ios/App/build/
