@@ -18,12 +18,21 @@ vi.mock('@/lib/visitorPlatform', async (orig) => ({
   },
 }))
 
+const plugin = vi.hoisted(() => ({ share: vi.fn() }))
+vi.mock('@capacitor/share', () => ({ Share: plugin }))
+
 import { AndroidTesterInviteRow } from '@/app/(dashboard)/settings/_components/AndroidTesterInviteRow'
 import { APP_URL } from '@/lib/i18n/seo'
 
-function setNative(platform: 'android' | 'ios' | null) {
+function setNative(platform: 'android' | 'ios' | null, plugins: string[] = []) {
   if (platform === null) delete (window as { Capacitor?: unknown }).Capacitor
-  else (window as { Capacitor?: unknown }).Capacitor = { isNativePlatform: () => true, getPlatform: () => platform }
+  else {
+    ;(window as { Capacitor?: unknown }).Capacitor = {
+      isNativePlatform: () => true,
+      getPlatform: () => platform,
+      isPluginAvailable: (n: string) => plugins.includes(n),
+    }
+  }
 }
 function setNav(share: unknown, writeText: unknown) {
   Object.defineProperty(window.navigator, 'share', { value: share, configurable: true })
@@ -39,6 +48,7 @@ afterEach(() => {
   cleanup()
   setNative(null)
   track.mockClear()
+  plugin.share.mockReset()
   Object.defineProperty(window.navigator, 'share', { value: undefined, configurable: true })
 })
 
@@ -116,5 +126,44 @@ describe('AndroidTesterInviteRow (#1648)', () => {
     expect(writeText).not.toHaveBeenCalled()
     expect(track).not.toHaveBeenCalled()
     expect(screen.queryByText('Copied')).toBeNull()
+  })
+
+  describe('Android shell with @capacitor/share (#1749)', () => {
+    it('opens the system sheet through the plugin and tracks method=share', async () => {
+      setNative('android', ['Share'])
+      plugin.share.mockResolvedValue({ activityType: 'x' })
+      const writeText = vi.fn()
+      setNav(undefined, writeText) // the shell WebView has no navigator.share
+      render(<AndroidTesterInviteRow />)
+      fireEvent.click(screen.getByText('Invite'))
+      await waitFor(() => expect(track).toHaveBeenCalledWith('android_beta_share_clicked', { method: 'share' }))
+      expect(plugin.share).toHaveBeenCalledWith({ title: 'ST', text: 'SX', url: `${APP_URL}/android-beta` })
+      expect(writeText).not.toHaveBeenCalled()
+    })
+
+    it('does nothing when the user dismisses the sheet ("Share canceled")', async () => {
+      setNative('android', ['Share'])
+      plugin.share.mockRejectedValue(new Error('Share canceled')) // SharePlugin.java:79
+      const writeText = vi.fn()
+      setNav(undefined, writeText)
+      render(<AndroidTesterInviteRow />)
+      fireEvent.click(screen.getByText('Invite'))
+      await waitFor(() => expect(plugin.share).toHaveBeenCalled())
+      await Promise.resolve()
+      expect(writeText).not.toHaveBeenCalled()
+      expect(track).not.toHaveBeenCalled()
+      expect(screen.queryByText('Copied')).toBeNull()
+    })
+
+    it('copies in a shell built without the plugin', async () => {
+      setNative('android', [])
+      const writeText = vi.fn().mockResolvedValue(undefined)
+      setNav(undefined, writeText)
+      render(<AndroidTesterInviteRow />)
+      fireEvent.click(screen.getByText('Invite'))
+      await waitFor(() => expect(screen.getByText('Copied')).toBeTruthy())
+      expect(plugin.share).not.toHaveBeenCalled()
+      expect(track.mock.calls).toEqual([['android_beta_share_clicked', { method: 'copy' }]])
+    })
   })
 })

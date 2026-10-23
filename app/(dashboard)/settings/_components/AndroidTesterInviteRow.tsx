@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from '@/lib/i18n/client'
 import { isLocale } from '@/lib/i18n/locales-meta'
 import { localizedHref } from '@/lib/i18n/path'
 import { APP_URL } from '@/lib/i18n/seo'
+import { hasShareSheet, isShareCancel, openShareSheet } from '@/lib/shareSheet'
 import { ANDROID_BETA_PATH, ANDROID_TEST_GROUP_URL } from '@/lib/visitorPlatform'
 
 /**
@@ -23,11 +24,11 @@ import { ANDROID_BETA_PATH, ANDROID_TEST_GROUP_URL } from '@/lib/visitorPlatform
  * and the first client render agree. Hidden when the group URL is empty, so we
  * never share a page with no action.
  *
- * Share: `navigator.share` when present, else (or on a non-Abort rejection)
- * the clipboard plus an inline confirmation. `@capacitor/share` is not a
- * dependency and adding it would touch the native projects, so inside the
- * Android shell, whose WebView has no Web Share API, the clipboard path is the
- * path. User cancel (AbortError) does nothing.
+ * Share: the system sheet when there is one (`lib/shareSheet.ts`: Web Share, or
+ * `@capacitor/share` inside the Android shell, #1749), else (or on a failure that
+ * isn't a cancel) the clipboard plus an inline confirmation. A shell built
+ * before the plugin was added has no sheet and keeps copying. User cancel does
+ * nothing.
  *
  * TEMPORARY: removed with the Android closed-test cleanup (#1553), together
  * with the `androidTesterInvite` i18n namespace and `android_beta_share_clicked`.
@@ -63,13 +64,13 @@ export function AndroidTesterInviteRow() {
 
   const handleClick = async () => {
     const url = `${APP_URL}${localizedHref(ANDROID_BETA_PATH, locale)}`
-    if (typeof navigator.share === 'function') {
+    if (hasShareSheet()) {
       try {
-        await navigator.share({ title: t.androidTesterInvite.shareTitle, text: t.androidTesterInvite.shareText, url })
+        await openShareSheet({ title: t.androidTesterInvite.shareTitle, text: t.androidTesterInvite.shareText, url })
         track('android_beta_share_clicked', { method: 'share' })
         return
       } catch (e) {
-        if (e instanceof Error && e.name === 'AbortError') return
+        if (isShareCancel(e)) return
       }
     }
     await copy(url)
