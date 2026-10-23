@@ -67,6 +67,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：「第三方服務」補上 Apple 推播通知服務與 Google Firebase 雲端通訊，說明它們只收到裝置的推播識別碼與固定的通知文字。
   技術：四語 `privacyPage.sectionThirdPartyItems` 加一條、更新日期改為 2026-10-23；文案經 Grok 審（#1826）。
 
+- **Android App 1.9.0 起可以收到定期收支提醒（#968）**
+  使用者：裝了 1.9.0 以上 Android App 的人，打開後會被問是否允許通知，之後會收到「有待確認的定期收支」；更舊的 Android App 不受影響、不會跳通知權限。
+  技術：`registerPushToken` 在 Android 先讀殼版本（`FCM_MIN_ANDROID_SHELL`，讀不到一律不註冊）再註冊 FCM；登出刪 token 不再限定 APNs，長度上限 4096；新增只在 `next dev` 存在的 `/dev/push-gate` 探測頁。
+
 ### 技術變更
 
 - **每晚推播的伺服器端可以送 Android（FCM）（#968）**
