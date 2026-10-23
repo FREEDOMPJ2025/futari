@@ -4,6 +4,7 @@ import { Suspense, useInsertionEffect, useRef, useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { isTokenBearingUrl } from '@/lib/analytics/tokenBearingUrl'
+import { GA_OPT_OUT_PARAM, isGaOptedOut } from '@/lib/analytics/gaOptOut'
 
 export { isOutingSharePath, isInviteTokenPath, isTokenBearingUrl } from '@/lib/analytics/tokenBearingUrl'
 
@@ -51,6 +52,10 @@ export { isOutingSharePath, isInviteTokenPath, isTokenBearingUrl } from '@/lib/a
  * - Only the singular `outing` segment counts; the signed-in
  *   `/outings/<uuid>` keeps reporting. `next` matching is anchored, so
  *   `/sign-in?next=/dashboard` and `?next=/settings/invite/x` keep reporting.
+ * - Owner testing (automated browsers, or a browser opted out with
+ *   `?ga_optout=1`) only sets the same opt-out flag, after hydration; the
+ *   scripts still render so the server HTML stays identical for everyone.
+ *   See lib/analytics/gaOptOut.ts.
  *
  * ## What failure looks like
  *
@@ -73,6 +78,7 @@ function GoogleAnalyticsGateLeaf({ gaId }: { gaId: string }) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const blocked = isTokenBearingUrl(pathname, searchParams?.getAll('next') ?? [])
+  const optOutParam = searchParams?.get(GA_OPT_OUT_PARAM) ?? null
   const [rendered, setRendered] = useState(!blocked)
   // Derived-state update during render: latches on the first non-blocked URL.
   if (!blocked && !rendered) setRendered(true)
@@ -82,11 +88,12 @@ function GoogleAnalyticsGateLeaf({ gaId }: { gaId: string }) {
   useInsertionEffect(() => {
     if (blocked && rendered) sticky.current = true
     try {
-      ;(window as unknown as Record<string, unknown>)[`ga-disable-${gaId}`] = blocked || sticky.current
+      ;(window as unknown as Record<string, unknown>)[`ga-disable-${gaId}`] =
+        blocked || sticky.current || isGaOptedOut(optOutParam)
     } catch {
       // A locked-down window object must not take the page down.
     }
-  }, [gaId, blocked, rendered])
+  }, [gaId, blocked, rendered, optOutParam])
 
   if (!rendered) return null
   return <GoogleAnalytics gaId={gaId} />

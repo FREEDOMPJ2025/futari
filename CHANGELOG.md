@@ -41,7 +41,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
-_Nothing unreleased yet._
+### 技術變更
+
+- **開發者自己的測試不再進 GA**
+  技術：`lib/analytics/gaOptOut.ts`：瀏覽器開過 `?ga_optout=1`（localStorage，`=0` 取消）或 `navigator.webdriver` 為真時設 `ga-disable`；server HTML 不變，一般訪客照送。
 
 ## [1.8.0] - 2026-10-19
 

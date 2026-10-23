@@ -39,9 +39,15 @@ vi.mock('@next/third-parties/google', () => ({
 
 const flag = () => (window as unknown as Record<string, unknown>)[`ga-disable-${GA_ID}`]
 
+function setWebdriver(value: boolean) {
+  Object.defineProperty(window.navigator, 'webdriver', { value, configurable: true })
+}
+
 beforeEach(() => {
   go('/')
   delete (window as unknown as Record<string, unknown>)[`ga-disable-${GA_ID}`]
+  window.localStorage.clear()
+  setWebdriver(false)
 })
 afterEach(cleanup)
 
@@ -181,6 +187,77 @@ describe('GoogleAnalyticsGate', () => {
     view.rerender(<GoogleAnalyticsGate gaId={GA_ID} />)
     expect(view.queryByTestId('ga-src')).not.toBeNull()
     expect(flag()).toBe(false)
+  })
+})
+
+describe('owner test traffic opt-out', () => {
+  it('an automated browser never sends, but the scripts still render', async () => {
+    const { GoogleAnalyticsGate } = await import('@/app/google-analytics')
+    setWebdriver(true)
+    const view = render(<GoogleAnalyticsGate gaId={GA_ID} />)
+    expect(view.queryByTestId('ga-src')).not.toBeNull()
+    expect(flag()).toBe(true)
+  })
+
+  it('?ga_optout=1 opts this browser out and survives navigation and reloads', async () => {
+    const { GoogleAnalyticsGate } = await import('@/app/google-analytics')
+    go('/zh-TW?ga_optout=1')
+    const view = render(<GoogleAnalyticsGate gaId={GA_ID} />)
+    expect(flag()).toBe(true)
+
+    go('/dashboard')
+    view.rerender(<GoogleAnalyticsGate gaId={GA_ID} />)
+    expect(flag()).toBe(true)
+    view.unmount()
+
+    go('/')
+    render(<GoogleAnalyticsGate gaId={GA_ID} />)
+    expect(flag()).toBe(true)
+  })
+
+  it('?ga_optout=0 opts back in', async () => {
+    const { GoogleAnalyticsGate } = await import('@/app/google-analytics')
+    window.localStorage.setItem('futari_ga_optout', '1')
+    go('/?ga_optout=0')
+    const view = render(<GoogleAnalyticsGate gaId={GA_ID} />)
+    expect(flag()).toBe(false)
+    view.unmount()
+
+    go('/')
+    render(<GoogleAnalyticsGate gaId={GA_ID} />)
+    expect(flag()).toBe(false)
+  })
+
+  it('ordinary visitors keep sending, and the server HTML is unchanged by the opt-out', async () => {
+    const { GoogleAnalyticsGate } = await import('@/app/google-analytics')
+    for (const url of ['/', '/zh-TW', '/dashboard', '/?ga_optout=x']) {
+      go(url)
+      const view = render(<GoogleAnalyticsGate gaId={GA_ID} />)
+      expect(flag(), url).toBe(false)
+      view.unmount()
+    }
+    go('/?ga_optout=1')
+    expect(renderToString(<GoogleAnalyticsGate gaId={GA_ID} />)).toContain(
+      `googletagmanager.com/gtag/js?id=${GA_ID}`,
+    )
+  })
+
+  it('blocked storage does not break the gate', async () => {
+    const { GoogleAnalyticsGate } = await import('@/app/google-analytics')
+    const get = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('blocked')
+    })
+    const set = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('blocked')
+    })
+    go('/?ga_optout=1')
+    const view = render(<GoogleAnalyticsGate gaId={GA_ID} />)
+    expect(flag()).toBe(true)
+    go('/')
+    view.rerender(<GoogleAnalyticsGate gaId={GA_ID} />)
+    expect(flag()).toBe(false)
+    get.mockRestore()
+    set.mockRestore()
   })
 })
 
