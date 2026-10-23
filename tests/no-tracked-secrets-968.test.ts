@@ -38,13 +38,9 @@ const LEAK_SHAPES: [string, RegExp][] = [
  * elsewhere in the same file — still fails. Entries that no longer match
  * anything fail too, so the list can't silently outgrow its reasons.
  */
-const ALLOWED_LINES: { path: string; line: string; reason: string }[] = [
-  {
-    path: 'supabase/functions/send-recurring-push/index.ts',
-    line: `.replace(/${PEM_HEADER}/, '')`,
-    reason: 'APNs signing: strips the PEM header from a key read from Supabase secrets at runtime; no key material in source.',
-  },
-]
+// Empty since #968 S4b: send-recurring-push strips PEM armour with a generic
+// pattern (pem.ts), so no tracked line spells out a private-key header.
+const ALLOWED_LINES: { path: string; line: string; reason: string }[] = []
 
 const MAX_BYTES = 2 * 1024 * 1024
 
