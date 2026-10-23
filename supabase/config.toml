@@ -1,0 +1,15 @@
+# Supabase CLI config — functions section only (#968).
+#
+# This file exists to pin per-function deploy settings that
+# `supabase functions deploy` reads. It is NOT a full project config:
+# do not run `supabase config push` (it would push the CLI's local
+# defaults for auth, storage, etc. over the hosted projects' settings).
+#
+# verify_jwt must stay true for send-recurring-push while callerAuth.ts uses
+# the claim check: the gateway verifies the JWT signature, the function only
+# reads role/ref/exp. With verify_jwt off, anyone can forge those claims.
+# Do not deploy it with --no-verify-jwt or flip the dashboard toggle.
+# See docs/superpowers/ops-runbook.md「呼叫者驗證」.
+
+[functions.send-recurring-push]
+verify_jwt = true

@@ -25,7 +25,6 @@ const ROOT = join(__dirname, '..')
 
 // Leak shapes. Built from pieces so this file doesn't contain them literally
 // and can be scanned like every other file (no self-exemption).
-const PEM_HEADER = '-----BEGIN ' + 'PRIVATE KEY-----'
 const LEAK_SHAPES: [string, RegExp][] = [
   ['a service-account JSON "type" field', new RegExp('"type"\\s*:\\s*"service' + '_account"')],
   ['a "private_key" JSON key', new RegExp('"private' + '_key"\\s*:')],
