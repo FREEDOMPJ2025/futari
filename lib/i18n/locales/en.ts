@@ -2187,7 +2187,7 @@ export const en: Translations = {
 
   privacyPage: {
     heading: 'Privacy Policy',
-    lastUpdated: 'Last updated: October 15, 2026',
+    lastUpdated: 'Last updated: October 23, 2026',
     intro: 'This page explains how Futari collects, uses, and protects your personal data.',
     sectionCollectTitle: 'Data we collect',
     sectionCollectItems: [
@@ -2223,6 +2223,7 @@ export const en: Translations = {
       'PostHog (product analytics — collects anonymous usage events, no personally identifiable information)',
       'Google Analytics 4 (traffic source analytics — IP-anonymised, cross-site personalisation disabled)',
       'Google Drive (storage for encrypted database backups)',
+      "Apple Push Notification service and Google Firebase Cloud Messaging (push notifications — receive only the device's push token and fixed notification text, no ledger content)",
     ],
     sectionRightsTitle: 'Your rights',
     sectionRightsBody: 'You may sign out or delete your account at any time from the settings page. To export or enquire about your personal data, ',

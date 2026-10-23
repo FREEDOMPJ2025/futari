@@ -51,6 +51,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：頁面還有資源載入中時點「跳到主要內容」之類的錨點，已顯示的頁面不會在 6 秒後被換成離線頁。
   技術：載入看門狗在目標網址只差 `#fragment`（且非 reload）時不啟動；規則在 `native-offline-logic.ts`，只有 Swift 鏡射，需隨下一版 iOS 殼上架。
 
+- **隱私權政策列出推播服務（#1826）**
+  使用者：「第三方服務」補上 Apple 推播通知服務與 Google Firebase 雲端通訊，說明它們只收到裝置的推播識別碼與固定的通知文字。
+  技術：四語 `privacyPage.sectionThirdPartyItems` 加一條、更新日期改為 2026-10-23；文案經 Grok 審（#1826）。
+
 ### 技術變更
 
 - **每晚推播的伺服器端可以送 Android（FCM）（#968）**

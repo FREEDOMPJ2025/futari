@@ -2183,7 +2183,7 @@ export const zhCN: Translations = {
 
   privacyPage: {
     heading: '隐私权政策',
-    lastUpdated: '最后更新：2026 年 10 月 15 日',
+    lastUpdated: '最后更新：2026 年 10 月 23 日',
     intro: '本页说明 Futari 如何收集、使用与保护您的个人数据。',
     sectionCollectTitle: '收集的数据',
     sectionCollectItems: [
@@ -2219,6 +2219,7 @@ export const zhCN: Translations = {
       'PostHog（产品分析，收集匿名操作事件，不含个人识别信息）',
       'Google Analytics 4（流量来源分析，IP 匿名化，不启用跨站个人化）',
       'Google Drive（存放加密的数据库备份）',
+      'Apple 推送通知服务、Google Firebase 云消息传递（推送通知，只收到设备的推送标识符与固定的通知文本，不含账本内容）',
     ],
     sectionRightsTitle: '您的权利',
     sectionRightsBody: '您可随时通过设置页退出登录或删除账号。如需导出或查询您的个人数据，',
