@@ -745,7 +745,7 @@ LIMIT 5;
 
 #### legacy key 退場（2026 年底）
 
-Supabase 預計在 2026 年底停用 legacy JWT API key（anon／service_role）。停用那天起，cron 送的 legacy JWT 會在 gateway 被擋：cron 401、函式沒有 `[auth]` log、沒有人收到推播。在那之前要做 follow-up issue：cron 改送 `apikey: sb_secret_…`，函式改 `verify_jwt = false`、在函式內驗 secret key——這個檢查要**取代**現在的聲明檢查，不是加在旁邊：`verify_jwt = false` 時聲明檢查等於沒有檢查，任何人都能偽造。到時 `supabase/config.toml`、`callerAuth.ts` 的頂端說明、這一節與 `tests/push-caller-auth-968.test.ts` 的 config 釘選要一起改。
+Supabase 預計在 2026 年底停用 legacy JWT API key（anon／service_role）。停用那天起，cron 送的 legacy JWT 會在 gateway 被擋：cron 401、函式沒有 `[auth]` log、沒有人收到推播。在那之前要做 #1834：cron 改送 `apikey: sb_secret_…`，函式改 `verify_jwt = false`、在函式內驗 secret key——這個檢查要**取代**現在的聲明檢查，不是加在旁邊：`verify_jwt = false` 時聲明檢查等於沒有檢查，任何人都能偽造。到時 `supabase/config.toml`、`callerAuth.ts` 的頂端說明、這一節與 `tests/push-caller-auth-968.test.ts` 的 config 釘選要一起改。
 
 ### FCM 金鑰（Supabase function secrets）
 
