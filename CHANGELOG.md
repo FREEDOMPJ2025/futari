@@ -51,6 +51,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：頁面還有資源載入中時點「跳到主要內容」之類的錨點，已顯示的頁面不會在 6 秒後被換成離線頁。
   技術：載入看門狗在目標網址只差 `#fragment`（且非 reload）時不啟動；規則在 `native-offline-logic.ts`，只有 Swift 鏡射，需隨下一版 iOS 殼上架。
 
+### 技術變更
+
+- **每晚推播的伺服器端可以送 Android（FCM）（#968）**
+  使用者：還沒有變化；等 Android 殼註冊推播（v1.9.0）後，Android 也會收到「有待確認的定期收支」。
+  技術：`send-recurring-push` 依 `platform` 分流，FCM HTTP v1 以三個 function secret 換 OAuth token，兩平台互不影響；失效 token 只依錯誤代碼刪、超過一半 400 就不刪；supabase-js pin 2.105.1。
+
+### Security
+
+- **只有排程能觸發每晚推播（#968）**
+  使用者：無感；拿到公開 anon key 的人不能再隨時讓所有人的手機收到推播。
+  技術：edge function 先比對 bearer 是否等於自己的 service role key（常數時間），不符回 401；prod 部署後要確認下一次 cron 回 200。
+
 ## [1.8.0] - 2026-10-19
 
 主題：**品牌頁．讓陌生人信任**——登入前的品牌頁整體升級（award review 第 6 輪 7.45 通過）；iPhone 捷徑能把付款送進待確認；匯入多了三個來源。

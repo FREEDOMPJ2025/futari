@@ -670,6 +670,67 @@ pg_cron job 要帶 `service_role` bearer token 呼叫 Edge Function 時，**toke
 
 ---
 
+## 推播 edge function：呼叫者驗證與 Android FCM 金鑰（#968）
+
+`supabase/functions/send-recurring-push` 每晚 16:10 UTC 由 `notify-recurring-push` cron 呼叫，iOS 走 APNs、Android 走 FCM HTTP v1。兩條分支各自包起來：FCM 的金鑰、OAuth 或網路出錯，不會擋住 APNs，反之亦然。
+
+### 呼叫者驗證
+
+函式只接受 `Authorization: Bearer <值>` 的值**完全等於**函式自己的 `SUPABASE_SERVICE_ROLE_KEY`（雜湊後常數時間比對，`callerAuth.ts`），其他一律 401，在任何 DB 查詢之前。Gateway 的 JWT 檢查本身也接受公開的 anon key，沒有這道檢查時，任何拿到 anon key 的人都能隨時讓每個家庭的手機收到推播。
+
+- 所以 Vault 的 `oikos_service_role_key`（cron 送的值，見上一節）必須跟函式環境的 `SUPABASE_SERVICE_ROLE_KEY` 是同一個字串。輪替 service role key，或改用新版 API key（`sb_secret_…`）時，Vault 要在同一步更新。
+- **失效的樣子**：cron 照常在 16:10 UTC 觸發，`net._http_response.status_code` 是 401 而不是 200；沒有人收到推播，其他地方都沒有錯誤。
+- dev 資料庫的這個 cron 也打 prod 的網址（0056 寫死），dev 的 service role key 本來就過不了，所以 dev 的 `net._http_response` 不能拿來判斷。
+
+**prod 部署後的檢查（必做）**：部署當天 16:10 UTC 那次執行之後、6 小時內（pg_net 預設只留 6 小時），用 admin service 唯讀查：
+
+```sql
+SELECT id, status_code, timed_out, created
+FROM net._http_response
+WHERE created >= date_trunc('day', now()) + interval '16 hours 10 minutes'
+ORDER BY created
+LIMIT 5;
+```
+
+- 只看狀態碼；**不要 select `headers`、`content`**。
+- 200：通過。401：立刻回滾，重新部署前一版函式（在前一版 commit 的 detached worktree 裡跑 `supabase functions deploy send-recurring-push --project-ref <prod ref>`；沒有 schema 變動）。回滾之後再查 Vault 與函式的 key 為什麼不一致。
+- 查不到任何列：多半是已經超過 6 小時被清掉，不代表 cron 沒跑；隔天再查一次。
+- 經使用者同意，也可以不等 cron，用同一個 Vault secret 手動 `net.http_post` 一次，再照上面只查狀態碼。
+- dev 部署後先手動驗：anon key → 401、service role key → 200。
+
+### FCM 金鑰（Supabase function secrets）
+
+| secret | 內容 |
+|---|---|
+| `FCM_CLIENT_EMAIL` | service account 的 email：`futari-fcm-sender@oikos-pj.iam.gserviceaccount.com` |
+| `FCM_PRIVATE_KEY_PEM` | 下載的金鑰 JSON 裡的 PEM 私鑰；保留 JSON 的 `\n` 跳脫也可以，程式會換回換行 |
+| `FCM_PRIVATE_KEY_ID` | 同一把金鑰的 key id（JWT 的 `kid`） |
+
+- Firebase project id `oikos-pj` 和 token URI `https://oauth2.googleapis.com/token` 寫死在 `fcm.ts`，不是 secret。
+- SA 只有 `roles/firebasecloudmessaging.admin`。**dev、prod 各用一把不同的 key**（同一個 SA）；prod 那把的 key id 開頭是 `bb467751`。dev 那把建立後把開頭 8 碼記在這裡。
+- 設定方式：三行寫在加密 dmg 掛載後的檔案裡，`supabase secrets set --project-ref <ref> --env-file <dmg 裡的檔案>`。**不要用 `NAME=value` 寫在指令列**：會留在 shell history 與行程列表。不要 `cat`、不要印出這個檔案。確認只用 `supabase secrets list --project-ref <ref>`（只顯示名稱與 digest）。
+- 函式每次執行只換一次 OAuth access token，只存在那次執行的記憶體裡，不寫進任何地方，也不寫進 log。
+
+**失效的樣子**（每一種都是 Android 使用者靜靜收不到推播，iOS 照常，沒有任何畫面上的錯誤；只有函式 log 看得到）：
+
+- secret 沒設或有一個是空的：每晚一行 `[fcm] secrets missing; skipping FCM sends`。
+- key 已刪除、key id 對不上、email 打錯：`[fcm] oauth failed status=400 error=invalid_grant`（log 只記 OAuth 回應的 `error` 欄位）。
+- PEM 貼壞（少一段、多了引號）：`[fcm] branch failed: <錯誤名稱>`。
+- `[fcm] stale-delete breaker tripped`：這次超過一半的 FCM 發送回 400，函式這次一個 FCM token 都沒刪。多半是 payload 或設定壞了，不是大量手機失效；先查最近的部署。
+
+### 金鑰輪替與撤銷
+
+規劃內輪替（建議跟 Apple OAuth secret 一起排，見下方「Sign in with Apple」雷點 2）：
+
+1. 使用者在 Google Cloud Console（或自己用 `!` 跑 gcloud）替 `futari-fcm-sender` 建一把新 key，JSON 直接存進加密 dmg。
+2. dev：用新 key 更新三個 secret（`--env-file`），驗證：dev Android build 收到一則推播，函式 log 沒有 `[fcm] oauth failed`。
+3. prod：同樣更新，驗證：下一次 16:10 UTC 執行的函式 log 沒有 `[fcm] oauth failed`／`[fcm] branch failed`。
+4. 確認 prod 用新 key 跑過之後，才在 Console 刪除舊 key。順序反過來的樣子：舊 key 刪掉到新 secret 生效之間，Android 推播全部 `invalid_grant`。
+
+懷疑 key 外洩：直接在 Console 刪除那把 key（不等新 key），接受 Android 推播中斷到新 key 設好；再照上面 1–3 補新 key。已經換出去的 access token 刪 key 後最多還能用 1 小時，無法提早作廢。
+
+---
+
 ## Supabase Auth：JWT 簽章金鑰與 refresh token（#1540）
 
 **JWT 簽章金鑰：先輪替、等它簽過的 access token 全部過期（~1 小時）之後才 revoke**；並在兩個 project 的 Auth 設定確認 refresh token reuse interval（唯讀查看）。失效的樣子：提早 revoke 會讓 `getUser()` 回 `bad_jwt`，`proxy.ts` 把它當「確定被拒」清掉登入 cookie——所有在那一小時內簽發 token 的使用者同時被登出，沒有任何錯誤。

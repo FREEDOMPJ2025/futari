@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-10-17
+last_updated: 2026-10-23
 status: shipped
 first_shipped_in: v1.2.0
 updates:
@@ -17,8 +17,9 @@ updates:
   - v1.7.2: 補「`android_beta_step_clicked`、`tester_feedback_clicked`、`android_beta_outing_link_clicked`、`android_beta_share_clicked` 是新測量點，`android_beta_invite_clicked` 的語意改變」這條邊界（#1648）
   - v1.7.4: 補「`outing_created`、`outing_link_shared` 是新測量點；出遊分享頁事件 0 筆是沒有訪客、不是沒送出；出遊漏斗在分享那一步換人」這條邊界（#1723）；「`outing_ledger_invite_viewed`／`_clicked` 是新測量點，`entry_source=outing` 從此有兩個入口」（#1728）；補「2026-10-16 起出遊朋友頁路徑讀作 `/outing/r/:id`」（#1742）
   - v1.8.0: 補「`record_created` 涵蓋所有記帳管道、五個 server 事件帶 `group_id`」這條邊界，2026-10-17 起，前後計數不可比（#1764）
+  - v1.9.0: 補「伺服器端推播（send-recurring-push）只有 console log」這條邊界（#968）
 related_specs: [conversion-analytics, product]
-related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", "#1415", "#1453", "#1552", "#1546", "#1553", "#1648", "#1723", "#1742", "#1764"]
+related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", "#1415", "#1453", "#1552", "#1546", "#1553", "#1648", "#1723", "#1742", "#1764", "#968"]
 ---
 
 # 觀測的邊界與讀數據的紀律
@@ -57,6 +58,8 @@ related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", 
   - **登入 callback 換 session 失敗（`area: 'auth'`、`op: 'exchange_code'`）自 v1.8.0 起帶 `error_code`（#1768）**，PostHog `sign_in_failed reason=exchange_error` 同名欄位。值是 Supabase 的錯誤代碼（`flow_state_not_found`、`bad_code_verifier`、`pkce_code_verifier_not_found` 等），只收 `[a-z0-9_]{1,64}`，其他字串記成 `other`、沒有代碼記成 `none`（網路錯誤就是 `none`）。tag 名稱刻意不用 `code`：那是這條路由的 OAuth 祕密參數名。v1.8.0 之前的事件沒有這個欄位，跨部署日比較無效。
   - **失效的樣子**：使用者看到「出了點問題」的錯誤頁，Sentry Issues 是空的，看起來像沒有錯誤——2026-10-17 盤點近 30 天全站約 32 筆事件，瀏覽器與 Android 殼各 0 筆。推播註冊壞掉（Android FCM，#968）同樣沒有任何訊號。查這類問題用 `area` tag 篩 Issues；沒有結果時再去 Logs 確認，不要直接下結論說沒出錯。
   - **`react-hydration-errors` inbound filter 會藏起之後的 hydration 回歸。** 該 filter 丟掉約 127 筆（比收進來的多 4 倍），最後一筆 10/12，#1515／#1424 修完後停了。失效的樣子是 Issues 乾淨、dropped events 卻在長：**每個 release 看一次 Sentry 的 dropped events（Stats → Filtered）**，數字回升就是 hydration 又壞了。
+- **伺服器端推播（`supabase/functions/send-recurring-push`）只有 console log，沒有 Sentry、沒有 PostHog（#968）。** 這支 Supabase edge function 不載入任何 Sentry 或 PostHog SDK；它的成敗只留在 Supabase 的 Edge Function logs（`function_logs`，跟其他 Supabase log 一樣最多查 24 小時），以及 cron 那一側 `net._http_response` 的狀態碼。log 刻意只記狀態碼、Google／Apple 回應裡的錯誤代碼（`error.status`、`errorCode`、APNs `reason`、OAuth `error`）和 token 前 8 碼，不記 access token、簽好的 assertion、`Authorization` header、請求 body 或錯誤的 `message` 文字。client 端的 `area: 'push'`（上面那條）只涵蓋「裝置註冊 token」，不涵蓋「伺服器送出推播」。
+  - **失效的樣子**：Sentry Issues、Logs 與 PostHog 全部乾淨，Android（或 iOS）使用者卻收不到每晚的推播。要查就看 Edge Function logs 的 `[fcm]`／`[apns]`／`[push]` 開頭的行（`[fcm] secrets missing`、`[fcm] oauth failed`、`[fcm] stale-delete breaker tripped` 的意思見 [ops-runbook](../ops-runbook.md)「推播 edge function」），以及 `net._http_response` 是不是 401；超過 24 小時就查不到了，不要把查不到當成沒出錯。
 - **Session Replay 在前端鎖死（`disable_session_recording: true`）。** PostHog 專案後台那個開關現在是無效的；要開必須先連同 replay 自己的遮罩（`session_recording.maskAllInputs` + `maskTextSelector: '*'`）一起改 code，因為上面那兩個選項管不到 recorder。
 - **Sentry 的 request、breadcrumb、span、log 裡看不到原始網址、cookie、header、請求 body 與 client IP——但 exception 的訊息內容不經清洗。** 自 v1.5.16 起（#1274），client / server / edge 三份 Sentry config 的 `beforeSend` / `beforeSendTransaction` / `beforeSendSpan` / `beforeBreadcrumb` / `beforeSendLog` 全部走 `lib/observability/sentryScrub.ts`：網址套用與 PostHog 共用的 `lib/analytics/urlSanitizer.ts` 規則（路徑與 query key 保留，邀請 token 變 `:token`，非白名單 query 值變 `<masked>`），header / cookie / `request.data` 整段拿掉。所以「重現某個錯誤時的完整網址或 server action 參數」在 Sentry 上查不到，要從 issue 的路徑形狀與 stack 回推。錯誤訊息（`exception.values[].value`）不在清洗範圍內：丟出含 URL 的 `Error` 前要自己處理（同「catch 住的錯誤只進 Logs」那條的做法）。
   - **失效的樣子是沒有任何錯誤。** 某份 config 漏接一個 hook，原始網址與 cookie 會安靜地重新出現在 Sentry，而沒人會去那裡看；hook 自己 throw 時，`beforeSend*` 那幾個會讓 SDK 丟掉整筆事件，breadcrumb／log 的則漏給呼叫端。唯一會變紅的是 `tests/sentry-scrub-wiring.test.ts`。
