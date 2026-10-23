@@ -14,7 +14,8 @@ import os
 //
 // Rules mirrored from scripts/native-offline-logic.ts (which has the unit tests): timeouts 6 -> 15 -> 30 s,
 // then stays at 30 s (never disabled); the counter resets only after a server document was shown for
-// 60 s with no fire, or after > 5 min in the background. Change both together.
+// 60 s with no fire, or after > 5 min in the background. Fragment-only navigations do not arm (#1680, Swift
+// only). Change both together.
 //
 // Failure looks like: nothing. A watchdog that never arms leaves the old blank screen; one that fires on
 // a normal load flashes the offline page. Watch: `log stream --predicate 'category == "FutariWatchdog"'`.
@@ -31,6 +32,18 @@ private enum Watchdog {
     static func timeout(forConsecutiveFires n: Int) -> Double {
         timeoutsSeconds[min(max(n, 0), timeoutsSeconds.count - 1)]
     }
+}
+
+/// Mirrors isFragmentOnlyNavigation in scripts/native-offline-logic.ts (Swift only; Android never sees
+/// in-page navigations in shouldInterceptRequest). A wrong "true" silently leaves a real load unwatched
+/// (the #1672 blank screen); a wrong "false" flashes the offline page over a loaded page.
+private func isFragmentOnlyNavigation(target: String, current: String?, isReload: Bool) -> Bool {
+    guard !isReload, let current = current, target.contains("#") else { return false }
+    func strip(_ s: String) -> String {
+        if let i = s.firstIndex(of: "#") { return String(s[s.startIndex..<i]) }
+        return s
+    }
+    return strip(target) == strip(current)
 }
 
 /// Weak proxy so the user content controller does not retain the view controller.
@@ -121,6 +134,15 @@ class FutariBridgeViewController: CAPBridgeViewController {
             let url = action.request.url
             if self.isErrorURL(url) { return }
             if self.isServerOrigin(url), (action.request.httpMethod ?? "GET") == "GET" {
+                // Fragment-only in-page navigation (#1680): no new document, so the commit script never
+                // runs and the timer could never disarm. Raw URLs, current = webView.url right now (pushState
+                // updates it; expectedUrl and the committed href are not). Armed state is left untouched.
+                if isFragmentOnlyNavigation(
+                    target: url?.absoluteString ?? "", current: self.webView?.url?.absoluteString,
+                    isReload: action.navigationType == .reload) {
+                    self.log("SKIP fragment-only \(Self.shape(url?.absoluteString ?? ""))")
+                    return
+                }
                 self.arm(Self.stripFragment(url?.absoluteString ?? ""))
             } else if self.armed {
                 // Left the server origin (e.g. a redirect Capacitor opens externally): nothing to time out.
