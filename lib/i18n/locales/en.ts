@@ -3992,7 +3992,7 @@ I will upload the screenshots once you confirm.`,
         },
         {
           title: 'Build the link with a Text action',
-          body: 'Add a Text action and paste the link below, replacing [Amount] with the result of step 2 and [Merchant] with the result of step 3 (if you skipped step 2, use Shortcut Input, then Amount). To use another category, change the id after category= (see the category table below).',
+          body: 'Add a Text action and paste the link below, replacing [Amount] with the result of step 2 and [Merchant] with the result of step 3 (if you skipped step 2, use Shortcut Input, then Amount). You don\'t need to set a category: a merchant you\'ve recorded before gets the category you used last time, and a new merchant starts as Dining. You can change it before saving.',  // TODO(i18n): 待確認 #1838
         },
         {
           title: 'Open the URL',
@@ -4030,8 +4030,8 @@ I will upload the screenshots once you confirm.`,
         },
         {
           param: 'category',
-          rule: 'One of the ids in the table below, all lowercase and spelled exactly.',
-          fallback: 'Falls back to Dining',
+          rule: 'One of the ids in the table below, all lowercase and spelled exactly. Used only the first time you record a merchant; after that, the category you used last time applies.',  // TODO(i18n): 待確認 #1838
+          fallback: 'The category you used last time for this merchant, or Dining for a new one',  // TODO(i18n): 待確認 #1838
         },
         {
           param: 'note',
@@ -4071,8 +4071,8 @@ I will upload the screenshots once you confirm.`,
           cause: 'The merchant name was not passed through URL Encode.',
         },
         {
-          symptom: 'The category is Dining, not the one I wrote',
-          cause: 'The category id is misspelled or uses capital letters.',
+          symptom: "The category isn't the one in my link",  // TODO(i18n): 待確認 #1838
+          cause: "You've recorded this merchant before, so it uses the category from last time. For a new merchant, a misspelled or capitalized id falls back to Dining.",  // TODO(i18n): 待確認 #1838
         },
       ],
     },

@@ -29,7 +29,7 @@ https://futari.southern-light.dev/dashboard#add=expense&amount=<金額>&category
 | 參數 | 規則 | 不合格時 |
 |---|---|---|
 | `amount` | 正整數，1～9,999,999。可以有千分位逗號（`1,200`），全形數字（`１２０`）也可以。小數、負數、`1e5` 這類寫法都不收 | 金額空白，自己輸入 |
-| `category` | 下表其中一個 id，大小寫要完全一樣 | 用預設的「飲食」 |
+| `category` | 下表其中一個 id，大小寫要完全一樣。只有第一次記這個商家時會採用，記過的商家沿用上次的分類 | 這個商家記過就沿用上次的分類，沒記過用「飲食」 |
 | `note` | 會變成「描述」。最多 100 個字，控制字元與改變文字方向的隱形字元會被拿掉 | 描述空白，儲存前要自己填 |
 
 分類 id：
@@ -51,7 +51,7 @@ https://futari.southern-light.dev/dashboard#add=expense&amount=<金額>&category
 例：
 
 ```
-dev.southernlight.futari://add?amount=120&category=dining&note=LINE%20Pay%20%E5%8D%88%E9%A4%90
+dev.southernlight.futari://add?amount=120&note=LINE%20Pay%20%E5%8D%88%E9%A4%90
 ```
 
 ### 什麼時候不會跳出來
@@ -79,9 +79,9 @@ dev.southernlight.futari://add?amount=120&category=dining&note=LINE%20Pay%20%E5%
    中文和空白一定要先經過「URL 編碼」，不然網址會斷在中間，描述會是空的。
 5. 加一個「文字」動作，內容輸入（把 `[金額]`、`[描述]` 換成上面的變數）：
    ```
-   dev.southernlight.futari://add?amount=[金額]&category=dining&note=[描述]
+   dev.southernlight.futari://add?amount=[金額]&note=[描述]
    ```
-   沒做第 4 步就把 `&note=[描述]` 整段拿掉。分類想換成別的，就改 `category=` 後面的 id（見上表）。
+   沒做第 4 步就把 `&note=[描述]` 整段拿掉。分類不用寫：記過的商家會沿用上次的分類，第一次記的商家先用「飲食」，存之前都可以改。
 6. 加一個「打開 URL」動作，輸入選第 5 步的文字。
 7. 原本「記錄支出 [金額] 元於餐飲」那一步刪掉——現在由 Futari 記。
 8. 測試：在捷徑編輯畫面按右下角 ▶︎ 執行，Futari 應該打開並跳出「記一筆」，金額和分類已經填好。確認後按「儲存」。
@@ -91,7 +91,7 @@ dev.southernlight.futari://add?amount=120&category=dining&note=LINE%20Pay%20%E5%
 第 5 步改用網頁網址，第 6 步一樣用「打開 URL」：
 
 ```
-https://futari.southern-light.dev/dashboard#add=expense&amount=[金額]&category=dining&note=[描述]
+https://futari.southern-light.dev/dashboard#add=expense&amount=[金額]&note=[描述]
 ```
 
 會在 Safari 打開。要先在 Safari 登入過 Futari。
@@ -105,5 +105,5 @@ https://futari.southern-light.dev/dashboard#add=expense&amount=[金額]&category
 | Futari 打開了，但沒有跳出「記一筆」 | 有視窗開著、正在看過去章節，或還沒登入（見上面「什麼時候不會跳出來」） |
 | 跳出來了，金額是空的 | 第 3 步的輸出不是純數字（例如帶了「元」、小數點或空白以外的字）。讓模型「只輸出數字」 |
 | 描述是空的或只有一半 | 第 4 步沒做「URL 編碼」 |
-| 分類是「飲食」而不是我寫的 | `category` 的 id 拼錯或大小寫不同 |
+| 分類不是我網址裡寫的 | 這個商家記過，會沿用上次的分類；第一次記的商家，`category` 的 id 拼錯或大小寫不同就會用「飲食」 |
 | 同一筆跑了兩次捷徑，跳了兩次 | 預期行為：兩筆金額一樣的付款是可能的，所以每跑一次就跳一次。不想記的那次按「取消」就好 |
