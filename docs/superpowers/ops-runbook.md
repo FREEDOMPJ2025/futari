@@ -571,7 +571,7 @@ where n.nspname in ('public', 'drizzle') and c.relkind in ('r', 'p')
      \unset srk
      ```
      `oikos_cron_secret_key`、`oikos_project_url` 照〈呼叫者驗證〉→〈只有 owner 能做的事〉第 1–4 步建。
-   - 再依 manifest 的 `## cron` 逐一 `SELECT cron.schedule('<jobname>', '<schedule>', convert_from(decode('<base64 command>', 'base64'), 'UTF8'));`。還原到**新的** project 時：0100 之後的 command 不含網址或金鑰，全部從 Vault 讀，所以 command 不用改；要改的是 Vault——`oikos_project_url` 放**新 project** 的網址、`cron` key 在新 project 重建一把再放進 `oikos_cron_secret_key`（舊 project 的那把在新 project 是 `mismatch`）、`oikos_service_role_key` 放新 project 自己的 legacy JWT。函式也要部署到新 project（`verify_jwt` 讀回 `false`）。備份早於 0100 時，command 裡是寫死的舊 prod 網址：先照常 schedule，再手動執行一次 `drizzle/0100_recurring_push_cron_secret_key.sql` 的內容。
+   - 再依 manifest 的 `## cron` 逐一 `SELECT cron.schedule('<jobname>', '<schedule>', convert_from(decode('<base64 command>', 'base64'), 'UTF8'));`。還原到**新的** project 時：0100 之後的 command 不含網址或金鑰，全部從 Vault 讀，所以 command 不用改；要改的是 Vault——`oikos_project_url` 放**新 project** 的網址、`cron` key 在新 project 重建一把再放進 `oikos_cron_secret_key`（舊 project 的那把在新 project 會被 gateway 以 `UNAUTHORIZED_INVALID_API_KEY` 擋下、函式沒有 `[auth]` 行，見上方〈失效的樣子〉）、`oikos_service_role_key` 放新 project 自己的 legacy JWT。函式也要部署到新 project（`verify_jwt` 讀回 `false`）。備份早於 0100 時，command 裡是寫死的舊 prod 網址：先照常 schedule，再手動執行一次 `drizzle/0100_recurring_push_cron_secret_key.sql` 的內容。
    - 漏掉：定期收支推播不再送出，**帳號刪除也不再自動執行**——隱私權政策承諾的 14 天就此失效，而且沒有任何錯誤。
 7. **重新套用備份日之後處理過的刪除**：
    - **先** `npm run db:migrate`（指向目標 project），**再**手動跑一次 `SELECT public.process_account_deletions();`。順序不能反：備份早於 `0096`（#1701）時，備份裡的 `process_account_deletions` 是舊本體，留下的人（單人狀態）的刪除會走整本 cascade，把本來要留給離開的人的共同章節整本硬刪。先 migrate 才會換成新本體，並建好 `sweep-orphan-ledgers` job（也要核對 `cron.job` 有它：`SELECT jobname, schedule FROM cron.job WHERE jobname = 'sweep-orphan-ledgers';` → `0 15 * * *`）。
@@ -834,7 +834,7 @@ agent 不建金鑰、不寫 Vault、不碰 prod；以下由 owner 自己做。
 
 3. 先在 dev 測：不重新部署，`SUPABASE_SECRET_KEYS` 是否已經換成新 key（dev 第 5 步的 `apikey: <新 key>` → 200）。拿到 `mismatch`／`no_key_config` 就重新部署再測，並把結果記在這裡。
 4. prod 同樣更新後，避開 16:10 UTC，照 S4 第 5(c) 步手動正向呼叫一次。
-- 刪 key 到 Vault 更新之間 cron 會 401 `mismatch`；外洩時接受這個空窗。
+- 刪 key 到 Vault 更新之間 cron 會 401（gateway 以 `UNAUTHORIZED_INVALID_API_KEY` 擋下，函式沒有 `[auth]` 行）；外洩時接受這個空窗。
 
 #### legacy key 退場（#1834 S5，2026 年底前）
 
