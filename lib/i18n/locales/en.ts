@@ -4147,6 +4147,7 @@ I will upload the screenshots once you confirm.`,
       pending_former_member: 'The payer on this card has left this ledger. Tap Edit to choose a new payer first.',
       rule_payer_not_member: 'The payer on this rule has left this ledger. Edit the rule to choose a new payer, then resume.',
       rule_recipient_not_member: 'The income recipient on this rule has left this ledger. Edit the rule to choose a new recipient, then resume.',
+      recurring_ends_before_start: 'The end date can\'t be before the start date',  // TODO(i18n): 待確認
       pending_income_not_found: 'This pending income was already handled or can\'t be found',
       pending_income_handled_elsewhere: 'This pending income was handled on another device',
       shortcut_pending_handled_elsewhere: 'This one was handled on another device or has expired',

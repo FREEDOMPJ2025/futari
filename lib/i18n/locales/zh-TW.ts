@@ -3512,6 +3512,8 @@ export type Translations = {
       pending_former_member: string
       rule_payer_not_member: string
       rule_recipient_not_member: string
+      /** #1837 — recurring rule end date earlier than its start date. */
+      recurring_ends_before_start: string
       pending_income_not_found: string
       pending_income_handled_elsewhere: string
       shortcut_pending_handled_elsewhere: string
@@ -7674,6 +7676,7 @@ export const zhTW: Translations = {
       pending_former_member: '這張卡片的付款人已離開這本帳本，請先改一下再確認。',
       rule_payer_not_member: '這條規則的付款人已離開這本帳本，請先修改再恢復。',
       rule_recipient_not_member: '這條規則的收入歸屬已離開這本帳本，請先修改再恢復。',
+      recurring_ends_before_start: '結束日期不能早於開始日期',
       pending_income_not_found: '待確認收入已被處理或找不到',
       pending_income_handled_elsewhere: '待確認收入已被其他裝置處理',
       shortcut_pending_handled_elsewhere: '這張待確認已在其他裝置處理或已過期',

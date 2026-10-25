@@ -3,6 +3,7 @@ import type { SplitType } from '@/lib/balance'
 import { isValidIncomeCategoryId } from '@/lib/incomeCategories'
 import { GAS_FUEL_TYPES, type GasFuelType } from '@/lib/fuel'
 import { ymdToUTCNoon } from '@/lib/local-date'
+import { actionError } from '@/lib/action-errors'
 import { parseCurrencyCode, type CurrencyCode } from '@/lib/currency'
 
 /**
@@ -1034,7 +1035,7 @@ export function validateRecurringIncomeRuleInput(
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.startsOn)) throw new Error('起始日格式不對')
   if (input.endsOn != null) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(input.endsOn)) throw new Error('結束日格式不對')
-    if (input.endsOn < input.startsOn) throw new Error('結束日不可早於起始日')
+    if (input.endsOn < input.startsOn) throw actionError('recurring_ends_before_start')
   }
   const source = input.source?.trim() || null
   const assetId = input.assetId || null
@@ -1133,7 +1134,7 @@ export function validateRecurringExpenseRuleInput(
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.startsOn)) throw new Error('起始日格式不對')
   if (input.endsOn != null) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(input.endsOn)) throw new Error('結束日格式不對')
-    if (input.endsOn < input.startsOn) throw new Error('結束日不可早於起始日')
+    if (input.endsOn < input.startsOn) throw actionError('recurring_ends_before_start')
   }
 
   return {

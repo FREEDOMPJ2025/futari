@@ -4144,6 +4144,7 @@ I will upload the screenshots once you confirm.`,
       pending_former_member: 'このカードの支払者はこの家計簿から離れました。先に「修正」で支払者を選び直してください。',
       rule_payer_not_member: 'このルールの支払者はこの家計簿から離れました。支払者を選び直してから再開してください。',
       rule_recipient_not_member: 'このルールの収入の受取人はこの家計簿から離れました。受取人を選び直してから再開してください。',
+      recurring_ends_before_start: '終了日は開始日より前にできません',  // TODO(i18n): 待確認
       pending_income_not_found: '確認待ちの収入はすでに処理済みか、見つかりません',
       pending_income_handled_elsewhere: '確認待ちの収入は別の端末で処理されました',
       shortcut_pending_handled_elsewhere: 'この確認待ちは別の端末で処理されたか、期限が切れました',
