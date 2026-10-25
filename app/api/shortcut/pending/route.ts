@@ -57,7 +57,7 @@
 // Cache-Control: no-store.
 
 import * as Sentry from '@sentry/nextjs'
-import { and, eq, gt, isNull, or, sql } from 'drizzle-orm'
+import { and, desc, eq, gt, isNull, or, sql } from 'drizzle-orm'
 import { db } from '@/lib/db/client'
 import { oikosGroups, profiles, shortcutKeys, shortcutPendingExpenses } from '@/lib/db/schema'
 import { lockProfileRow } from '@/lib/db/queries/epoch'
@@ -209,22 +209,31 @@ async function writePending(
 
     // A ledger is required (confirming writes into it). Read under the
     // Profiles lock, which createGroup / acceptInvite also take.
+    // Same pick as getActiveGroupForUser (lib/db/queries/group.ts), which the
+    // confirm path reaches through getViewerWriteContext: after a leave +
+    // re-join the owner is in two ledgers, and without the ORDER BY this
+    // could read the old one. Failure looks like: nothing errors; the card's
+    // merchant-memory category comes from the ledger the owner left.
     const [ledger] = await tx
       .select({ id: oikosGroups.id })
       .from(oikosGroups)
       .where(or(eq(oikosGroups.memberA, key.userId), eq(oikosGroups.memberB, key.userId)))
+      .orderBy(desc(oikosGroups.currentEpochStartedAt))
       .limit(1)
     if (!ledger) return 'no_ledger'
 
     // #1822 — merchant memory lookup. When a description is present (the iOS
-    // Shortcut may send it as "note"), check if this merchant has been recorded
-    // before and use that category if no explicit category was sent. This lets
-    // Shortcuts that only send {amount, note} auto-fill the category from
-    // household history, same as quick-add #1488. The lookup runs inside the
-    // transaction so it sees the latest committed state.
+    // Shortcut may send it as "note"), the category this owner's ledger last
+    // used for that merchant — from the chapters the owner belonged to only —
+    // wins over the payload's `category`; with no remembered category the
+    // payload's (or none, so confirm falls back to the default) is kept.
+    // Priority: memory > payload category > default. This lets Shortcuts that
+    // only send {amount, note} auto-fill the category, same as quick-add
+    // #1488. Read on `tx` (a plain read, no lock), after the Profiles and key
+    // locks, so the lock order in the header is unchanged.
     let merchantCategory: string | null = null
     if (prefill.description?.trim()) {
-      merchantCategory = (await getCategoryForMerchant(ledger.id, prefill.description, tx)) ?? null
+      merchantCategory = (await getCategoryForMerchant(ledger.id, key.userId, prefill.description, tx)) ?? null
     }
 
     const [{ n: lastHour }] = await tx

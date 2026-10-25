@@ -536,7 +536,8 @@ export const getDescriptionSuggestions = action(async (): Promise<string[]> => {
  * #1822 — merchant memory for category suggestions.
  *
  * Looks up the most recent transaction with a matching description
- * (normalized: case-insensitive, NFKC, trimmed) in the viewer's group.
+ * (normalized: case-insensitive, NFKC, trimmed) in the viewer's group, from
+ * the chapters the viewer belonged to only (see `getCategoryForMerchant`).
  * Returns the category from that transaction, or `null` if no match exists.
  *
  * Used by quick add (#1488) and pending shortcut cards (#1536) to auto-suggest
@@ -549,6 +550,6 @@ export const getMerchantCategory = action(async (merchant: string): Promise<Cate
   const group = await getActiveGroupForUser(user.id)
   if (!group) return null
 
-  const category = await getCategoryForMerchant(group.id, merchant)
+  const category = await getCategoryForMerchant(group.id, user.id, merchant)
   return category ?? null
 })

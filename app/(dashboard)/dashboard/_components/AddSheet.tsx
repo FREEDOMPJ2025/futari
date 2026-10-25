@@ -323,9 +323,9 @@ export function AddSheet({ open, onClose, initial, onMutated, prefilledAssetId, 
     setError('')
   // `activeTrips` is intentionally excluded — its identity changes every parent
   // render but its meaningful state is captured by `activeTripsKey`.
-  // #1822 — `merchantMemoryCategory` is NO LONGER in the deps. The merchant
-  // memory effect applies the category directly via setCategory when the async
-  // lookup completes, so we don't re-run this entire reset when it resolves.
+  // #1822 — merchant memory is not a dep: its own effect (above) applies the
+  // remembered category via setCategory when the async lookup resolves, so
+  // this reset does not re-run (and wipe typed input) when it does.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initial, viewer.id, viewer.defaultSplitType, isSolo, prefilledAssetId, prefilledCategory, prefilledAmount, prefilledDescription, skipTripAutoDetect, prefilledTripId, groupDefaultRatioA, baseCurrency, activeTripsKey])
 

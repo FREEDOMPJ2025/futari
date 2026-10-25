@@ -14,6 +14,8 @@
  * for the same merchant should pick up the category from the first.
  */
 import { describe, it, expect } from 'vitest'
+import { PgDialect } from 'drizzle-orm/pg-core'
+import type { SQL } from 'drizzle-orm'
 import type { CategoryId } from '@/lib/categories'
 import { normalizeMerchant, getCategoryForMerchant } from '@/lib/db/queries/merchantMemory'
 
@@ -33,7 +35,9 @@ describe('merchant memory - normalization logic', () => {
       const halfwidth = normalizeMerchant('7−ELEVEN')
       expect(fullwidth).toBe(halfwidth)
 
-      // Also test actual fullwidth hyphen (U+FF0D) which does convert
+      // The fullwidth hyphen-minus (U+FF0D) does fold to ASCII "-"
+      expect(normalizeMerchant('７－ＥＬＥＶＥＮ')).toBe(normalizeMerchant('7-Eleven'))
+      // The katakana long vowel 「ー」 (U+30FC) is kept as is
       expect(normalizeMerchant('７ーＥＬＥＶＥＮ')).toBe('7ーeleven')
     })
 
@@ -114,123 +118,74 @@ describe('merchant memory - normalization logic', () => {
   })
 })
 
+// The behaviour against real rows (chapter scope, no recency window, width
+// folding, soft deletes, JS/SQL agreement) is covered on the dev DB in
+// __tests__/actions/merchantMemory1822.test.ts, which CI excludes. These
+// checks run everywhere: they pin the SHAPE of the query, so dropping the
+// chapter scope or re-adding a fetch-then-filter window fails here too.
 describe('getCategoryForMerchant', () => {
-  // Mock transaction rows for testing
-  type MockRow = {
-    description: string
-    category: string
-    createdAt?: Date
-    transactedAt?: Date
-    deletedAt?: Date | null
-  }
+  const dialect = new PgDialect()
+  const VIEWER = '11111111-1111-4111-8111-111111111111'
+  const GROUP = '22222222-2222-4222-8222-222222222222'
 
-  function createMockDb(rows: MockRow[]) {
-    // Sort by createdAt desc, transactedAt desc (same order as real query)
-    const sorted = [...rows]
-      .filter((r) => !r.deletedAt)
-      .sort((a, b) => {
-        const aCreated = a.createdAt?.getTime() ?? 0
-        const bCreated = b.createdAt?.getTime() ?? 0
-        if (aCreated !== bCreated) return bCreated - aCreated
-        const aTransacted = a.transactedAt?.getTime() ?? 0
-        const bTransacted = b.transactedAt?.getTime() ?? 0
-        return bTransacted - aTransacted
-      })
-      .slice(0, 100)  // limit(100) in real query
-
-    return {
-      select: () => ({
-        from: () => ({
-          where: () => ({
-            orderBy: () => ({
-              limit: () => Promise.resolve(sorted.map((r) => ({
-                description: r.description,
-                category: r.category,
-              }))),
-            }),
+  /** A db stand-in that records the WHERE / LIMIT and returns `rows`. */
+  function createMockDb(rows: Array<{ category: string }>) {
+    const seen: { where?: SQL; limit?: number; calls: number } = { calls: 0 }
+    const mock = {
+      select: () => {
+        seen.calls++
+        return {
+          from: () => ({
+            where: (w: SQL) => {
+              seen.where = w
+              return {
+                orderBy: () => ({
+                  limit: (n: number) => {
+                    seen.limit = n
+                    return Promise.resolve(rows)
+                  },
+                }),
+              }
+            },
           }),
-        }),
-      }),
-    } as unknown as Parameters<typeof getCategoryForMerchant>[2]
+        }
+      },
+    } as unknown as Parameters<typeof getCategoryForMerchant>[3]
+    return { mock, seen }
   }
 
-  it('returns the category of the most recent matching transaction', async () => {
-    const mockDb = createMockDb([
-      { description: 'Starbucks', category: 'dining', createdAt: new Date('2026-01-01') },
-      { description: 'Starbucks', category: 'health', createdAt: new Date('2026-01-02') },
-    ])
-    const result = await getCategoryForMerchant('group-1', 'Starbucks', mockDb)
-    expect(result).toBe('health')  // most recent
+  it('scopes to the chapters the viewer belonged to, matches in SQL, and reads one row', async () => {
+    const { mock, seen } = createMockDb([{ category: 'health' }])
+    expect(await getCategoryForMerchant(GROUP, VIEWER, 'Starbucks', mock)).toBe('health')
+    const q = dialect.sqlToQuery(seen.where!)
+    // viewerChaptersClause, with the outer column table-qualified.
+    expect(q.sql).toContain('FROM "GroupEpochs" ve')
+    expect(q.sql).toContain('"CashTransactions"."created_at" >= ve."started_at"')
+    expect(q.params).toContain(VIEWER)
+    // Normalized on both sides in SQL; no client-side window.
+    expect(q.sql.match(/lower\(btrim\(normalize\(/g)).toHaveLength(2)
+    expect(q.params).toContain('Starbucks')
+    expect(q.sql).toMatch(/"deleted_at" is null/i)
+    expect(seen.limit).toBe(1)
   })
 
-  it('matches fullwidth and halfwidth equivalents (NFKC)', async () => {
-    // U+FF17 (fullwidth 7), U+FF0D (fullwidth hyphen-minus), fullwidth ELEVEN
-    const mockDb = createMockDb([
-      { description: '７－ＥＬＥＶＥＮ', category: 'dining', createdAt: new Date('2026-01-01') },
-    ])
-    const result = await getCategoryForMerchant('group-1', '7-ELEVEN', mockDb)
-    expect(result).toBe('dining')
-  })
-
-  it('is case-insensitive', async () => {
-    const mockDb = createMockDb([
-      { description: 'Starbucks', category: 'dining', createdAt: new Date('2026-01-01') },
-    ])
-    const result = await getCategoryForMerchant('group-1', 'STARBUCKS', mockDb)
-    expect(result).toBe('dining')
-  })
-
-  it('ignores soft-deleted transactions', async () => {
-    const mockDb = createMockDb([
-      { description: 'Cafe', category: 'dining', createdAt: new Date('2026-01-02'), deletedAt: new Date('2026-01-03') },
-      { description: 'Cafe', category: 'health', createdAt: new Date('2026-01-01'), deletedAt: null },
-    ])
-    const result = await getCategoryForMerchant('group-1', 'Cafe', mockDb)
-    expect(result).toBe('health')  // only non-deleted one
-  })
-
-  it('returns undefined when no match exists', async () => {
-    const mockDb = createMockDb([
-      { description: 'Starbucks', category: 'dining', createdAt: new Date('2026-01-01') },
-    ])
-    const result = await getCategoryForMerchant('group-1', 'Target', mockDb)
-    expect(result).toBeUndefined()
-  })
-
-  it('returns undefined when merchant is empty', async () => {
-    const mockDb = createMockDb([])
-    const result = await getCategoryForMerchant('group-1', '', mockDb)
-    expect(result).toBeUndefined()
-  })
-
-  it('returns undefined when merchant is whitespace-only', async () => {
-    const mockDb = createMockDb([])
-    const result = await getCategoryForMerchant('group-1', '   ', mockDb)
-    expect(result).toBeUndefined()
+  it('returns undefined when no row matches', async () => {
+    const { mock } = createMockDb([])
+    expect(await getCategoryForMerchant(GROUP, VIEWER, 'Target', mock)).toBeUndefined()
   })
 
   it('returns undefined when the category is not in PICKABLE_CATEGORIES', async () => {
-    const mockDb = createMockDb([
-      { description: 'Starbucks', category: 'removed-category', createdAt: new Date('2026-01-01') },
-    ])
-    const result = await getCategoryForMerchant('group-1', 'Starbucks', mockDb)
-    expect(result).toBeUndefined()
+    const { mock } = createMockDb([{ category: 'removed-category' }])
+    expect(await getCategoryForMerchant(GROUP, VIEWER, 'Starbucks', mock)).toBeUndefined()
+    const { mock: settle } = createMockDb([{ category: 'settle' }])
+    expect(await getCategoryForMerchant(GROUP, VIEWER, 'Starbucks', settle)).toBeUndefined()
   })
 
-  it('prefers the most recent by createdAt, then transactedAt', async () => {
-    const mockDb = createMockDb([
-      { description: 'Cafe', category: 'dining', createdAt: new Date('2026-01-01T10:00:00Z'), transactedAt: new Date('2026-01-01T09:00:00Z') },
-      { description: 'Cafe', category: 'health', createdAt: new Date('2026-01-01T10:00:00Z'), transactedAt: new Date('2026-01-01T10:00:00Z') },
-    ])
-    const result = await getCategoryForMerchant('group-1', 'Cafe', mockDb)
-    expect(result).toBe('health')  // same createdAt, later transactedAt wins
-  })
-
-  it('trims the merchant name before matching', async () => {
-    const mockDb = createMockDb([
-      { description: 'Starbucks', category: 'dining', createdAt: new Date('2026-01-01') },
-    ])
-    const result = await getCategoryForMerchant('group-1', '  Starbucks  ', mockDb)
-    expect(result).toBe('dining')
+  it('does not query for an empty or whitespace-only merchant', async () => {
+    const { mock, seen } = createMockDb([{ category: 'health' }])
+    expect(await getCategoryForMerchant(GROUP, VIEWER, '', mock)).toBeUndefined()
+    expect(await getCategoryForMerchant(GROUP, VIEWER, '   ', mock)).toBeUndefined()
+    expect(await getCategoryForMerchant(GROUP, VIEWER, '　', mock)).toBeUndefined()
+    expect(seen.calls).toBe(0)
   })
 })
