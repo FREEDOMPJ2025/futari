@@ -81,7 +81,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 - **只有排程能觸發每晚推播（#968）**
   使用者：無感；拿到公開 anon key 的人不能再隨時讓所有人的手機收到推播。
-  技術：gateway 驗 JWT 簽章（`supabase/config.toml` 釘 `verify_jwt = true`），函式再查 `role=service_role`、`ref`、`exp`，不符回 401；部署後讀回 `verify_jwt`、確認下一次 cron 回 200。
+  技術：函式在任何 DB 查詢前驗呼叫者，不符回 401；原本的 JWT 聲明檢查（`verify_jwt = true`）已由 #1834 的具名 secret key 取代，見下一條。
+
+- **每晚推播改用具名 secret key 驗證排程，legacy key 停用後照常送出（#1834）**
+  使用者：無感；Supabase 年底停用舊金鑰後，「有待確認的定期收支」推播不會無聲停掉。
+  技術：`0100` 讓 cron 從 Vault 帶 `apikey`（`cron` key）與網址；函式 `verify_jwt = false`，只認 `SUPABASE_SECRET_KEYS.cron`、常數時間比對、fail closed，DB client 改用 `default`；需 owner 先建 key 與 Vault。
 
 - **Android 殼在同意推播前不產生推播 ID；Firebase 設定檔不會進 repo（#968）**
   使用者：之後的 Android 殼要等你允許通知，才建立推播用的裝置 ID；不用 Firebase 分析。

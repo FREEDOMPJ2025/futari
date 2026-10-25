@@ -1,294 +1,223 @@
 // @vitest-environment node
 /**
- * #968 S4b (security-review F8) — send-recurring-push accepts only the legacy
- * service_role JWT that the notify-recurring-push cron sends from Vault.
+ * #1834 (replaces #968 S4b) — send-recurring-push accepts only the project's
+ * named secret key `cron`, sent by the notify-recurring-push cron as `apikey`.
  *
- * How it holds: the Supabase gateway (verify_jwt = true, pinned in
- * supabase/config.toml) verifies the JWT signature; callerAuth.ts checks the
- * claims role=service_role, ref=<this project>, exp in the future. The fixtures
- * below carry made-up signatures on purpose — checking the signature is the
- * gateway's job, which is why the config pin at the bottom is part of this test.
+ * How it holds: supabase/config.toml sets verify_jwt = false (the gateway
+ * cannot verify sb_ keys), so callerAuth.ts#checkCronApiKey is the ONLY check.
+ * It compares the `apikey` header with the `cron` entry of the runtime's
+ * SUPABASE_SECRET_KEYS (a JSON object keyed by key name), constant-time, and
+ * fails closed on any config problem.
  *
- * Scenario guarded (exploit): the gateway alone lets the public anon key and
- * `sb_publishable_…` keys through, so anyone holding them could POST to the
+ * Scenario guarded (exploit): with verify_jwt off, any fail-open path — a
+ * missing / unparsable SUPABASE_SECRET_KEYS treated as "allow", an undefined
+ * vs undefined compare, accepting the `default` key or any key in the object,
+ * reading the Authorization header, a leftover JWT claim check (anyone can
+ * write claims when nobody verifies the signature) — lets anyone POST to the
  * function and push every household with a pending card.
  *
- * Scenario guarded (failure, 2026-10-23): the withdrawn check required the
- * bearer to equal SUPABASE_SERVICE_ROLE_KEY, which the hosted runtime sets to a
- * new-style `sb_` secret key while the cron sends the legacy JWT. Failure looked
- * like: the 16:10 UTC cron gets 401, no push goes out, nothing else errors —
- * see 「呼叫者驗證」 in ops-runbook.md. The "accepts the cron's token shape"
- * case is that regression check.
+ * Scenario guarded (failure): Supabase retires the legacy JWT keys at the end
+ * of 2026. The withdrawn claim check needed the cron's legacy service_role JWT;
+ * from that day the 16:10 UTC cron would get 401, no `[auth]` log line, no
+ * push, nothing else erroring — see 「呼叫者驗證」 in ops-runbook.md. The
+ * "accepts the cron key" case is that regression check.
  *
- * Fixtures are built from JSON here; none of them is a real key.
+ * Fixtures are built here; none of them is a real key. They are assembled from
+ * pieces so this file never spells out an sb_secret_-shaped literal
+ * (tests/no-tracked-secrets-968.test.ts scans it like every other file).
  */
 import { describe, it, expect } from 'vitest'
-import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import {
-  MAX_AUTHORIZATION_LENGTH,
-  checkServiceRoleJwt,
-  decodeJwtSegment,
-  projectRefFromUrl,
+  CRON_KEY_NAME,
+  MAX_APIKEY_LENGTH,
+  checkCronApiKey,
+  secretKeyNamed,
 } from '../supabase/functions/send-recurring-push/callerAuth.ts'
 
-const REF = 'abcdefghij0123456789' // 20 chars, same shape as a real ref
-const NOW = 1_800_000_000
-const FUTURE = 2_082_758_400 // 2036, like the legacy keys
-const FAKE_SIG = 'not-a-real-signature_gateway-checks-it'
+const SECRET = 'sb_' + 'secret_'
+const fakeSecret = (tag: string) => `${SECRET}${tag}`.padEnd(41, '0')
+const CRON_KEY = fakeSecret('cronFAKE')
+const DEFAULT_KEY = fakeSecret('defaultFAKE')
+const PUBLISHABLE_KEY = `${'sb_' + 'publishable_'}FAKE`.padEnd(46, '0')
+const LEGACY_JWT = ['eyJhbGciOiJIUzI1NiJ9', 'eyJyb2xlIjoic2VydmljZV9yb2xlIn0', 'not-a-real-signature'].join('.')
 
-function b64url(s: string | Uint8Array): string {
-  return Buffer.from(s).toString('base64url')
-}
-function seg(value: unknown): string {
-  return b64url(JSON.stringify(value))
-}
-function jwt(payload: unknown, header: unknown = { alg: 'HS256', typ: 'JWT' }): string {
-  return `${seg(header)}.${seg(payload)}.${FAKE_SIG}`
-}
-const CRON_CLAIMS = { iss: 'supabase', ref: REF, role: 'service_role', iat: 1_700_000_000, exp: FUTURE }
-const bearer = (token: string) => `Bearer ${token}`
-const check = (authorization: string | null | undefined, ref: string | null | undefined = REF) =>
-  checkServiceRoleJwt(authorization, ref, NOW)
-const rejects = (authorization: string | null | undefined, reason: string, ref: string | null | undefined = REF) =>
-  expect(check(authorization, ref)).toEqual({ ok: false, reason })
+const keys = (entries: Record<string, unknown>) => JSON.stringify(entries)
+const CONFIG = keys({ default: DEFAULT_KEY, cron: CRON_KEY })
 
-describe('checkServiceRoleJwt — accept', () => {
-  it("accepts the cron's token shape (role/ref/exp); the signature is the gateway's job, not checked here", () => {
-    expect(check(bearer(jwt(CRON_CLAIMS)))).toEqual({ ok: true })
+const rejects = (apikey: string | null | undefined, reason: string, config: string | null | undefined = CONFIG) =>
+  expect(checkCronApiKey(apikey, config)).toEqual({ ok: false, reason })
+
+describe('checkCronApiKey — accept', () => {
+  it('accepts the cron key on the apikey header', () => {
+    expect(checkCronApiKey(CRON_KEY, CONFIG)).toEqual({ ok: true })
   })
 
-  it('accepts without iss/iat (only role, ref, exp are required)', () => {
-    expect(check(bearer(jwt({ role: 'service_role', ref: REF, exp: NOW + 1 })))).toEqual({ ok: true })
+  it('accepts it whatever other keys the project has', () => {
+    expect(checkCronApiKey(CRON_KEY, keys({ cron: CRON_KEY }))).toEqual({ ok: true })
+    expect(checkCronApiKey(CRON_KEY, keys({ default: DEFAULT_KEY, other: fakeSecret('o'), cron: CRON_KEY }))).toEqual({ ok: true })
+  })
+
+  it('only accepts the key named cron', () => {
+    expect(CRON_KEY_NAME).toBe('cron')
   })
 })
 
-describe('checkServiceRoleJwt — claims', () => {
+describe('checkCronApiKey — fails closed on the key config (no_key_config)', () => {
   it.each([
-    ['anon', { ...CRON_CLAIMS, role: 'anon' }],
-    ['authenticated', { ...CRON_CLAIMS, role: 'authenticated' }],
-    ['missing', { iss: 'supabase', ref: REF, exp: FUTURE }],
-    ['array', { ...CRON_CLAIMS, role: ['service_role'] }],
-    ['wrong case', { ...CRON_CLAIMS, role: 'Service_Role' }],
-    ['leading space', { ...CRON_CLAIMS, role: ' service_role' }],
-    ['trailing space', { ...CRON_CLAIMS, role: 'service_role ' }],
-  ])('rejects role %s', (_name, payload) => {
-    rejects(bearer(jwt(payload)), 'role')
-  })
-
-  it('rejects a token for another project, or with no ref', () => {
-    rejects(bearer(jwt({ ...CRON_CLAIMS, ref: 'zzzzzzzzzz0123456789' })), 'ref')
-    rejects(bearer(jwt({ iss: 'supabase', role: 'service_role', exp: FUTURE })), 'ref')
-    rejects(bearer(jwt({ ...CRON_CLAIMS, ref: REF.toUpperCase() })), 'ref')
-  })
-
-  it('fails closed when the function has no project ref', () => {
-    rejects(bearer(jwt(CRON_CLAIMS)), 'no_ref_config', null)
-    rejects(bearer(jwt(CRON_CLAIMS)), 'no_ref_config', '')
-    // Called directly: passing undefined to the helper would pick up its default REF.
-    expect(checkServiceRoleJwt(bearer(jwt(CRON_CLAIMS)), undefined, NOW)).toEqual({ ok: false, reason: 'no_ref_config' })
-  })
-
-  it.each([
-    ['past', NOW - 1],
-    ['exactly now', NOW],
-    ['a string', String(FUTURE)],
-    ['null', null],
-  ])('rejects exp %s', (_name, exp) => {
-    rejects(bearer(jwt({ ...CRON_CLAIMS, exp })), 'expired')
-  })
-
-  it('rejects a missing exp', () => {
-    rejects(bearer(jwt({ iss: 'supabase', ref: REF, role: 'service_role' })), 'expired')
-  })
-
-  it.each(['none', 'NONE', 'None'])('rejects alg %s', (alg) => {
-    rejects(bearer(jwt(CRON_CLAIMS, { alg, typ: 'JWT' })), 'not_jwt')
-  })
-
-  it('rejects a header without a string alg', () => {
-    rejects(bearer(jwt(CRON_CLAIMS, { typ: 'JWT' })), 'not_jwt')
-    rejects(bearer(jwt(CRON_CLAIMS, { alg: 256 })), 'not_jwt')
-  })
-})
-
-describe('checkServiceRoleJwt — header shape', () => {
-  const good = jwt(CRON_CLAIMS)
-
-  it('rejects a missing or empty header', () => {
-    rejects(null, 'no_header')
-    rejects(undefined, 'no_header')
-    rejects('', 'no_header')
-  })
-
-  it('rejects other schemes, lowercase bearer, a bare token, and leading whitespace', () => {
-    rejects(`Basic ${good}`, 'not_bearer')
-    rejects(`bearer ${good}`, 'not_bearer')
-    rejects(`BEARER ${good}`, 'not_bearer')
-    rejects(good, 'not_bearer')
-    rejects(` Bearer ${good}`, 'not_bearer')
-    rejects(`Bearer\t${good}`, 'not_bearer')
-  })
-
-  it('rejects a header longer than the limit without parsing it', () => {
-    const long = `Bearer ${seg({ alg: 'HS256' })}.${seg({ ...CRON_CLAIMS, pad: 'x'.repeat(MAX_AUTHORIZATION_LENGTH) })}.${FAKE_SIG}`
-    expect(long.length).toBeGreaterThan(MAX_AUTHORIZATION_LENGTH)
-    rejects(long, 'not_bearer')
-  })
-
-  it.each([
-    ['sb_publishable key', 'Bearer sb_publishable_xxxxxxxxxxxxxxxxxxxxxxxxxxxx'],
-    ['sb_secret key', 'Bearer sb_secret_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'],
-    ['empty bearer', 'Bearer '],
-    ['two segments', `Bearer ${seg({ alg: 'HS256' })}.${seg(CRON_CLAIMS)}`],
-    ['four segments', `Bearer ${good}.extra`],
-    ['empty signature', `Bearer ${seg({ alg: 'HS256' })}.${seg(CRON_CLAIMS)}.`],
-    ['empty header segment', `Bearer .${seg(CRON_CLAIMS)}.${FAKE_SIG}`],
-    ['`=` padding', `Bearer ${good}=`],
-    ['standard base64 `+`', `Bearer ${good}+x`],
-    ['standard base64 `/`', `Bearer ${good}/x`],
-    ['two joined headers', `Bearer ${good}, Bearer ${good}`],
-    ['trailing space', `Bearer ${good} `],
-    ['trailing newline', `Bearer ${good}\n`],
-    ['double space', `Bearer  ${good}`],
-    ['two tokens', `Bearer ${good} ${good}`],
-  ])('rejects %s as not a JWT', (_name, authorization) => {
-    rejects(authorization, 'not_jwt')
-  })
-
-  it.each([
-    ['non-JSON payload', `${seg({ alg: 'HS256' })}.${b64url('not json')}.${FAKE_SIG}`],
-    ['JSON null payload', `${seg({ alg: 'HS256' })}.${seg(null)}.${FAKE_SIG}`],
-    ['JSON array payload', `${seg({ alg: 'HS256' })}.${seg([CRON_CLAIMS])}.${FAKE_SIG}`],
-    ['JSON number payload', `${seg({ alg: 'HS256' })}.${seg(42)}.${FAKE_SIG}`],
-    ['JSON string payload', `${seg({ alg: 'HS256' })}.${seg('service_role')}.${FAKE_SIG}`],
-    ['invalid UTF-8 payload', `${seg({ alg: 'HS256' })}.${b64url(new Uint8Array([0x7b, 0xff, 0xfe, 0x7d]))}.${FAKE_SIG}`],
-    ['impossible base64 length', `${seg({ alg: 'HS256' })}.A.${FAKE_SIG}`],
-    ['non-JSON header', `${b64url('HS256')}.${seg(CRON_CLAIMS)}.${FAKE_SIG}`],
-    ['JSON array header', `${seg(['HS256'])}.${seg(CRON_CLAIMS)}.${FAKE_SIG}`],
-  ])('rejects %s', (_name, token) => {
-    rejects(bearer(token), 'bad_payload')
-  })
-})
-
-describe('decodeJwtSegment', () => {
-  it('decodes base64url with `-`/`_` and multi-byte UTF-8', () => {
-    // UTF-8 of this object encodes to base64 containing both `+` and `/`, so
-    // its base64url form contains both `-` and `_`.
-    const value = { n: 'é漢字?>~>?', role: 'service_role' }
-    const s = seg(value)
-    expect(s).toMatch(/-/)
-    expect(s).toMatch(/_/)
-    expect(s).not.toMatch(/[+/=]/)
-    expect(decodeJwtSegment(s)).toEqual(value)
-  })
-
-  it('decodes an unpadded segment of every length remainder', () => {
-    for (const v of [{ a: 1 }, { ab: 1 }, { abc: 1 }]) {
-      expect(decodeJwtSegment(seg(v))).toEqual(v)
+    ['missing (undefined)', undefined],
+    ['missing (null)', null],
+    ['empty', ''],
+    ['not JSON', 'cron=' + CRON_KEY],
+    ['JSON null', 'null'],
+    ['JSON array', JSON.stringify([CRON_KEY])],
+    ['JSON string', JSON.stringify(CRON_KEY)],
+    ['no cron entry', keys({ default: DEFAULT_KEY })],
+    ['empty object', '{}'],
+    ['cron entry not a string', keys({ cron: 42 })],
+    ['cron entry null', keys({ cron: null })],
+    ['cron entry is a publishable key', keys({ cron: PUBLISHABLE_KEY })],
+    ['cron entry is a legacy JWT', keys({ cron: LEGACY_JWT })],
+    ['cron entry is only the prefix', keys({ cron: SECRET })],
+    ['cron entry is empty', keys({ cron: '' })],
+    ['cron entry too long', keys({ cron: SECRET + 'x'.repeat(MAX_APIKEY_LENGTH) })],
+    ['cron only via __proto__', '{"__proto__":{"cron":"' + CRON_KEY + '"}}'],
+    ['different case of the name', keys({ Cron: CRON_KEY })],
+  ])('%s → every caller is refused, even one sending the right key', (_name, config) => {
+    // Called directly: passing undefined to the `rejects` helper would pick up its default CONFIG.
+    for (const apikey of [CRON_KEY, null, undefined]) {
+      expect(checkCronApiKey(apikey, config)).toEqual({ ok: false, reason: 'no_key_config' })
     }
   })
 })
 
-describe('projectRefFromUrl', () => {
-  it('reads the ref from https://<ref>.supabase.co, with or without a trailing slash', () => {
-    expect(projectRefFromUrl(`https://${REF}.supabase.co`)).toBe(REF)
-    expect(projectRefFromUrl(`https://${REF}.supabase.co/`)).toBe(REF)
+describe('checkCronApiKey — the apikey header', () => {
+  it.each([
+    ['missing (null)', null],
+    ['missing (undefined)', undefined],
+    ['empty', ''],
+    ['the string "undefined"', 'undefined'],
+  ])('rejects %s as no_apikey', (_name, apikey) => {
+    rejects(apikey, 'no_apikey')
   })
 
-  it('returns null for anything else (fail closed)', () => {
-    expect(projectRefFromUrl('https://api.futari.example')).toBeNull()
-    expect(projectRefFromUrl(`http://${REF}.supabase.co`)).toBeNull()
-    expect(projectRefFromUrl(`https://${REF}.supabase.co/functions/v1`)).toBeNull()
-    expect(projectRefFromUrl(`https://${REF}x.supabase.co`)).toBeNull()
-    expect(projectRefFromUrl(`https://${REF.toUpperCase()}.supabase.co`)).toBeNull()
-    expect(projectRefFromUrl(`https://${REF}.supabase.co.evil.example`)).toBeNull()
-    expect(projectRefFromUrl('')).toBeNull()
-    expect(projectRefFromUrl(undefined)).toBeNull()
+  it('rejects a key sent only as Authorization (the apikey header is absent)', () => {
+    // The function passes req.headers.get('apikey') and nothing else; a caller
+    // that puts the right key in Authorization reaches the check with null.
+    rejects(null, 'no_apikey')
+  })
+
+  it.each([
+    ['the publishable key', PUBLISHABLE_KEY],
+    ['the default secret key', DEFAULT_KEY],
+    ['another secret key', fakeSecret('other')],
+    ['a legacy service_role JWT', LEGACY_JWT],
+    ['a Bearer-prefixed cron key', `Bearer ${CRON_KEY}`],
+    ['trailing whitespace', `${CRON_KEY} `],
+    ['leading whitespace', ` ${CRON_KEY}`],
+    ['trailing newline', `${CRON_KEY}\n`],
+    ['two joined values ("k, k")', `${CRON_KEY}, ${CRON_KEY}`],
+    ['the key upper-cased', CRON_KEY.toUpperCase()],
+    ['the key minus its last character', CRON_KEY.slice(0, -1)],
+    ['one character different, same length', CRON_KEY.slice(0, -1) + (CRON_KEY.endsWith('1') ? '2' : '1')],
+    ['only the prefix', SECRET],
+    ['longer than the cap', CRON_KEY + 'x'.repeat(MAX_APIKEY_LENGTH)],
+    ['the string "null"', 'null'],
+  ])('rejects %s as mismatch', (_name, apikey) => {
+    rejects(apikey, 'mismatch')
   })
 })
 
-describe('send-recurring-push wiring (#968 S4b caller auth)', () => {
-  const src = readFileSync(
-    join(process.cwd(), 'supabase/functions/send-recurring-push/index.ts'),
-    'utf8',
-  )
-  const serve = src.slice(src.indexOf('Deno.serve('))
-  const CALL = "checkServiceRoleJwt(req.headers.get('authorization'), PROJECT_REF, Math.floor(Date.now() / 1000))"
+describe('secretKeyNamed (the DB client key)', () => {
+  it('returns the default key for the DB client, and the cron key by name', () => {
+    expect(secretKeyNamed(CONFIG, 'default')).toBe(DEFAULT_KEY)
+    expect(secretKeyNamed(CONFIG, 'cron')).toBe(CRON_KEY)
+  })
+
+  it('returns null rather than a fallback', () => {
+    expect(secretKeyNamed(keys({ cron: CRON_KEY }), 'default')).toBeNull()
+    expect(secretKeyNamed(undefined, 'default')).toBeNull()
+    expect(secretKeyNamed('not json', 'default')).toBeNull()
+    expect(secretKeyNamed(keys({ default: LEGACY_JWT }), 'default')).toBeNull()
+  })
+})
+
+/** Source with // and /* *\/ comments removed, so prose about the old design does not count. */
+function code(rel: string): string {
+  return readFileSync(join(process.cwd(), rel), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/.*$/gm, '$1')
+}
+
+describe('send-recurring-push wiring (#1834 caller auth)', () => {
+  const src = readFileSync(join(process.cwd(), 'supabase/functions/send-recurring-push/index.ts'), 'utf8')
+  const serveAt = src.indexOf('Deno.serve(')
+  const moduleScope = src.slice(0, serveAt)
+  const serve = src.slice(serveAt)
+  const CALL = "checkCronApiKey(req.headers.get('apikey'), secretKeys)"
   const check = serve.indexOf(CALL)
   const client = serve.indexOf('createClient(')
   const gate = serve.slice(check, client)
+  const authCode = code('supabase/functions/send-recurring-push/callerAuth.ts')
+  const indexCode = code('supabase/functions/send-recurring-push/index.ts')
 
-  it('derives the project ref from SUPABASE_URL', () => {
-    expect(src).toMatch(/^const SUPABASE_URL = Deno\.env\.get\('SUPABASE_URL'\)!$/m)
-    expect(src).toMatch(/^const PROJECT_REF = projectRefFromUrl\(SUPABASE_URL\)$/m)
-  })
-
-  it('checks the caller before creating the DB client or any query, and answers 401', () => {
-    expect(serve.indexOf('Deno.serve(')).toBe(0)
+  it('checks the caller on the apikey header before creating the DB client or any query, and answers 401', () => {
+    expect(serveAt).toBeGreaterThan(-1)
     expect(check).toBeGreaterThan(-1)
     expect(client).toBeGreaterThan(check)
     expect(serve.indexOf('.from(')).toBeGreaterThan(client)
+    expect(serve.slice(0, check)).toMatch(/if \(req\.method !== 'POST'\) return new Response\('method not allowed', \{ status: 405 \}\)/)
     expect(gate).toMatch(/if \(!caller\.ok\) \{[\s\S]*?return new Response\('unauthorized', \{ status: 401 \}\)\s*\}/)
   })
 
+  it('reads SUPABASE_SECRET_KEYS inside the request handler, never at module scope', () => {
+    expect(moduleScope).not.toContain('SUPABASE_SECRET_KEYS')
+    expect(serve.slice(0, check)).toContain("const secretKeys = Deno.env.get('SUPABASE_SECRET_KEYS')")
+  })
+
+  it('builds the DB client from the default secret key, not SUPABASE_SERVICE_ROLE_KEY (F3)', () => {
+    expect(gate).toContain("const dbKey = secretKeyNamed(secretKeys, 'default')")
+    expect(serve).toContain('createClient(SUPABASE_URL, dbKey)')
+    expect(indexCode).not.toContain('SUPABASE_SERVICE_ROLE_KEY')
+    expect(src.match(/createClient\(/g)).toHaveLength(1)
+  })
+
   it('logs only the reason on reject, and nothing on accept', () => {
-    const logs = gate.match(/console\.\w+\([^\n]*\)/g) ?? []
+    const rejectBranch = gate.slice(0, gate.indexOf("return new Response('unauthorized'"))
+    const logs = rejectBranch.match(/console\.\w+\([^\n]*\)/g) ?? []
     expect(logs).toEqual(['console.warn(`[auth] reject reason=${caller.reason}`)'])
-    for (const l of logs) expect(l).not.toMatch(/authorization|token|payload|role|header|bearer/i)
-    // The one log line sits inside the reject branch.
+    for (const l of logs) expect(l).not.toMatch(/apikey|secretKeys|token|header|bearer|authorization/i)
     expect(gate.indexOf('if (!caller.ok) {')).toBeLessThan(gate.indexOf('console.warn('))
   })
 
-  it('has no exact-match path against SUPABASE_SERVICE_ROLE_KEY (withdrawn 2026-10-23)', () => {
-    expect(gate).not.toContain('SUPABASE_SERVICE_ROLE_KEY')
-    const auth = readFileSync(
-      join(process.cwd(), 'supabase/functions/send-recurring-push/callerAuth.ts'),
-      'utf8',
-    )
-    expect(auth).not.toMatch(/timingSafe|isServiceRoleCaller|crypto\.subtle|Deno\.env/)
+  it('callerAuth never reads Authorization, the env, or JWT claims; accepts only the key named cron', () => {
+    expect(authCode).not.toMatch(/authorization|bearer/i)
+    expect(authCode).not.toMatch(/Deno\.env|process\.env/)
+    expect(authCode).not.toMatch(/service_role|atob|\.role\b|\bexp\b|decodeJwtSegment|checkServiceRoleJwt|projectRefFromUrl/)
+    expect(authCode).not.toMatch(/'default'/)
+    expect(authCode).toMatch(/export const CRON_KEY_NAME = 'cron'/)
+    expect(authCode).toMatch(/secretKeyNamed\(secretKeysEnvJson, CRON_KEY_NAME\)/)
+  })
+
+  it('no file in the function still carries the withdrawn claim check', () => {
+    for (const f of ['index.ts', 'callerAuth.ts']) {
+      const c = code(`supabase/functions/send-recurring-push/${f}`)
+      expect(c).not.toMatch(/checkServiceRoleJwt|decodeJwtSegment|projectRefFromUrl|PROJECT_REF|service_role/)
+    }
   })
 })
 
-describe('verify_jwt stays on for send-recurring-push (the claim check depends on it)', () => {
-  it('supabase/config.toml pins verify_jwt = true and never false', () => {
+describe('verify_jwt is off for send-recurring-push (#1834)', () => {
+  it('supabase/config.toml pins verify_jwt = false, once, in one section', () => {
     const toml = readFileSync(join(process.cwd(), 'supabase/config.toml'), 'utf8')
     const lines = toml.split('\n').map((l) => l.replace(/#.*$/, '').trim()).filter(Boolean)
     const start = lines.indexOf('[functions.send-recurring-push]')
     expect(start).toBeGreaterThan(-1)
     const next = lines.findIndex((l, i) => i > start && l.startsWith('['))
     const section = lines.slice(start + 1, next === -1 ? undefined : next)
-    expect(section).toContain('verify_jwt = true')
-    expect(section.filter((l) => /^verify_jwt\s*=/.test(l))).toEqual(['verify_jwt = true'])
+    expect(section.filter((l) => /^verify_jwt\s*=/.test(l))).toEqual(['verify_jwt = false'])
     // Only one section for this function (a later duplicate would override it).
     expect(lines.filter((l) => /^\[functions\.["']?send-recurring-push["']?\]$/.test(l))).toHaveLength(1)
-  })
-
-  it('no tracked doc, script, skill or workflow deploys it with --no-verify-jwt', () => {
-    const files = execFileSync('git', ['ls-files', '-z', '--', 'docs', 'scripts', '.claude', '.github', 'package.json'], {
-      cwd: process.cwd(),
-      encoding: 'utf8',
-    })
-      .split('\0')
-      .filter(Boolean)
-    expect(files.length).toBeGreaterThan(10)
-    const hits: string[] = []
-    for (const rel of files) {
-      let text: string
-      try {
-        text = readFileSync(join(process.cwd(), rel), 'utf8')
-      } catch {
-        continue
-      }
-      // Join shell line continuations so a multi-line deploy command is one line.
-      const lines = text.replace(/\\\r?\n/g, ' ').split('\n')
-      lines.forEach((l, i) => {
-        if (/functions\s+deploy/.test(l) && l.includes('send-recurring-push') && l.includes('--no-verify-jwt')) {
-          hits.push(`${rel}:${i + 1}`)
-        }
-      })
-    }
-    expect(hits).toEqual([])
   })
 })
