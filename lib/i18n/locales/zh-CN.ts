@@ -4091,6 +4091,7 @@ export const zhCN: Translations = {
       pending_former_member: '这张卡片的付款人已离开这本账本，请先改一下再确认。',
       rule_payer_not_member: '这条规则的付款人已离开这本账本，请先修改再恢复。',
       rule_recipient_not_member: '这条规则的收入归属已离开这本账本，请先修改再恢复。',
+      recurring_ends_before_start: '结束日期不能早于开始日期',
       pending_income_not_found: '待确认收入已被处理或找不到',
       pending_income_handled_elsewhere: '待确认收入已被其他设备处理',
       shortcut_pending_handled_elsewhere: '这张待确认已在其他设备处理或已过期',
