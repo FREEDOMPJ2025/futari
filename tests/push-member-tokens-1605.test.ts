@@ -140,7 +140,9 @@ describe('send-recurring-push wiring (#1605)', () => {
   })
 
   it('loads both platforms (#968 S4b): no platform filter on the token query', () => {
-    const start = src.indexOf(".from('PushTokens')\n    .select(")
+    // #1827 — the query now sits inside a keyset-paging callback; the slice
+    // runs from it to the point where its rows are used.
+    const start = src.indexOf(".from('PushTokens')\n        .select(")
     const end = src.indexOf('if (tokenErr)')
     expect(start).toBeGreaterThan(-1)
     expect(end).toBeGreaterThan(start)
