@@ -4,6 +4,7 @@ import {
   importResumeSourceFromParam,
   appendQueryParam,
   buildAuthCallbackUrl,
+  authPathFromHint,
   isFirstAuth,
   fromParamForUseCase,
 } from '@/lib/analytics/attribution'
@@ -135,6 +136,46 @@ describe('buildAuthCallbackUrl', () => {
   it('omits from and aid when falsy', () => {
     const url = buildAuthCallbackUrl('https://app.test', { next: '/x', from: null, anonId: undefined })
     expect(url).toBe('https://app.test/auth/callback?next=%2Fx')
+  })
+
+  // #1769 — the shell's platform rides as `p`, appended last, only when asked.
+  it.each(['android_native', 'ios_browser'] as const)('appends p=%s after the existing params', (hint) => {
+    const url = buildAuthCallbackUrl('dev.southernlight.futari://login-callback', {
+      next: '/dashboard',
+      from: 'landing',
+      anonId: 'anon-1',
+      platformHint: hint,
+    })
+    expect(url).toBe(
+      `dev.southernlight.futari://login-callback/auth/callback?next=%2Fdashboard&from=landing&aid=anon-1&p=${hint}`,
+    )
+  })
+  it('never adds p without a hint (the web flow passes none)', () => {
+    for (const platformHint of [undefined, null]) {
+      const url = buildAuthCallbackUrl('https://app.test', { next: '/dashboard', anonId: 'anon-1', platformHint })
+      expect(new URL(url).searchParams.has('p')).toBe(false)
+    }
+  })
+})
+
+describe('authPathFromHint (#1769)', () => {
+  it('accepts exactly one recognised shell value', () => {
+    expect(authPathFromHint(['android_native'])).toBe('android_native')
+    expect(authPathFromHint(['ios_browser'])).toBe('ios_browser')
+  })
+  it.each([
+    ['missing', []],
+    ['empty', ['']],
+    ['unknown', ['web']],
+    ['ios_native (only the native Apple sheet reports it)', ['ios_native']],
+    ['web_oauth spelled out', ['web_oauth']],
+    ['case variant', ['Android_Native']],
+    ['padded', [' android_native']],
+    ['repeated', ['android_native', 'android_native']],
+    ['conflicting', ['android_native', 'ios_browser']],
+    ['oversized', ['android_native'.repeat(1000)]],
+  ])('falls back to web_oauth when %s', (_label, values) => {
+    expect(authPathFromHint(values)).toBe('web_oauth')
   })
 })
 

@@ -238,10 +238,16 @@ async function browserOAuthSignIn(
   const { Browser } = await loadBrowser()
   const { App } = await loadApp()
 
+  // #1769 — tells /auth/callback which shell this came from, so `signed_in` /
+  // `signed_up` stop counting it as web. From the runtime platform only, never
+  // from the page URL (a crafted `?p=` link would mislabel web sign-ins). Keyed
+  // on the platform, not on this flow: iOS runs it too (Google, Apple fallback).
+  const platform = getPlatform()
   const redirectTo = buildAuthCallbackUrl(`${CAPACITOR_SCHEME}://login-callback`, {
     next: ctx.next,
     from: ctx.from,
     anonId: getAnonId(),
+    platformHint: platform === 'android' ? 'android_native' : platform === 'ios' ? 'ios_browser' : null,
   })
 
   const { data } = await supabase.auth.signInWithOAuth({

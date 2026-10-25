@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-10-23
+last_updated: 2026-10-25
 status: shipped
 first_shipped_in: v1.2.0
 updates:
@@ -18,8 +18,9 @@ updates:
   - v1.7.4: 補「`outing_created`、`outing_link_shared` 是新測量點；出遊分享頁事件 0 筆是沒有訪客、不是沒送出；出遊漏斗在分享那一步換人」這條邊界（#1723）；「`outing_ledger_invite_viewed`／`_clicked` 是新測量點，`entry_source=outing` 從此有兩個入口」（#1728）；補「2026-10-16 起出遊朋友頁路徑讀作 `/outing/r/:id`」（#1742）
   - v1.8.0: 補「`record_created` 涵蓋所有記帳管道、五個 server 事件帶 `group_id`」這條邊界，2026-10-17 起，前後計數不可比（#1764）
   - v1.9.0: 補「伺服器端推播（send-recurring-push）只有 console log」這條邊界（#968）
+  - v1.9.0: `signed_in`／`signed_up` 與 callback 的 `sign_in_failed` 的 `path` 分出 `android_native`／`ios_browser`，部署日前後不可比（#1769）
 related_specs: [conversion-analytics, product]
-related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", "#1415", "#1453", "#1552", "#1546", "#1553", "#1648", "#1723", "#1742", "#1764", "#968"]
+related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", "#1415", "#1453", "#1552", "#1546", "#1553", "#1648", "#1723", "#1742", "#1764", "#968", "#1769"]
 ---
 
 # 觀測的邊界與讀數據的紀律
@@ -45,9 +46,11 @@ related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", 
     - `invite_link_opened` 在 `InviteConfirm` 每次 mount 都會發（`useEffect`），重新整理或再次造訪會重複計算——算「打開」時以群組去重，不要直接數事件。
   - **client 端邀請事件自 v1.6.2 起帶 `group_id`（#1415），不回填。** `invite_link_copied` / `invite_link_shared` / `invite_qr_revealed` / `invite_skipped` / `invite_copy_failed`（`app/setup/SetupForm.tsx`、`InviteQr.tsx`）與 `invite_link_opened`（`app/invite/[token]/InviteConfirm.tsx`）現在都帶 `group_id`，可以跟 server 端的 `invite_created` / `partner_joined` 用同一個 key 配對，量出「連結送出 → 對方打開 → 加入」這段——在此之前這幾個 client 事件是匿名 id，無法跟 server 事件關聯（見上面的 person join 例外那條）。**跨這個部署日的比較無效**：v1.6.2 之前的這幾個 client 事件沒有 `group_id`，query 只能配對 v1.6.2 之後才發生的事件，不能拿舊資料去補齊舊的漏斗。
   - **`invite_revoked`（#1546）只在真的讓一條還能用的連結失效時才發，不是「按了讓連結失效」的次數。** `revokeOpenInvites()`（`actions/invite.ts`，設定的成員區塊）只帶 `group_id`、`count`；連結早已過期或被取代、或對方剛好先加入（`partnerJoined`）時，按鈕照樣按得下去、畫面照樣有回應，但不發事件，也沒有對應的 client 事件。所以拿它當「使用者想撤回邀請」的次數會偏低，要的話只能另外加 client 事件。
-- **`platform` 只在 client 事件上**：`detectPlatform()`（`lib/platform.ts`）在 SSR 回 `null`（server render 沒有平台可言）。server 端的 `signed_in` / `signed_up` 要改用 `path`（`web_oauth` / `ios_native`）分辨。所以「iOS 殼使用者的登入成功率」這類跨維度問題無解。
+- **`platform` 只在 client 事件上**：`detectPlatform()`（`lib/platform.ts`）在 SSR 回 `null`（server render 沒有平台可言）。server 端的 `signed_in` / `signed_up` 要改用 `path` 分辨：`web_oauth`（瀏覽器）、`android_native`（Android 殼的 Custom Tab 登入）、`ios_browser`（iOS 殼走瀏覽器的登入：Google，以及原生 Apple 面板失敗後的備援）、`ios_native`（iOS 原生 Apple 面板，不經 `/auth/callback`）。所以「iOS 殼使用者的登入成功率」這類跨維度問題，要把 `ios_native` 與 `ios_browser` 加起來算，不能只看其中一個。
+  - **`android_native` / `ios_browser` 自 #1769 部署日起才有，之前這兩種登入都記成 `web_oauth`。** 值由 `SignInButton` 依 runtime 平台寫進 callback 網址的 `p` 參數，`app/auth/callback/route.ts` 只收這兩個值（完全相等、只出現一次），其他一律 `web_oauth`。server 端的 `sign_in_failed`（`missing_code` / `exchange_error`）也帶同一個 `path`；client 端的 `sign_in_failed` 的 `path` 是另一套值（`capacitor_browser` / `web` / `ios_native` 等），兩邊用 `reason` 分開，不要混在一起切。**跨這個部署日的比較無效**：部署前的 `web_oauth` 混著瀏覽器、Android 殼與 iOS 殼的 Google 登入，部署後只剩瀏覽器，看起來會像 web 登入突然掉了一截——那是拆分，不是使用者流失。舊事件不回填。
+  - **失效的樣子**：拆分上線後 `android_native` 一直是 0、`web_oauth` 沒有往下掉——代表 `p` 沒有跟著 deep link 回到 callback（殼或 Supabase 改了 redirect 形狀），不是沒有 Android 使用者。`p` 是使用者自己能改的標籤，只能拿來分群，不能當權限或防偽依據。
 - **匿名訪客數是膨脹的**：cookieless 下每個 session 算新 person。已登入用戶走 identify 所以人數可靠。訪客絕對值不可用，只有同類頁面的**相對**比較有效。
-- **維度不回填**：`platform` 自 v1.5.7 部署起才有，`path` 自 v1.5.6 起。更早的事件永遠沒有，事後無法用 SQL 補。
+- **維度不回填**：`platform` 自 v1.5.7 部署起才有，`path` 自 v1.5.6 起（`android_native` / `ios_browser` 兩個值自 #1769 起，見上一條）。更早的事件永遠沒有，事後無法用 SQL 補。
 - **autocapture 事件不帶任何文字或屬性，`$el_text` 永遠是空的。** `mask_all_text` + `mask_all_element_attributes` 自 v1.5.15 起鎖死（#1267）：dashboard 的交易列把說明與金額渲染在可點擊元素裡，autocapture 預設會把那些字串送給 PostHog，而隱私權政策寫的是 `no third-party analytics tracking financial data`。autocapture 留下來的只有 tag、classes、`$elements_chain` 的位置、`$current_url`，以及連結的 `attr__href`。
   - **推論：「哪顆按鈕被點了」不能用 `$el_text` 問，要用具名 `track()` 事件。** 這不是 v1.5.15 才成立的紀律——#1015 就已經把邀請漏斗從 `$el_text` 反推改成具名事件（理由是文案一改就斷、而且只涵蓋 zh-TW）。現在只是從慣例變成結構。需要一個新的互動指標時，加一個 `track()` 埋點，不要想辦法從 autocapture 還原。
   - **失效的樣子是查詢回 0 筆，不是報錯。** 對 `$el_text` 下條件會安靜地 match 不到任何事件，看起來像「這個按鈕沒人點」而不是「這個欄位不存在」。v1.5.15 以前的事件仍然帶著文字，所以跨這個部署日的查詢會得到一條在 2026-09 突然歸零的曲線——那是遮罩上線，不是使用者行為改變。

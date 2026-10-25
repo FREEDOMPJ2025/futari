@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-10-07
+last_updated: 2026-10-25
 status: shipped
 first_shipped_in: v1.2.0
 updates:
@@ -9,8 +9,9 @@ updates:
   - v1.6.8: 事件清單新增 iOS Apple 瀏覽器備援的 `sign_in_fallback_*` 事件（#1552）
   - v1.7.0: 邀請漏斗新增 `invite_revoked`（#1546）
   - v1.7.3: `transactions_exported` 屬性改為各類筆數與章節／帳本數，不再帶 `group_id`（#1460）
+  - v1.9.0: `signed_in`／`signed_up` 的 `path` 分出 `android_native`／`ios_browser`（#1769）
 related_specs: [csv-import, solo-mode, csv-export]
-related_issues: ["#734", "#1056", "#1062", "#1290", "#1552", "#1546"]
+related_issues: ["#734", "#1056", "#1062", "#1290", "#1552", "#1546", "#1769"]
 ---
 
 # 轉換分析 — 從入口頁到註冊的事件追蹤
@@ -157,11 +158,13 @@ migrate 流程 → `app/[locale]/migrate/_components/MigrateTool.tsx` + `Migrate
 
 | event | 觸發時機 | 關鍵屬性 |
 |---|---|---|
-| `signed_up` | 新用戶首次 OAuth 成功 | `entry_source`、`migrate_source?`、`locale` |
-| `signed_in` | 回訪認證成功 | `entry_source?` |
+| `signed_up` | 新用戶首次 OAuth 成功 | `entry_source`、`migrate_source?`、`locale`、`path`、`provider?` |
+| `signed_in` | 回訪認證成功 | `entry_source?`、`path`、`provider?` |
 
 實作落地點：`app/auth/callback/route.ts`（已能取得 `data.user`，可在此判定新／舊用戶並 alias + capture）。
 `SignInButton` 需把匿名 `distinct_id` 與 `from` append 到 `redirectTo`。
+
+`path` 分辨登入走哪條路：`web_oauth`（瀏覽器）、`android_native`（Android 殼）、`ios_browser`（iOS 殼的 Google 與 Apple 備援）、`ios_native`（iOS 原生 Apple 面板，由 `recordNativeAuthConversion` 補發）。殼的兩個值靠 `redirectTo` 上的 `p` 參數帶回 callback，自 #1769 起才有；之前全部記成 `web_oauth`，跨部署日不可比，讀法見 [observability](observability-design.md)「`platform` 只在 client 事件上」那條。
 
 ### Post-auth — identified（次要指標）
 
