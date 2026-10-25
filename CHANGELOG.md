@@ -43,6 +43,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **捷徑與網址帶入的記帳，沿用同一商家上次的分類（#1822）**
+  使用者：從捷徑或網址帶入商家時，分類會自動選成這家店上次用的分類，自己改過的就不會被蓋掉；教學頁的範例網址不再寫死「餐飲」。
+  技術：`getCategoryForMerchant` 在帳本最近 100 筆未刪除紀錄裡比對 NFKC／不分大小寫的描述；優先順序是商家記憶 > 網址或 payload 的 `category` > 預設；待確認卡在 `/api/shortcut/pending` 寫入時就套用。
+
 - **Android 殼裡的分享打開系統分享面板（#1749）**
   使用者：在 Android App 裡分享出遊連結、夥伴邀請與測試邀請，會跳出系統分享面板，不再只是複製。
   技術：加 `@capacitor/share`，`lib/shareSheet.ts` 在 runtime 判斷 Android 殼與 plugin；舊殼沒有 plugin 時照舊複製；需隨 v1.9.0 重送原生殼。
