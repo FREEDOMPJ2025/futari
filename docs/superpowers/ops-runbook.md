@@ -766,6 +766,8 @@ agent 不建金鑰、不寫 Vault、不碰 prod；以下由 owner 自己做。
 5. **手動矩陣**（金鑰都放 shell 變數，不印出；原因從函式 log 讀）：沒有 header → 401 `no_apikey`；`apikey: <publishable key>` → 401 `mismatch`；`apikey: <default secret key>` → 401 `mismatch`；只有 legacy Bearer → 401 `no_apikey`；`apikey: $CK` → 200。
    - 拿到 `no_key_config`：`cron` key 建立後 runtime 還沒拿到 `SUPABASE_SECRET_KEYS` 的新內容。記下來、重新部署、再測。
 6. 下一次 dev 16:10 UTC 執行 → `net._http_response` 200（只 select `id, status_code, timed_out, created`）。
+   - **dev 做不到這一步（2026-10-25 量到）**：dev 沒有安裝 `pg_net`（`pg_extension` 裡只有 `pg_cron`、`supabase_vault`，也沒有 `net` schema），所以 dev 的排程每晚呼叫 `net.http_post` 都會失敗，不會真的打到函式；F5 的 `net.http_request_queue` 權限檢查在 dev 也無從查起。dev 只能用步驟 3–5 的手動請求驗證；排程本身的 200 要到 prod（S4.7）才看得到。失效的樣子：在 dev 等 16:10 等不到任何 `net._http_response`，不是 0100 壞了。
+   - 2026-10-25 dev 實測結果：0100 讀回 `10 16 * * * | t | t | t | t | f`；雙 header 打舊函式 200；新函式 `verify_jwt=false`；矩陣 none→401 `no_apikey`、publishable→401 `mismatch`、default→401 `mismatch`、legacy Bearer only→401 `no_apikey`、cron→200。
 
 #### prod 切換（S4；每一個寫入都要 owner 的一句明確的話）
 
