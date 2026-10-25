@@ -846,6 +846,63 @@ Supabase 預計在 2026 年底停用 legacy JWT API key（anon／service_role）
    - **失效的樣子**：這一步漏掉、legacy key 一停用，web app 對 Supabase 的每個請求都失敗——登入、讀資料全壞。
 4. 以上都完成，才在 Dashboard 停用 legacy key。
 
+### 發送上限、截止時間與 summary log（#1827 S1）
+
+每個登入的人都能寫自己的 PushTokens 列；#1827 之前函式照表格順序一筆一筆送、APNs 沒有逾時，一個帳號塞一千筆就能吃掉整次執行。現在：
+
+- **讀取**：待確認卡的 `group_id` 與 PushTokens 都用 keyset 分頁讀到空頁為止（`keysetPages.ts`），不受 project「Max rows」截斷。讀取出錯只記 `[push] query error code=…`（支出，回 500）／`[push] income query error code=…`（收入，照常送支出的）／`[push] token query error code=…`（回 200、這次不送）。
+- **排程**（`sendPlan.ts`）：帳本間輪流、帳本內兩個成員輪流；每人最多 10、每帳本最多 20、每次最多 2000。
+- **發送**（`sendPool.ts`）：每個平台 8 個併發，APNs 與 FCM 同時跑；每個請求 10 秒逾時；開始讀取後約 100 秒就不再發新的，兩個分支一律跑完失效 token 的刪除。
+- **每次 200 都有一行**：`[push] summary sent=<n> skipped_by_cap=<n> skipped_by_deadline=<n>`，只有計數。
+
+**平常的樣子**：兩個 skipped 都是 0。**失效的樣子**：
+
+- `skipped_by_cap` > 0：有人超過 10 台裝置、帳本超過 20、或整次超過 2000。0101 套上後每人只會剩 10 列，所以多半是帳本或整次的上限；先唯讀數 PushTokens 每人、每帳本的列數（只數，不讀 token）。
+- `skipped_by_deadline` > 0：APNs／FCM 回得很慢，同一次 log 會有很多 `status=network`。持續出現就是有家庭每晚收不到。
+- 完全沒有 summary 行、cron 不是 200：函式在中途被平台砍掉（超過 wall-clock），或是 `[auth]`／`no default secret key` 那幾種（見上面〈呼叫者驗證〉）。
+
+**部署**：只動函式，不需要 migration；跟 0101 哪個先都可以。prod 部署要 owner 的一句明確的話，而且**必須在 #1834 的 prod 切換（上面 S4）做完、檢查都通過之後**（兩者都改 `index.ts`，這版疊在 #1834 上）。部署後：讀回 `verify_jwt: false`；跑 S4 第 5 步的 (a) 沒有 header → 401 `no_apikey`、(b) 錯的 `sb_secret_…` → 401 `mismatch`；下一次 16:10 UTC 執行回 200，函式 log 有 summary 行。回滾：從 #1834 的函式 commit 開 detached worktree 重新部署，讀回 `verify_jwt`。
+
+### PushTokens 格式與筆數上限（0101，#1827 S2）
+
+`drizzle/0101_push_token_format_cap.sql`：刪掉格式不合的列，加完整驗證的 CHECK `push_tokens_token_format`（apns：大小寫 hex、64–512、偶數長度；fcm：`[A-Za-z0-9_:-]`、20–512）；BEFORE UPDATE trigger 讓 `updated_at` 跟著每次重新註冊更新；AFTER INSERT trigger 讓每個 user_id 最多 10 列，超過就刪最久沒重新註冊的。數字的唯一來源是 `lib/pushTokenFormat.ts`。
+
+**套用前（每個環境，唯讀，只數不讀 token）**：
+
+```sql
+SELECT platform, count(*) AS total,
+       count(*) FILTER (WHERE NOT (
+         (platform = 'apns' AND token ~ '^[0-9A-Fa-f]+$' AND char_length(token) BETWEEN 64 AND 512 AND char_length(token) % 2 = 0)
+         OR (platform = 'fcm' AND token ~ '^[A-Za-z0-9_:-]+$' AND char_length(token) BETWEEN 20 AND 512))) AS will_delete
+FROM "PushTokens" GROUP BY platform;
+SELECT max(n) FROM (SELECT count(*) AS n FROM "PushTokens" GROUP BY user_id) s;
+```
+
+prod 2026-10-25：41 列全是 apns、`will_delete` 0、每人最多 2。`will_delete` 不是 0 就先停下來看是哪一種格式（長度、大小寫），不要照跑——那可能是真的裝置。
+
+**dev**（agent 不自己跑，交給 owner／協調者）：照〈Drizzle Migrations〉先算待套用清單，`npm run db:migrate`，然後**一定要查資料確認真的套上了**（dev 歷史被污染，可能回報成功卻跳過）：
+
+```sql
+SELECT convalidated, pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'push_tokens_token_format';
+SELECT tgname FROM pg_trigger WHERE tgrelid = '"PushTokens"'::regclass AND NOT tgisinternal ORDER BY 1;
+SELECT proname, prosecdef, proconfig,
+       has_function_privilege('anon', oid, 'EXECUTE') AS anon,
+       has_function_privilege('authenticated', oid, 'EXECUTE') AS authenticated
+FROM pg_proc WHERE proname IN ('push_tokens_touch_updated_at', 'push_tokens_enforce_cap');
+```
+
+預期：`t` 與兩個平台的條件；`PushTokens_enforce_cap`、`PushTokens_touch_updated_at`；`push_tokens_enforce_cap` 是 `t | {search_path=""}`，兩個函式的 anon／authenticated 都是 `f`。沒套上就手動跑檔案本體（idempotent）：`psql "$DATABASE_URL_DIRECT" -1 -v ON_ERROR_STOP=1 -f drizzle/0101_push_token_format_cap.sql`。之後重跑 dev DB 測試：`npx vitest run --no-file-parallelism __tests__/actions/pushTokens1605.test.ts __tests__/actions/dataApiGrants1518.test.ts`（allowlist 不該多任何一行）。
+
+**prod**：發版時套，要 owner 的一句明確的話；順序上排在 #1834 的 prod 切換之後（不是技術依賴，是一次只動一件事）。照〈Prod：npm script 到不了〉先比對待套用清單，再跑上面「套用前」的計數、套用、再跑一次 dev 那三條查詢。之後 Sentry 會出現的新訊號見下。
+
+**失效的樣子**：
+
+- Sentry `push token upsert failed code=23514`（`area: push`、`op: token_upsert`）：CHECK 擋掉了某台裝置的 token。如果不只一兩則，多半是 Apple／Google 改了格式，真機收不到推播、畫面上什麼都沒有。先跑下面的 rollback（或至少 `ALTER TABLE "PushTokens" DROP CONSTRAINT push_tokens_token_format`），再看格式改 `lib/pushTokenFormat.ts` 與新 migration。
+- `code=42501`：換帳本當下的競態（0087），零星出現是預期內的。
+- 有人回報「重灌很多次之後最舊那台收不到」：那就是上限在淘汰，預期內（每人 10 台）。
+
+**回滾**：`psql "$DATABASE_URL_DIRECT" -1 -v ON_ERROR_STOP=1 -f scripts/rollback/0101_push_token_format_cap.down.sql`，跑檔頭的 post-check（三個 0）。跟程式碼沒有順序關係；刪掉或淘汰的列不會回來，真的裝置下次打開 App 會重新註冊。
+
 ### FCM 金鑰（Supabase function secrets）
 
 | secret | 內容 |

@@ -18,13 +18,20 @@ export async function registerPushToken(userId: string, groupId: string): Promis
     // (LogoutButton → signOut action, #1617). Never throws.
     storePushToken(token)
     const supabase = createClient()
-    // Since 0087 the database refuses a group_id the user is not a member of;
-    // supabase-js returns that as `{ error }`, which is ignored here on purpose
-    // (the registrar passes the active ledger, so it only happens on a race).
-    await supabase.from('PushTokens').upsert(
+    // Since 0087 the database refuses a group_id the user is not a member of
+    // (42501, only on a race: the registrar passes the active ledger); since
+    // 0101 it refuses a token of the wrong shape (23514). supabase-js returns
+    // either as `{ error }`. #1827 — report the code and nothing else: the
+    // error's message / details can quote the failing row, token included.
+    // Failure looks like (unreported): no push on this phone, no error anywhere.
+    const { error } = await supabase.from('PushTokens').upsert(
       { user_id: userId, group_id: groupId, platform: 'apns', token },
       { onConflict: 'user_id,platform,token' }
     )
+    if (error) {
+      const code = typeof error.code === 'string' && /^[A-Za-z0-9]{1,16}$/.test(error.code) ? error.code : 'other'
+      reportClientError(new Error(`push token upsert failed code=${code}`), { area: 'push', op: 'token_upsert' })
+    }
   })
 
   PushNotifications.addListener('registrationError', (error) => {

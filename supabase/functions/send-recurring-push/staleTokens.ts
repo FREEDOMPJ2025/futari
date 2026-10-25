@@ -164,7 +164,9 @@ export function fcmFailureLog(token: string, httpStatus: number | null, body: un
   return `[fcm] failed token=${tokenPrefix(token)} status=${httpStatus} error.status=${safeCode(parsed.status)} errorCode=${codes}`
 }
 
-export function apnsFailureLog(token: string, status: number, bodyText: string): string {
+/** `status` null: the request threw (network error, or the #1827 fetch timeout). */
+export function apnsFailureLog(token: string, status: number | null, bodyText: string): string {
+  if (status === null) return `[apns] failed token=${tokenPrefix(token)} status=network`
   let reason: unknown
   try {
     const j = JSON.parse(bodyText) as unknown
