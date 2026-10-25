@@ -2559,7 +2559,7 @@ export const ja: Translations = {
         // TODO(#839): ja copy below pending native review
         moneybook: {
           name: 'Moneybook',
-          description: '台湾の自動連携家計簿アプリ。CSV を書き出して持ち込めます。',
+          description: '台湾の自動連携家計簿アプリ。スクショ＋ChatGPT で CSV に整えて持ち込めます。',  // TODO(i18n): 待確認
         },
         andromoney: {
           name: 'AndroMoney',
@@ -2567,7 +2567,7 @@ export const ja: Translations = {
         },
         mobills: {
           name: 'Mobills',
-          description: '海外発の個人向け家計簿アプリ。CSV を書き出して持ち込めます。',
+          description: '海外発の個人向け家計簿アプリ。スクショ＋ChatGPT で CSV に整えて持ち込めます。',  // TODO(i18n): 待確認
         },
         manebo: {
           name: 'Manebo',
@@ -2782,7 +2782,7 @@ I will upload the screenshots once you confirm.`,
         heroKicker: 'MONEYBOOK → FUTARI',
         heroTitle: 'Moneybook のデータも、持っていけます',
         heroSubtitle:
-          'Moneybook から Futari へ：取引明細を CSV で書き出し、ここでプレビューして、ふたりで記録を続けましょう。',
+          'Moneybook から Futari へ：取引画面をスクショして ChatGPT で CSV に整え、ここでプレビューして、ふたりで記録を続けましょう。',  // TODO(i18n): 待確認
         intro: 'Moneybook は 2026 年 4 月から完全有料化しました。未契約のアカウントは同期はもちろん、手入力での記録もできなくなっています。公式のアナウンスによると、年額は 2027 年から NT$1,499 に改定される予定です。この機会に、基本機能がずっと無料のふたり向け家計簿へ、これまでの記録を持っていきたい方のためのページです。',
         differentiators: [
           {
@@ -2799,22 +2799,29 @@ I will upload the screenshots once you confirm.`,
           },
         ],
         stepsHeading: 'Moneybook からの引っ越し 3 ステップ',
-        step1: 'Moneybook（契約中のアカウント）で「明細エクスポート」から取引を CSV で書き出します。',
-        step2: 'CSV をここにアップロードして、取引明細の期間と件数に抜けがないか確認します。',
-        step3: 'Futari のアカウントを作り、取り込み時にカテゴリを対応づけて支払者を指定したら、パートナーと続きを記録していきます。',
+        step1: 'Moneybook で移したい取引をページごとにスクリーンショット。暗号化された書き出しファイルは扱わなくて構いません（下に詳しい手順）。',  // TODO(i18n): 待確認
+        step2: 'ChatGPT でスクショを CSV に整えます。無料版で十分です。カテゴリの文字はそのまま CSV に入り、取り込み時に合うものは Futari のカテゴリに、それ以外は「その他」に入ります。',  // TODO(i18n): 待確認
+        step3: 'CSV をここにアップロードして、件数と期間が合っているか確認してから、アカウントを作成して取り込みを完了します。',  // TODO(i18n): 待確認
         faq: [
           {
             question: '無料アカウントでもデータを書き出せますか？',
-            answer: '2026 年 4 月の有料化以降、明細エクスポートは契約中のアカウント限定の機能です。まだ契約が続いているうちに、一度書き出しておくことをおすすめします。',
+            answer: '2026 年 4 月の有料化以降、明細エクスポートは契約中のアカウント限定の機能です。引っ越しのためだけに契約したくなければ、スクショを使います。取引画面を撮って ChatGPT で CSV に整えます。下に手順とコピーできるプロンプトがあります。',  // TODO(i18n): 待確認
           },
           {
-            question: '書き出した CSV は Futari の形式と合いますか？',
-            answer:
-              '完全には同じではありません。ここにアップロードするとブラウザ上でプレビューされ、件数・期間・よく使うカテゴリが見られます。実際の取り込みでは、支払者と分担をまとめて指定し、読み取れなかった行はスキップして記録が残ります。',
+            question: 'Moneybook から書き出したファイルが開けません。どうすれば？',  // TODO(i18n): 待確認
+            answer: 'Moneybook の書き出しファイルは暗号化されていて、パスワードは身分証番号（台湾の身分證字號）です。入力するまで開けません。この手順を省きたい場合はスクショを使います。取引画面を撮って ChatGPT で CSV に整えます。下に手順とコピーできるプロンプトがあります。',  // TODO(i18n): 待確認
+          },
+          {
+            question: 'スクショは何枚必要ですか？',  // TODO(i18n): 待確認
+            answer: '5〜10 枚が目安です。移したい期間をカバーするようスクロールしてください。同じ取引が重複した場合は、プロンプトで ChatGPT に 1 件だけ残すよう頼んでいます。',  // TODO(i18n): 待確認
           },
           {
             question: '移ったあとも課金が必要ですか？',
             answer: '不要です。Futari の基本の家計簿・分担・精算は無料で、取り込みも無料です。',
+          },
+          {
+            question: 'ChatGPT が作るカテゴリはずれませんか？',  // TODO(i18n): 待確認
+            answer: 'カテゴリの文字はそのまま保たれます。アップロード後にプレビューでき、実際の取り込み時に Futari のカテゴリへ対応づけられます。',  // TODO(i18n): 待確認
           },
           {
             question: 'Moneybook は銀行と自動連携しますが、Futari も？',
@@ -2877,7 +2884,7 @@ I will upload the screenshots once you confirm.`,
         heroKicker: 'MOBILLS → FUTARI',
         heroTitle: 'Mobills のデータも、持っていけます',
         heroSubtitle:
-          'Mobills から Futari へ：CSV を書き出し、ここでプレビューして、ふたりで記録を続けましょう。',
+          'Mobills から Futari へ：取引画面をスクショして ChatGPT で CSV に整え、ここでプレビューして、ふたりで記録を続けましょう。',  // TODO(i18n): 待確認
         differentiators: [
           {
             title: 'それぞれ別々ではなく、ふたりで共有',
@@ -2893,10 +2900,18 @@ I will upload the screenshots once you confirm.`,
           },
         ],
         stepsHeading: 'Mobills からの引っ越し 3 ステップ',
-        step1: 'Mobills で取引履歴を書き出し、CSV をダウンロードします。',
-        step2: 'CSV をここにアップロードして、プレビューで期間を確認します。移したい範囲がそろっているかを見てください。',
-        step3: 'Futari のアカウントを作ります。ふたりがそれぞれ自分のファイルを取り込めば、記録はどちらも同じ共有家計簿に入ります。',
+        step1: 'Mobills で移したい取引をページごとにスクリーンショット（下に詳しい手順）。',  // TODO(i18n): 待確認
+        step2: 'ChatGPT でスクショを CSV に整えます。無料版で十分です。カテゴリの文字はそのまま CSV に入り、取り込み時に合うものは Futari のカテゴリに、それ以外は「その他」に入ります。',  // TODO(i18n): 待確認
+        step3: 'CSV をここにアップロードして、件数と期間が合っているか確認してから、アカウントを作成して取り込みを完了します。ふたりがそれぞれ自分の CSV を取り込めば、記録はどちらも同じ共有家計簿に入ります。',  // TODO(i18n): 待確認
         faq: [
+          {
+            question: 'Mobills の書き出しファイルはそのままアップロードできますか？',  // TODO(i18n): 待確認
+            answer: 'Futari には今のところ Mobills の書き出しファイル向けの読み取りがなく、形式が合わない行は読み取れません。スクショを使います。取引画面を撮って ChatGPT で CSV に整えます。下に手順とコピーできるプロンプトがあります。',  // TODO(i18n): 待確認
+          },
+          {
+            question: 'スクショは何枚必要ですか？',  // TODO(i18n): 待確認
+            answer: '5〜10 枚が目安です。移したい期間をカバーするようスクロールしてください。同じ取引が重複した場合は、プロンプトで ChatGPT に 1 件だけ残すよう頼んでいます。',  // TODO(i18n): 待確認
+          },
           {
             question: '違うファイルを取り込んでしまったら？',
             answer:
@@ -2910,6 +2925,10 @@ I will upload the screenshots once you confirm.`,
             question: 'ふたりとも Mobills に記録があります。どうやってまとめますか？',
             answer:
               'それぞれが自分のファイルを取り込みます。取り込みのたびにデフォルト支払者（自分か相手）と分担を指定でき、どちらの記録も同じ共有家計簿に入ります。共通の支出を両方が記録していた場合は、取り込み前にどちらか一方だけ残してください。Futari は重複を自動では統合しません。',
+          },
+          {
+            question: 'ChatGPT が作るカテゴリはずれませんか？',  // TODO(i18n): 待確認
+            answer: 'カテゴリの文字はそのまま保たれます。アップロード後にプレビューでき、実際の取り込み時に Futari のカテゴリへ対応づけられます。',  // TODO(i18n): 待確認
           },
           {
             question: 'Mobills には予算機能がありますが、Futari にも？',
@@ -3339,9 +3358,9 @@ I will upload the screenshots once you confirm.`,
       },
       // TODO(#839): ja copy below pending native review
       moneybook: {
-        title: 'Moneybook から Futari へ｜CSV 取り込み',
-        description: 'Moneybook のデータをふたりの家計簿へ。取引明細を CSV で書き出し、カップル・夫婦の共同家計簿 Futari に取り込むだけ。無料・広告なし・ふたりだけに開放。',
-        ogDescription: 'Moneybook ユーザーの次の住みか。CSV を書き出して Futari へ。',
+        title: 'Moneybook から Futari へ｜スクショで取り込み',  // TODO(i18n): 待確認
+        description: 'Moneybook のデータをふたりの家計簿へ。スクショを ChatGPT で CSV に整え、カップル・夫婦の共同家計簿 Futari に取り込むだけ。無料・広告なし・ふたりだけに開放。',  // TODO(i18n): 待確認
+        ogDescription: 'Moneybook ユーザーの次の住みか。スクショ→ChatGPT→CSV→Futari。',  // TODO(i18n): 待確認
       },
       andromoney: {
         title: 'AndroMoney から Futari へ｜CSV 取り込み',
@@ -3349,9 +3368,9 @@ I will upload the screenshots once you confirm.`,
         ogDescription: 'AndroMoney ユーザーの次の住みか。CSV を書き出して Futari へ。',
       },
       mobills: {
-        title: 'Mobills から Futari へ｜CSV 取り込み',
-        description: 'Mobills のデータをふたりの家計簿へ。CSV をカップル・夫婦の共同家計簿 Futari に取り込むだけ。無料・広告なし・ふたりだけに開放。',
-        ogDescription: 'Mobills ユーザーの次の住みか。CSV を書き出して Futari へ。',
+        title: 'Mobills から Futari へ｜スクショで取り込み',  // TODO(i18n): 待確認
+        description: 'Mobills のデータをふたりの家計簿へ。スクショを ChatGPT で CSV に整え、カップル・夫婦の共同家計簿 Futari に取り込むだけ。無料・広告なし・ふたりだけに開放。',  // TODO(i18n): 待確認
+        ogDescription: 'Mobills ユーザーの次の住みか。スクショ→ChatGPT→CSV→Futari。',  // TODO(i18n): 待確認
       },
       manebo: {
         title: 'Manebo から Futari へ｜カップル共同家計簿',

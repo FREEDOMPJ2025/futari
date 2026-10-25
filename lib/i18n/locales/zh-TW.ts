@@ -6119,7 +6119,7 @@ export const zhTW: Translations = {
         },
         moneybook: {
           name: '麻布記帳',
-          description: '台灣的自動同步記帳 App，匯出 CSV 帶過來。',
+          description: '台灣的自動同步記帳 App，截圖請 ChatGPT 整理成 CSV 帶過來。',
         },
         andromoney: {
           name: 'AndroMoney',
@@ -6127,7 +6127,7 @@ export const zhTW: Translations = {
         },
         mobills: {
           name: 'Mobills',
-          description: '國際個人理財 App，匯出 CSV 帶過來。',
+          description: '國際個人理財 App，截圖請 ChatGPT 整理成 CSV 帶過來。',
         },
         manebo: {
           name: 'Manebo',
@@ -6337,7 +6337,7 @@ export const zhTW: Translations = {
       moneybook: {
         heroKicker: 'MONEYBOOK → FUTARI',
         heroTitle: '你的麻布記帳資料，可以帶走',
-        heroSubtitle: '從麻布記帳搬到 Futari：匯出交易明細 CSV，上傳預覽後，和伴侶一起把這些記錄接著寫下去。',
+        heroSubtitle: '從麻布記帳搬到 Futari：把交易畫面截圖，請 ChatGPT 整理成 CSV，上傳預覽後，和伴侶一起把這些記錄接著寫下去。',
         intro: '麻布記帳自 2026 年 4 月起改為全面收費：未訂閱的帳號無法再同步，也無法手動記帳；依官方公告，年費將於 2027 年起調整為 NT$1,499。如果你們正在重新考慮，想把這些年的記錄帶去一個核心功能免費的雙人帳本，這一頁是為此準備的。',
         differentiators: [
           {
@@ -6354,21 +6354,29 @@ export const zhTW: Translations = {
           },
         ],
         stepsHeading: '麻布記帳搬遷三步',
-        step1: '在麻布記帳（訂閱會員）用「明細匯出」把交易輸出成 CSV。',
-        step2: '把 CSV 上傳到這裡預覽，先確認交易明細的日期範圍和筆數沒有缺一段。',
-        step3: '建立 Futari 帳號，匯入時對照類別、指定付款人，之後和伴侶一起接著記。',
+        step1: '在麻布記帳把要搬的交易一頁一頁截圖，不必處理匯出的加密檔（下方有完整做法）。',
+        step2: '用 ChatGPT 把截圖整理成 CSV，免費版就夠；分類文字會原樣寫進 CSV，匯入時對得上的會歸到 Futari 的類別，其餘歸在「其他」。',
+        step3: '把 CSV 上傳到這裡預覽，確認筆數和日期範圍對得上，再建立帳號完成匯入。',
         faq: [
           {
             question: '免費帳號還能把資料匯出來嗎？',
-            answer: '2026 年 4 月收費制上路後，明細匯出屬於訂閱會員功能。若你們還在訂閱期，建議先把明細匯出留存一份。',
+            answer: '2026 年 4 月收費制上路後，明細匯出屬於訂閱會員功能。不想為了搬家先訂閱的話，可以改用截圖：把交易畫面截下來請 ChatGPT 整理成 CSV，下方有完整步驟和可複製的提示詞。',
           },
           {
-            question: '匯出的 CSV 和 Futari 的格式對得起來嗎？',
-            answer: '不完全一樣。上傳到這頁會先在瀏覽器預覽，看得到筆數、日期範圍和常出現的分類；正式匯入時，付款人與分攤方式整批指定，讀不出來的列會被略過並留下紀錄。',
+            question: '麻布記帳匯出的檔案打不開，怎麼辦？',
+            answer: '麻布記帳匯出的檔案有加密，密碼是你的身分證字號，輸入前打不開。不想處理這一步的話，改用截圖：把交易畫面截下來請 ChatGPT 整理成 CSV，下方有完整步驟和可複製的提示詞。',
+          },
+          {
+            question: '要截幾張圖？',
+            answer: '建議 5–10 張，往下捲動蓋過你想搬的時間範圍即可。同一筆重複出現的，提示詞已請 ChatGPT 只留一筆。',
           },
           {
             question: '搬過來之後要訂閱嗎？',
             answer: '不用。Futari 的核心記帳、分攤與結算都在免費層，匯入也不收費。',
+          },
+          {
+            question: 'ChatGPT 整理的分類會不會跑掉？',
+            answer: '分類文字會原樣保留，上傳後先預覽，正式匯入時可以對照調整成 Futari 的分類。',
           },
           {
             question: '麻布記帳會自動同步銀行，Futari 也會嗎？',
@@ -6425,7 +6433,7 @@ export const zhTW: Translations = {
       mobills: {
         heroKicker: 'MOBILLS → FUTARI',
         heroTitle: '你的 Mobills 資料，可以帶走',
-        heroSubtitle: '從 Mobills 搬到 Futari：匯出 CSV，上傳預覽後，和伴侶一起把記錄接著寫下去。',
+        heroSubtitle: '從 Mobills 搬到 Futari：把交易畫面截圖，請 ChatGPT 整理成 CSV，上傳預覽後，和伴侶一起把記錄接著寫下去。',
         differentiators: [
           {
             title: '雙人共用，不是各記各的',
@@ -6441,10 +6449,18 @@ export const zhTW: Translations = {
           },
         ],
         stepsHeading: 'Mobills 搬遷三步',
-        step1: '在 Mobills 匯出交易紀錄，下載 CSV 檔。',
-        step2: '把 CSV 上傳到這裡，先看預覽裡的日期範圍，確認你要搬的那段時間都在。',
-        step3: '建立 Futari 帳號，兩個人各自匯入各自的檔案，記錄都會落在同一本共同帳本。',
+        step1: '在 Mobills 把要搬的交易一頁一頁截圖（下方有完整做法）。',
+        step2: '用 ChatGPT 把截圖整理成 CSV，免費版就夠；分類文字會原樣寫進 CSV，匯入時對得上的會歸到 Futari 的類別，其餘歸在「其他」。',
+        step3: '把 CSV 上傳到這裡預覽，確認筆數和日期範圍對得上，再建立帳號完成匯入。兩個人各自匯入各自的 CSV，記錄都會落在同一本共同帳本。',
         faq: [
+          {
+            question: 'Mobills 的匯出檔可以直接上傳嗎？',
+            answer: 'Futari 目前沒有針對 Mobills 匯出檔的讀取支援，格式對不上的列會讀不到。改用截圖：把交易畫面截下來請 ChatGPT 整理成 CSV，下方有完整步驟和可複製的提示詞。',
+          },
+          {
+            question: '要截幾張圖？',
+            answer: '建議 5–10 張，往下捲動蓋過你想搬的時間範圍即可。同一筆重複出現的，提示詞已請 ChatGPT 只留一筆。',
+          },
           {
             question: '匯錯了可以重來嗎？',
             answer: '可以。匯入完成後 24 小時內能一鍵復原整批，不會留下半份資料，也不會動到 Mobills 裡的原始記錄。',
@@ -6456,6 +6472,10 @@ export const zhTW: Translations = {
           {
             question: '我們兩個人都有 Mobills 的記錄，要怎麼合併？',
             answer: '各自匯入各自的檔案就好。每次匯入都可以指定預設付款人（你或對方）與分攤方式，兩份記錄最後落在同一本共同帳本。同一筆共同支出如果兩邊都記了，匯入前先留下其中一份；Futari 不會自動合併重複的記錄。',
+          },
+          {
+            question: 'ChatGPT 整理的分類會不會跑掉？',
+            answer: '分類文字會原樣保留，上傳後先預覽，正式匯入時可以對照調整成 Futari 的分類。',
           },
           {
             question: 'Mobills 有預算功能，Futari 有嗎？',
@@ -6854,9 +6874,9 @@ export const zhTW: Translations = {
         ogDescription: 'CWMoney 用戶的下一站：免費分帳，Excel 轉 CSV 搬進 Futari。',
       },
       moneybook: {
-        title: '從麻布記帳搬家到 Futari｜CSV 匯入',
-        description: '麻布記帳資料怎麼搬到雙人帳本？把交易明細匯出成 CSV，上傳到 Futari 這個專為夫妻、伴侶設計的共同帳本，和對方一起接著記。免費、無廣告、只開放給你們倆。',
-        ogDescription: '麻布記帳用戶的雙人記帳新選擇：匯出 CSV，搬進 Futari。',
+        title: '從麻布記帳搬家到 Futari｜截圖匯入',
+        description: '麻布記帳資料怎麼搬到雙人帳本？把交易畫面截圖，請 ChatGPT 整理成 CSV，再上傳到 Futari 這個專為夫妻、伴侶設計的共同帳本，和對方一起接著記。免費、無廣告、只開放給你們倆。',
+        ogDescription: '麻布記帳用戶的雙人記帳新選擇：截圖整理成 CSV，搬進 Futari。',
       },
       andromoney: {
         title: '從 AndroMoney 搬家到 Futari｜CSV 匯入',
@@ -6864,9 +6884,9 @@ export const zhTW: Translations = {
         ogDescription: 'AndroMoney 用戶的雙人記帳新選擇：匯出 CSV，搬進 Futari。',
       },
       mobills: {
-        title: '從 Mobills 搬家到 Futari｜CSV 匯入',
-        description: 'Mobills 資料匯出後怎麼搬到雙人帳本？把 CSV 匯入 Futari 這個專為夫妻、伴侶設計的共同帳本，和對方一起接著記帳。免費、無廣告、只開放給你們倆。',
-        ogDescription: 'Mobills 用戶的雙人記帳新選擇：匯出 CSV，搬進 Futari。',
+        title: '從 Mobills 搬家到 Futari｜截圖匯入',
+        description: 'Mobills 資料怎麼搬到雙人帳本？把交易畫面截圖，請 ChatGPT 整理成 CSV，再上傳到 Futari 這個專為夫妻、伴侶設計的共同帳本，和對方一起接著記帳。免費、無廣告、只開放給你們倆。',
+        ogDescription: 'Mobills 用戶的雙人記帳新選擇：截圖整理成 CSV，搬進 Futari。',
       },
       manebo: {
         title: '從 Manebo 搬家到 Futari｜情侶共同記帳',

@@ -186,7 +186,8 @@ export const MIGRATE_SOURCES = {
   moneybook: {
     slug: 'moneybook',
     name: 'Moneybook',
-    contentUpdatedAt: '2026-10-18',
+    contentUpdatedAt: '2026-10-25',
+    screenshotWorkflow: true,
     comparison: {
       rows: [
         { feature: { i18n: 'featSharedLedger' },   futari: { label: { i18n: 'verdictDefaultMode' }, tone: 'yes'     }, other: { label: { i18n: 'verdictSingleUser' },   tone: 'no'      } },
@@ -213,14 +214,15 @@ export const MIGRATE_SOURCES = {
   mobills: {
     slug: 'mobills',
     name: 'Mobills',
-    contentUpdatedAt: '2026-10-18',
+    contentUpdatedAt: '2026-10-25',
+    screenshotWorkflow: true,
     comparison: {
       rows: [
         { feature: { i18n: 'featSharedLedger' }, futari: { label: { i18n: 'verdictDefaultMode' },  tone: 'yes'     }, other: { label: { i18n: 'verdictSingleUser' },   tone: 'no'      } },
         { feature: { i18n: 'featSplitModes' }, futari: { label: { i18n: 'verdictMultipleModes' },  tone: 'yes'     }, other: { label: { i18n: 'verdictNone' },         tone: 'no'      } },
         { feature: { i18n: 'interfaceLanguage' },     futari: { label: { i18n: 'fourLanguages' }, tone: 'yes'    }, other: { label: { i18n: 'mostlyEnglish' }, tone: 'partial' } },
         { feature: { i18n: 'featFree' },     futari: { label: { i18n: 'verdictForever' },      tone: 'yes'     }, other: { label: { i18n: 'advancedNeedsSubscription' }, tone: 'partial' } },
-        { feature: { i18n: 'featCsvImport' }, futari: { label: { i18n: 'verdictDirectUpload' },  tone: 'yes'     }, other: { label: { i18n: 'verdictCanExport' },     tone: 'yes'     } },
+        { feature: { i18n: 'featDataExport' }, futari: { label: { i18n: 'verdictCsvExport' },  tone: 'yes'     }, other: { label: { i18n: 'verdictCanExport' },     tone: 'yes'     } },
       ],
     },
   },

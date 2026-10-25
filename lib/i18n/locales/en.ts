@@ -2560,7 +2560,7 @@ export const en: Translations = {
         // TODO(#839): en copy below pending native review
         moneybook: {
           name: 'Moneybook',
-          description: 'A Taiwanese auto-syncing budgeting app; export CSV and bring it over.',
+          description: 'A Taiwanese auto-syncing budgeting app; screenshot + ChatGPT → CSV and bring it over.',  // TODO(i18n): 待確認
         },
         andromoney: {
           name: 'AndroMoney',
@@ -2568,7 +2568,7 @@ export const en: Translations = {
         },
         mobills: {
           name: 'Mobills',
-          description: 'An international personal-finance app; export CSV and bring it over.',
+          description: 'An international personal-finance app; screenshot + ChatGPT → CSV and bring it over.',  // TODO(i18n): 待確認
         },
         manebo: {
           name: 'Manebo',
@@ -2784,7 +2784,7 @@ I will upload the screenshots once you confirm.`,
         heroKicker: 'MONEYBOOK → FUTARI',
         heroTitle: 'Your Moneybook data can come with you',
         heroSubtitle:
-          'Moving from Moneybook to Futari: export your transactions as CSV, preview them here, and keep writing the story together.',
+          'Moving from Moneybook to Futari: screenshot your transactions, have ChatGPT turn them into a CSV, preview it here, and keep writing the story together.',  // TODO(i18n): 待確認
         intro: "Since April 2026, Moneybook has moved to a fully paid model: accounts without a subscription can no longer sync, or even log entries manually. Per their own announcement, the annual price is set to change to NT$1,499 starting 2027. If you're reconsidering and want to bring years of records to a two-person ledger whose core features stay free, this page is for that move.",
         differentiators: [
           {
@@ -2801,22 +2801,29 @@ I will upload the screenshots once you confirm.`,
           },
         ],
         stepsHeading: 'Moving from Moneybook in three steps',
-        step1: 'In Moneybook (subscriber account), use "Export details" to output your transactions as CSV.',
-        step2: 'Upload the CSV here to preview it and check that the date range and row count of your transaction details have no gap.',
-        step3: 'Create a Futari account, map categories and set a payer during import, then keep logging together.',
+        step1: 'In Moneybook, screenshot the transactions you want to move, page by page; there is no need to deal with the encrypted export file (full how-to below).',  // TODO(i18n): 待確認
+        step2: 'Turn the screenshots into a CSV with ChatGPT; the free plan is enough. Category text is written into the CSV as it appears, and on import the ones that match land in Futari\'s categories while the rest go to Other.',  // TODO(i18n): 待確認
+        step3: 'Upload the CSV here and preview it to check the row count and date range, then create an account to finish the import.',  // TODO(i18n): 待確認
         faq: [
           {
             question: 'Can a free account still export its data?',
-            answer: 'Since the paid model launched in April 2026, exporting details is a subscriber-only feature. If you still have an active subscription, it is worth exporting a copy now.',
+            answer: 'Since the paid model launched in April 2026, exporting details is a subscriber-only feature. If you would rather not subscribe just to move, use screenshots instead: capture the transaction screens and have ChatGPT turn them into a CSV. The full steps and a copy-ready prompt are below.',  // TODO(i18n): 待確認
           },
           {
-            question: "Does the exported CSV match Futari's format?",
-            answer:
-              "Not exactly. Uploading here shows a preview in your browser with the row count, date range and most common categories. In the actual import you set the payer and split for the whole batch, and any row that can't be read is skipped and logged.",
+            question: 'The file exported from Moneybook won\'t open. What now?',  // TODO(i18n): 待確認
+            answer: 'Files exported from Moneybook are encrypted, and the password is your national ID number, so the file stays closed until you enter it. If you would rather skip that step, use screenshots instead: capture the transaction screens and have ChatGPT turn them into a CSV. The full steps and a copy-ready prompt are below.',  // TODO(i18n): 待確認
+          },
+          {
+            question: 'How many screenshots?',  // TODO(i18n): 待確認
+            answer: '5–10 is a good range; scroll to cover the period you want to move. The prompt already asks ChatGPT to keep one copy of any entry that appears twice.',  // TODO(i18n): 待確認
           },
           {
             question: 'Do I have to subscribe after moving?',
             answer: 'No. The core ledger, splitting and settling are free, and import costs nothing.',
+          },
+          {
+            question: 'Will the categories ChatGPT produces be off?',  // TODO(i18n): 待確認
+            answer: 'The category text is kept as-is; you preview after uploading and can map it to Futari categories during the actual import.',  // TODO(i18n): 待確認
           },
           {
             question: 'Moneybook syncs banks automatically — does Futari?',
@@ -2879,7 +2886,7 @@ I will upload the screenshots once you confirm.`,
         heroKicker: 'MOBILLS → FUTARI',
         heroTitle: 'Your Mobills data can come with you',
         heroSubtitle:
-          'Moving from Mobills to Futari: export a CSV, preview it here, and keep writing the records together.',
+          'Moving from Mobills to Futari: screenshot your transactions, have ChatGPT turn them into a CSV, preview it here, and keep writing the records together.',  // TODO(i18n): 待確認
         differentiators: [
           {
             title: 'Shared, not each on their own',
@@ -2895,10 +2902,18 @@ I will upload the screenshots once you confirm.`,
           },
         ],
         stepsHeading: 'Moving from Mobills in three steps',
-        step1: 'In Mobills, export your transactions and download the CSV.',
-        step2: 'Upload the CSV here and check the date range in the preview to make sure the stretch you want to move is all there.',
-        step3: 'Create a Futari account. Each of you imports your own file and everything lands in the same shared ledger.',
+        step1: 'In Mobills, screenshot the transactions you want to move, page by page (full how-to below).',  // TODO(i18n): 待確認
+        step2: 'Turn the screenshots into a CSV with ChatGPT; the free plan is enough. Category text is written into the CSV as it appears, and on import the ones that match land in Futari\'s categories while the rest go to Other.',  // TODO(i18n): 待確認
+        step3: 'Upload the CSV here and preview it to check the row count and date range, then create an account to finish the import. Each of you imports your own CSV and everything lands in the same shared ledger.',  // TODO(i18n): 待確認
         faq: [
+          {
+            question: 'Can I upload Mobills\' export file directly?',  // TODO(i18n): 待確認
+            answer: 'Futari has no reader built for Mobills export files yet, so rows that don\'t match the format can\'t be read. Use screenshots instead: capture the transaction screens and have ChatGPT turn them into a CSV. The full steps and a copy-ready prompt are below.',  // TODO(i18n): 待確認
+          },
+          {
+            question: 'How many screenshots?',  // TODO(i18n): 待確認
+            answer: '5–10 is a good range; scroll to cover the period you want to move. The prompt already asks ChatGPT to keep one copy of any entry that appears twice.',  // TODO(i18n): 待確認
+          },
           {
             question: 'What if I import the wrong file?',
             answer:
@@ -2912,6 +2927,10 @@ I will upload the screenshots once you confirm.`,
             question: 'We both have Mobills records. How do we combine them?',
             answer:
               "Each of you imports your own file. Every import lets you set the default payer (you or your partner) and the split, and both sets of records end up in the same shared ledger. If a shared expense was logged on both sides, keep just one copy before importing; Futari doesn't merge duplicates automatically.",
+          },
+          {
+            question: 'Will the categories ChatGPT produces be off?',  // TODO(i18n): 待確認
+            answer: 'The category text is kept as-is; you preview after uploading and can map it to Futari categories during the actual import.',  // TODO(i18n): 待確認
           },
           {
             question: 'Mobills has budgets — does Futari?',
@@ -3341,9 +3360,9 @@ I will upload the screenshots once you confirm.`,
       },
       // TODO(#839): en copy below pending native review
       moneybook: {
-        title: 'Import from Moneybook to Futari · CSV guide',
-        description: 'Moving Moneybook data to a shared ledger? Export CSV and import into Futari, built for couples. Free, ad-free, just for you two.',
-        ogDescription: 'Where Moneybook users go next: export CSV and import into Futari.',
+        title: 'Move from Moneybook to Futari · screenshot guide',  // TODO(i18n): 待確認
+        description: 'Moving Moneybook data to a shared ledger? Screenshot it, let ChatGPT build a CSV, and import into Futari, made for couples. Free, ad-free.',  // TODO(i18n): 待確認
+        ogDescription: 'Where Moneybook users go next: screenshot → ChatGPT → CSV → Futari.',  // TODO(i18n): 待確認
       },
       andromoney: {
         title: 'Import from AndroMoney to Futari · CSV guide',
@@ -3351,9 +3370,9 @@ I will upload the screenshots once you confirm.`,
         ogDescription: 'Where AndroMoney users go next: export CSV and import into Futari.',
       },
       mobills: {
-        title: 'Import from Mobills to Futari · CSV guide',
-        description: 'Moving Mobills data to a two-person ledger? Import your CSV into Futari, the shared ledger built for couples. Free, ad-free, just for you two.',
-        ogDescription: 'Where Mobills users go next: export CSV and import into Futari.',
+        title: 'Move from Mobills to Futari · screenshot guide',  // TODO(i18n): 待確認
+        description: 'Moving Mobills data to a two-person ledger? Screenshot it, let ChatGPT build a CSV, and import into Futari, made for couples. Free, ad-free.',  // TODO(i18n): 待確認
+        ogDescription: 'Where Mobills users go next: screenshot → ChatGPT → CSV → Futari.',  // TODO(i18n): 待確認
       },
       manebo: {
         title: 'Import from Manebo to Futari · Couple budgeting',

@@ -2552,7 +2552,7 @@ export const zhCN: Translations = {
         },
         moneybook: {
           name: '麻布记账',
-          description: '台湾的自动同步记账 App，导出 CSV 带过来。',
+          description: '台湾的自动同步记账 App，截图让 ChatGPT 整理成 CSV 带过来。',
         },
         andromoney: {
           name: 'AndroMoney',
@@ -2560,7 +2560,7 @@ export const zhCN: Translations = {
         },
         mobills: {
           name: 'Mobills',
-          description: '国际个人理财 App，导出 CSV 带过来。',
+          description: '国际个人理财 App，截图让 ChatGPT 整理成 CSV 带过来。',
         },
         manebo: {
           name: 'Manebo',
@@ -2770,7 +2770,7 @@ export const zhCN: Translations = {
       moneybook: {
         heroKicker: 'MONEYBOOK → FUTARI',
         heroTitle: '你的麻布记账数据，可以带走',
-        heroSubtitle: '从麻布记账搬到 Futari：导出交易明细 CSV，上传预览后，和伴侣一起把这些记录接着写下去。',
+        heroSubtitle: '从麻布记账搬到 Futari：把交易页面截图，让 ChatGPT 整理成 CSV，上传预览后，和伴侣一起把这些记录接着写下去。',
         intro: '麻布记账自 2026 年 4 月起改为全面收费：未订阅的账号无法再同步，也无法手动记账；据官方公告，年费将于 2027 年起调整为 NT$1,499。如果你们正在重新考虑，想把这些年的记录带去一个核心功能免费的双人账本，这一页就是为此准备的。',
         differentiators: [
           {
@@ -2787,21 +2787,29 @@ export const zhCN: Translations = {
           },
         ],
         stepsHeading: '麻布记账搬迁三步',
-        step1: '在麻布记账（订阅会员）用「明细导出」把交易输出成 CSV。',
-        step2: '把 CSV 上传到这里预览，先确认交易明细的日期范围和笔数没有缺一段。',
-        step3: '创建 Futari 账号，导入时对应好类别、指定付款人，之后和伴侣一起接着记。',
+        step1: '在麻布记账里把要搬的交易一页一页截图，不用处理导出的加密文件（下方有完整做法）。',
+        step2: '用 ChatGPT 把截图整理成 CSV，免费版就够；分类文字会原样写进 CSV，导入时对得上的会归到 Futari 的类别，其余归在「其他」。',
+        step3: '把 CSV 上传到这里预览，确认笔数和日期范围对得上，再创建账号完成导入。',
         faq: [
           {
             question: '免费账号还能把数据导出来吗？',
-            answer: '2026 年 4 月收费制上线后，明细导出属于订阅会员功能。若你们还在订阅期，建议先把明细导出留存一份。',
+            answer: '2026 年 4 月收费制上线后，明细导出属于订阅会员功能。不想为了搬家先订阅的话，可以改用截图：把交易页面截下来让 ChatGPT 整理成 CSV，下方有完整步骤和可复制的提示词。',
           },
           {
-            question: '导出的 CSV 和 Futari 的格式对得上吗？',
-            answer: '不完全一样。上传到这一页会先在浏览器里预览，能看到笔数、日期范围和常出现的分类；正式导入时，付款人和分摊方式整批指定，读不出来的行会被跳过并留下记录。',
+            question: '麻布记账导出的文件打不开，怎么办？',
+            answer: '麻布记账导出的文件有加密，密码是你的身份证号，输入前打不开。不想处理这一步的话，改用截图：把交易页面截下来让 ChatGPT 整理成 CSV，下方有完整步骤和可复制的提示词。',
+          },
+          {
+            question: '要截几张图？',
+            answer: '建议 5–10 张，往下滚动覆盖你想搬的时间范围即可。同一笔重复出现的，提示词已让 ChatGPT 只保留一笔。',
           },
           {
             question: '搬过来之后还要订阅吗？',
             answer: '不用。Futari 的核心记账、分摊和结算都在免费层，导入也不收费。',
+          },
+          {
+            question: 'ChatGPT 整理的分类会不会跑掉？',
+            answer: '分类文字会原样保留，上传后先预览，正式导入时可以对照调整成 Futari 的分类。',
           },
           {
             question: '麻布记账会自动同步银行，Futari 也会吗？',
@@ -2858,7 +2866,7 @@ export const zhCN: Translations = {
       mobills: {
         heroKicker: 'MOBILLS → FUTARI',
         heroTitle: '你的 Mobills 数据，可以带走',
-        heroSubtitle: '从 Mobills 搬到 Futari：导出 CSV，上传预览后，和伴侣一起把记录接着写下去。',
+        heroSubtitle: '从 Mobills 搬到 Futari：把交易页面截图，让 ChatGPT 整理成 CSV，上传预览后，和伴侣一起把记录接着写下去。',
         differentiators: [
           {
             title: '双人共用，不是各记各的',
@@ -2874,10 +2882,18 @@ export const zhCN: Translations = {
           },
         ],
         stepsHeading: 'Mobills 搬迁三步',
-        step1: '在 Mobills 导出交易记录，下载 CSV 文件。',
-        step2: '把 CSV 上传到这里，先看预览里的日期范围，确认你要搬的那段时间都在。',
-        step3: '创建 Futari 账号，两个人各自导入各自的文件，记录都会落在同一本共同账本里。',
+        step1: '在 Mobills 里把要搬的交易一页一页截图（下方有完整做法）。',
+        step2: '用 ChatGPT 把截图整理成 CSV，免费版就够；分类文字会原样写进 CSV，导入时对得上的会归到 Futari 的类别，其余归在「其他」。',
+        step3: '把 CSV 上传到这里预览，确认笔数和日期范围对得上，再创建账号完成导入。两个人各自导入各自的 CSV，记录都会落在同一本共同账本里。',
         faq: [
+          {
+            question: 'Mobills 的导出文件可以直接上传吗？',
+            answer: 'Futari 目前没有针对 Mobills 导出文件的读取支持，格式对不上的行会读不到。改用截图：把交易页面截下来让 ChatGPT 整理成 CSV，下方有完整步骤和可复制的提示词。',
+          },
+          {
+            question: '要截几张图？',
+            answer: '建议 5–10 张，往下滚动覆盖你想搬的时间范围即可。同一笔重复出现的，提示词已让 ChatGPT 只保留一笔。',
+          },
           {
             question: '导错了可以重来吗？',
             answer: '可以。导入完成后 24 小时内能一键撤销整批，不会留下半份数据，也不会动 Mobills 里的原始记录。',
@@ -2889,6 +2905,10 @@ export const zhCN: Translations = {
           {
             question: '我们两个人都有 Mobills 的记录，怎么合到一起？',
             answer: '各自导入各自的文件就行。每次导入都可以指定默认付款人（你或对方）和分摊方式，两份记录最后落在同一本共同账本里。同一笔共同支出如果两边都记了，导入前先留下其中一份；Futari 不会自动合并重复的记录。',
+          },
+          {
+            question: 'ChatGPT 整理的分类会不会跑掉？',
+            answer: '分类文字会原样保留，上传后先预览，正式导入时可以对照调整成 Futari 的分类。',
           },
           {
             question: 'Mobills 有预算功能，Futari 有吗？',
@@ -3286,9 +3306,9 @@ export const zhCN: Translations = {
         ogDescription: 'CWMoney 用户的下一站：免费分账，Excel 转 CSV 搬进 Futari。',
       },
       moneybook: {
-        title: '从麻布记账搬家到 Futari｜CSV 导入',
-        description: '麻布记账数据怎么搬到双人账本？把交易明细导出成 CSV，上传到 Futari 这个专为夫妻、情侣设计的共同账本，和对方一起接着记。免费、无广告、只开放给你们俩。',
-        ogDescription: '麻布记账用户的双人记账新选择：导出 CSV，搬进 Futari。',
+        title: '从麻布记账搬家到 Futari｜截图导入',
+        description: '麻布记账数据怎么搬到双人账本？把交易页面截图，让 ChatGPT 整理成 CSV，再上传到 Futari 这个专为夫妻、情侣设计的共同账本，和对方一起接着记。免费、无广告、只开放给你们俩。',
+        ogDescription: '麻布记账用户的双人记账新选择：截图整理成 CSV，搬进 Futari。',
       },
       andromoney: {
         title: '从 AndroMoney 搬家到 Futari｜CSV 导入',
@@ -3296,9 +3316,9 @@ export const zhCN: Translations = {
         ogDescription: 'AndroMoney 用户的双人记账新选择：导出 CSV，搬进 Futari。',
       },
       mobills: {
-        title: '从 Mobills 搬家到 Futari｜CSV 导入',
-        description: 'Mobills 数据导出后怎么搬到双人账本？把 CSV 导入 Futari 这个专为夫妻、情侣设计的共同账本，和对方一起接着记账。免费、无广告、只开放给你们俩。',
-        ogDescription: 'Mobills 用户的双人记账新选择：导出 CSV，搬进 Futari。',
+        title: '从 Mobills 搬家到 Futari｜截图导入',
+        description: 'Mobills 数据怎么搬到双人账本？把交易页面截图，让 ChatGPT 整理成 CSV，再上传到 Futari 这个专为夫妻、情侣设计的共同账本，和对方一起接着记账。免费、无广告、只开放给你们俩。',
+        ogDescription: 'Mobills 用户的双人记账新选择：截图整理成 CSV，搬进 Futari。',
       },
       manebo: {
         title: '从 Manebo 搬家到 Futari｜情侣共同记账',
