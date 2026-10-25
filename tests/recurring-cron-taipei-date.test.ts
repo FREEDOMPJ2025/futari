@@ -16,11 +16,11 @@
  * around it cannot be.
  */
 import { describe, it, expect } from 'vitest'
-import { readFileSync, readdirSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { taipeiDateISO } from '../supabase/functions/send-recurring-push/taipeiDate.ts'
+import { liveCronJob } from './_helpers/cronJob'
 
-const DRIZZLE_DIR = join(process.cwd(), 'drizzle')
 const PUSH_FN = join(
   process.cwd(),
   'supabase/functions/send-recurring-push/index.ts',
@@ -28,21 +28,6 @@ const PUSH_FN = join(
 
 const TAIPEI_DATE_SQL = "(NOW() AT TIME ZONE 'Asia/Taipei')::date"
 const JOB_NAMES = ['generate-pending-income', 'generate-pending-expense'] as const
-
-/** The schedule + body of the migration that currently owns `jobName`. */
-function liveCronJob(jobName: string): { schedule: string; body: string } {
-  const files = readdirSync(DRIZZLE_DIR).filter((f) => f.endsWith('.sql')).sort()
-  const owning = files.filter((f) =>
-    readFileSync(join(DRIZZLE_DIR, f), 'utf8').includes(`cron.schedule('${jobName}'`),
-  )
-  expect(owning.length, `no migration schedules ${jobName}`).toBeGreaterThan(0)
-  const sql = readFileSync(join(DRIZZLE_DIR, owning[owning.length - 1]), 'utf8')
-  const m = sql.match(
-    new RegExp(`cron\\.schedule\\('${jobName}',\\s*'([^']+)',\\s*\\$\\$([\\s\\S]*?)\\$\\$\\)`),
-  )
-  expect(m, `cron.schedule('${jobName}', ...) body should be parseable`).not.toBeNull()
-  return { schedule: m![1], body: m![2] }
-}
 
 describe.each(JOB_NAMES)('%s cron', (jobName) => {
   it('reads the date in Asia/Taipei, never bare CURRENT_DATE', () => {
