@@ -22,7 +22,7 @@ import { loadEnvLocal } from '../outing/_setup'
 //
 // Failure looks like: no error anywhere; an ex (or the next person holding a
 // shared phone) keeps getting 「有待確認的定期收支」 for a ledger that is not
-// theirs. Rows are TEST_1605_*; everything is removed in afterEach.
+// theirs. Profiles and ledgers are TEST_1605_*; everything is removed in afterEach.
 // ──────────────────────────────────────────────────────────────────────────
 
 loadEnvLocal()
@@ -80,6 +80,23 @@ const { eq, inArray, or, and } = await import('drizzle-orm')
 
 if (!process.env.DATABASE_URL?.includes('ufhcprrauwsxdmscbkrf')) {
   throw new Error('#1605 dev-DB test: DATABASE_URL must point at the dev project (oikos-dev)')
+}
+
+// Well-formed APNs tokens (64 uppercase hex, the shape Capacitor emits) so the
+// fixtures pass 0101's CHECK (#1827). Within each test they sort in the order
+// the expectations below list them (tokensOf sorts by token).
+const tok = (n: number) => `1605${n.toString(16).toUpperCase().padStart(2, '0')}`.padEnd(64, 'A')
+const TOK = {
+  rmA: tok(1),
+  rmBOnG: tok(2),
+  rmBOther: tok(3),
+  lvA: tok(1),
+  lvB1: tok(2),
+  lvB2: tok(3),
+  accInviter: tok(1),
+  accJoiner: tok(2),
+  T1: tok(1),
+  T2: tok(2),
 }
 
 const created = { profiles: [] as string[], auth: [] as string[], groups: [] as string[] }
@@ -151,25 +168,25 @@ describe('#1605 push tokens follow membership', () => {
     const a = await person('stayer'); const b = await person('removed')
     const g = await ledger('duo', a, b)
     const other = await ledger('b-elsewhere', b, null) // a stale solo ledger of B's
-    await token(a, g, 'TEST_1605_rm_a')
-    await token(b, g, 'TEST_1605_rm_b_on_g')
-    await token(b, other, 'TEST_1605_rm_b_other')
+    await token(a, g, TOK.rmA)
+    await token(b, g, TOK.rmBOnG)
+    await token(b, other, TOK.rmBOther)
 
     mockUserId = a
     unwrapAction(await removePartner())
 
     expect(await tokensOf([a, b])).toEqual([
-      { userId: a, groupId: g, token: 'TEST_1605_rm_a' },
-      { userId: b, groupId: other, token: 'TEST_1605_rm_b_other' },
+      { userId: a, groupId: g, token: TOK.rmA },
+      { userId: b, groupId: other, token: TOK.rmBOther },
     ])
   })
 
   it('leaveGroup moves the leaver\'s tokens to their new solo ledger; the stayer\'s stay', async () => {
     const a = await person('stayer'); const b = await person('leaver')
     const g = await ledger('duo', a, b)
-    await token(a, g, 'TEST_1605_lv_a')
-    await token(b, g, 'TEST_1605_lv_b1')
-    await token(b, g, 'TEST_1605_lv_b2')
+    await token(a, g, TOK.lvA)
+    await token(b, g, TOK.lvB1)
+    await token(b, g, TOK.lvB2)
 
     mockUserId = b
     const { groupId: newGroup } = unwrapAction(await leaveGroup())
@@ -177,9 +194,9 @@ describe('#1605 push tokens follow membership', () => {
 
     expect(newGroup).not.toBe(g)
     expect(await tokensOf([a, b])).toEqual([
-      { userId: a, groupId: g, token: 'TEST_1605_lv_a' },
-      { userId: b, groupId: newGroup, token: 'TEST_1605_lv_b1' },
-      { userId: b, groupId: newGroup, token: 'TEST_1605_lv_b2' },
+      { userId: a, groupId: g, token: TOK.lvA },
+      { userId: b, groupId: newGroup, token: TOK.lvB1 },
+      { userId: b, groupId: newGroup, token: TOK.lvB2 },
     ])
   })
 
@@ -187,8 +204,8 @@ describe('#1605 push tokens follow membership', () => {
     const inviter = await person('inviter'); const joiner = await person('joiner')
     const target = await ledger('target', inviter, null)
     const solo = await ledger('joiner-solo', joiner, null)
-    await token(inviter, target, 'TEST_1605_acc_inviter')
-    await token(joiner, solo, 'TEST_1605_acc_joiner')
+    await token(inviter, target, TOK.accInviter)
+    await token(joiner, solo, TOK.accJoiner)
 
     const { generateToken, hashToken } = await import('@/lib/invite')
     const raw = generateToken()
@@ -200,8 +217,8 @@ describe('#1605 push tokens follow membership', () => {
     expect(unwrapAction(await acceptInvite(raw))).toBe(target)
 
     expect(await tokensOf([inviter, joiner])).toEqual([
-      { userId: inviter, groupId: target, token: 'TEST_1605_acc_inviter' },
-      { userId: joiner, groupId: target, token: 'TEST_1605_acc_joiner' },
+      { userId: inviter, groupId: target, token: TOK.accInviter },
+      { userId: joiner, groupId: target, token: TOK.accJoiner },
     ])
   })
 })
@@ -211,36 +228,36 @@ describe('#1605 / #1617 signOut(token) removes this device\'s registration', () 
     const u = await person('u'); const v = await person('v')
     const gu = await ledger('u-solo', u, null)
     const gv = await ledger('v-solo', v, null)
-    await token(u, gu, 'TEST_1605_T1')
-    await token(u, gu, 'TEST_1605_T2')
-    await token(v, gv, 'TEST_1605_T1') // same device, someone else signed in on it earlier
+    await token(u, gu, TOK.T1)
+    await token(u, gu, TOK.T2)
+    await token(v, gv, TOK.T1) // same device, someone else signed in on it earlier
 
     mockUserId = u
-    expect(await signOutDigest('TEST_1605_T1')).toBe('NEXT_REDIRECT;replace;/;307;')
+    expect(await signOutDigest(TOK.T1)).toBe('NEXT_REDIRECT;replace;/;307;')
 
     expect(authSignOut).toHaveBeenCalledOnce()
     expect(await tokensOf([u, v])).toEqual([
-      { userId: v, groupId: gv, token: 'TEST_1605_T1' },
-      { userId: u, groupId: gu, token: 'TEST_1605_T2' },
+      { userId: v, groupId: gv, token: TOK.T1 },
+      { userId: u, groupId: gu, token: TOK.T2 },
     ])
   })
 
   it('with the delete failing, sign-out still completes and nothing is deleted', async () => {
     const u = await person('u')
     const gu = await ledger('u-solo', u, null)
-    await token(u, gu, 'TEST_1605_T1')
+    await token(u, gu, TOK.T1)
 
     mockUserId = '' // not a uuid → the delete fails in Postgres (the session check itself passes: { id: '' } is a user object)
-    expect(await signOutDigest('TEST_1605_T1')).toBe('NEXT_REDIRECT;replace;/;307;')
+    expect(await signOutDigest(TOK.T1)).toBe('NEXT_REDIRECT;replace;/;307;')
 
     expect(authSignOut).toHaveBeenCalledOnce()
-    expect(await tokensOf([u])).toEqual([{ userId: u, groupId: gu, token: 'TEST_1605_T1' }])
+    expect(await tokensOf([u])).toEqual([{ userId: u, groupId: gu, token: TOK.T1 }])
   })
 
   it('an empty, oversized or missing token deletes nothing and still signs out', async () => {
     const u = await person('u')
     const gu = await ledger('u-solo', u, null)
-    await token(u, gu, 'TEST_1605_T1')
+    await token(u, gu, TOK.T1)
     mockUserId = u
     for (const t of ['', 'x'.repeat(513), undefined]) {
       expect(await signOutDigest(t)).toBe('NEXT_REDIRECT;replace;/;307;')

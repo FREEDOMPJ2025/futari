@@ -13,7 +13,7 @@
 //   NX  X's own ledger from 2026-07-20, untouched by everything here.
 // Labels say where a row sits: *Pre = E0, *In = E1, *Post = E2.
 
-import { randomUUID } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import type { Sql, TransactionSql } from 'postgres'
 
 export const TOMB = '已離開的夥伴'
@@ -369,8 +369,12 @@ export async function world(sql: Db, tag: string, opts: { xAlive?: boolean } = {
     imported_category: 'other', invoice_date: '2026-08-01', merchant_name: 'shop',
   }, 'invoice_number')
   await rec.ins('CurrencyRates', 'rate', { group_id: G, from_currency: 'usd', to_currency: 'twd', rate: '31.5' }, 'group_id')
-  await rec.ins('PushTokens', 'pushD', { user_id: D, group_id: G, platform: 'apns', token: `tD ${tag}` })
-  await rec.ins('PushTokens', 'pushX', { user_id: X, group_id: G, platform: 'fcm', token: `tX ${tag}` })
+  // Well-formed per platform, so this world still builds once 0101's CHECK is
+  // in (#1827): APNs = 64 hex, FCM = [A-Za-z0-9_:-]. Derived from `tag` so
+  // each world's tokens differ.
+  const tokenHex = (who: string) => createHash('sha256').update(`${who} ${tag}`).digest('hex')
+  await rec.ins('PushTokens', 'pushD', { user_id: D, group_id: G, platform: 'apns', token: tokenHex('tD') })
+  await rec.ins('PushTokens', 'pushX', { user_id: X, group_id: G, platform: 'fcm', token: `tX:${tokenHex('tX')}` })
 
   return { rec, D, X, G, NX, E0, E1, E2 }
 }

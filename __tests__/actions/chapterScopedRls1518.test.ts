@@ -263,13 +263,15 @@ describe.skipIf(!isLocalDb)('0080 chapter-scoped RLS — fresh local stand-in', 
         expect(rule.length).toBe(1)
 
         // PushTokens: the client's upsert, as PostgREST runs it (merge-duplicates), twice — insert then update path.
+        // A well-formed APNs token (64 hex), so this still holds once 0101's CHECK is in (#1827).
+        const apnsToken = 'A1518'.padEnd(64, '0')
         const upsert = `INSERT INTO "PushTokens" (user_id, group_id, platform, token)
-          VALUES ('${w.C}', '${w.G}', 'apns', 'TEST_1518_token')
+          VALUES ('${w.C}', '${w.G}', 'apns', '${apnsToken}')
           ON CONFLICT (user_id, platform, token) DO UPDATE SET user_id = EXCLUDED.user_id, group_id = EXCLUDED.group_id,
             platform = EXCLUDED.platform, token = EXCLUDED.token`
         await as(tx, w.C, async () => { await tx.unsafe(upsert); await tx.unsafe(upsert) })
         const mine = await as(tx, w.C, () => tx`SELECT token FROM "PushTokens" WHERE user_id = ${w.C}`)
-        expect(mine.map((r) => r.token)).toEqual(['TEST_1518_token'])
+        expect(mine.map((r) => r.token)).toEqual([apnsToken])
         await no(`DELETE FROM "PushTokens"`)
       })
     })
