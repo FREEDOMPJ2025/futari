@@ -284,3 +284,86 @@ describe('/auth/callback — success path is untouched', () => {
     expect(propsOf()).not.toHaveProperty('provider')
   })
 })
+
+// #1769 — the shells' in-app browser OAuth tags the callback with `p`. Exact
+// whitelist; a label only, so it may never move the redirect or the exchange.
+describe('/auth/callback — platform path (#1769)', () => {
+  beforeEach(() => {
+    state.exchange = {
+      error: null,
+      data: { user: { id: 'user-1', created_at: new Date(0).toISOString() } },
+    }
+  })
+
+  it.each(['android_native', 'ios_browser'])('labels the conversion path=%s', async (hint) => {
+    await call(`?code=abc123&next=%2Fdashboard&aid=anon-1&p=${hint}`)
+
+    expect(eventOf()).toBe('signed_in')
+    expect(propsOf()).toMatchObject({ path: hint })
+  })
+
+  it('labels a first-time sign-up the same way', async () => {
+    state.exchange = {
+      error: null,
+      data: { user: { id: 'user-1', created_at: new Date().toISOString() } },
+    }
+    await call('?code=abc123&p=android_native')
+
+    expect(eventOf()).toBe('signed_up')
+    expect(propsOf()).toMatchObject({ path: 'android_native' })
+  })
+
+  it.each([
+    ['missing', ''],
+    ['empty', '&p='],
+    ['unknown', '&p=web'],
+    ['ios_native (only the native Apple sheet reports it)', '&p=ios_native'],
+    ['case variant', '&p=Android_Native'],
+    ['repeated', '&p=android_native&p=android_native'],
+    ['conflicting', '&p=android_native&p=ios_browser'],
+    ['oversized', `&p=${'android_native'.repeat(1000)}`],
+    ['URL-shaped', '&p=%2F%2Fevil.example.com'],
+  ])('falls back to web_oauth when p is %s', async (_label, query) => {
+    await call(`?code=abc123${query}`)
+
+    expect(propsOf()).toMatchObject({ path: 'web_oauth' })
+  })
+
+  it.each(['android_native', 'ios_browser', 'ios_native', '%2F%2Fevil.example.com', 'android_native&p=x'])(
+    'leaves the redirect target and the exchange untouched for p=%s',
+    async (hint) => {
+      const withHint = await call(`?code=abc123&next=%2Frecords&p=${hint}`)
+
+      expect(withHint.headers.get('location')).toBe(`${ORIGIN}/records`)
+      expect(h.exchangeCodeForSession).toHaveBeenCalledWith('abc123')
+      // The route itself sets no cookie; the hint must not introduce one.
+      expect(withHint.headers.get('set-cookie')).toBeNull()
+
+      vi.clearAllMocks()
+      const offSite = await call(`?code=abc123&next=//evil.example.com&p=${hint}`)
+      expect(offSite.headers.get('location')).toBe(`${ORIGIN}/dashboard`)
+    },
+  )
+
+  it('labels the missing-code failure with the path (F7)', async () => {
+    const res = await call('?aid=anon-1&p=android_native&error=access_denied')
+
+    expect(eventOf()).toBe('sign_in_failed')
+    expect(propsOf()).toMatchObject({ reason: 'missing_code', path: 'android_native', oauth_error: 'access_denied' })
+    expect(res.headers.get('location')).toContain('/sign-in?error=auth_failed')
+  })
+
+  it('labels the exchange failure with the path (F7)', async () => {
+    state.exchange = { error: { name: 'AuthApiError', status: 400, code: 'flow_state_not_found' }, data: { user: null } }
+    const res = await call('?code=abc123&p=ios_browser')
+
+    expect(propsOf()).toMatchObject({ reason: 'exchange_error', path: 'ios_browser' })
+    expect(res.headers.get('location')).toContain('/sign-in?error=auth_failed')
+  })
+
+  it('labels an untagged failure web_oauth', async () => {
+    await call('')
+
+    expect(propsOf()).toMatchObject({ reason: 'missing_code', path: 'web_oauth' })
+  })
+})

@@ -65,6 +65,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：還沒有變化；等 Android 殼註冊推播（v1.9.0）後，Android 也會收到「有待確認的定期收支」。
   技術：`send-recurring-push` 依 `platform` 分流，FCM HTTP v1 以三個 function secret 換 OAuth token，兩平台互不影響；失效 token 只依錯誤代碼刪、超過一半 400 就不刪；supabase-js pin 2.105.1。
 
+- **登入事件分出 Android 殼與 iOS 殼的瀏覽器登入（#1769）**
+  使用者：無感；登入流程與畫面不變。
+  技術：殼內瀏覽器登入依 runtime 平台在 `redirectTo` 加 `p`，callback 只收 `android_native`／`ios_browser`、其餘記 `web_oauth`，`signed_in`／`signed_up` 與 callback 失敗事件的 `path` 跟著分；部署日前後不可比。
+
 ### Security
 
 - **只有排程能觸發每晚推播（#968）**

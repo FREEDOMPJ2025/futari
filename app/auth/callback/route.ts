@@ -13,6 +13,8 @@ import { safeSameOriginUrl } from '@/lib/auth/nativeRedirect'
 import { LOCALE_COOKIE, DEFAULT_LOCALE, isLocale } from '@/lib/i18n/locales-meta'
 import { aliasServer, captureServer } from '@/lib/analytics/server'
 import {
+  AUTH_PLATFORM_PARAM,
+  authPathFromHint,
   entrySourceFromParam,
   importResumeSourceFromParam,
   isFirstAuth,
@@ -32,9 +34,6 @@ import {
  */
 const FAILURE_BUCKET_ID = 'anon:auth-callback-failure'
 
-/** Every sign-in reaching this route came through the web OAuth redirect. */
-const AUTH_PATH: AuthPath = 'web_oauth'
-
 /**
  * Which OAuth provider the session belongs to, when Supabase tells us. Read from
  * `app_metadata.provider`, which is the provider the account was created with —
@@ -51,11 +50,13 @@ function providerOf(user: { app_metadata?: Record<string, unknown> } | null): st
 async function recordAuthFailure(
   aid: string | null,
   reason: 'missing_code' | 'exchange_error',
+  path: AuthPath,
   detail?: Record<string, unknown>,
 ): Promise<void> {
   await captureServer(aid ?? FAILURE_BUCKET_ID, 'sign_in_failed', {
     reason,
     had_anon_id: !!aid,
+    path,
     ...detail,
   })
 }
@@ -70,6 +71,10 @@ export async function GET(request: Request) {
   // Funnel attribution carried through the OAuth redirect by SignInButton.
   const from = searchParams.get('from')
   const aid = searchParams.get('aid')
+  // Which flow sent us here (#1769): the shells' in-app browser OAuth tags the
+  // callback with `p`; anything unrecognised is `web_oauth`. Analytics label
+  // only — it must never feed `next`, the redirect, cookies or the exchange.
+  const authPath = authPathFromHint(searchParams.getAll(AUTH_PLATFORM_PARAM))
 
   // Keep the user on their picked locale even when OAuth fails — without an
   // explicit prefix the response 302s to /sign-in, proxy then resets
@@ -81,7 +86,7 @@ export async function GET(request: Request) {
     // consent (or the provider itself errored) it forwards its own reason in
     // `error` / `error_description` — previously discarded. These are provider
     // status strings, not user data, so they're safe to record.
-    await recordAuthFailure(aid, 'missing_code', {
+    await recordAuthFailure(aid, 'missing_code', authPath, {
       oauth_error: searchParams.get('error'),
       oauth_error_description: searchParams.get('error_description'),
     })
@@ -109,7 +114,7 @@ export async function GET(request: Request) {
         : error.code
           ? 'other'
           : 'none'
-    await recordAuthFailure(aid, 'exchange_error', {
+    await recordAuthFailure(aid, 'exchange_error', authPath, {
       error_name: error.name,
       error_status: error.status,
       error_code: errorCode,
@@ -162,7 +167,7 @@ export async function GET(request: Request) {
         entry_source: entrySource,
         ...(importResumeSource ? { migrate_source: importResumeSource } : {}),
         locale,
-        path: AUTH_PATH,
+        path: authPath,
         ...(provider ? { provider } : {}),
       },
       firstAuth ? { entry_source: entrySource } : undefined,

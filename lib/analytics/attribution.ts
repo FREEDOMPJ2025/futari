@@ -104,13 +104,47 @@ function entrySourceForUseCase(from: string): UseCaseEntrySource | undefined {
  * Named after `sign_in_failed`'s existing `path` property so success and failure
  * can be sliced the same way.
  *
- * - `web_oauth` — everything that lands on /auth/callback. That is browser web
- *   *and* Android's in-app-browser OAuth: `buildAuthCallbackUrl` carries no
- *   platform hint, so the callback genuinely cannot tell the two apart.
+ * - `web_oauth` — /auth/callback without a recognised platform hint: browser
+ *   web, plus every shell sign-in from before #1769 (when the callback could not
+ *   tell an Android shell apart from a browser).
+ * - `android_native` — /auth/callback reached from the Android shell's in-app
+ *   browser OAuth (Custom Tab + deep link). Since #1769.
+ * - `ios_browser` — /auth/callback reached from the iOS shell's in-app browser
+ *   OAuth: Google, and the Apple fallback when the native sheet fails. Since
+ *   #1769.
  * - `ios_native` — Apple's native sheet via `signInWithIdToken`, which skips the
- *   callback entirely and reports through `recordNativeAuthConversion`.
+ *   callback entirely and reports through `recordNativeAuthConversion`. Never
+ *   accepted from the callback URL.
+ *
+ * The two shell values reach the callback as the `p` query param, which
+ * SignInButton sets from the runtime platform (never from the page URL). It is
+ * a label only: a user can forge their own, so it must never steer `next`, the
+ * redirect, cookies or the code exchange.
  */
-export type AuthPath = 'web_oauth' | 'ios_native'
+export type AuthPath = 'web_oauth' | 'ios_native' | 'android_native' | 'ios_browser'
+
+/** The shell paths a sign-in can carry through the OAuth redirect (#1769). */
+export type AuthPlatformHint = Extract<AuthPath, 'android_native' | 'ios_browser'>
+
+/**
+ * Query param carrying {@link AuthPlatformHint} on the callback URL. One letter
+ * and clear of every name the callback or the provider already uses (`code`,
+ * `error*`, `next`, `from`, `aid`).
+ */
+export const AUTH_PLATFORM_PARAM = 'p'
+
+/**
+ * The `path` for a /auth/callback hit, from every value of {@link AUTH_PLATFORM_PARAM}
+ * (`searchParams.getAll`). Exact match on a single value only — missing,
+ * repeated, unknown, `ios_native` or anything else is `web_oauth`. Never throws.
+ */
+export function authPathFromHint(values: readonly string[]): AuthPath {
+  if (values.length !== 1) return 'web_oauth'
+  const [value] = values
+  if (value === 'android_native') return 'android_native'
+  if (value === 'ios_browser') return 'ios_browser'
+  return 'web_oauth'
+}
 
 /**
  * Migrate CTAs tag sign-in with the bare slug (`?from=cwmoney`), so membership
@@ -158,16 +192,23 @@ export function appendQueryParam(href: string, key: string, value: string): stri
 /**
  * Build the OAuth callback URL carrying funnel attribution across the redirect.
  * `aid` is the client's anonymous PostHog distinct_id so the callback can
- * alias() the pre-auth events onto the real user.
+ * alias() the pre-auth events onto the real user. `platformHint` is set only by
+ * the shells' in-app browser flow (#1769); the web flow never passes one.
  */
 export function buildAuthCallbackUrl(
   origin: string,
-  opts: { next: string; from?: string | null; anonId?: string | null },
+  opts: {
+    next: string
+    from?: string | null
+    anonId?: string | null
+    platformHint?: AuthPlatformHint | null
+  },
 ): string {
   const params = new URLSearchParams()
   params.set('next', opts.next)
   if (opts.from) params.set('from', opts.from)
   if (opts.anonId) params.set('aid', opts.anonId)
+  if (opts.platformHint) params.set(AUTH_PLATFORM_PARAM, opts.platformHint)
   return `${origin}/auth/callback?${params.toString()}`
 }
 
