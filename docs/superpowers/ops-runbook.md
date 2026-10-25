@@ -693,8 +693,10 @@ pg_cron job 呼叫 Edge Function 時要帶的金鑰（以及網址），**存 Su
 
 - `reason=no_key_config`：函式環境的 `SUPABASE_SECRET_KEYS` 沒有名為 `cron` 的 `sb_secret_…`——這個 project 還沒建 `cron` key、名稱打錯（要全小寫 `cron`）、或 key 建立後 runtime 還沒拿到（重新部署函式再測）。**每一個**呼叫都被拒。
 - `reason=no_apikey`：請求沒帶 `apikey`。cron 的 job 還是舊形狀（0100 沒套上，或跑了 down script 但函式還是新的）。
-- `reason=mismatch`：帶了 `apikey` 但不是這個 project 的 `cron` key——Vault `oikos_cron_secret_key` 是別的 project 的、`cron` key 在 Dashboard 換過但 Vault 沒更新、或值多了空白。
-- 401、函式 log **沒有** `[auth]` 行：被 gateway 擋了，代表 `verify_jwt` 又被打開了（讀回見下），而且 cron 送的 legacy JWT 無效或已不送。
+- `reason=mismatch`：帶了 `apikey`，是這個 project 認得的 key，但不是 `cron`（例如 publishable、`default`、legacy JWT 或其他不像 `sb_` key 的字串）。值前後的空白在傳輸時就被拿掉了，不會造成 mismatch；Vault 裡的空白由 0100 的 precondition 擋下。
+- 401、函式 log **沒有** `[auth]` 行：被 gateway 擋了，函式根本沒執行。有兩種，看 `function_edge_logs` 那一列分辨：
+  - `sb_error_code=UNAUTHORIZED_INVALID_API_KEY`（`apikey.error` 是 `bad_length`／`bad_checksum` 之類）：`apikey` 的值**長得像 `sb_` key 但不是這個 project 的任何一把 key**——就算 `verify_jwt=false`，gateway 也會先驗 `sb_` 形狀的 `apikey`（2026-10-25 dev 實測）。代表 Vault `oikos_cron_secret_key` 是別的 project 的、`cron` key 在 Dashboard 換過或刪掉但 Vault 沒更新、或值被截斷／多了字元。修 Vault（`vault.update_secret`）後再測。
+  - 沒有 `apikey` 錯誤：`verify_jwt` 又被打開了（讀回見下），而且 cron 送的 legacy JWT 無效或已不送。
 - 500、`[push] no default secret key`：`SUPABASE_SECRET_KEYS` 沒有 `default`。
 - `net._http_response` 是錯誤或沒有列、函式完全沒被呼叫：Vault `oikos_project_url` 不對。0100 的 precondition 會在 migration 時擋下缺漏或格式錯的 Vault 項目（migration 失敗、job 不動），所以這多半是事後被改過。
 
@@ -779,7 +781,7 @@ agent 不建金鑰、不寫 Vault、不碰 prod；以下由 owner 自己做。
 4. 部署函式（一般指令，`--project-ref cxbnlahuhdvrbwcnzoqo`），讀回 `verify_jwt: false`。
 5. **部署當天的檢查**（原因只從函式 log 讀）：
    - (a) 沒有任何 header 的 POST → 401，`reason=no_apikey`。
-   - (b) 格式正確但錯的值（`WRONG="sb_secret_$(openssl rand -hex 16)"`，當 `apikey`）→ 401，`reason=mismatch`。這證明 `SUPABASE_SECRET_KEYS` 解析得到、而且有 `cron`。拿到 `no_key_config` → 回滾。
+   - (b) 用 prod 的 **publishable key** 當 `apikey`（`PK=$(supabase projects api-keys --project-ref cxbnlahuhdvrbwcnzoqo -o json | jq -r '.[]|select(.type=="publishable")|.api_key')`）→ 401，函式 log `reason=mismatch`。這證明請求到得了函式、`SUPABASE_SECRET_KEYS` 解析得到、而且有 `cron`（設定壞掉會先回 `no_key_config`）。拿到 `no_key_config` → 回滾。**不要用隨機的 `sb_secret_…` 當錯誤值**：gateway 會先以 `UNAUTHORIZED_INVALID_API_KEY` 擋下、函式根本沒執行，看起來像「沒有 `[auth]` 行」，會被誤判成 `verify_jwt` 被打開（2026-10-25 dev 實測）。
    - (c) owner 同意後，走 cron 的同一條路手動呼叫一次（admin service）：
 
      ```sql
