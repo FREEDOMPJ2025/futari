@@ -91,6 +91,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：之後的 Android 殼要等你允許通知，才建立推播用的裝置 ID；不用 Firebase 分析。
   技術：manifest 關 FCM auto-init 與 Analytics；`.gitignore`＋guard 測試擋金鑰進 repo；release 缺 `google-services.json` 即失敗，上傳前驗 AAB 的 versionName ≥ 1.9.0 與 `google_app_id`。
 
+- **一個帳號塞大量推播註冊，不再能擠掉其他家庭的每晚推播（#1827）**
+  使用者：無感；「有待確認的定期收支」照常送達，每人最多保留最近 10 台裝置的註冊。
+  技術：`0101` 加 PushTokens 格式 CHECK、每人 10 筆（淘汰最久沒註冊的）與 `updated_at` trigger；`send-recurring-push` 分頁讀完、依帳本輪流、每人／帳本／次上限、8 併發與約 100 秒截止，log 只記計數；寫入被拒時 client 只回報錯誤代碼。
+
 ## [1.8.0] - 2026-10-19
 
 主題：**品牌頁．讓陌生人信任**——登入前的品牌頁整體升級（award review 第 6 輪 7.45 通過）；iPhone 捷徑能把付款送進待確認；匯入多了三個來源。
