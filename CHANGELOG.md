@@ -47,6 +47,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：結束日期選得比開始日期早時，儲存前就會看到提示，日期選擇器也不再讓人選到更早的日子；以前只會看到一般的失敗訊息。
   技術：`RecurringRuleSheet` 結束日加 `min` 並在送出前擋下；兩個 rule validator 改丟 `recurring_ends_before_start`（四語），不再丟原始中文 `Error`（PRJ-FUTARI-T）。
 
+- **Moneybook、Mobills 搬遷頁改用截圖匯入（#1791）**
+  使用者：兩頁不再寫成「匯出 CSV 直接上傳」，改教截圖請 ChatGPT 整理成 CSV 再匯入；Moneybook 的匯出檔是加密檔、Mobills 的匯出檔 Futari 讀不了，照原本寫法會匯到 0 筆。
+  技術：`sources.ts` 兩個 source 加 `screenshotWorkflow: true`（頁面自動帶出 ChatGPT 流程區塊），Mobills 比較表「CSV 匯入」列改為「資料匯出」，四語步驟／FAQ／meta 同步重寫，en／ja 待確認；content-updated-at snapshot 更新。
+
 - **捷徑與網址帶入的記帳，沿用同一商家上次的分類（#1822）**
   使用者：從捷徑或網址帶入商家時，分類會自動選成這家店上次用的分類，自己改過的就不會被蓋掉；教學頁的範例網址不再寫死「飲食」。
   技術：`getCategoryForMerchant` 在 SQL 比對 NFKC／不分大小寫的描述，只看檢視者待過的章節、未刪除的紀錄；優先順序是商家記憶 > 網址或 payload 的 `category` > 預設；待確認卡在 `/api/shortcut/pending` 寫入時就套用。
