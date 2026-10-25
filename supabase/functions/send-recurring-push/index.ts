@@ -2,7 +2,7 @@ import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supa
 import { create, getNumericDate } from 'https://deno.land/x/djwt@v3.0.2/mod.ts'
 import { taipeiDateISO } from './taipeiDate.ts'
 import { tokensOfCurrentMembers, type PushTarget, type TokenRow } from './memberTokens.ts'
-import { checkServiceRoleJwt, projectRefFromUrl } from './callerAuth.ts'
+import { checkCronApiKey, secretKeyNamed } from './callerAuth.ts'
 import { pkcs8DerFromPem } from './pem.ts'
 import {
   FCM_FETCH_TIMEOUT_MS,
@@ -26,9 +26,6 @@ import {
 } from './staleTokens.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
-// null (custom domain, unset) makes every call fail closed: reason=no_ref_config.
-const PROJECT_REF = projectRefFromUrl(SUPABASE_URL)
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const APNS_KEY_ID = Deno.env.get('APNS_KEY_ID')!
 const APNS_TEAM_ID = Deno.env.get('APNS_TEAM_ID')!
 const APNS_PRIVATE_KEY_PEM = Deno.env.get('APNS_PRIVATE_KEY_PEM')!
@@ -224,18 +221,30 @@ async function isolated(name: 'apns' | 'fcm', run: () => Promise<BranchResult>):
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('method not allowed', { status: 405 })
 
-  // #968 S4b (F8) — only the notify-recurring-push cron, which sends the
-  // legacy service_role JWT from Vault. The gateway (verify_jwt = true in
-  // supabase/config.toml) has verified its signature; this checks the claims.
-  // Checked before any DB work or secret read. Log only the reason, never
-  // anything taken from the header.
-  const caller = checkServiceRoleJwt(req.headers.get('authorization'), PROJECT_REF, Math.floor(Date.now() / 1000))
+  // #1834 — only the notify-recurring-push cron, which sends the named secret
+  // key `cron` as `apikey` (from Vault). verify_jwt = false in
+  // supabase/config.toml, so this is the ONLY check: it runs before any DB work
+  // or other secret read, and fails closed. SUPABASE_SECRET_KEYS is read per
+  // request, never at module scope. Log only the reason, never anything taken
+  // from the header or the env.
+  const secretKeys = Deno.env.get('SUPABASE_SECRET_KEYS')
+  const caller = checkCronApiKey(req.headers.get('apikey'), secretKeys)
   if (!caller.ok) {
     console.warn(`[auth] reject reason=${caller.reason}`)
     return new Response('unauthorized', { status: 401 })
   }
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+  // The DB client uses the project's `default` secret key (#1834 F3), not
+  // SUPABASE_SERVICE_ROLE_KEY: Supabase's docs call that variable the legacy
+  // key (on dev it measured as an sb_ key), and what it holds once the legacy
+  // keys are retired at the end of 2026 is not documented. Failure looks like:
+  // cron gets 500, the function logs `[push] no default secret key`.
+  const dbKey = secretKeyNamed(secretKeys, 'default')
+  if (!dbKey) {
+    console.error('[push] no default secret key; cannot query')
+    return new Response('error', { status: 500 })
+  }
+  const supabase = createClient(SUPABASE_URL, dbKey)
 
   // Taipei wall-clock, not UTC (#1262). This runs at 00:10 Asia/Taipei; a UTC
   // date here is the previous day and misses the pendings the generators

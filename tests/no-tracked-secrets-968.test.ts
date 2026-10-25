@@ -5,6 +5,7 @@ import { basename, join } from 'node:path'
 
 /**
  * #968 — Firebase / Google credentials never enter the repo.
+ * #1834 — nor Supabase secret keys (`sb_secret_…`, e.g. the cron's named key).
  *
  * The repo is public. Android push needs two Firebase files: the client config
  * `google-services.json` (copied from the vault into android/app/ only for a
@@ -29,6 +30,10 @@ const LEAK_SHAPES: [string, RegExp][] = [
   ['a service-account JSON "type" field', new RegExp('"type"\\s*:\\s*"service' + '_account"')],
   ['a "private_key" JSON key', new RegExp('"private' + '_key"\\s*:')],
   ['a PEM private-key header', new RegExp('-----BEGIN (RSA )?' + 'PRIVATE KEY-----')],
+  // #1834: a Supabase secret key has full database privilege (bypasses RLS).
+  // Real ones measured 41 characters; 30+ after the prefix leaves room for
+  // prose like `sb_secret_…` while catching a pasted key.
+  ['a Supabase secret key', new RegExp('sb_' + 'secret_[A-Za-z0-9_-]{30,}')],
 ]
 
 /**
@@ -63,12 +68,22 @@ function readText(rel: string): string | null {
   return buf.toString('utf8')
 }
 
-describe('no Firebase / Google credentials tracked by git (#968)', () => {
+describe('no Firebase / Google credentials or Supabase secret keys tracked by git (#968, #1834)', () => {
   const files = trackedFiles()
 
   it('sees the tracked tree (guards against a vacuous pass)', () => {
     expect(files.length).toBeGreaterThan(100)
     expect(files).toContain('android/app/build.gradle')
+  })
+
+  it('recognises each leak shape (guards against a pattern that matches nothing)', () => {
+    const shape = (label: string) => LEAK_SHAPES.find(([l]) => l === label)![1]
+    const fakeSecret = ('sb_' + 'secret_') + 'FAKE0123456789abcdefghijklmnopqrstu'
+    expect(shape('a Supabase secret key').test(fakeSecret)).toBe(true)
+    expect(shape('a Supabase secret key').test(`apikey: ${fakeSecret}`)).toBe(true)
+    // Prose that names the prefix is not a key.
+    expect(shape('a Supabase secret key').test('sends `apikey: sb_' + 'secret_…`')).toBe(false)
+    expect(shape('a Supabase secret key').test("left(v_key, 10) <> 'sb_" + "secret_'")).toBe(false)
   })
 
   it('tracks no google-services.json anywhere', () => {
