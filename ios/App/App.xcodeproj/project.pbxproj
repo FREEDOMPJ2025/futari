@@ -16,6 +16,7 @@
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
 		E9A8D930A08C48ED828540F9 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71123C65CB864C92B2F0DAC5 /* SceneDelegate.swift */; };
+		65C724CB7AC933BF518FD09E /* QuickAddIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E099F62A84A83E634803D046 /* QuickAddIntent.swift */; };
 		55EEB5CE313D9D2537DB613E /* SentryBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = C589C2922BCCB8E53BEBF251 /* SentryBootstrap.swift */; };
 		EFBB4A181299C3925D08CD98 /* Sentry-Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = B2288611E2022F833C4C3A4E /* Sentry-Dynamic */; };
 		8E4D2B6FAC304D7E9F1B2C3D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3C1A5E9B2F4C6D8E0A1B2C /* main.swift */; };
@@ -35,6 +36,7 @@
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		71123C65CB864C92B2F0DAC5 /* SceneDelegate.swift */ = {isa = PBXFileReference; name = "SceneDelegate.swift"; path = "SceneDelegate.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
+		E099F62A84A83E634803D046 /* QuickAddIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddIntent.swift; sourceTree = "<group>"; };
 		C589C2922BCCB8E53BEBF251 /* SentryBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentryBootstrap.swift; sourceTree = "<group>"; };
 		7D3C1A5E9B2F4C6D8E0A1B2C /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		B1C2D3E4F5061728394A5B6C /* FutariBridgeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FutariBridgeViewController.swift; sourceTree = "<group>"; };
@@ -85,6 +87,7 @@
 				50B271D01FEDC1A000F3C39B /* public */,
 				71123C65CB864C92B2F0DAC5 /* SceneDelegate.swift */,
 				C589C2922BCCB8E53BEBF251 /* SentryBootstrap.swift */,
+				E099F62A84A83E634803D046 /* QuickAddIntent.swift */,
 				B1C2D3E4F5061728394A5B6C /* FutariBridgeViewController.swift */,
 			);
 			path = App;
@@ -177,6 +180,7 @@
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				E9A8D930A08C48ED828540F9 /* SceneDelegate.swift in Sources */,
 				55EEB5CE313D9D2537DB613E /* SentryBootstrap.swift in Sources */,
+				65C724CB7AC933BF518FD09E /* QuickAddIntent.swift in Sources */,
 				A1B2C3D4E5F60718293A4B5C /* FutariBridgeViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -51,6 +51,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：兩頁不再寫成「匯出 CSV 直接上傳」，改教截圖請 ChatGPT 整理成 CSV 再匯入；Moneybook 的匯出檔是加密檔、Mobills 的匯出檔 Futari 讀不了，照原本寫法會匯到 0 筆。
   技術：`sources.ts` 兩個 source 加 `screenshotWorkflow: true`（頁面自動帶出 ChatGPT 流程區塊），Mobills 比較表「CSV 匯入」列改為「資料匯出」，四語步驟／FAQ／meta 同步重寫，en／ja 待確認；content-updated-at snapshot 更新。
 
+- **iPhone 錢包自動化可以直接加「Futari 記一筆」動作（#1823）**
+  使用者：錢包自動化裡一個動作就能帶入金額與商家，不用再串四個動作；執行後仍會打開記一筆畫面讓你確認。
+  技術：App Intent 組出 quick-add deep link，iOS 16 以上；驗證仍在 `lib/quickAdd.ts`；需隨 v1.9.0 重送 iOS 殼。
+
 - **捷徑與網址帶入的記帳，沿用同一商家上次的分類（#1822）**
   使用者：從捷徑或網址帶入商家時，分類會自動選成這家店上次用的分類，自己改過的就不會被蓋掉；教學頁的範例網址不再寫死「飲食」。
   技術：`getCategoryForMerchant` 在 SQL 比對 NFKC／不分大小寫的描述，只看檢視者待過的章節、未刪除的紀錄；優先順序是商家記憶 > 網址或 payload 的 `category` > 預設；待確認卡在 `/api/shortcut/pending` 寫入時就套用。
