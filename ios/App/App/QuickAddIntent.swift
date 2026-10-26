@@ -50,10 +50,11 @@ struct QuickAddIntent: AppIntent {
     @MainActor
     func perform() async throws -> some IntentResult {
         var items: [URLQueryItem] = []
-        // Non-finite, non-positive or absurdly large amounts are left out so the web leaves the
-        // field blank; Int(_:) would trap on values beyond Int range.
-        if amount.isFinite, amount > 0, amount < 1e15 {
-            items.append(URLQueryItem(name: "amount", value: String(Int(amount.rounded()))))
+        // Non-finite, absurdly large amounts or ones that round to 0 are left out so the web
+        // leaves the field blank; Int(_:) would trap on values beyond Int range.
+        let rounded = amount.rounded()
+        if amount.isFinite, rounded >= 1, rounded < 1e15 {
+            items.append(URLQueryItem(name: "amount", value: String(Int(rounded))))
         }
         if let note, !note.isEmpty { items.append(URLQueryItem(name: "note", value: note)) }
         if let category { items.append(URLQueryItem(name: "category", value: category.rawValue)) }
@@ -62,6 +63,11 @@ struct QuickAddIntent: AppIntent {
         components.scheme = "dev.southernlight.futari"
         components.host = "add"
         components.queryItems = items.isEmpty ? nil : items
+        // URLComponents leaves `+` as is, but lib/quickAdd.ts reads the query with
+        // URLSearchParams, which decodes `+` as a space ("Disney+" would arrive as "Disney").
+        // Every literal `+` here comes from a value, since the names are fixed.
+        components.percentEncodedQuery = components.percentEncodedQuery?
+            .replacingOccurrences(of: "+", with: "%2B")
         if let url = components.url {
             await UIApplication.shared.open(url)
         }
