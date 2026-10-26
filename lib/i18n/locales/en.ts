@@ -2560,7 +2560,7 @@ export const en: Translations = {
         // TODO(#839): en copy below pending native review
         moneybook: {
           name: 'Moneybook',
-          description: 'A Taiwanese auto-syncing budgeting app; screenshot + ChatGPT → CSV and bring it over.',  // TODO(i18n): 待確認
+          description: 'A Taiwanese auto-syncing budgeting app; screenshot + ChatGPT → CSV and bring it over.',
         },
         andromoney: {
           name: 'AndroMoney',
@@ -2568,7 +2568,7 @@ export const en: Translations = {
         },
         mobills: {
           name: 'Mobills',
-          description: 'An international personal-finance app; screenshot + ChatGPT → CSV and bring it over.',  // TODO(i18n): 待確認
+          description: 'An international personal-finance app; screenshot + ChatGPT → CSV and bring it over.',
         },
         manebo: {
           name: 'Manebo',
@@ -2784,7 +2784,7 @@ I will upload the screenshots once you confirm.`,
         heroKicker: 'MONEYBOOK → FUTARI',
         heroTitle: 'Your Moneybook data can come with you',
         heroSubtitle:
-          'Moving from Moneybook to Futari: screenshot your transactions, have ChatGPT turn them into a CSV, preview it here, and keep writing the story together.',  // TODO(i18n): 待確認
+          'Moving from Moneybook to Futari: screenshot your transactions, have ChatGPT turn them into a CSV, preview it here, and keep writing the story together.',
         intro: "Since April 2026, Moneybook has moved to a fully paid model: accounts without a subscription can no longer sync, or even log entries manually. Per their own announcement, the annual price is set to change to NT$1,499 starting 2027. If you're reconsidering and want to bring years of records to a two-person ledger whose core features stay free, this page is for that move.",
         differentiators: [
           {
@@ -2801,29 +2801,29 @@ I will upload the screenshots once you confirm.`,
           },
         ],
         stepsHeading: 'Moving from Moneybook in three steps',
-        step1: 'In Moneybook, screenshot the transactions you want to move, page by page; there is no need to deal with the encrypted export file (full how-to below).',  // TODO(i18n): 待確認
-        step2: 'Turn the screenshots into a CSV with ChatGPT; the free plan is enough. Category text is written into the CSV as it appears, and on import the ones that match land in Futari\'s categories while the rest go to Other.',  // TODO(i18n): 待確認
-        step3: 'Upload the CSV here and preview it to check the row count and date range, then create an account to finish the import.',  // TODO(i18n): 待確認
+        step1: 'In Moneybook, screenshot the transactions you want to move, page by page; there is no need to deal with the encrypted export file (full how-to below).',
+        step2: 'Turn the screenshots into a CSV with ChatGPT; the free plan is enough. Category text is written into the CSV as it appears, and on import the ones that match land in Futari\'s categories while the rest go to Other.',
+        step3: 'Upload the CSV here and preview it to check the row count and date range, then create an account to finish the import.',
         faq: [
           {
             question: 'Can a free account still export its data?',
-            answer: 'Since the paid model launched in April 2026, exporting details is a subscriber-only feature. If you would rather not subscribe just to move, use screenshots instead: capture the transaction screens and have ChatGPT turn them into a CSV. The full steps and a copy-ready prompt are below.',  // TODO(i18n): 待確認
+            answer: 'Since the paid model launched in April 2026, exporting details is a subscriber-only feature. If you would rather not subscribe just to move, use screenshots instead: capture the transaction screens and have ChatGPT turn them into a CSV. The full steps and a copy-ready prompt are below.',
           },
           {
-            question: 'The file exported from Moneybook won\'t open. What now?',  // TODO(i18n): 待確認
-            answer: 'Files exported from Moneybook are encrypted, and the password is your national ID number, so the file stays closed until you enter it. If you would rather skip that step, use screenshots instead: capture the transaction screens and have ChatGPT turn them into a CSV. The full steps and a copy-ready prompt are below.',  // TODO(i18n): 待確認
+            question: 'The file exported from Moneybook won\'t open. What now?',
+            answer: 'Files exported from Moneybook are encrypted, and the password is your national ID number, so the file stays closed until you enter it. If you would rather skip that step, use screenshots instead: capture the transaction screens and have ChatGPT turn them into a CSV. The full steps and a copy-ready prompt are below.',
           },
           {
-            question: 'How many screenshots?',  // TODO(i18n): 待確認
-            answer: '5–10 is a good range; scroll to cover the period you want to move. The prompt already asks ChatGPT to keep one copy of any entry that appears twice.',  // TODO(i18n): 待確認
+            question: 'How many screenshots?',
+            answer: '5–10 is a good range; scroll to cover the period you want to move. The prompt already asks ChatGPT to keep one copy of any entry that appears twice.',
           },
           {
             question: 'Do I have to subscribe after moving?',
             answer: 'No. The core ledger, splitting and settling are free, and import costs nothing.',
           },
           {
-            question: 'Will the categories ChatGPT produces be off?',  // TODO(i18n): 待確認
-            answer: 'The category text is kept as-is; you preview after uploading and can map it to Futari categories during the actual import.',  // TODO(i18n): 待確認
+            question: 'Will the categories ChatGPT produces be off?',
+            answer: 'The category text is written into the CSV as-is. On import, names that match are filed into Futari\'s categories automatically, and the rest start out under Other; you can change individual entries afterwards.',
           },
           {
             question: 'Moneybook syncs banks automatically — does Futari?',
@@ -2886,7 +2886,7 @@ I will upload the screenshots once you confirm.`,
         heroKicker: 'MOBILLS → FUTARI',
         heroTitle: 'Your Mobills data can come with you',
         heroSubtitle:
-          'Moving from Mobills to Futari: screenshot your transactions, have ChatGPT turn them into a CSV, preview it here, and keep writing the records together.',  // TODO(i18n): 待確認
+          'Moving from Mobills to Futari: screenshot your transactions, have ChatGPT turn them into a CSV, preview it here, and keep writing the records together.',
         differentiators: [
           {
             title: 'Shared, not each on their own',
@@ -2902,17 +2902,17 @@ I will upload the screenshots once you confirm.`,
           },
         ],
         stepsHeading: 'Moving from Mobills in three steps',
-        step1: 'In Mobills, screenshot the transactions you want to move, page by page (full how-to below).',  // TODO(i18n): 待確認
-        step2: 'Turn the screenshots into a CSV with ChatGPT; the free plan is enough. Category text is written into the CSV as it appears, and on import the ones that match land in Futari\'s categories while the rest go to Other.',  // TODO(i18n): 待確認
-        step3: 'Upload the CSV here and preview it to check the row count and date range, then create an account to finish the import. Each of you imports your own CSV and everything lands in the same shared ledger.',  // TODO(i18n): 待確認
+        step1: 'In Mobills, screenshot the transactions you want to move, page by page (full how-to below).',
+        step2: 'Turn the screenshots into a CSV with ChatGPT; the free plan is enough. Category text is written into the CSV as it appears, and on import the ones that match land in Futari\'s categories while the rest go to Other.',
+        step3: 'Upload the CSV here and preview it to check the row count and date range, then create an account to finish the import. Each of you imports your own CSV and everything lands in the same shared ledger.',
         faq: [
           {
-            question: 'Can I upload Mobills\' export file directly?',  // TODO(i18n): 待確認
-            answer: 'Futari has no reader built for Mobills export files yet, so rows that don\'t match the format can\'t be read. Use screenshots instead: capture the transaction screens and have ChatGPT turn them into a CSV. The full steps and a copy-ready prompt are below.',  // TODO(i18n): 待確認
+            question: 'Can I upload Mobills\' export file directly?',
+            answer: 'Futari has no reader built for Mobills export files yet, so rows that don\'t match the format can\'t be read. Use screenshots instead: capture the transaction screens and have ChatGPT turn them into a CSV. The full steps and a copy-ready prompt are below.',
           },
           {
-            question: 'How many screenshots?',  // TODO(i18n): 待確認
-            answer: '5–10 is a good range; scroll to cover the period you want to move. The prompt already asks ChatGPT to keep one copy of any entry that appears twice.',  // TODO(i18n): 待確認
+            question: 'How many screenshots?',
+            answer: '5–10 is a good range; scroll to cover the period you want to move. The prompt already asks ChatGPT to keep one copy of any entry that appears twice.',
           },
           {
             question: 'What if I import the wrong file?',
@@ -2929,8 +2929,8 @@ I will upload the screenshots once you confirm.`,
               "Each of you imports your own file. Every import lets you set the default payer (you or your partner) and the split, and both sets of records end up in the same shared ledger. If a shared expense was logged on both sides, keep just one copy before importing; Futari doesn't merge duplicates automatically.",
           },
           {
-            question: 'Will the categories ChatGPT produces be off?',  // TODO(i18n): 待確認
-            answer: 'The category text is kept as-is; you preview after uploading and can map it to Futari categories during the actual import.',  // TODO(i18n): 待確認
+            question: 'Will the categories ChatGPT produces be off?',
+            answer: 'The category text is written into the CSV as-is. On import, names that match are filed into Futari\'s categories automatically, and the rest start out under Other; you can change individual entries afterwards.',
           },
           {
             question: 'Mobills has budgets — does Futari?',
@@ -3031,7 +3031,7 @@ I will upload the screenshots once you confirm.`,
           {
             question: 'Will the categories ChatGPT produces be off?',
             answer:
-              'The category text is kept as-is; you preview after uploading and can map it to Futari categories during the actual import.',
+              'The category text is written into the CSV as-is. On import, names that match are filed into Futari\'s categories automatically, and the rest start out under Other; you can change individual entries afterwards.',
           },
           {
             // TODO(#1414): en copy below pending native review
@@ -3360,9 +3360,9 @@ I will upload the screenshots once you confirm.`,
       },
       // TODO(#839): en copy below pending native review
       moneybook: {
-        title: 'Move from Moneybook to Futari · screenshot guide',  // TODO(i18n): 待確認
-        description: 'Moving Moneybook data to a shared ledger? Screenshot it, let ChatGPT build a CSV, and import into Futari, made for couples. Free, ad-free.',  // TODO(i18n): 待確認
-        ogDescription: 'Where Moneybook users go next: screenshot → ChatGPT → CSV → Futari.',  // TODO(i18n): 待確認
+        title: 'Move from Moneybook to Futari · screenshot guide',
+        description: 'Moving Moneybook data to a shared ledger? Screenshot it, let ChatGPT build a CSV, and import into Futari, made for couples. Free, ad-free.',
+        ogDescription: 'Where Moneybook users go next: screenshot → ChatGPT → CSV → Futari.',
       },
       andromoney: {
         title: 'Import from AndroMoney to Futari · CSV guide',
@@ -3370,9 +3370,9 @@ I will upload the screenshots once you confirm.`,
         ogDescription: 'Where AndroMoney users go next: export CSV and import into Futari.',
       },
       mobills: {
-        title: 'Move from Mobills to Futari · screenshot guide',  // TODO(i18n): 待確認
-        description: 'Moving Mobills data to a two-person ledger? Screenshot it, let ChatGPT build a CSV, and import into Futari, made for couples. Free, ad-free.',  // TODO(i18n): 待確認
-        ogDescription: 'Where Mobills users go next: screenshot → ChatGPT → CSV → Futari.',  // TODO(i18n): 待確認
+        title: 'Move from Mobills to Futari · screenshot guide',
+        description: 'Moving Mobills data to a two-person ledger? Screenshot it, let ChatGPT build a CSV, and import into Futari, made for couples. Free, ad-free.',
+        ogDescription: 'Where Mobills users go next: screenshot → ChatGPT → CSV → Futari.',
       },
       manebo: {
         title: 'Import from Manebo to Futari · Couple budgeting',
@@ -4011,7 +4011,7 @@ I will upload the screenshots once you confirm.`,
         },
         {
           title: 'Build the link with a Text action',
-          body: 'Add a Text action and paste the link below, replacing [Amount] with the result of step 2 and [Merchant] with the result of step 3 (if you skipped step 2, use Shortcut Input, then Amount). You don\'t need to set a category: a merchant you\'ve recorded before gets the category you used last time, and a new merchant starts as Dining. You can change it before saving.',  // TODO(i18n): 待確認 #1838
+          body: 'Add a Text action and paste the link below, replacing [Amount] with the result of step 2 and [Merchant] with the result of step 3 (if you skipped step 2, use Shortcut Input, then Amount). You don\'t need to set a category: a merchant you\'ve recorded before gets the category you used last time, and a new merchant starts as Dining. You can change it before saving.',
         },
         {
           title: 'Open the URL',
@@ -4049,8 +4049,8 @@ I will upload the screenshots once you confirm.`,
         },
         {
           param: 'category',
-          rule: 'One of the ids in the table below, all lowercase and spelled exactly. Used only the first time you record a merchant; after that, the category you used last time applies.',  // TODO(i18n): 待確認 #1838
-          fallback: 'The category you used last time for this merchant, or Dining for a new one',  // TODO(i18n): 待確認 #1838
+          rule: 'One of the ids in the table below, all lowercase and spelled exactly. Used only the first time you record a merchant; after that, the category you used last time applies.',
+          fallback: 'The category you used last time for this merchant, or Dining for a new one',
         },
         {
           param: 'note',
@@ -4090,8 +4090,8 @@ I will upload the screenshots once you confirm.`,
           cause: 'The merchant name was not passed through URL Encode.',
         },
         {
-          symptom: "The category isn't the one in my link",  // TODO(i18n): 待確認 #1838
-          cause: "You've recorded this merchant before, so it uses the category from last time. For a new merchant, a misspelled or capitalized id falls back to Dining.",  // TODO(i18n): 待確認 #1838
+          symptom: "The category isn't the one in my link",
+          cause: "You've recorded this merchant before, so it uses the category from last time. For a new merchant, a misspelled or capitalized id falls back to Dining.",
         },
       ],
     },
@@ -4166,7 +4166,7 @@ I will upload the screenshots once you confirm.`,
       pending_former_member: 'The payer on this card has left this ledger. Tap Edit to choose a new payer first.',
       rule_payer_not_member: 'The payer on this rule has left this ledger. Edit the rule to choose a new payer, then resume.',
       rule_recipient_not_member: 'The income recipient on this rule has left this ledger. Edit the rule to choose a new recipient, then resume.',
-      recurring_ends_before_start: 'The end date can\'t be before the start date',  // TODO(i18n): 待確認
+      recurring_ends_before_start: 'The end date can\'t be before the start date',
       pending_income_not_found: 'This pending income was already handled or can\'t be found',
       pending_income_handled_elsewhere: 'This pending income was handled on another device',
       shortcut_pending_handled_elsewhere: 'This one was handled on another device or has expired',

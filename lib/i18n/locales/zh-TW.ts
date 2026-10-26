@@ -6376,7 +6376,7 @@ export const zhTW: Translations = {
           },
           {
             question: 'ChatGPT 整理的分類會不會跑掉？',
-            answer: '分類文字會原樣保留，上傳後先預覽，正式匯入時可以對照調整成 Futari 的分類。',
+            answer: '分類文字會原樣寫進 CSV；匯入時名稱對得上的會自動歸到 Futari 的類別，其餘先歸在「其他」，匯入後可以再逐筆改。',
           },
           {
             question: '麻布記帳會自動同步銀行，Futari 也會嗎？',
@@ -6475,7 +6475,7 @@ export const zhTW: Translations = {
           },
           {
             question: 'ChatGPT 整理的分類會不會跑掉？',
-            answer: '分類文字會原樣保留，上傳後先預覽，正式匯入時可以對照調整成 Futari 的分類。',
+            answer: '分類文字會原樣寫進 CSV；匯入時名稱對得上的會自動歸到 Futari 的類別，其餘先歸在「其他」，匯入後可以再逐筆改。',
           },
           {
             question: 'Mobills 有預算功能，Futari 有嗎？',
@@ -6568,7 +6568,7 @@ export const zhTW: Translations = {
           },
           {
             question: 'ChatGPT 整理的分類會不會跑掉？',
-            answer: '分類文字會原樣保留，上傳後先預覽，正式匯入時可以對照調整成 Futari 的分類。',
+            answer: '分類文字會原樣寫進 CSV；匯入時名稱對得上的會自動歸到 Futari 的類別，其餘先歸在「其他」，匯入後可以再逐筆改。',
           },
           {
             question: '我在簡單記帳買的（永久）VIP，搬過來會浪費嗎？',

@@ -2809,7 +2809,7 @@ export const zhCN: Translations = {
           },
           {
             question: 'ChatGPT 整理的分类会不会跑掉？',
-            answer: '分类文字会原样保留，上传后先预览，正式导入时可以对照调整成 Futari 的分类。',
+            answer: '分类文字会原样写进 CSV；导入时名称对得上的会自动归到 Futari 的类别，其余先归在「其他」，导入后可以再逐笔改。',
           },
           {
             question: '麻布记账会自动同步银行，Futari 也会吗？',
@@ -2908,7 +2908,7 @@ export const zhCN: Translations = {
           },
           {
             question: 'ChatGPT 整理的分类会不会跑掉？',
-            answer: '分类文字会原样保留，上传后先预览，正式导入时可以对照调整成 Futari 的分类。',
+            answer: '分类文字会原样写进 CSV；导入时名称对得上的会自动归到 Futari 的类别，其余先归在「其他」，导入后可以再逐笔改。',
           },
           {
             question: 'Mobills 有预算功能，Futari 有吗？',
@@ -3001,7 +3001,7 @@ export const zhCN: Translations = {
           },
           {
             question: 'ChatGPT 整理的分类会不会跑掉？',
-            answer: '分类文字会原样保留，上传后先预览，正式导入时可以对照调整成 Futari 的分类。',
+            answer: '分类文字会原样写进 CSV；导入时名称对得上的会自动归到 Futari 的类别，其余先归在「其他」，导入后可以再逐笔改。',
           },
           {
             question: '我在简单记账买的（永久）VIP，换过来会浪费吗？',

@@ -186,7 +186,7 @@ export const MIGRATE_SOURCES = {
   moneybook: {
     slug: 'moneybook',
     name: 'Moneybook',
-    contentUpdatedAt: '2026-10-25',
+    contentUpdatedAt: '2026-10-26',
     screenshotWorkflow: true,
     comparison: {
       rows: [
@@ -214,7 +214,7 @@ export const MIGRATE_SOURCES = {
   mobills: {
     slug: 'mobills',
     name: 'Mobills',
-    contentUpdatedAt: '2026-10-25',
+    contentUpdatedAt: '2026-10-26',
     screenshotWorkflow: true,
     comparison: {
       rows: [
@@ -242,7 +242,7 @@ export const MIGRATE_SOURCES = {
   'simple-daily-money': {
     slug: 'simple-daily-money',
     name: '簡單記帳',
-    contentUpdatedAt: '2026-10-18',
+    contentUpdatedAt: '2026-10-26',
     screenshotWorkflow: true,
     comparison: {
       rows: [
