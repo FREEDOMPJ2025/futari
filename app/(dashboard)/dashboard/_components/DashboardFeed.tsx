@@ -68,9 +68,14 @@ export function DashboardFeed({
       denseMonths
       label={header ? header(title) : <div className="flex items-end justify-between">{title}</div>}
       emptyState={
-        mode === 'income'
-          ? <IncomeEmptyState onAdd={onAddIncome} />
-          : <EmptyState onAdd={onAddTx} />
+        // A filter that matches nothing is not an empty ledger (#1866): say so, the way the
+        // records page does, instead of inviting a first record. The filter row stays above
+        // (#1851), so clearing it there brings the usual empty state back.
+        filter
+          ? <div className="px-6 py-16 text-center text-sm" style={{ color: 'var(--ink-3)' }}>{t.feed.noFiltered}</div>
+          : mode === 'income'
+            ? <IncomeEmptyState onAdd={onAddIncome} />
+            : <EmptyState onAdd={onAddTx} />
       }
     />
   )
