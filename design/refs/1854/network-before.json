@@ -1,0 +1,445 @@
+{
+  "label": "before",
+  "base": "https://localhost:3443",
+  "viewports": {
+    "390": {
+      "viewport": "390x844@3",
+      "heroDownloads": [
+        {
+          "url": "/_next/image?url=/illustration-hero.png&w=1080&q=75",
+          "status": 200,
+          "mime": "image/avif",
+          "bytes": 27353,
+          "prio": "High",
+          "proto": "h2"
+        }
+      ],
+      "heroDownloadsAfterScroll": [
+        {
+          "url": "/_next/image?url=/illustration-hero.png&w=1080&q=75",
+          "status": 200,
+          "mime": "image/avif",
+          "bytes": 27353,
+          "prio": "High",
+          "proto": "h2"
+        }
+      ],
+      "otherImages": [
+        {
+          "url": "https://storage.ko-fi.com/cdn/logomarkLogo.png",
+          "status": 200,
+          "mime": "image/webp",
+          "bytes": 2387,
+          "prio": "Low",
+          "proto": "h2"
+        },
+        {
+          "url": "https://storage.ko-fi.com/cdn/logomarkLogo.png",
+          "status": 200,
+          "mime": "image/webp",
+          "bytes": 2168,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "geom": [
+        {
+          "visible": true,
+          "box": {
+            "w": 334,
+            "h": 252
+          },
+          "natural": {
+            "w": 334,
+            "h": 186
+          },
+          "currentSrc": "https://localhost:3443/_next/image?url=%2Fillustration-hero.png&w=1080&q=75",
+          "objectFit": "cover",
+          "objectPosition": "50% 0%",
+          "dotOriginPct": {
+            "x": 30.8,
+            "y": 39.4
+          },
+          "dpr": 3
+        }
+      ],
+      "frozenDots": 3
+    },
+    "412": {
+      "viewport": "412x915@2.625",
+      "heroDownloads": [
+        {
+          "url": "/_next/image?url=/illustration-hero.png&w=1080&q=75",
+          "status": 200,
+          "mime": "image/avif",
+          "bytes": 27352,
+          "prio": "High",
+          "proto": "h2"
+        }
+      ],
+      "heroDownloadsAfterScroll": [
+        {
+          "url": "/_next/image?url=/illustration-hero.png&w=1080&q=75",
+          "status": 200,
+          "mime": "image/avif",
+          "bytes": 27352,
+          "prio": "High",
+          "proto": "h2"
+        }
+      ],
+      "otherImages": [
+        {
+          "url": "https://storage.ko-fi.com/cdn/logomarkLogo.png",
+          "status": 200,
+          "mime": "image/webp",
+          "bytes": 2387,
+          "prio": "Low",
+          "proto": "h2"
+        },
+        {
+          "url": "https://storage.ko-fi.com/cdn/logomarkLogo.png",
+          "status": 200,
+          "mime": "image/webp",
+          "bytes": 2168,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "geom": [
+        {
+          "visible": true,
+          "box": {
+            "w": 356,
+            "h": 252
+          },
+          "natural": {
+            "w": 356,
+            "h": 198
+          },
+          "currentSrc": "https://localhost:3443/_next/image?url=%2Fillustration-hero.png&w=1080&q=75",
+          "objectFit": "cover",
+          "objectPosition": "50% 0%",
+          "dotOriginPct": {
+            "x": 32,
+            "y": 39.4
+          },
+          "dpr": 2.625
+        }
+      ]
+    },
+    "768": {
+      "viewport": "768x1024@2",
+      "heroDownloads": [
+        {
+          "url": "/_next/image?url=/illustration-hero.png&w=828&q=75",
+          "status": 200,
+          "mime": "image/avif",
+          "bytes": 21139,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "heroDownloadsAfterScroll": [
+        {
+          "url": "/_next/image?url=/illustration-hero.png&w=828&q=75",
+          "status": 200,
+          "mime": "image/avif",
+          "bytes": 21139,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "otherImages": [
+        {
+          "url": "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+          "status": 200,
+          "mime": "image/gif",
+          "bytes": 0,
+          "prio": "High",
+          "proto": "data"
+        },
+        {
+          "url": "https://storage.ko-fi.com/cdn/logomarkLogo.png",
+          "status": 200,
+          "mime": "image/webp",
+          "bytes": 2168,
+          "prio": "Low",
+          "proto": "h2"
+        },
+        {
+          "url": "https://storage.ko-fi.com/cdn/logomarkLogo.png",
+          "status": 200,
+          "mime": "image/webp",
+          "bytes": 2387,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "geom": [
+        {
+          "visible": true,
+          "box": {
+            "w": 200,
+            "h": 404
+          },
+          "natural": {
+            "w": 384,
+            "h": 214
+          },
+          "currentSrc": "https://localhost:3443/_next/image?url=%2Fillustration-hero.png&w=828&q=75",
+          "objectFit": "cover",
+          "objectPosition": "50% 50%",
+          "dotOriginPct": {
+            "x": 18,
+            "y": 50.2
+          },
+          "dpr": 2
+        }
+      ],
+      "frozenDots": 3
+    },
+    "1024": {
+      "viewport": "1024x768@2",
+      "heroDownloads": [
+        {
+          "url": "/_next/image?url=/illustration-hero.png&w=1080&q=75",
+          "status": 200,
+          "mime": "image/avif",
+          "bytes": 27375,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "heroDownloadsAfterScroll": [
+        {
+          "url": "/_next/image?url=/illustration-hero.png&w=1080&q=75",
+          "status": 200,
+          "mime": "image/avif",
+          "bytes": 27375,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "otherImages": [
+        {
+          "url": "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+          "status": 200,
+          "mime": "image/gif",
+          "bytes": 0,
+          "prio": "High",
+          "proto": "data"
+        },
+        {
+          "url": "https://storage.ko-fi.com/cdn/logomarkLogo.png",
+          "status": 200,
+          "mime": "image/webp",
+          "bytes": 2387,
+          "prio": "Low",
+          "proto": "h2"
+        },
+        {
+          "url": "https://storage.ko-fi.com/cdn/logomarkLogo.png",
+          "status": 200,
+          "mime": "image/webp",
+          "bytes": 2168,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "geom": [
+        {
+          "visible": true,
+          "box": {
+            "w": 336,
+            "h": 429
+          },
+          "natural": {
+            "w": 512,
+            "h": 285
+          },
+          "currentSrc": "https://localhost:3443/_next/image?url=%2Fillustration-hero.png&w=1080&q=75",
+          "objectFit": "cover",
+          "objectPosition": "50% 50%",
+          "dotOriginPct": {
+            "x": 31,
+            "y": 51.2
+          },
+          "dpr": 2
+        }
+      ],
+      "frozenDots": 3
+    },
+    "1279": {
+      "viewport": "1279x800@1",
+      "heroDownloads": [
+        {
+          "url": "/_next/image?url=/illustration-hero.png&w=640&q=75",
+          "status": 200,
+          "mime": "image/avif",
+          "bytes": 16667,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "heroDownloadsAfterScroll": [
+        {
+          "url": "/_next/image?url=/illustration-hero.png&w=640&q=75",
+          "status": 200,
+          "mime": "image/avif",
+          "bytes": 16667,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "otherImages": [
+        {
+          "url": "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+          "status": 200,
+          "mime": "image/gif",
+          "bytes": 0,
+          "prio": "High",
+          "proto": "data"
+        },
+        {
+          "url": "https://storage.ko-fi.com/cdn/logomarkLogo.png",
+          "status": 200,
+          "mime": "image/webp",
+          "bytes": 2387,
+          "prio": "Low",
+          "proto": "h2"
+        },
+        {
+          "url": "https://storage.ko-fi.com/cdn/logomarkLogo.png",
+          "status": 200,
+          "mime": "image/webp",
+          "bytes": 2172,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "geom": [
+        {
+          "visible": true,
+          "box": {
+            "w": 591,
+            "h": 457.2
+          },
+          "natural": {
+            "w": 639,
+            "h": 356
+          },
+          "currentSrc": "https://localhost:3443/_next/image?url=%2Fillustration-hero.png&w=640&q=75",
+          "objectFit": "cover",
+          "objectPosition": "50% 50%",
+          "dotOriginPct": {
+            "x": 39.2,
+            "y": 52.2
+          },
+          "dpr": 1
+        }
+      ],
+      "frozenDots": 3
+    },
+    "1440": {
+      "viewport": "1440x900@1",
+      "heroDownloads": [
+        {
+          "url": "/_next/image?url=/illustration-hero.png&w=750&q=75",
+          "status": 200,
+          "mime": "image/avif",
+          "bytes": 19318,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "heroDownloadsAfterScroll": [
+        {
+          "url": "/_next/image?url=/illustration-hero.png&w=750&q=75",
+          "status": 200,
+          "mime": "image/avif",
+          "bytes": 19318,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "otherImages": [
+        {
+          "url": "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+          "status": 200,
+          "mime": "image/gif",
+          "bytes": 0,
+          "prio": "High",
+          "proto": "data"
+        },
+        {
+          "url": "https://storage.ko-fi.com/cdn/logomarkLogo.png",
+          "status": 200,
+          "mime": "image/webp",
+          "bytes": 2168,
+          "prio": "Low",
+          "proto": "h2"
+        },
+        {
+          "url": "https://storage.ko-fi.com/cdn/logomarkLogo.png",
+          "status": 200,
+          "mime": "image/webp",
+          "bytes": 2387,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "geom": [],
+      "frozenDots": 3
+    },
+    "1440x2": {
+      "viewport": "1440x900@2",
+      "heroDownloads": [
+        {
+          "url": "/_next/image?url=/illustration-hero.png&w=1440&q=75",
+          "status": 200,
+          "mime": "image/avif",
+          "bytes": 33949,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "heroDownloadsAfterScroll": [
+        {
+          "url": "/_next/image?url=/illustration-hero.png&w=1440&q=75",
+          "status": 200,
+          "mime": "image/avif",
+          "bytes": 33949,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "otherImages": [
+        {
+          "url": "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+          "status": 200,
+          "mime": "image/gif",
+          "bytes": 0,
+          "prio": "High",
+          "proto": "data"
+        },
+        {
+          "url": "https://storage.ko-fi.com/cdn/logomarkLogo.png",
+          "status": 200,
+          "mime": "image/webp",
+          "bytes": 2168,
+          "prio": "Low",
+          "proto": "h2"
+        },
+        {
+          "url": "https://storage.ko-fi.com/cdn/logomarkLogo.png",
+          "status": 200,
+          "mime": "image/webp",
+          "bytes": 2387,
+          "prio": "Low",
+          "proto": "h2"
+        }
+      ],
+      "geom": []
+    }
+  }
+}

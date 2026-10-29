@@ -1,9 +1,9 @@
 ---
-last_updated: 2026-08-12
+last_updated: 2026-10-29
 status: shipped
 first_shipped_in: v1.4.3
 related_specs: []
-related_issues: ["#832"]
+related_issues: ["#832", "#1854"]
 blocked_on: []
 ---
 
@@ -49,7 +49,9 @@ One Ember Rule 原本管的是 PRODUCT 表面（帳本、設定、任務流程�
 
 ## Illustration Asset
 
-**Chosen image**（`public/illustration-hero.png`）：兩人從背後坐在沙發上，靠近看著手機，身後有暖色落地燈，漂浮的光點與光帶（ember/sage/cream 色調），溫馨的夜晚室內、背景有城市窗景。插畫風、暖色調——直接對應 Futari「陪伴式記錄」的品牌哲學，同一張圖靠 CSS object-fit/object-position 供 desktop / mobile 兩種佈局共用裁切。
+**Chosen image**（`public/illustration-hero.png`）：兩人從背後坐在沙發上，靠近看著手機，身後有暖色落地燈，漂浮的光點與光帶（ember/sage/cream 色調），溫馨的夜晚室內、背景有城市窗景。插畫風、暖色調——直接對應 Futari「陪伴式記錄」的品牌哲學。
+
+**兩張裁切（#1854）**：原本同一張圖靠 CSS object-fit/object-position 共用給 desktop / mobile，手機的 392×252 帶狀區因此只剩一小塊人物。現在是同一幅畫的兩次裁切（只裁不重畫、畫風不改）：桌面欄 `public/illustration-hero.png`（1170×620），手機帶狀區 `public/illustration-hero-mobile.png`（902×580，跟帶狀區同比例）。兩張都去掉原圖的白框與右下角浮水印，圓角由 `IllustrationSlot` 的 `rounded-3xl overflow-hidden` 負責。手機版刻意不做直式：帶狀區高度固定 252px，直式圖會被 `object-cover` 切回橫的，要直式得先改版面再重新出圖。
 
 The illustration slot is isolated in a single `<IllustrationSlot>` component so swapping the image later requires no JSX changes.
 
