@@ -90,6 +90,9 @@ describe('CJK serif heading fallback stack (#1849)', () => {
   // so they opt in with .cjk-h, which is unlayered to beat leading-*/font-*.
   it('applies the CJK heading rule to inline-serif titles via unlayered .cjk-h', () => {
     expect(globalsCss).toMatch(/\n\.cjk-h:is\(:lang\(zh\),:lang\(ja\)\)\{font-weight:500;line-height:1\.35\}/)
+    // The landing display headline keeps 1.15 (#1859 round 3): h1 + its two tagline spans only.
+    expect(globalsCss).toMatch(/\n\.cjk-d:is\(:lang\(zh\),:lang\(ja\)\)\{line-height:1\.15\}/)
+    expect(globalsCss.indexOf('.cjk-d:is(')).toBeGreaterThan(globalsCss.indexOf('.cjk-h:is('))
     const uses: Array<[string, number]> = [
       ['app/[locale]/_landing/Landing.tsx', 6],
       ['app/(dashboard)/dashboard/_components/WelcomeSoloCard.tsx', 1],
@@ -105,5 +108,6 @@ describe('CJK serif heading fallback stack (#1849)', () => {
     // CJK can override it; en still renders 400 / 1.15.
     const landing = readFileSync(join(REPO_ROOT, 'app/[locale]/_landing/Landing.tsx'), 'utf8')
     expect(landing).toContain('text-display-tagline font-normal leading-[1.15]')
+    expect(landing.match(/cjk-d /g)?.length).toBe(3)
   })
 })
