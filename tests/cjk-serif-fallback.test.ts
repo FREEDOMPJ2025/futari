@@ -82,7 +82,28 @@ describe('CJK serif heading fallback stack (#1849)', () => {
       /@layer base\{:is\(h1,h2,h3\)\.font-serif:is\(:lang\(zh\),:lang\(ja\)\)\{font-weight:500;line-height:1\.35\}\}/,
     )
     expect(globalsCss).toMatch(
-      /:is\(\.brand,\.font-serif\):lang\(zh\),:is\(\.brand,\.font-serif\):lang\(ja\)\{line-break:strict;word-break:auto-phrase;font-synthesis-style:none\}/,
+      /:is\(\.brand,\.font-serif,\.cjk-h\):is\(:lang\(zh\),:lang\(ja\)\)\{line-break:strict;word-break:auto-phrase;font-synthesis-style:none\}/,
     )
+  })
+
+  // Landing and dashboard serif titles set their font inline (no .font-serif),
+  // so they opt in with .cjk-h, which is unlayered to beat leading-*/font-*.
+  it('applies the CJK heading rule to inline-serif titles via unlayered .cjk-h', () => {
+    expect(globalsCss).toMatch(/\n\.cjk-h:is\(:lang\(zh\),:lang\(ja\)\)\{font-weight:500;line-height:1\.35\}/)
+    const uses: Array<[string, number]> = [
+      ['app/[locale]/_landing/Landing.tsx', 6],
+      ['app/(dashboard)/dashboard/_components/WelcomeSoloCard.tsx', 1],
+      ['app/(dashboard)/dashboard/_components/AndroidBetaInviteCard.tsx', 1],
+      ['app/(dashboard)/dashboard/_components/PartnerLeftCard.tsx', 1],
+      ['app/(dashboard)/dashboard/_components/ActiveTripBanner.tsx', 1],
+    ]
+    for (const [file, n] of uses) {
+      const src = readFileSync(join(REPO_ROOT, file), 'utf8')
+      expect(src.match(/className="cjk-h /g)?.length, file).toBe(n)
+    }
+    // The landing tagline's 400 / 1.15 moved from inline style to classes so
+    // CJK can override it; en still renders 400 / 1.15.
+    const landing = readFileSync(join(REPO_ROOT, 'app/[locale]/_landing/Landing.tsx'), 'utf8')
+    expect(landing).toContain('text-display-tagline font-normal leading-[1.15]')
   })
 })

@@ -377,8 +377,11 @@ body {
  * simulated mobile LCP from 2.47 s to 2.62 s: one extra round trip, no error,
  * no visual change. The same goes for the landing HTML (gzip ~29.1 KB). */
 @layer base{:is(h1,h2,h3).font-serif:is(:lang(zh),:lang(ja)){font-weight:500;line-height:1.35}}
+/* .cjk-h: serif titles whose font is set inline (landing, dashboard cards), so
+ * no .font-serif. Unlayered so it beats leading-* and font-* utilities. */
+.cjk-h:is(:lang(zh),:lang(ja)){font-weight:500;line-height:1.35}
 .brand{display:contents}
-:is(.brand,.font-serif):lang(zh),:is(.brand,.font-serif):lang(ja){line-break:strict;word-break:auto-phrase;font-synthesis-style:none}
+:is(.brand,.font-serif,.cjk-h):is(:lang(zh),:lang(ja)){line-break:strict;word-break:auto-phrase;font-synthesis-style:none}
 .brand :is(h1,h2,h3,dt,p,li,dd){text-wrap:balance}
 /* Kill the grey tap flash Android Chrome paints over tapped controls. (#713) */
 * { -webkit-tap-highlight-color: transparent; }
