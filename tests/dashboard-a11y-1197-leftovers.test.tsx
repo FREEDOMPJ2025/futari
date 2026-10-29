@@ -78,10 +78,8 @@ describe('DashboardFilterRow tap areas (#1197 §6)', () => {
   }
 
   it('pads the overflow-x row top by exactly what it pulls back (layout-neutral) so ::before hit areas are not clipped', () => {
-    // #1851 — the scrolling row holds only the dual-toggles now (the 篩選
-    // trigger moved up to the mode-toggle row), so render it revealed.
-    const { container } = render(<DashboardFilterRow {...props} payerFilter="me" />)
-    const row = container.children[1] as HTMLElement
+    const { container } = render(<DashboardFilterRow {...props} />)
+    const row = container.firstElementChild as HTMLElement
     const cls = row.className.split(/\s+/)
     expect(cls).toContain('overflow-x-auto')
     expect(cls).toContain('pt-1.5')

@@ -325,6 +325,7 @@ export const en: Translations = {
       tripEmpty: 'Start a trip',
       tripAria: 'Trips: go to your trips',
     },
+    pendingSummary: '{n} to confirm',
     soloHero: {
       monthLabel: 'Logged in {month}',
       countLabel: { one: '{count} entry', other: '{count} entries' },

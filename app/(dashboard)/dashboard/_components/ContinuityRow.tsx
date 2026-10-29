@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from '@/lib/i18n/client'
 import { formatYearMonth } from '@/lib/monthlyReview'
 import type { ReviewCellState } from '@/lib/reviewCell'
-import { ContinuityCell } from './ContinuityCell'
+import { ContinuityCell, ReviewIcon } from './ContinuityCell'
 import { TripEntryCell } from './TripEntryCell'
 
 export type { ReviewCellState }
@@ -22,20 +22,18 @@ export function ContinuityRow({ review, hasActiveTrip }: { review: ReviewCellSta
   const c = t.dashboard.continuity
 
   let href = '/review'
-  let subtitle = review.kind === 'empty' ? c.reviewEmpty : c.reviewReturn
   let ariaLabel = c.reviewAriaIndex
   if (review.kind === 'latest') {
     // Intl names the month so each locale gets its own form ('8月' / 'August').
     const monthName = new Intl.DateTimeFormat(locale, { month: 'long' })
       .format(new Date(review.month.year, review.month.month - 1, 1))
     href = `/review/${formatYearMonth(review.month)}`
-    subtitle = c.reviewLatest.replace('{month}', monthName)
     ariaLabel = c.reviewAriaLatest.replace('{month}', monthName)
   }
 
   return (
-    <div className="px-4 pt-1 flex gap-4">
-      <ContinuityCell href={href} title={c.reviewTitle} subtitle={subtitle} ariaLabel={ariaLabel} />
+    <div className="px-5 flex gap-5">
+      <ContinuityCell href={href} title={c.reviewTitle} ariaLabel={ariaLabel} icon={<ReviewIcon />} />
       {!hasActiveTrip && <TripEntryCell />}
     </div>
   )

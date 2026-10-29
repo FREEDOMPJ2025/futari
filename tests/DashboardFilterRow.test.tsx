@@ -41,23 +41,4 @@ describe('DashboardFilterRow', () => {
     expect(chip.getAttribute('aria-expanded')).toBe('true')
     expect(getAllByRole('button')).toHaveLength(5)
   })
-
-  // #1851 — the trigger shares the mode-toggle row instead of taking its own,
-  // and at rest it is a text button (no fill, no border); an active filter
-  // keeps the filled chip.
-  it('puts the trigger on the same row as `leading`, quiet at rest and filled when active', () => {
-    const { getByRole, getByTestId, rerender } = render(
-      <DashboardFilterRow {...base} payerFilter="all" splitFilter="all" leading={<div data-testid="mode" />} />,
-    )
-    const chip = getByRole('button', { name: chipName })
-    expect(chip.parentElement).toBe(getByTestId('mode').parentElement)
-    expect(chip.style.background).toBe('transparent')
-    expect(chip.style.borderStyle).toBe('none')
-
-    rerender(<DashboardFilterRow {...base} payerFilter="me" splitFilter="all" leading={<div data-testid="mode" />} />)
-    expect(getByRole('button', { name: chipName }).style.background).toBe('var(--ink)')
-    // The toggles drop to a row of their own, below the shared row.
-    const segment = getByRole('button', { name: chipName }).parentElement!.nextElementSibling
-    expect(segment?.querySelectorAll('button').length).toBe(4)
-  })
 })

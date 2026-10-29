@@ -21,6 +21,7 @@ import { PendingIncomeStack } from './PendingIncomeStack'
 import { PendingExpenseStack } from './PendingExpenseStack'
 import { PendingShortcutStack } from './PendingShortcutStack'
 import { FirstRecordCard } from './FirstRecordCard'
+import { PendingSummary } from './PendingSummary'
 import type { PendingIncomeView, PendingExpenseView } from '@/lib/recurringMemberLink'
 import type { ShortcutPendingView } from '@/lib/db/queries/shortcutPending'
 import { useTranslations } from '@/lib/i18n/client'
@@ -300,15 +301,6 @@ export function Dashboard({
 
   const addOrIncome = mode === 'income' ? 'income' : 'add'
 
-  const modeToggle = (
-    <ModeTogglePlaceholder
-      mode={mode}
-      onChange={setMode}
-      incomePendingCount={pendings.length}
-      expensePendingCount={expensePendings.length}
-    />
-  )
-
   return (
     <div className="relative min-h-dvh pb-[var(--bottom-nav-offset)]">
       {/* L1: Brand identity */}
@@ -319,23 +311,15 @@ export function Dashboard({
         baseCurrency={baseCurrency}
         initialTripCollapsed={initialTripCollapsed}
       />
-      {/* L2: Mode toggle — left-aligned. The 篩選 trigger shares its row
-          (#1851) so the filter costs no row of its own; the filter collapses
-          in solo mode (only one person, no real split decisions). See
-          DashboardFilterRow for the toggle details. */}
-      {!viewedIsSolo && viewedPartner ? (
-        <DashboardFilterRow
-          payerFilter={payerFilter}
-          splitFilter={splitFilter}
-          onPayerChange={setPayerFilter}
-          onSplitChange={setSplitFilter}
-          viewerIsA={viewerIsA}
-          t={t}
-          leading={modeToggle}
+      {/* L2: Mode toggle — left-aligned */}
+      <div className="px-5 pb-3">
+        <ModeTogglePlaceholder
+          mode={mode}
+          onChange={setMode}
+          incomePendingCount={pendings.length}
+          expensePendingCount={expensePendings.length}
         />
-      ) : (
-        <div className="px-5 pb-3">{modeToggle}</div>
-      )}
+      </div>
       {/* Hero slot. Only the expense side ever differed by member count: a
           solo ledger has no balance to show, so it shows the month instead.
           The income branch of BalanceHero never involved a partner, so solo
@@ -387,91 +371,99 @@ export function Dashboard({
           confirming one while pinned would hit the past-chapter write block
           anyway. The page passes empty lists when pinned; the gate here is the
           component's own rule. */}
-      {!isPast && mode === 'expense' && expensePendings.length > 0 && (
-        <div className="px-5">
-          <PendingExpenseStack
-            pendings={expensePendings}
-            onEdit={(p) => dispatch({
-              type: 'openModal',
-              modal: {
-                kind: 'edit-pending-expense',
-                pendingId: p.id,
-                data: {
-                  id: p.id,
-                  amount: p.proposedAmount,
-                  description: p.proposedDescription,
-                  category: p.category,
-                  splitType: p.proposedSplitType,
-                  splitRatioA: p.proposedSplitRatioA,
-                  payerId: p.proposedPaidBy,
-                  // #1588 — the payer left; AddSheet makes the user re-pick.
-                  payerFormer: p.proposedPaidByIsFormer,
-                  // Construct as local midnight so AddSheet's getFullYear/Month/Date
-                  // round-trip yields the original YYYY-MM-DD regardless of timezone.
-                  transactedAt: `${p.proposedDate}T00:00:00`,
-                  assetId: p.assetId,
-                  notes: null,
-                },
-              },
-            })}
-          />
-        </div>
-      )}
-      {!isPast && mode === 'expense' && shortcutPendings.length > 0 && (
-        <div className="px-5">
-          <PendingShortcutStack
-            pendings={shortcutPendings}
-            onEdit={(p) => dispatch({
-              type: 'openModal',
-              modal: {
-                kind: 'edit-shortcut-pending',
-                pendingId: p.id,
-                data: {
-                  id: p.id,
-                  amount: p.amount,
-                  description: p.note ?? '',
-                  category: p.category ?? 'other',
-                  // The ledger default: solo is all mine, a duo opens on the
-                  // split slider at the ledger's ratio (AddSheet's create-mode
-                  // default). The save sends what the sheet shows.
-                  splitType: isSolo ? 'all_mine' : 'half',
-                  splitRatioA: null,
-                  payerId: viewer.id,
-                  // Local midnight, so AddSheet's local getFullYear/Month/Date
-                  // round-trip yields the card's Taipei day as is.
-                  transactedAt: `${p.day}T00:00:00`,
-                  assetId: null,
-                  notes: null,
-                },
-              },
-            })}
-          />
-        </div>
-      )}
-      {!isPast && mode === 'income' && (
-        <div className="px-5">
-          <PendingIncomeStack
-            pendings={pendings}
-            onEdit={(p) => dispatch({
-              type: 'openModal',
-              modal: {
-                kind: 'edit-pending',
-                pendingId: p.id,
-                data: {
-                  id: p.id,
-                  amount: p.proposedAmount,
-                  category: p.category,
-                  source: p.source,
-                  recipientId: p.recipientId,
-                  // #1588 — the recipient left; IncomeSheet makes the user re-pick.
-                  recipientFormer: p.recipientIsFormer,
-                  assetId: p.assetId,
-                  occurredAt: p.proposedDate,
-                },
-              },
-            })}
-          />
-        </div>
+      {/* #1851 — the stacks sit behind one 「N 筆待確認」 line and open in place
+          on tap; the count is always visible, so nothing waiting disappears. */}
+      {!isPast && (
+        <PendingSummary
+          count={mode === 'expense' ? expensePendings.length + shortcutPendings.length : pendings.length}
+        >
+          {mode === 'expense' && expensePendings.length > 0 && (
+            <div className="px-5">
+              <PendingExpenseStack
+                pendings={expensePendings}
+                onEdit={(p) => dispatch({
+                  type: 'openModal',
+                  modal: {
+                    kind: 'edit-pending-expense',
+                    pendingId: p.id,
+                    data: {
+                      id: p.id,
+                      amount: p.proposedAmount,
+                      description: p.proposedDescription,
+                      category: p.category,
+                      splitType: p.proposedSplitType,
+                      splitRatioA: p.proposedSplitRatioA,
+                      payerId: p.proposedPaidBy,
+                      // #1588 — the payer left; AddSheet makes the user re-pick.
+                      payerFormer: p.proposedPaidByIsFormer,
+                      // Construct as local midnight so AddSheet's getFullYear/Month/Date
+                      // round-trip yields the original YYYY-MM-DD regardless of timezone.
+                      transactedAt: `${p.proposedDate}T00:00:00`,
+                      assetId: p.assetId,
+                      notes: null,
+                    },
+                  },
+                })}
+              />
+            </div>
+          )}
+          {mode === 'expense' && shortcutPendings.length > 0 && (
+            <div className="px-5">
+              <PendingShortcutStack
+                pendings={shortcutPendings}
+                onEdit={(p) => dispatch({
+                  type: 'openModal',
+                  modal: {
+                    kind: 'edit-shortcut-pending',
+                    pendingId: p.id,
+                    data: {
+                      id: p.id,
+                      amount: p.amount,
+                      description: p.note ?? '',
+                      category: p.category ?? 'other',
+                      // The ledger default: solo is all mine, a duo opens on the
+                      // split slider at the ledger's ratio (AddSheet's create-mode
+                      // default). The save sends what the sheet shows.
+                      splitType: isSolo ? 'all_mine' : 'half',
+                      splitRatioA: null,
+                      payerId: viewer.id,
+                      // Local midnight, so AddSheet's local getFullYear/Month/Date
+                      // round-trip yields the card's Taipei day as is.
+                      transactedAt: `${p.day}T00:00:00`,
+                      assetId: null,
+                      notes: null,
+                    },
+                  },
+                })}
+              />
+            </div>
+          )}
+          {mode === 'income' && (
+            <div className="px-5">
+              <PendingIncomeStack
+                pendings={pendings}
+                onEdit={(p) => dispatch({
+                  type: 'openModal',
+                  modal: {
+                    kind: 'edit-pending',
+                    pendingId: p.id,
+                    data: {
+                      id: p.id,
+                      amount: p.proposedAmount,
+                      category: p.category,
+                      source: p.source,
+                      recipientId: p.recipientId,
+                      // #1588 — the recipient left; IncomeSheet makes the user re-pick.
+                      recipientFormer: p.recipientIsFormer,
+                      assetId: p.assetId,
+                      occurredAt: p.proposedDate,
+                    },
+                  },
+                })}
+              />
+            </div>
+          )}
+        </PendingSummary>
       )}
       <Suspense fallback={<DashboardFeedSkeleton />}>
         <DashboardFeed
@@ -482,6 +474,21 @@ export function Dashboard({
           onItemClick={handleItemClick}
           onAddIncome={() => dispatch({ type: 'openModal', modal: { kind: 'income' } })}
           onAddTx={() => dispatch({ type: 'openModal', modal: { kind: 'add' } })}
+          // L3 filter row, moved down to head the records it filters (#1851):
+          // 「最近紀錄」 left, the 篩選 chip right. Screen order is reading and
+          // Tab order, no CSS `order`. Not in solo mode (only one person, no
+          // real split decisions). See DashboardFilterRow for the toggles.
+          header={!viewedIsSolo && viewedPartner ? (title) => (
+            <DashboardFilterRow
+              payerFilter={payerFilter}
+              splitFilter={splitFilter}
+              onPayerChange={setPayerFilter}
+              onSplitChange={setSplitFilter}
+              viewerIsA={viewerIsA}
+              t={t}
+              title={title}
+            />
+          ) : undefined}
         />
       </Suspense>
       <BottomNav onAddClick={() => dispatch({ type: 'openModal', modal: { kind: addOrIncome } })} hideFab={sheetOpen || isPast} />

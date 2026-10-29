@@ -12,8 +12,9 @@ interface DashboardFilterRowProps {
   onSplitChange: (next: DashboardSplit) => void
   viewerIsA: boolean
   t: ReturnType<typeof useTranslations>
-  /** What shares the row with the 篩選 trigger: the dashboard's mode toggle (#1851). */
-  leading?: ReactNode
+  /** #1851 — set when the row heads the records list: the list's own title
+   *  sits left of the chip on one line, and the toggles open below it. */
+  title?: ReactNode
 }
 
 /**
@@ -31,7 +32,7 @@ export function DashboardFilterRow({
   onSplitChange,
   viewerIsA,
   t,
-  leading,
+  title,
 }: DashboardFilterRowProps) {
   const [open, setOpen] = useState(false)
   const hasActiveFilter = payerFilter !== 'all' || splitFilter !== 'all'
@@ -39,31 +40,19 @@ export function DashboardFilterRow({
   // explicit tap opens them when nothing is filtered yet.
   const showToggles = open || hasActiveFilter
 
-  // `pt-1.5 -mt-1.5` is layout-neutral on purpose (same fix as the /records L3
-  // row, #1169): `overflow-x-auto` also clips overflow-y, and clipping applies
-  // to hit-testing. The chip and the dual-toggle segments pad their tap areas
-  // to 44px with ::before pseudos that reach ~5px above the row's content box;
-  // without top padding that strip is cut off and the real tap area stops
-  // short of 44px. The existing pb-2 already covers the bottom edge.
-  // Symptom if the padding goes: nothing looks different, taps on the top few
-  // px above a chip just stop registering (#1197).
-  // #1851 — at rest the chip is a quiet text button on the mode-toggle row
-  // (`leading`), so the filter costs no row of its own. Left, right after the
-  // toggle: the right edge is where BrandHeaderHint's 旅行／設定 labels hang. Active, it keeps the
-  // filled ink chip so a filtered feed is never mistaken for the full one.
-  const trigger = (
+  // Visible chip stays 32px; the ::before extends the hit area 6px up and
+  // down to 44px (same pattern as SettleButton, #147).
+  const chip = (
     <button
       type="button"
       onClick={() => setOpen((o) => !o)}
       aria-expanded={showToggles}
       aria-label={t.dashboard.filterAriaLabel}
-      // Visible chip stays 32px; the ::before extends the hit area 6px up
-      // and down to 44px (same pattern as SettleButton, #147).
       className="relative h-8 px-3 rounded-full text-sm flex items-center gap-1.5 shrink-0 whitespace-nowrap cursor-pointer transition-colors duration-150 before:absolute before:-inset-y-1.5 before:inset-x-0 before:content-['']"
       style={{
-        background: hasActiveFilter ? 'var(--ink)' : 'transparent',
+        background: hasActiveFilter ? 'var(--ink)' : 'var(--surface)',
         color: hasActiveFilter ? 'var(--on-fill)' : 'var(--ink-2)',
-        border: 'none',
+        border: hasActiveFilter ? 'none' : '1px solid var(--hairline)',
       }}
     >
       {t.dashboard.filterLabel}
@@ -75,40 +64,47 @@ export function DashboardFilterRow({
       )}
     </button>
   )
+  const toggles = (
+    <>
+      <PayerDualToggle value={payerFilter} onChange={onPayerChange} viewerIsA={viewerIsA} t={t} />
+      <SplitDualToggle value={splitFilter} onChange={onSplitChange} viewerIsA={viewerIsA} t={t} />
+    </>
+  )
 
   // `pt-1.5 -mt-1.5` is layout-neutral on purpose (same fix as the /records L3
   // row, #1169): `overflow-x-auto` also clips overflow-y, and clipping applies
-  // to hit-testing. The dual-toggle segments pad their tap areas to 44px with
-  // ::before pseudos that reach ~5px above the row's content box; without top
-  // padding that strip is cut off and the real tap area stops short of 44px.
-  // The existing pb-2 already covers the bottom edge.
+  // to hit-testing. The chip and the dual-toggle segments pad their tap areas
+  // to 44px with ::before pseudos that reach ~5px above the row's content box;
+  // without top padding that strip is cut off and the real tap area stops
+  // short of 44px. The existing pb-2 already covers the bottom edge.
   // Symptom if the padding goes: nothing looks different, taps on the top few
-  // px above a toggle just stop registering (#1197).
-  return (
-    <>
-      <div className="flex items-center gap-2 px-5 pb-3">
-        {leading}
-        {trigger}
-      </div>
-      {showToggles && (
-        <div
-          className="flex items-center gap-2 px-5 pt-1.5 -mt-1.5 pb-2 overflow-x-auto"
-          style={{ scrollbarWidth: 'none' } as React.CSSProperties}
-        >
-          <PayerDualToggle
-            value={payerFilter}
-            onChange={onPayerChange}
-            viewerIsA={viewerIsA}
-            t={t}
-          />
-          <SplitDualToggle
-            value={splitFilter}
-            onChange={onSplitChange}
-            viewerIsA={viewerIsA}
-            t={t}
-          />
+  // px above a chip just stop registering (#1197).
+  const scrollRow = 'flex items-center gap-2 pt-1.5 -mt-1.5 pb-2 overflow-x-auto'
+
+  if (title !== undefined) {
+    // Heading the records list (#1851): the list's title on the left, the
+    // chip on the right, toggles on their own row below. TransactionFeed's
+    // label wrapper owns the horizontal padding. The title row does not clip,
+    // so the chip keeps its full 44px there.
+    return (
+      <>
+        <div className="flex items-center justify-between gap-3">
+          {title}
+          {chip}
         </div>
-      )}
-    </>
+        {showToggles && (
+          <div className={`${scrollRow} mt-2`} style={{ scrollbarWidth: 'none' } as React.CSSProperties}>
+            {toggles}
+          </div>
+        )}
+      </>
+    )
+  }
+
+  return (
+    <div className={`${scrollRow} px-5`} style={{ scrollbarWidth: 'none' } as React.CSSProperties}>
+      {chip}
+      {showToggles && toggles}
+    </div>
   )
 }

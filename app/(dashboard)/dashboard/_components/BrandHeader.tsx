@@ -12,7 +12,7 @@ interface BrandHeaderProps {
   onTripClick?: () => void
 }
 
-function PlaneIcon({ size = 14, color = 'currentColor' }: { size?: number; color?: string }) {
+export function PlaneIcon({ size = 14, color = 'currentColor' }: { size?: number; color?: string }) {
   return (
     <svg
       width={size}

@@ -326,6 +326,7 @@ export const ja: Translations = {
       tripEmpty: '旅行を記録する',
       tripAria: '旅行：旅行の一覧へ',
     },
+    pendingSummary: '確認待ち {n} 件',
     soloHero: {
       monthLabel: '{month}の記録',
       countLabel: { one: '{count}件', other: '{count}件' },

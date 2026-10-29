@@ -1,6 +1,6 @@
 'use client'
 
-import { use, useCallback, useMemo } from 'react'
+import { use, useCallback, useMemo, type ReactNode } from 'react'
 import { TransactionFeed } from '@/app/(dashboard)/_components/TransactionFeed'
 import { EmptyState } from './EmptyState'
 import { IncomeEmptyState } from './IncomeEmptyState'
@@ -19,6 +19,9 @@ interface DashboardFeedProps {
   onItemClick: (tx: PagedTxnRow) => void
   onAddIncome: () => void
   onAddTx: () => void
+  /** #1851 — wraps the list's 「最近紀錄」 title, so the 篩選 row can head the
+   *  records it filters. Absent (solo): the title alone, as before. */
+  header?: (title: ReactNode) => ReactNode
 }
 
 export function DashboardFeed({
@@ -29,9 +32,15 @@ export function DashboardFeed({
   onItemClick,
   onAddIncome,
   onAddTx,
+  header,
 }: DashboardFeedProps) {
   const { recent, recentIncomeFeed } = use(feedDataPromise)
   const t = useTranslations()
+  const title = (
+    <span className="text-xs font-medium tracking-[0.5px]" style={{ color: 'var(--ink-2)' }}>
+      {t.feed.header}
+    </span>
+  )
 
   const incomeRenderRow = useCallback(
     (tx: PagedTxnRow) => renderIncomeFeedRow(tx, onItemClick),
@@ -56,13 +65,7 @@ export function DashboardFeed({
       filter={filter ?? undefined}
       loader={mode === 'income' ? incomeLoader : undefined}
       renderRow={mode === 'income' ? incomeRenderRow : undefined}
-      label={
-        <div className="flex items-end justify-between">
-          <span className="text-xs font-medium tracking-[0.5px]" style={{ color: 'var(--ink-2)' }}>
-            {t.feed.header}
-          </span>
-        </div>
-      }
+      label={header ? header(title) : <div className="flex items-end justify-between">{title}</div>}
       emptyState={
         mode === 'income'
           ? <IncomeEmptyState onAdd={onAddIncome} />
