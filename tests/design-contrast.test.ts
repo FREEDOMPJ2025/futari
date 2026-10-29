@@ -260,10 +260,20 @@ describe('design-contrast — PhilosophyCards text opacity', () => {
     expect(contrastOf('--ink-2', '--bg')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
   })
 
-  it('the accent eyebrow uses --accent-text, which clears normal-text AA on --bg (~4.90:1) and --surface (~5.63:1)', () => {
+  it('the accent eyebrow uses --accent-text, which clears normal-text AA on --bg (~5.30:1) and --surface (~6.08:1)', () => {
     expect(source).toMatch(/const TEXT:[^\n]*accent: 'text-accent-text'/)
     expect(contrastOf('--accent-text', '--bg')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
     expect(contrastOf('--accent-text', '--surface')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+    // Pinned so a lighter --accent-text shows up here first, not only on the card 2 band.
+    expect(contrastOf('--accent-text', '--bg')).toBeCloseTo(5.30, 1)
+    expect(contrastOf('--accent-text', '--surface')).toBeCloseTo(6.08, 1)
+  })
+
+  it('--accent-text clears normal-text AA on --accent-soft (~4.55:1), the band under onboarding card 2’s eyebrow', () => {
+    // Card 2 draws a --bg → --accent-soft gradient behind a transparent surface, and its eyebrow sits
+    // on the --accent-soft part (PhilosophyCards Card02). That band is the worst case for this token.
+    expect(source).toMatch(/linear-gradient\(180deg, var\(--bg\) 0%, var\(--bg\) 38%, var\(--accent-soft\) 38%/)
+    expect(contrastOf('--accent-text', '--accent-soft')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
   })
 })
 

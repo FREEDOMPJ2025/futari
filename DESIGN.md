@@ -202,7 +202,7 @@ A warm domestic palette lit from one ember source, kept low-chroma so nothing sh
 ### Primary
 - **Ember** (#E08856): The single brand accent. The switch "on" state, on-state dots and focus rings (at 55% mix); filled CTAs (FAB, invite, monthly-review entry) use its deeper Ember Fill. Used sparingly so its warmth reads as a highlight, not a wash.
 - **Ember Fill** (#A9572A, `--accent-fill`): Ember deepened for filled buttons that carry white text (FAB, invite, monthly-review entry, via `--btn-accent-bg`). White on it is 5.14:1; plain Ember fails at 2.68:1. Plain Ember stays for focus rings, on-state dots, soft fills and illustration (#1850).
-- **Ember Text** (#A05228, `--accent-text`): Ember deepened for small ember text on `--bg` (4.90:1) and `--surface` (5.63:1), such as the onboarding eyebrows; plain Ember is 2.34:1 on `--bg`. Small text uses `--accent-text`; `--accent` is only for dots, rails and illustration (#1850).
+- **Ember Text** (#984E26, `--accent-text`): Ember deepened for small ember text on `--bg` (5.30:1), `--surface` (6.08:1) and `--accent-soft` (4.55:1, the onboarding card 2 band), such as the onboarding eyebrows; plain Ember is 2.34:1 on `--bg`. Small text uses `--accent-text`; `--accent` is only for dots, rails and illustration (#1850).
 - **Ember Soft** (#F8D9C2): The accent's quiet tint for soft fills and accent backgrounds where the full ember would be too loud.
 
 ### Secondary
