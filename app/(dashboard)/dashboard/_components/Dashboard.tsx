@@ -304,7 +304,7 @@ export function Dashboard({
   return (
     <div className="relative min-h-dvh pb-[var(--bottom-nav-offset)]">
       {/* L1: Brand identity */}
-      <BrandHeader showTripButton={activeTrips.length === 0} onTripClick={() => dispatch({ type: 'openTripSheet' })} />
+      <BrandHeader />
       {/* L3: Contextual strip (offline / past-epoch / active-trip) */}
       <ContextStrip
         activeTrips={activeTrips}

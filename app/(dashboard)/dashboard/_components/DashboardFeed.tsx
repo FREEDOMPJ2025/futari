@@ -65,6 +65,7 @@ export function DashboardFeed({
       filter={filter ?? undefined}
       loader={mode === 'income' ? incomeLoader : undefined}
       renderRow={mode === 'income' ? incomeRenderRow : undefined}
+      denseMonths
       label={header ? header(title) : <div className="flex items-end justify-between">{title}</div>}
       emptyState={
         mode === 'income'
@@ -84,7 +85,7 @@ export function DashboardFeedSkeleton() {
           {t.feed.header}
         </span>
       </div>
-      <div className="px-6 pt-4 pb-2">
+      <div className="px-6 pt-2 pb-1">
         <div className="h-4 w-24 rounded animate-pulse" style={{ background: 'var(--surface)', opacity: 0.6 }} />
       </div>
       <div

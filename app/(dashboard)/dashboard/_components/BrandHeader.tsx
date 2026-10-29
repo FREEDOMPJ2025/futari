@@ -7,11 +7,6 @@ import { Avatar } from '@/app/(dashboard)/_components/Avatar'
 import { useTranslations } from '@/lib/i18n/client'
 import { BrandHeaderHint } from './BrandHeaderHint'
 
-interface BrandHeaderProps {
-  showTripButton?: boolean
-  onTripClick?: () => void
-}
-
 export function PlaneIcon({ size = 14, color = 'currentColor' }: { size?: number; color?: string }) {
   return (
     <svg
@@ -30,7 +25,7 @@ export function PlaneIcon({ size = 14, color = 'currentColor' }: { size?: number
   )
 }
 
-export function BrandHeader({ showTripButton, onTripClick }: BrandHeaderProps = {}) {
+export function BrandHeader() {
   const { group, viewer, viewerIsA, isFormerMember } = useMember()
   // #1604 — in a past chapter: that chapter's partner, initial only (avatarUrl
   // is null), or nobody if the chapter was solo. Never today's partner.
@@ -58,22 +53,9 @@ export function BrandHeader({ showTripButton, onTripClick }: BrandHeaderProps = 
       </div>
       {/* relative: anchor for BrandHeaderHint absolute callouts */}
       <div className="relative flex items-center gap-2 shrink-0">
-        {/* #1612 — a former member's look-back offers no trip or settings
-            entry: both act on the viewer's own ledger, not this chapter. */}
-        {showTripButton && !isFormerMember && (
-          <button
-            type="button"
-            onClick={onTripClick}
-            aria-label={t.dashboard.activeTripBanner.addAriaLabel}
-            className="h-8 w-8 rounded-full flex items-center justify-center cursor-pointer"
-            style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--hairline)',
-            }}
-          >
-            <PlaneIcon size={14} color="var(--ink-2)" />
-          </button>
-        )}
+        {/* #1612 — a former member's look-back offers no settings entry: it
+            acts on the viewer's own ledger, not this chapter. The trip entry
+            lives in the dashboard's continuation row only (#1851). */}
         {isFormerMember ? (
           <div className="flex p-1 -mr-1">
             <Avatar memberRole={viewerRole} initial={viewer.initial} src={viewer.avatarUrl} size={26} />
@@ -98,7 +80,7 @@ export function BrandHeader({ showTripButton, onTripClick }: BrandHeaderProps = 
             )}
           </button>
         )}
-        {!isFormerMember && <BrandHeaderHint showTripButton={!!showTripButton} />}
+        {!isFormerMember && <BrandHeaderHint />}
       </div>
     </div>
   )
