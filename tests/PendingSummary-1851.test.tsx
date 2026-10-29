@@ -37,11 +37,16 @@ describe('PendingSummary (#1851)', () => {
     fireEvent.click(screen.getByRole('button', { name: '1 筆待確認' }))
   })
 
-  it('every locale has the summary with its {n}', async () => {
+  it('every locale has both plural forms with their {n} (#1862 copy)', async () => {
     const { en } = await import('@/lib/i18n/locales/en')
     const { zhCN } = await import('@/lib/i18n/locales/zh-CN')
     const { ja } = await import('@/lib/i18n/locales/ja')
-    for (const t of [zhTW, zhCN, en, ja]) expect(t.dashboard.pendingSummary).toContain('{n}')
+    for (const t of [zhTW, zhCN, en, ja]) {
+      expect(t.dashboard.pendingSummary.one).toContain('{n}')
+      expect(t.dashboard.pendingSummary.other).toContain('{n}')
+    }
+    expect(en.dashboard.pendingSummary.one).toBe('{n} entry to confirm')
+    expect(en.dashboard.pendingSummary.other).toBe('{n} entries to confirm')
   })
 })
 

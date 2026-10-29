@@ -325,7 +325,7 @@ export const zhCN: Translations = {
       tripEmpty: '开始一趟旅行账',
       tripAria: '旅行：前往旅行列表',
     },
-    pendingSummary: '{n} 笔待确认',
+    pendingSummary: { one: '{n} 笔待确认', other: '{n} 笔待确认' },
     soloHero: {
       monthLabel: '{month}记下',
       countLabel: { one: '{count} 笔', other: '{count} 笔' },
