@@ -200,15 +200,16 @@ This system explicitly rejects the things a money app reflexively becomes. No co
 A warm domestic palette lit from one ember source, kept low-chroma so nothing shouts.
 
 ### Primary
-- **Ember** (#E08856): The single brand accent. The FAB, key CTAs (invite, monthly-review entry), the switch "on" state, and focus rings (at 55% mix). Used sparingly so its warmth reads as a highlight, not a wash.
+- **Ember** (#E08856): The single brand accent. The switch "on" state, on-state dots and focus rings (at 55% mix); filled CTAs (FAB, invite, monthly-review entry) use its deeper Ember Fill. Used sparingly so its warmth reads as a highlight, not a wash.
+- **Ember Fill** (#A9572A, `--accent-fill`): Ember deepened for filled buttons that carry white text (FAB, invite, monthly-review entry, via `--btn-accent-bg`). White on it is 5.14:1; plain Ember fails at 2.68:1. Plain Ember stays for focus rings, on-state dots, soft fills and illustration (#1850).
 - **Ember Soft** (#F8D9C2): The accent's quiet tint for soft fills and accent backgrounds where the full ember would be too loud.
 
 ### Secondary
 - **Cocoa Ink** (#3A2419): The system's anchor. Primary text and, as a fill, the primary commit button and selected chips/segments. The dark-ink fill is the firmest gesture in the room.
 
 ### Tertiary
-- **Sage** (#7A9F7E): Credit / income / money-coming-in. Also the savings family, with Sage Saving (#5A7A66) for badge text and Saving Soft (#DDE5DC) for its fill.
-- **Clay** (#D17561): Debit / money-going-out, and soft error tints (clay at 10%). Clay has two derived companions that exist purely to hold WCAG AA: `--debit-quiet` (clay mixed 72% with cocoa-ink) for the balance-hero "you owe" amount, so the debtor figure reads as calm earth rather than alarm; and `--debit-text` (clay mixed 60% with cocoa-ink, ~4.87:1) for any alert body sitting on the 10% clay tint, because plain clay fails AA there at ~2.7:1.
+- **Sage** (#7A9F7E): Credit / income / money-coming-in, for icons, dots and charts. Income *amount text* uses **Sage Text** (#557559, `--credit-text`, 4.49:1 on `--bg`, 5.15:1 on `--surface`), because plain Sage is 2.58:1 on `--bg` (#1850). Also the savings family, with Sage Saving (#5A7A66) for badge text and Saving Soft (#DDE5DC) for its fill.
+- **Clay** (#D17561): Debit / money-going-out, and soft error tints (clay at 10%). Clay has two derived companions that exist purely to hold WCAG AA: `--debit-quiet` (clay mixed 72% with cocoa-ink) for the balance-hero "you owe" amount, so the debtor figure reads as calm earth rather than alarm; and `--debit-text` (clay mixed 60% with cocoa-ink, ~4.87:1) for any alert body sitting on the 10% clay tint, because plain clay fails AA there at ~2.7:1. `--debit-text` (#955544, 5.00:1 on `--bg`) is also the color for expense amount text in ledger rows; plain Clay (2.85:1) is for icons, dots and charts only (#1850).
 - **Warning** (#B45309): Amber for paused and warning states, with a 12% tint for the paused pill badge. Distinct from destructive so "paused" never reads as "broken."
 - **Destructive** (#B85A48): Deeper red reserved for irreversible actions (leave ledger, delete, sign out), with a 25% tint for its outline variant. Deliberately separate from Clay so "leaving" never reads as "an expense."
 - **Realtime Flash** (#FFFBE8): The pale warm yellow that pulses once behind a row when the partner writes from another device. See **The Realtime Flash** in Components.
@@ -236,7 +237,7 @@ Per愛物-type identity colors, each muted and emotive, with a tint derived via 
 
 **The Two-Grounds Rule.** `--bg` is where the couple works; `--bg-committed` is where the product speaks. Brand surfaces take the committed ground and the serif; app surfaces take the app ground and the sans. (§3 names a handful of first-run/connectivity screens — `/setup`, `/onboarding`, `/invite`, `/offline` — that keep the serif while staying on `--bg`; that is a §3 typography exception, not a second ground.) Never mix: a landing section on `--bg` looks unfinished, and a dashboard on `--bg-committed` looks like a marketing page wearing app chrome.
 
-**The Derived-Contrast Rule.** When a warm hue must carry text or sit under text, it gets a cocoa-ink-mixed companion rather than an opacity reduction. `--debit-quiet` and `--debit-text` exist for exactly this. Never solve a contrast failure by lightening the background or reaching for a new hue.
+**The Derived-Contrast Rule.** When a warm hue must carry text or sit under text, it gets a cocoa-ink-mixed companion rather than an opacity reduction. `--debit-quiet`, `--debit-text`, `--credit-text` and `--accent-fill` exist for exactly this. Never solve a contrast failure by lightening the background or reaching for a new hue.
 
 ## 3. Typography
 
@@ -365,7 +366,7 @@ The vocabulary is deliberately tiny. `components/ui/` holds five primitives: `Bu
 - **Shape:** Friendly rounded (`--radius-bubble`, 14px). Heights via control tokens: sm 36px, md 44px, lg 52px. Font weight 500, label truncates rather than wraps.
 - **Height by role (#1250):** the full-width commit button that closes a sheet or ends a standalone flow (sheet footer 記下, setup / invite / sign-in, leave-ledger, remove-partner, log out, delete account, public-page CTAs) is **48px, Tailwind-native `h-12`**. That is the primary-button default in shipped code, about 30 sites. `--control-md` (44px) is the `Button` primitive's `md`, used for inline and secondary buttons and for every text input. `--control-lg` (52px) is reserved for the hero CTA. An earlier token comment called 44px the "primary button default". Shipped code never matched it, and the failure looks like this: a reviewer "corrects" a 48px commit button down to `h-11`, and that one screen's anchor comes out 4px shorter than every other flow's. Don't shrink the `h-12` sites to match the token.
 - **Primary:** Cocoa Ink fill (#3A2419) with `--on-fill` text. The firm commit anchor (記下 / 儲存 / 繼續 / 確認).
-- **Accent:** Ember fill with `--on-fill` text. The rare ember commit (empty-state "add first record", invite, monthly-review entry). Subject to the One Ember Rule. Flat: no drop shadow; the fill carries it.
+- **Accent:** Ember Fill (`--accent-fill`) with `--on-fill` text. The rare ember commit (empty-state "add first record", invite, monthly-review entry). Subject to the One Ember Rule. Flat: no drop shadow; the fill carries it.
 - **Secondary:** Surface White with Cocoa Ink text and a Cocoa Ink 3 (#82654F) hairline border. The calm alternative (取消 / 輔助).
 - **Ghost:** Transparent with Cocoa Ink 2 (#7A5848) text, no border.
 - **Danger:** Destructive fill (#B85A48) with white text (離開帳本 / 刪除). Distinct from Clay debit so "leaving" never reads as "an expense."
@@ -433,10 +434,10 @@ Each Don't carries a one-sentence audit test. Run the test on the screen; if it 
 - **Do** set brand-surface headings in Fraunces 500 on `--bg-committed`; set the working ledger in Noto Sans TC on `--bg`.
 - **Do** use the dark Cocoa Ink fill for the primary commit, so the one firm action is unmistakable.
 - **Do** give amounts room to be big with `tnum`, paired with a quiet label.
-- **Do** give every new animation a `prefers-reduced-motion: reduce` branch, matching `.partner-toast` and `.about-article`. Three existing animations (`.rt-flash`, `.rt-fading`, `.animate-blink`) still lack one; adding motion without a branch widens a known gap.
+- **Do** give every new animation a `prefers-reduced-motion: reduce` branch, matching `.partner-toast` and `.about-article`.
 - **Do** keep transitions near 150ms and ease-out (the about fade-up uses `cubic-bezier(0.22, 1, 0.36, 1)`).
 - **Do** pair the Sage/Clay credit-debit distinction with a non-color cue (sign, label, icon) for color-blind legibility.
-- **Do** solve a warm-hue contrast failure with a cocoa-ink-mixed companion (`--debit-text`, `--debit-quiet`), never by lightening the ground.
+- **Do** solve a warm-hue contrast failure with a cocoa-ink-mixed companion (`--debit-text`, `--debit-quiet`, `--credit-text`, `--accent-fill`), never by lightening the ground.
 - **Do** treat both partners as equals, and treat solo mode as a complete state rather than a half-finished setup.
 - **Do** clear `env(safe-area-inset-*)` on every fixed or sticky element, and verify it in the native shell rather than the browser.
 - **Do** reach for an existing token first: `text-*` for type, Tailwind spacing utilities plus `--sheet-*` for padding, `--radius-*` for corners, `--color-*` / `var(--ink*)` for color, `z-*` for stacking.

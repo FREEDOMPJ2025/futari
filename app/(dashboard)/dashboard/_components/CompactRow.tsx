@@ -98,7 +98,7 @@ export function CompactRow({ tx, isLast, onClick }: CompactRowProps) {
     ? (payerIsViewer ? tx.amount - delta : -delta)
     : 0
   const showMyShare = tx.kind === 'transaction' && myShare !== 0
-  const myShareColor = tx.kind === 'income' ? 'var(--credit)' : 'var(--debit)'
+  const myShareColor = tx.kind === 'income' ? 'var(--credit-text)' : 'var(--debit-text)'
 
   // For income rows, fall back to category label when source/description is empty.
   const displayLabel = tx.kind === 'income'

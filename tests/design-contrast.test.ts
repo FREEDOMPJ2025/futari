@@ -233,7 +233,7 @@ describe('design-contrast — math sanity check against documented figures', () 
 // ---------------------------------------------------------------------------
 
 const GROUNDS = ['--bg', '--bg-committed', '--surface', '--surface-alt']
-const INKS = ['--ink', '--ink-2', '--ink-3', '--debit-text', '--debit-quiet', '--credit', '--accent', '--destructive', '--on-fill']
+const INKS = ['--ink', '--ink-2', '--ink-3', '--debit-text', '--debit-quiet', '--credit', '--credit-text', '--accent', '--accent-fill', '--destructive', '--on-fill']
 
 const NORMAL_TEXT_MIN = 4.5
 const GRAPHICAL_MIN = 3
@@ -338,11 +338,11 @@ describe('design-contrast — known-bad pairings, encoded as passing assertions 
     expect(resolve('--on-fill')).toEqual({ r: 255, g: 255, b: 255, a: 1 })
   })
 
-  // The settlement commit button no longer uses this pairing (#1197 moved it
-  // to --btn-primary-*, asserted above). The pairing itself is unchanged and
-  // still backs --btn-accent-bg / --btn-accent-text wherever the accent
-  // button is used, so the known-bad ratio stays pinned here.
-  it('#1197 — white on --accent is below 4.5:1 (~2.68:1); was the settlement commit button, still the --btn-accent-* pairing', () => {
+  // No button uses this pairing any more: #1197 moved the settlement commit
+  // button to --btn-primary-*, and #1850 moved --btn-accent-bg to
+  // --accent-fill (asserted below). --accent itself is unchanged and stays
+  // for rings, dots and soft fills, so the ratio stays pinned here.
+  it('#1197 — white on --accent is below 4.5:1 (~2.68:1); no longer a button pairing since #1850', () => {
     const ratio = contrastOf('--on-fill', '--accent')
     console.log(`[design-contrast] #1197 --on-fill on --accent = ${ratio.toFixed(2)}:1`)
     expect(Math.abs(ratio - 2.68)).toBeLessThan(0.05)
@@ -359,5 +359,36 @@ describe('design-contrast — #1197 TransactionFeed error toast', () => {
     console.log(`[design-contrast] #1197 TransactionFeed toast --debit-text on --debit-soft-over-surface = ${ratio.toFixed(2)}:1`)
     expect(ratio).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
     expect(contrastOf('--on-fill', '--debit')).toBeLessThan(NORMAL_TEXT_MIN)
+  })
+})
+
+describe('design-contrast — #1850 accent fill and amount text', () => {
+  it('--btn-accent-text on --btn-accent-bg (now --accent-fill) clears normal-text AA (~5.14:1)', () => {
+    const ratio = contrastOf('--btn-accent-text', '--btn-accent-bg')
+    console.log(`[design-contrast] #1850 --btn-accent-text on --btn-accent-bg = ${ratio.toFixed(2)}:1`)
+    expect(ratio).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+  })
+
+  it('--accent-fill on --bg clears graphical-object AA (3:1) for the FAB edge (~4.48:1)', () => {
+    expect(contrastOf('--accent-fill', '--bg')).toBeGreaterThanOrEqual(GRAPHICAL_MIN)
+  })
+
+  it('--debit-text on --bg clears normal-text AA (~5.00:1) — CompactRow expense share', () => {
+    expect(contrastOf('--debit-text', '--bg')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+  })
+
+  it('--credit-text on --surface clears normal-text AA (~5.15:1) — outing settlement, income hero card', () => {
+    expect(contrastOf('--credit-text', '--surface')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+  })
+
+  // The approved value (#557559) lands 0.01 short of 4.5:1 on --bg, where
+  // CompactRow's 14px income share sits. Pinned like the known-bad block
+  // above so a later token change is a deliberate update. Large text
+  // (BalanceHero, 3:1) is fine.
+  it('#1850 — --credit-text on --bg is ~4.49:1: clears large-text 3:1, 0.01 short of normal-text 4.5:1', () => {
+    const ratio = contrastOf('--credit-text', '--bg')
+    console.log(`[design-contrast] #1850 --credit-text on --bg = ${ratio.toFixed(3)}:1`)
+    expect(Math.abs(ratio - 4.49)).toBeLessThan(0.01)
+    expect(ratio).toBeGreaterThanOrEqual(GRAPHICAL_MIN)
   })
 })

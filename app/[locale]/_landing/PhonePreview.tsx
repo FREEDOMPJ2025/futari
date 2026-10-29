@@ -196,8 +196,8 @@ export function PhonePreview({ t, scale = 1 }: Props) {
         <div
           className="absolute right-[18px] bottom-[18px] w-12 h-12 rounded-full flex items-center justify-center text-page font-medium"
           style={{
-            background: 'var(--accent)',
-            color: 'var(--on-fill)',
+            background: 'var(--btn-accent-bg)',
+            color: 'var(--btn-accent-text)',
             boxShadow: '0 8px 16px -4px rgba(224, 136, 86, 0.5)',
           }}
         >
