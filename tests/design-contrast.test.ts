@@ -377,18 +377,13 @@ describe('design-contrast — #1850 accent fill and amount text', () => {
     expect(contrastOf('--debit-text', '--bg')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
   })
 
-  it('--credit-text on --surface clears normal-text AA (~5.15:1) — outing settlement, income hero card', () => {
+  it('--credit-text on --surface clears normal-text AA (~5.22:1) — outing settlement, income hero card', () => {
     expect(contrastOf('--credit-text', '--surface')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
   })
 
-  // The approved value (#557559) lands 0.01 short of 4.5:1 on --bg, where
-  // CompactRow's 14px income share sits. Pinned like the known-bad block
-  // above so a later token change is a deliberate update. Large text
-  // (BalanceHero, 3:1) is fine.
-  it('#1850 — --credit-text on --bg is ~4.49:1: clears large-text 3:1, 0.01 short of normal-text 4.5:1', () => {
+  it('--credit-text on --bg clears normal-text AA (~4.54:1) — CompactRow income share', () => {
     const ratio = contrastOf('--credit-text', '--bg')
     console.log(`[design-contrast] #1850 --credit-text on --bg = ${ratio.toFixed(3)}:1`)
-    expect(Math.abs(ratio - 4.49)).toBeLessThan(0.01)
-    expect(ratio).toBeGreaterThanOrEqual(GRAPHICAL_MIN)
+    expect(ratio).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
   })
 })

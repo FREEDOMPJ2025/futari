@@ -22,7 +22,7 @@
   --accent-fill: #A9572A;
   --credit: #7A9F7E;
   /* Income amount text (#1850): --credit is 2.58:1 on --bg, so text uses this. */
-  --credit-text: #557559;
+  --credit-text: #557458;
   --debit: #D17561;
   --debit-soft: rgba(209, 117, 97, 0.10);  /* error message bg tint */
   /* Muted clay for the balance-hero "you owe" amount: clay shifted toward
@@ -179,6 +179,7 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-credit: var(--credit);
+  --color-credit-text: var(--credit-text);
   --color-debit: var(--debit);
   --color-destructive: var(--destructive);
   --color-hairline: var(--hairline);
