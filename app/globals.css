@@ -378,8 +378,10 @@ body {
  * no visual change. The same goes for the landing HTML (gzip ~29.1 KB). */
 @layer base{:is(h1,h2,h3).font-serif:is(:lang(zh),:lang(ja)){font-weight:500;line-height:1.35}}
 /* .cjk-h: serif titles whose font is set inline (landing, dashboard cards), so
- * no .font-serif. Unlayered so it beats leading-* and font-* utilities. */
+ * no .font-serif. Unlayered so it beats leading-* and font-* utilities.
+ * .cjk-d: the landing display headline keeps a tight 1.15 (Daphne, #1859). */
 .cjk-h:is(:lang(zh),:lang(ja)){font-weight:500;line-height:1.35}
+.cjk-d:is(:lang(zh),:lang(ja)){line-height:1.15}
 .brand{display:contents}
 :is(.brand,.font-serif,.cjk-h):is(:lang(zh),:lang(ja)){line-break:strict;word-break:auto-phrase;font-synthesis-style:none}
 .brand :is(h1,h2,h3,dt,p,li,dd){text-wrap:balance}

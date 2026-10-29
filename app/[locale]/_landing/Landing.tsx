@@ -175,7 +175,7 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
             </p>
 
             <h1
-              className="cjk-h m-0 leading-none md:leading-[1]"
+              className="cjk-h cjk-d m-0 leading-none md:leading-[1]"
               style={{
                 fontFamily: 'var(--font-fraunces)',
                 fontWeight: 500,
@@ -188,7 +188,7 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
                   even though per-character it's smaller; lh 1.15 keeps
                   the block tight, letter-spacing -1px tightens CJK rhythm. */}
               <span
-                className="cjk-h ph md:hidden block text-display-tagline font-normal leading-[1.15]"
+                className="cjk-h cjk-d ph md:hidden block text-display-tagline font-normal leading-[1.15]"
                 style={{
                   letterSpacing: '-1px',
                 }}
@@ -196,7 +196,7 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
               />
               {/* desktop: tagline as the giant headline */}
               <span
-                className="cjk-h ph hidden md:inline text-display-tagline-lg"
+                className="cjk-h cjk-d ph hidden md:inline text-display-tagline-lg"
                 style={{
                   letterSpacing: '-3.5px',
                 }}
