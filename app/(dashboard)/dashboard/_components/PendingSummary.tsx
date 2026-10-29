@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from '@/lib/i18n/client'
 import { pickPlural } from '@/lib/i18n/plural'
 
@@ -21,6 +21,7 @@ export function PendingSummary({ count, children }: { count: number; children: R
   const t = useTranslations()
   const locale = useLocale()
   const [open, setOpen] = useState(openThisSession)
+  const regionId = useId()
   if (count <= 0) return null
   const toggle = () => {
     openThisSession = !open
@@ -33,6 +34,7 @@ export function PendingSummary({ count, children }: { count: number; children: R
           type="button"
           onClick={toggle}
           aria-expanded={open}
+          aria-controls={regionId}
           className="w-full min-h-11 flex items-center gap-2 text-sm text-ink text-left bg-transparent border-0 p-0 cursor-pointer"
         >
           <span
@@ -49,7 +51,7 @@ export function PendingSummary({ count, children }: { count: number; children: R
           </svg>
         </button>
       </div>
-      {open && children}
+      {open && <div id={regionId}>{children}</div>}
     </>
   )
 }

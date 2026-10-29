@@ -282,7 +282,13 @@ export function TransactionFeed({ initial, pageSize, emptyState, onItemClick, la
   ) : null
 
   if (items.length === 0) {
-    return <>{emptyState}{errorToast}</>
+    return (
+      <>
+        {filter && label && <div className="px-6 pt-2 pb-1">{label}</div>}
+        {emptyState}
+        {errorToast}
+      </>
+    )
   }
 
   const groups = groupByMonth(items, (i) => i.transactedAt)
