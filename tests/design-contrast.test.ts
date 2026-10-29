@@ -238,6 +238,36 @@ const INKS = ['--ink', '--ink-2', '--ink-3', '--debit-text', '--debit-quiet', '-
 const NORMAL_TEXT_MIN = 4.5
 const GRAPHICAL_MIN = 3
 
+describe('design-contrast — PhilosophyCards text opacity', () => {
+  const source = readFileSync(join(REPO_ROOT, 'app/onboarding/PhilosophyCards.tsx'), 'utf8')
+
+  it('keeps the eyebrow, skip button and payday mark free of opacity utilities', () => {
+    const elements = [
+      source.match(/<p\b[^>]*>\s*\{pad\(index \+ 1\)\}[^<]*\{card\.eyebrow\}/)?.[0],
+      source.match(/<button\b[^>]*>\s*\{copy\.skip\}/)?.[0],
+      source.match(/<div\b[^>]*>\s*\{props\.copy\.paydayMark\}/)?.[0],
+    ]
+    for (const [index, element] of elements.entries()) {
+      expect(element).toBeDefined()
+      expect(element).toContain(index === 0 ? '${TEXT[tone]}' : 'text-ink-2')
+      expect(element).not.toMatch(/opacity-/)
+    }
+    expect(source).toMatch(/const TEXT:[^\n]*credit: 'text-credit-text'/)
+  })
+
+  it('full-opacity TEXT.credit and text-ink-2 on --bg clear normal-text AA', () => {
+    expect(contrastOf('--credit-text', '--bg')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+    expect(contrastOf('--ink-2', '--bg')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+  })
+
+  it('known gap — accent eyebrow on --bg remains below 4.5:1 (~2.34:1)', () => {
+    // Pending design decision: full opacity cannot make text-accent AA-compliant.
+    const ratio = contrastOf('--accent', '--bg')
+    expect(Math.abs(ratio - 2.34)).toBeLessThan(0.05)
+    expect(ratio).toBeLessThan(NORMAL_TEXT_MIN)
+  })
+})
+
 /** The full ink x ground matrix, computed once and printed for
  *  discoverability regardless of which assertions below pass or fail. */
 const matrix: Record<string, Record<string, number>> = {}
