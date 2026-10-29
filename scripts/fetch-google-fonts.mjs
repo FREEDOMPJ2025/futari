@@ -61,7 +61,12 @@ const FONTS = [
       ` * (font-noto-tc on its wrapper) — it does not unload Fraunces. An earlier\n` +
       ` * version of this comment said the opposite ("layouts opt subtrees in by\n` +
       ` * class"); that was false and fed a P1 that stripped serif from intentional\n` +
-      ` * emotional moments (#1162). See DESIGN.md §3, The Serif-Speaks Rule.`,
+      ` * emotional moments (#1162). See DESIGN.md §3, The Serif-Speaks Rule.\n` +
+      ` * CJK locales append system fallbacks after Fraunces (#1849); en unchanged.`,
+    extraCss:
+      `.font-fraunces:lang(zh-TW){--font-fraunces:'Fraunces','Fraunces Fallback','PingFang TC','Microsoft JhengHei','Noto Sans CJK TC','Noto Sans TC',sans-serif}\n` +
+      `.font-fraunces:lang(zh-CN){--font-fraunces:'Fraunces','Fraunces Fallback','PingFang SC','Microsoft YaHei','Noto Sans CJK SC','Noto Sans SC',sans-serif}\n` +
+      `.font-fraunces:lang(ja){--font-fraunces:'Fraunces','Fraunces Fallback','Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic','Meiryo','Noto Sans CJK JP','Noto Sans JP',sans-serif}\n`,
   },
   {
     family: 'Noto Sans TC',
@@ -191,7 +196,8 @@ async function mirrorFont(font) {
 
   const varBlock =
     `\n/* ${font.scopeNote} */\n` +
-    `.${font.className} {\n  ${font.cssVar}: ${stack};\n}\n`
+    `.${font.className} {\n  ${font.cssVar}: ${stack};\n}\n` +
+    (font.extraCss ?? '')
 
   const cssPath = path.join(ROOT, 'app', 'fonts', `${font.slug}.css`)
   await mkdir(path.dirname(cssPath), { recursive: true })
