@@ -191,7 +191,7 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
             </p>
 
             <h1
-              className="m-0 leading-none md:leading-[1]"
+              className="cjk-h m-0 leading-none md:leading-[1]"
               style={{
                 fontFamily: 'var(--font-fraunces)',
                 fontWeight: 500,
@@ -204,17 +204,15 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
                   even though per-character it's smaller; lh 1.15 keeps
                   the block tight, letter-spacing -1px tightens CJK rhythm. */}
               <span
-                className="ph md:hidden block text-display-tagline"
+                className="cjk-h ph md:hidden block text-display-tagline font-normal leading-[1.15]"
                 style={{
-                  fontWeight: 400,
-                  lineHeight: 1.15,
                   letterSpacing: '-1px',
                 }}
                 dangerouslySetInnerHTML={{ __html: phraseHtml(t.taglineHtml) }}
               />
               {/* desktop: tagline as the giant headline */}
               <span
-                className="ph hidden md:inline text-display-tagline-lg"
+                className="cjk-h ph hidden md:inline text-display-tagline-lg"
                 style={{
                   letterSpacing: '-3.5px',
                 }}
@@ -355,7 +353,7 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
                 {t.featuresKicker}
               </p>
               <h2
-                className="m-0 mt-1.5 text-xl md:text-page"
+                className="cjk-h m-0 mt-1.5 text-xl md:text-page"
                 style={{
                   fontFamily: 'var(--font-fraunces)',
                   fontWeight: 500,
@@ -537,7 +535,7 @@ function MigrateLinksSection({
               {t.migrateSection.kicker}
             </p>
             <h2
-              className="m-0 mt-1.5 text-xl md:text-page"
+              className="cjk-h m-0 mt-1.5 text-xl md:text-page"
               style={{
                 fontFamily: 'var(--font-fraunces)',
                 fontWeight: 500,
@@ -663,7 +661,7 @@ function UseCaseLinksSection({
               {t.useCaseSection.kicker}
             </p>
             <h2
-              className="m-0 mt-1.5 text-xl md:text-page"
+              className="cjk-h m-0 mt-1.5 text-xl md:text-page"
               style={{
                 fontFamily: 'var(--font-fraunces)',
                 fontWeight: 500,

@@ -171,7 +171,7 @@ export function ActiveTripBanner({ trips, baseCurrency }: Props) {
                 </div>
               </div>
               <div
-                className="mt-1.5 text-sm leading-relaxed truncate"
+                className="cjk-h mt-1.5 text-sm leading-relaxed truncate"
                 style={{ color: 'var(--ink)', fontFamily: 'var(--font-fraunces)', fontWeight: 500 }}
               >
                 {single ? single.name : pickPlural(locale, trips.length, tr.multipleHeading).replace('{count}', String(trips.length))}
