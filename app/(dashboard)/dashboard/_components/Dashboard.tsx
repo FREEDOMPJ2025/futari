@@ -300,6 +300,15 @@ export function Dashboard({
 
   const addOrIncome = mode === 'income' ? 'income' : 'add'
 
+  const modeToggle = (
+    <ModeTogglePlaceholder
+      mode={mode}
+      onChange={setMode}
+      incomePendingCount={pendings.length}
+      expensePendingCount={expensePendings.length}
+    />
+  )
+
   return (
     <div className="relative min-h-dvh pb-[var(--bottom-nav-offset)]">
       {/* L1: Brand identity */}
@@ -310,18 +319,11 @@ export function Dashboard({
         baseCurrency={baseCurrency}
         initialTripCollapsed={initialTripCollapsed}
       />
-      {/* L2: Mode toggle — left-aligned */}
-      <div className="px-5 pb-3">
-        <ModeTogglePlaceholder
-          mode={mode}
-          onChange={setMode}
-          incomePendingCount={pendings.length}
-          expensePendingCount={expensePendings.length}
-        />
-      </div>
-      {/* L3 filter row — collapses in solo mode (only one person, no real
-          split decisions). See DashboardFilterRow for the toggle details. */}
-      {!viewedIsSolo && viewedPartner && (
+      {/* L2: Mode toggle — left-aligned. The 篩選 trigger shares its row
+          (#1851) so the filter costs no row of its own; the filter collapses
+          in solo mode (only one person, no real split decisions). See
+          DashboardFilterRow for the toggle details. */}
+      {!viewedIsSolo && viewedPartner ? (
         <DashboardFilterRow
           payerFilter={payerFilter}
           splitFilter={splitFilter}
@@ -329,7 +331,10 @@ export function Dashboard({
           onSplitChange={setSplitFilter}
           viewerIsA={viewerIsA}
           t={t}
+          leading={modeToggle}
         />
+      ) : (
+        <div className="px-5 pb-3">{modeToggle}</div>
       )}
       {/* Hero slot. Only the expense side ever differed by member count: a
           solo ledger has no balance to show, so it shows the month instead.

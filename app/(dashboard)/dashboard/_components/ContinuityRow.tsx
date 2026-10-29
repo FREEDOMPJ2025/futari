@@ -34,7 +34,7 @@ export function ContinuityRow({ review, hasActiveTrip }: { review: ReviewCellSta
   }
 
   return (
-    <div className="px-4 pt-2 flex gap-2">
+    <div className="px-4 pt-1 flex gap-4">
       <ContinuityCell href={href} title={c.reviewTitle} subtitle={subtitle} ariaLabel={ariaLabel} />
       {!hasActiveTrip && <TripEntryCell />}
     </div>
