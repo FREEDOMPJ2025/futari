@@ -320,9 +320,7 @@ describe('design-contrast — #1864 pending CompactRow', () => {
     expect(rowSource).not.toMatch(/opacity/)
   })
 
-  it('the pending main amount uses --ink-3, settled keeps --ink', () => {
-    expect(rowSource).toMatch(/isPending \? 'var\(--ink-3\)' : 'var\(--ink\)'/)
-  })
+  // The amount colors themselves are checked on the rendered row: tests/CompactRow-pending-1864.test.tsx.
 
   it('every line of a pending row clears 4.5:1 on --surface', () => {
     const surface = resolve('--surface')
