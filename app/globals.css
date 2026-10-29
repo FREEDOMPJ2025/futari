@@ -20,6 +20,8 @@
   --accent-soft: #F8D9C2;
   /* Ember fill for white-text buttons only (5.14:1 vs white). --accent stays for rings, dots, art. #1850 */
   --accent-fill: #A9572A;
+  /* Ember text on --bg / --surface (4.90 / 5.63). --accent stays for dots, rails, art. #1850 */
+  --accent-text: #A05228;
   --credit: #7A9F7E;
   /* Income amount text (#1850): --credit is 2.58:1 on --bg, so text uses this. */
   --credit-text: #557458;
@@ -180,6 +182,7 @@
   --color-accent-soft: var(--accent-soft);
   --color-credit: var(--credit);
   --color-credit-text: var(--credit-text);
+  --color-accent-text: var(--accent-text);
   --color-debit: var(--debit);
   --color-destructive: var(--destructive);
   --color-hairline: var(--hairline);

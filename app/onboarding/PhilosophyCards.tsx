@@ -22,7 +22,7 @@ const UNTOKENISED = {
 type Tone = 'ink' | 'accent' | 'credit'
 const FILL: Record<Tone, string> = { ink: 'fill-ink', accent: 'fill-accent', credit: 'fill-credit' }
 const STROKE: Record<Tone, string> = { ink: 'stroke-ink', accent: 'stroke-accent', credit: 'stroke-credit' }
-const TEXT: Record<Tone, string> = { ink: 'text-ink', accent: 'text-accent', credit: 'text-credit-text' }
+const TEXT: Record<Tone, string> = { ink: 'text-ink', accent: 'text-accent-text', credit: 'text-credit-text' }
 const BG: Record<Tone, string> = { ink: 'bg-ink', accent: 'bg-accent', credit: 'bg-credit' }
 
 // The eyebrow and the skip label have always been set in the platform

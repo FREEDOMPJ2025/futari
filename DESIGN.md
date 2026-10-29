@@ -202,6 +202,7 @@ A warm domestic palette lit from one ember source, kept low-chroma so nothing sh
 ### Primary
 - **Ember** (#E08856): The single brand accent. The switch "on" state, on-state dots and focus rings (at 55% mix); filled CTAs (FAB, invite, monthly-review entry) use its deeper Ember Fill. Used sparingly so its warmth reads as a highlight, not a wash.
 - **Ember Fill** (#A9572A, `--accent-fill`): Ember deepened for filled buttons that carry white text (FAB, invite, monthly-review entry, via `--btn-accent-bg`). White on it is 5.14:1; plain Ember fails at 2.68:1. Plain Ember stays for focus rings, on-state dots, soft fills and illustration (#1850).
+- **Ember Text** (#A05228, `--accent-text`): Ember deepened for small ember text on `--bg` (4.90:1) and `--surface` (5.63:1), such as the onboarding eyebrows; plain Ember is 2.34:1 on `--bg`. Small text uses `--accent-text`; `--accent` is only for dots, rails and illustration (#1850).
 - **Ember Soft** (#F8D9C2): The accent's quiet tint for soft fills and accent backgrounds where the full ember would be too loud.
 
 ### Secondary
@@ -237,7 +238,7 @@ Per愛物-type identity colors, each muted and emotive, with a tint derived via 
 
 **The Two-Grounds Rule.** `--bg` is where the couple works; `--bg-committed` is where the product speaks. Brand surfaces take the committed ground and the serif; app surfaces take the app ground and the sans. (§3 names a handful of first-run/connectivity screens — `/setup`, `/onboarding`, `/invite`, `/offline` — that keep the serif while staying on `--bg`; that is a §3 typography exception, not a second ground.) Never mix: a landing section on `--bg` looks unfinished, and a dashboard on `--bg-committed` looks like a marketing page wearing app chrome.
 
-**The Derived-Contrast Rule.** When a warm hue must carry text or sit under text, it gets a cocoa-ink-mixed companion rather than an opacity reduction. `--debit-quiet`, `--debit-text`, `--credit-text` and `--accent-fill` exist for exactly this. Never solve a contrast failure by lightening the background or reaching for a new hue.
+**The Derived-Contrast Rule.** When a warm hue must carry text or sit under text, it gets a cocoa-ink-mixed companion rather than an opacity reduction. `--debit-quiet`, `--debit-text`, `--credit-text`, `--accent-fill` and `--accent-text` exist for exactly this. Never solve a contrast failure by lightening the background or reaching for a new hue.
 
 ## 3. Typography
 
@@ -437,7 +438,7 @@ Each Don't carries a one-sentence audit test. Run the test on the screen; if it 
 - **Do** give every new animation a `prefers-reduced-motion: reduce` branch, matching `.partner-toast` and `.about-article`.
 - **Do** keep transitions near 150ms and ease-out (the about fade-up uses `cubic-bezier(0.22, 1, 0.36, 1)`).
 - **Do** pair the Sage/Clay credit-debit distinction with a non-color cue (sign, label, icon) for color-blind legibility.
-- **Do** solve a warm-hue contrast failure with a cocoa-ink-mixed companion (`--debit-text`, `--debit-quiet`, `--credit-text`, `--accent-fill`), never by lightening the ground.
+- **Do** solve a warm-hue contrast failure with a cocoa-ink-mixed companion (`--debit-text`, `--debit-quiet`, `--credit-text`, `--accent-fill`, `--accent-text`), never by lightening the ground.
 - **Do** treat both partners as equals, and treat solo mode as a complete state rather than a half-finished setup.
 - **Do** clear `env(safe-area-inset-*)` on every fixed or sticky element, and verify it in the native shell rather than the browser.
 - **Do** reach for an existing token first: `text-*` for type, Tailwind spacing utilities plus `--sheet-*` for padding, `--radius-*` for corners, `--color-*` / `var(--ink*)` for color, `z-*` for stacking.

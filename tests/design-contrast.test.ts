@@ -233,7 +233,7 @@ describe('design-contrast — math sanity check against documented figures', () 
 // ---------------------------------------------------------------------------
 
 const GROUNDS = ['--bg', '--bg-committed', '--surface', '--surface-alt']
-const INKS = ['--ink', '--ink-2', '--ink-3', '--debit-text', '--debit-quiet', '--credit', '--credit-text', '--accent', '--accent-fill', '--destructive', '--on-fill']
+const INKS = ['--ink', '--ink-2', '--ink-3', '--debit-text', '--debit-quiet', '--credit', '--credit-text', '--accent', '--accent-fill', '--accent-text', '--destructive', '--on-fill']
 
 const NORMAL_TEXT_MIN = 4.5
 const GRAPHICAL_MIN = 3
@@ -260,11 +260,10 @@ describe('design-contrast — PhilosophyCards text opacity', () => {
     expect(contrastOf('--ink-2', '--bg')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
   })
 
-  it('known gap — accent eyebrow on --bg remains below 4.5:1 (~2.34:1)', () => {
-    // Pending design decision: full opacity cannot make text-accent AA-compliant.
-    const ratio = contrastOf('--accent', '--bg')
-    expect(Math.abs(ratio - 2.34)).toBeLessThan(0.05)
-    expect(ratio).toBeLessThan(NORMAL_TEXT_MIN)
+  it('the accent eyebrow uses --accent-text, which clears normal-text AA on --bg (~4.90:1) and --surface (~5.63:1)', () => {
+    expect(source).toMatch(/const TEXT:[^\n]*accent: 'text-accent-text'/)
+    expect(contrastOf('--accent-text', '--bg')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+    expect(contrastOf('--accent-text', '--surface')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
   })
 })
 
