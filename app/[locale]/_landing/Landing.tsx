@@ -13,6 +13,7 @@ import { IllustrationSlot } from './IllustrationSlot'
 import { LandingCtaHint } from './LandingCtaHint'
 import { LandingCtaLink } from './LandingCtaLink'
 import { FeatureOutingTextLink } from '../_components/FeatureOutingTextLink'
+import { LandingExampleCard } from './LandingExampleCard'
 import { LandingPrimaryCta } from './LandingPrimaryCta'
 import { LandingSecondaryCta } from './LandingSecondaryCta'
 import { LandingStandaloneRedirect } from './LandingStandaloneRedirect'
@@ -275,6 +276,11 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
                 {t.alreadyHaveAccount}
               </LandingSecondaryCta>
             </div>
+
+            {/* #1852 — example card below the sign-in link: one expense and how it
+                splits. Below the CTA so the button keeps its first-screen spot;
+                shown up to 1279px, where PhonePreview takes over. */}
+            <LandingExampleCard t={t} />
 
             {/* Trust row — desktop only; full version lives below the
                 Features section (see <TrustSection variant="full" /> below). */}

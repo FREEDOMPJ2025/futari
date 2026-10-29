@@ -168,3 +168,45 @@ describe('Landing — SSR CTAs work without JS (#1521)', () => {
     expect(html).not.toContain('android-beta')
   })
 })
+
+describe('Landing — example card (#1852)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    getSession.mockReturnValue(new Promise(() => {}))
+  })
+
+  it('is a figure whose caption is the one sentence screen readers get', () => {
+    renderLanding()
+    const fig = screen.getByRole('figure')
+    // The caption is visually hidden, not aria-hidden: that is what VoiceOver reads.
+    // (jsdom's accessible-name code does not derive a figure's name from its
+    // figcaption, so assert on the figcaption itself rather than getByRole name.)
+    const caption = fig.querySelector('figcaption')!
+    expect(caption.textContent).toBe(zhTW.landing.exampleCardCaption)
+    expect(caption.className).toContain('sr-only')
+    expect(caption.closest('[aria-hidden="true"]')).toBeNull()
+    // The visual copy sits in one aria-hidden subtree so the numbers are not read twice.
+    const visual = fig.querySelector('[aria-hidden="true"]')!
+    expect(visual.textContent).toContain(zhTW.landing.exampleCardTitle)
+    expect(visual.textContent).toContain(zhTW.landing.exampleCardSub)
+    expect(visual.textContent).toContain(zhTW.landing.exampleCardAmount)
+    expect(visual.textContent).toContain(zhTW.landing.exampleCardResult)
+  })
+
+  it('hides from xl up and ships no image, script or interactive element', () => {
+    renderLanding()
+    const fig = screen.getByRole('figure')
+    expect(fig.className).toContain('xl:hidden')
+    expect(fig.querySelector('img, picture, svg, script, a, button')).toBeNull()
+  })
+
+  it('sits right after the mobile sign-in link, before the compact trust row', () => {
+    renderLanding()
+    const fig = screen.getByRole('figure')
+    const mobileSignIn = screen
+      .getAllByText(zhTW.landing.alreadyHaveAccount)
+      .find((el) => el.closest('a')!.className.includes('min-h-11'))!
+      .closest('div')!
+    expect(mobileSignIn.nextElementSibling).toBe(fig)
+  })
+})

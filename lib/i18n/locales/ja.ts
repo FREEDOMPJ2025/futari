@@ -192,6 +192,12 @@ export const ja: Translations = {
     phoneMockFeed2Sub: '昨日',
     phoneMockFeed3Title: 'ペットの通院',
     phoneMockFeed3Sub: '5/11',
+    // TODO(i18n): 待 Aria 定稿 #1852（ja の金額と措辭は建議、日圓の數字も未確認）
+    exampleCardTitle: '金曜の夕食・ラーメン',
+    exampleCardSub: 'あなたが支払 · 折半',
+    exampleCardAmount: '−¥2,400',
+    exampleCardResult: 'パートナーが ¥1,200 借りている',
+    exampleCardCaption: '例：金曜の夕食 2,400 円、あなたが支払い、折半で、パートナーが 1,200 円借りています。',
   },
 
   brand: {
