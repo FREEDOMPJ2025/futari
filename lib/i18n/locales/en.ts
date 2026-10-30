@@ -191,12 +191,11 @@ export const en: Translations = {
     phoneMockFeed2Sub: 'Yesterday',
     phoneMockFeed3Title: 'Vet visit',
     phoneMockFeed3Sub: '5/11',
-    // TODO(i18n): 待 Aria 定稿 #1852（en 的金額與措辭都只是建議）
     exampleCardTitle: 'Friday dinner · Ramen',
     exampleCardSub: 'You paid · Split evenly',
-    exampleCardAmount: '−$24',
-    exampleCardResult: 'Partner owes you $12',
-    exampleCardCaption: 'Example: Friday dinner, $24, you paid, split evenly, so your partner owes you $12.',
+    exampleCardAmount: '−$36',
+    exampleCardResult: 'Partner owes you $18',
+    exampleCardCaption: 'Example: Friday dinner, $36. You paid and split it evenly, so your partner owes you $18.',
   },
 
   brand: {

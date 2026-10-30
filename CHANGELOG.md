@@ -43,6 +43,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **首頁範例小卡與日文分攤句定稿（#1876）**
+  使用者：範例小卡四語文案定稿（簡中、英文改成當地合理的金額）；日文 App 裡「對方欠你」的分攤句改成「パートナーに ¥… 貸している」，不再和反方向只差一個助詞，「支払」也補成「支払い」。
+  技術：`landing.exampleCard*` 四語套用 Grok 審稿並移除 `TODO(i18n)`；ja `splitTypeSelector.partnerOwesYouAmount`／`allTheirsYouPaid`／`allTheirsNoAmount` 與 `compactRow.youPaid`／`partnerPaid` 一起改。
+
 - **捷徑裡的「Futari 記一筆」動作顯示成手機的語言（#1878）**
   使用者：英文、日文、簡體中文的 iPhone 在捷徑 App 裡會看到自己語言的動作名稱、參數和分類（例如英文是「Add Entry to Futari」）；其他語言顯示英文。
   技術：新增 `Localizable.xcstrings`，`QuickAddIntent` 改用英文 key，`knownRegions` 加 zh-Hant／zh-Hans／ja；需隨 iOS 殼 1.9.0 上架。
