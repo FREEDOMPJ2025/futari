@@ -3773,12 +3773,11 @@ export const zhTW: Translations = {
     phoneMockFeed2Sub: '昨天',
     phoneMockFeed3Title: '小白看醫生',
     phoneMockFeed3Sub: '5/11',
-    // TODO(i18n): 待 Aria 定稿 #1852（文案出自 #1858 規格提案）
-    exampleCardTitle: '週五晚餐・拉麵',
+    exampleCardTitle: '週五晚餐 · 拉麵',
     exampleCardSub: '你付 · 各付一半',
     exampleCardAmount: '−840',
     exampleCardResult: '對方待還你 420',
-    exampleCardCaption: '範例：週五晚餐 840 元，你付，各付一半，對方待還你 420 元。',
+    exampleCardCaption: '範例：週五晚餐 840 元，你付、各付一半，對方待還你 420 元。',
   },
 
   brand: {
