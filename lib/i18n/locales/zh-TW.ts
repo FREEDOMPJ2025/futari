@@ -273,6 +273,15 @@ export type Translations = {
     phoneMockFeed2Sub: string
     phoneMockFeed3Title: string
     phoneMockFeed3Sub: string
+    /** Mobile example card under the sign-in link (#1852): one expense plus how it
+     *  splits. Demo data, the card is built from real components. The amounts
+     *  live inside the strings because the figures differ per locale. */
+    exampleCardTitle: string
+    exampleCardSub: string
+    exampleCardAmount: string
+    exampleCardResult: string
+    /** Visually hidden figcaption — the one sentence a screen reader gets. */
+    exampleCardCaption: string
   }
 
   /** Wayfinding strings shared by every brand page (landing, sign-in,
@@ -3764,6 +3773,12 @@ export const zhTW: Translations = {
     phoneMockFeed2Sub: '昨天',
     phoneMockFeed3Title: '小白看醫生',
     phoneMockFeed3Sub: '5/11',
+    // TODO(i18n): 待 Aria 定稿 #1852（文案出自 #1858 規格提案）
+    exampleCardTitle: '週五晚餐・拉麵',
+    exampleCardSub: '你付 · 各付一半',
+    exampleCardAmount: '−840',
+    exampleCardResult: '對方待還你 420',
+    exampleCardCaption: '範例：週五晚餐 840 元，你付，各付一半，對方待還你 420 元。',
   },
 
   brand: {

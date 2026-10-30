@@ -43,6 +43,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **首頁在「登入」下方多一張範例小卡（#1852）**
+  使用者：手機和平板寬度的首頁，往下捲一下就看到一筆支出和它怎麼分攤；1280 px 以上仍是原本的手機畫面。文案是四語建議版，待 Aria 定稿。
+  技術：新增無 JS 的 server 元件 `LandingExampleCard`，只用既有 utility class；唯一新增的 CSS 是 `xl:hidden`（主 stylesheet gzip +4 B）。
+
 - **首頁主視覺重新構圖，手機版人物變大（#1854）**
   使用者：手機首頁的插畫不再被裁成一小塊，兩人和手機佔滿畫面；桌面版去掉白邊與右下角的浮水印，構圖也更集中。
   技術：手機帶狀區改用 `illustration-hero-mobile.png`（與 `IllustrationSlot` 同比例），桌面圖換成新裁切；390／1440 寬各只下載一張，`.lp-dot-band-*` 光點位置不改。

@@ -191,6 +191,12 @@ export const zhCN: Translations = {
     phoneMockFeed2Sub: '昨天',
     phoneMockFeed3Title: '小白看医生',
     phoneMockFeed3Sub: '5/11',
+    // TODO(i18n): 待 Aria 定稿 #1852（zh-TW 提案跟進，保留繁簡差異）
+    exampleCardTitle: '周五晚餐・拉面',
+    exampleCardSub: '你付 · 各付一半',
+    exampleCardAmount: '−840',
+    exampleCardResult: '对方待还你 420',
+    exampleCardCaption: '示例：周五晚餐 840 元，你付，各付一半，对方待还你 420 元。',
   },
 
   brand: {
