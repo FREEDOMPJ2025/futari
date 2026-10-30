@@ -238,7 +238,7 @@ function NetAmount({ net, currency }: { net: number; currency: string }) {
   }
   const positive = net > 0
   return (
-    <span className={`text-sm tabular-nums shrink-0 ${positive ? 'text-[var(--credit)]' : 'text-[var(--debit-quiet)]'}`}>
+    <span className={`text-sm tabular-nums shrink-0 ${positive ? 'text-[var(--credit-text)]' : 'text-[var(--debit-quiet)]'}`}>
       {positive ? '+' : '−'}{formatAmount(Math.abs(net), currency)}
     </span>
   )
