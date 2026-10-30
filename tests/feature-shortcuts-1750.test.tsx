@@ -29,10 +29,21 @@ describe.each(SUPPORTED_LOCALES)('%s', (locale) => {
 
   it('renders the answer, Apple Pay steps, params, when-not and troubleshooting', async () => {
     const { doc } = await renderPage(locale)
-    for (const id of ['answer', 'apple-pay', 'web', 'params', 'when-not', 'trouble']) {
+    for (const id of ['answer', 'apple-pay', 'apple-pay-url', 'web', 'params', 'when-not', 'trouble']) {
       expect(doc.getElementById(id), id).not.toBeNull()
     }
-    expect(doc.querySelectorAll('#apple-pay ol > li')).toHaveLength(t.applePay.steps.length)
+    expect(doc.querySelectorAll('#apple-pay ol > li')).toHaveLength(3)
+    expect(doc.querySelector('#apple-pay pre')).toBeNull()
+    expect(doc.getElementById('apple-pay')!.textContent).toContain('iOS 16')
+    expect(doc.getElementById('apple-pay')!.textContent).toContain('1.9.0')
+    expect(doc.querySelector('#apple-pay ol')!.textContent).toContain('Futari 記一筆')
+    for (const field of ['金額', '備註', '分類']) {
+      expect(doc.querySelector('#apple-pay ol')!.textContent).toContain(field)
+    }
+    expect(doc.querySelectorAll('#apple-pay-url ol > li')).toHaveLength(5)
+    expect(doc.getElementById('apple-pay')!.nextElementSibling?.id).toBe('apple-pay-url')
+    expect(doc.querySelector('#apple-pay-url pre')!.textContent).toBe(appUrl(t.vars.amount, t.vars.merchant))
+    expect(doc.querySelectorAll('#line-pay pre')).toHaveLength(locale === 'zh-TW' ? 1 : 0)
     expect(doc.getElementById('answer')!.textContent).toContain(t.answer)
   })
 
@@ -82,7 +93,14 @@ describe.each(SUPPORTED_LOCALES)('%s', (locale) => {
       JSON.parse(el.textContent ?? '{}'),
     )
     expect(blocks.map((b) => b['@type'])).toEqual(['BreadcrumbList', 'HowTo'])
-    expect(blocks[1].step).toHaveLength(t.applePay.steps.length)
+    expect(blocks[1].step).toHaveLength(3)
+    expect(blocks[1].step).toEqual(t.applePay.steps.map((step, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: t.howToStepName.replace('{n}', String(i + 1)),
+      text: `${step.title}: ${step.body}`,
+      url: expect.stringContaining(`#step-${i + 1}`),
+    })))
   })
 })
 
