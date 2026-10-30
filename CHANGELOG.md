@@ -50,6 +50,10 @@ _Nothing unreleased yet._
 
 ### 使用者可見變化
 
+- **捷徑裡的「Futari 記一筆」動作顯示成手機的語言（#1878）**
+  使用者：英文、日文、簡體中文的 iPhone 在捷徑 App 裡會看到自己語言的動作名稱、參數和分類（例如英文是「Add Entry to Futari」）；其他語言顯示英文。
+  技術：新增 `Localizable.xcstrings`，`QuickAddIntent` 改用英文 key，`knownRegions` 加 zh-Hant／zh-Hans／ja；需隨 iOS 殼 1.9.0 上架。
+
 - **首頁在「登入」下方多一張範例小卡（#1852）**
   使用者：手機和平板寬度的首頁，往下捲一下就看到一筆支出和它怎麼分攤；1280 px 以上仍是原本的手機畫面。文案是四語建議版，待 Aria 定稿。
   技術：新增無 JS 的 server 元件 `LandingExampleCard`，只用既有 utility class；唯一新增的 CSS 是 `xl:hidden`（主 stylesheet gzip +4 B）。
