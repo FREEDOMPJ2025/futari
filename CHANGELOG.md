@@ -51,6 +51,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：記一筆按鈕、邀請按鈕的白字，以及收入金額、正餘額、支出份額的文字更清楚；引導卡片的小字不再半透明。
   技術：新增 `--accent-fill`（`--btn-accent-bg` 改指向它）、`--credit-text`、`--accent-text`，收入金額改用 `--credit-text`、支出份額改用 `--debit-text`；`--accent`／`--credit`／`--debit` 保留給圖示與圖表；`tests/design-contrast.test.ts` 釘住新組合。
 
+- **引導卡片引言的強調字看得清楚（#1869）**
+  使用者：第一次使用時第 2 張引導卡上的強調字（「共同的」）顏色加深，在淡橘底上也讀得清楚。
+  技術：`PhilosophyCards` 的 `<em>` 從 `text-accent` 改 `text-accent-text`，對比 2.01 → 4.55；`tests/design-contrast.test.ts` 釘住。
+
 - **待結算的紀錄不再整列變淡（#1864）**
   使用者：待結算的紀錄改用「待結算」膠囊和較淡的金額表示，標題、日期、備註照常清楚可讀。
   技術：`CompactRow` 拿掉整列 `opacity`，待結算主金額改 `--ink-3`；每段文字對 `--surface` ≥ 4.5:1。
