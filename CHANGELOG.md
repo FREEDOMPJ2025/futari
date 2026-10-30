@@ -43,6 +43,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **首頁主視覺重新構圖，手機版人物變大（#1854）**
+  使用者：手機首頁的插畫不再被裁成一小塊，兩人和手機佔滿畫面；桌面版去掉白邊與右下角的浮水印，構圖也更集中。
+  技術：手機帶狀區改用 `illustration-hero-mobile.png`（與 `IllustrationSlot` 同比例），桌面圖換成新裁切；390／1440 寬各只下載一張，`.lp-dot-band-*` 光點位置不改。
+
 - **記帳首頁收斂層級，第一眼是餘額、最近紀錄和記一筆（#1851、#1866）**
   使用者：待確認收成一行「N 筆待確認」、點了才展開；月回顧與旅行入口改成一行文字按鈕，頁首的飛機鈕拿掉；篩選移到紀錄清單上方，篩選後 0 筆時顯示「沒有符合條件的紀錄」並可清掉篩選。
   技術：依 #1857 規格新增 `PendingSummary`（展開狀態只記在本次 App 期間）、`ContinuityRow` 改文字按鈕、月份列緊湊版；新增四語 `dashboard.pendingSummary`（單複數），篩選後 0 筆改用既有的 `feed.noFiltered`。

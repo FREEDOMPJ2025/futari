@@ -82,9 +82,13 @@
 @media (max-width: 1279.98px) {
   .lp-dot-phone-1, .lp-dot-phone-2, .lp-dot-phone-3 { display: none; }
 }
-/* The couple's phone in the artwork (about 50% across, 68% down: the picture is
- * scaled to the box height and centred at every width, so this holds in the
- * mobile band and the desktop column alike), up into the ribbon above it. */
+/* The couple's phone in the artwork, up into the ribbon above it. The origin is
+ * 50% across, 68% down. In the two crops of #1854 the phone sits at 50.2% / 69.0%
+ * (illustration-hero-mobile.png, the band's own ratio) and 50.0% / 71.0%
+ * (illustration-hero.png, centred, so only the sides are trimmed), which puts the
+ * origin 1-3% of the box height above the phone's centre, still on the phone
+ * (the 34px ring is bigger than that). A crop that moves the phone moves the
+ * dots off it with no error: re-check at 390 and 1024. */
 .lp-dot-band-1, .lp-dot-band-2, .lp-dot-band-3 { left: calc(50% - 17px); top: calc(68% - 17px); width: 34px; height: 34px; }
 .lp-dot-band-1 { --lp-dx: -64px; --lp-dy: -72px; }
 .lp-dot-band-2 { --lp-dx: 26px;  --lp-dy: -96px; }

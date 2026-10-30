@@ -8,9 +8,18 @@ type Props = {
 }
 
 // IllustrationSlot — decorative hero image. Isolated so swapping the
-// illustration later requires only replacing public/illustration-hero.png
-// (or updating the src here) with no JSX changes elsewhere.
+// illustration later requires only replacing the two files below (or updating
+// the srcs here) with no JSX changes elsewhere.
 // alt="" intentionally: the illustration is decorative; the copy carries meaning.
+//
+// Two crops of one scene (#1854): the mobile band uses
+// public/illustration-hero-mobile.png (902x580, the band's own 392x252 ratio, so
+// `object-cover` no longer trims the couple); the desktop column uses
+// public/illustration-hero.png (1170x620). Both are frameless, so the rounded
+// corners come from this wrapper's `rounded-3xl overflow-hidden`, not the art.
+// The `.lp-dot-band-*` origin (landing-motion.css) is tuned to the couple's phone
+// in these two crops; a re-crop that moves the phone moves the dots off it with
+// no error, so re-check the dots at 390 and 1024 when either file changes.
 //
 // Loading (#1520): the landing renders both slots and hides one per breakpoint,
 // so `preload` on both (the old `priority`) queued two sizes of the same image
@@ -49,7 +58,7 @@ const BLANK_GIF = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAA
 export function IllustrationSlot({ mobile }: Props) {
   if (mobile) {
     const { props } = getImageProps({
-      src: '/illustration-hero.png',
+      src: '/illustration-hero-mobile.png',
       alt: '',
       fill: true,
       sizes: MOBILE_HERO_SIZES,
