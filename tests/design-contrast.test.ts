@@ -269,6 +269,13 @@ describe('design-contrast — PhilosophyCards text opacity', () => {
     expect(contrastOf('--accent-text', '--surface')).toBeCloseTo(6.08, 1)
   })
 
+  it('renderQuote’s <em> uses --accent-text, which clears normal-text AA on --bg and card 2’s --accent-soft band', () => {
+    expect(source).toMatch(/<em\b[^>]*className="italic text-accent-text"/)
+    expect(source).not.toMatch(/<em\b[^>]*className="[^"]*text-accent"/)
+    expect(contrastOf('--accent-text', '--bg')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+    expect(contrastOf('--accent-text', '--accent-soft')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+  })
+
   it('--accent-text clears normal-text AA on --accent-soft (~4.55:1), the band under onboarding card 2’s eyebrow', () => {
     // Card 2 draws a --bg → --accent-soft gradient behind a transparent surface, and its eyebrow sits
     // on the --accent-soft part (PhilosophyCards Card02). That band is the worst case for this token.

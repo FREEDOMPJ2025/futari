@@ -83,7 +83,7 @@ function renderQuote(lines: readonly string[]) {
       {i > 0 && <br />}
       {line.split(/(\*[^*]+\*)/).map((part, j) =>
         part.startsWith('*') && part.endsWith('*') && part.length > 2
-          ? <em key={j} className="italic text-accent">{part.slice(1, -1)}</em>
+          ? <em key={j} className="italic text-accent-text">{part.slice(1, -1)}</em>
           : <Fragment key={j}>{part}</Fragment>,
       )}
     </Fragment>
