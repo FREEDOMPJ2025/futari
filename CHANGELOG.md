@@ -43,6 +43,101 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 _Nothing unreleased yet._
 
+## [1.9.0] - 2026-10-31
+
+主題：**原生殼．Android 推播與分享**——Android App 開始收到定期收支提醒、分享打開系統面板；iPhone 錢包自動化一個動作就能記一筆，捷徑帶入的記帳沿用同一商家上次的分類；記帳首頁收斂層級、文字對比達標；首頁換上新主視覺與一張範例小卡；每晚推播改用具名金鑰，舊金鑰年底停用後照常送出。
+完整 diff：[v1.8.0...v1.9.0](https://github.com/redtear1115/oikos/compare/v1.8.0...v1.9.0)
+
+### 使用者可見變化
+
+- **首頁在「登入」下方多一張範例小卡（#1852）**
+  使用者：手機和平板寬度的首頁，往下捲一下就看到一筆支出和它怎麼分攤；1280 px 以上仍是原本的手機畫面。文案是四語建議版，待 Aria 定稿。
+  技術：新增無 JS 的 server 元件 `LandingExampleCard`，只用既有 utility class；唯一新增的 CSS 是 `xl:hidden`（主 stylesheet gzip +4 B）。
+
+- **首頁主視覺重新構圖，手機版人物變大（#1854）**
+  使用者：手機首頁的插畫不再被裁成一小塊，兩人和手機佔滿畫面；桌面版去掉白邊與右下角的浮水印，構圖也更集中。
+  技術：手機帶狀區改用 `illustration-hero-mobile.png`（與 `IllustrationSlot` 同比例），桌面圖換成新裁切；390／1440 寬各只下載一張，`.lp-dot-band-*` 光點位置不改。
+
+- **記帳首頁收斂層級，第一眼是餘額、最近紀錄和記一筆（#1851、#1866）**
+  使用者：待確認收成一行「N 筆待確認」、點了才展開；月回顧與旅行入口改成一行文字按鈕，頁首的飛機鈕拿掉；篩選移到紀錄清單上方，篩選後 0 筆時顯示「沒有符合條件的紀錄」並可清掉篩選。
+  技術：依 #1857 規格新增 `PendingSummary`（展開狀態只記在本次 App 期間）、`ContinuityRow` 改文字按鈕、月份列緊湊版；新增四語 `dashboard.pendingSummary`（單複數），篩選後 0 筆改用既有的 `feed.noFiltered`。
+
+- **按鈕與金額文字的對比達標（#1850）**
+  使用者：記一筆按鈕、邀請按鈕的白字，以及收入金額、正餘額、支出份額的文字更清楚；引導卡片的小字不再半透明。
+  技術：新增 `--accent-fill`（`--btn-accent-bg` 改指向它）、`--credit-text`、`--accent-text`，收入金額改用 `--credit-text`、支出份額改用 `--debit-text`；`--accent`／`--credit`／`--debit` 保留給圖示與圖表；`tests/design-contrast.test.ts` 釘住新組合。
+
+- **引導卡片引言的強調字看得清楚（#1869）**
+  使用者：第一次使用時第 2 張引導卡上的強調字（「共同的」）顏色加深，在淡橘底上也讀得清楚。
+  技術：`PhilosophyCards` 的 `<em>` 從 `text-accent` 改 `text-accent-text`，對比 2.01 → 4.55；`tests/design-contrast.test.ts` 釘住。
+
+- **待結算的紀錄不再整列變淡（#1864）**
+  使用者：待結算的紀錄改用「待結算」膠囊和較淡的金額表示，標題、日期、備註照常清楚可讀。
+  技術：`CompactRow` 拿掉整列 `opacity`，待結算主金額改 `--ink-3`；每段文字對 `--surface` ≥ 4.5:1。
+
+- **定期收支的結束日不能早於開始日（#1837）**
+  使用者：結束日期選得比開始日期早時，儲存前就會看到提示，日期選擇器也不再讓人選到更早的日子；以前只會看到一般的失敗訊息。
+  技術：`RecurringRuleSheet` 結束日加 `min` 並在送出前擋下；兩個 rule validator 改丟 `recurring_ends_before_start`（四語），不再丟原始中文 `Error`（PRJ-FUTARI-T）。
+
+- **Moneybook、Mobills 搬遷頁改用截圖匯入（#1791）**
+  使用者：兩頁不再寫成「匯出 CSV 直接上傳」，改教截圖請 ChatGPT 整理成 CSV 再匯入；Moneybook 的匯出檔是加密檔、Mobills 的匯出檔 Futari 讀不了，照原本寫法會匯到 0 筆。
+  技術：`sources.ts` 兩個 source 加 `screenshotWorkflow: true`（頁面自動帶出 ChatGPT 流程區塊），Mobills 比較表「CSV 匯入」列改為「資料匯出」，四語步驟／FAQ／meta 同步重寫，en／ja 待確認；content-updated-at snapshot 更新。
+
+- **iPhone 錢包自動化可以直接加「Futari 記一筆」動作（#1823）**
+  使用者：錢包自動化裡一個動作就能帶入金額與商家，不用再串四個動作；執行後仍會打開記一筆畫面讓你確認。
+  技術：App Intent 組出 quick-add deep link，iOS 16 以上；驗證仍在 `lib/quickAdd.ts`；需隨 v1.9.0 重送 iOS 殼。
+
+- **捷徑與網址帶入的記帳，沿用同一商家上次的分類（#1822）**
+  使用者：從捷徑或網址帶入商家時，分類會自動選成這家店上次用的分類，自己改過的就不會被蓋掉；教學頁的範例網址不再寫死「飲食」。
+  技術：`getCategoryForMerchant` 在 SQL 比對 NFKC／不分大小寫的描述，只看檢視者待過的章節、未刪除的紀錄；優先順序是商家記憶 > 網址或 payload 的 `category` > 預設；待確認卡在 `/api/shortcut/pending` 寫入時就套用。
+
+- **搬遷頁與捷徑教學頁的文案定稿（#1838、#1841）**
+  使用者：Moneybook、Mobills、簡單記帳搬遷頁的 FAQ 改說清楚「對得上的分類自動歸類，其餘先放『其他』、匯入後可再改」，不再寫成匯入時能逐一對照；日文措辭微調。
+  技術：四語套用 Grok 審稿結果，en／ja 移除全部 `TODO(i18n): 待確認`（70 處）；三個 source 的 `contentUpdatedAt` 改為 2026-10-26，content-updated-at snapshot 更新。
+
+- **Android 殼裡的分享打開系統分享面板（#1749）**
+  使用者：在 Android App 裡分享出遊連結、夥伴邀請與測試邀請，會跳出系統分享面板，不再只是複製。
+  技術：加 `@capacitor/share`，`lib/shareSheet.ts` 在 runtime 判斷 Android 殼與 plugin；舊殼沒有 plugin 時照舊複製；需隨 v1.9.0 重送原生殼。
+
+- **iOS 殼內點頁內錨點不再有機會跳成離線頁（#1680）**
+  使用者：頁面還有資源載入中時點「跳到主要內容」之類的錨點，已顯示的頁面不會在 6 秒後被換成離線頁。
+  技術：載入看門狗在目標網址只差 `#fragment`（且非 reload）時不啟動；規則在 `native-offline-logic.ts`，只有 Swift 鏡射，需隨下一版 iOS 殼上架。
+
+- **隱私權政策列出推播服務（#1826）**
+  使用者：「第三方服務」補上 Apple 推播通知服務與 Google Firebase 雲端通訊，說明它們只收到裝置的推播識別碼與固定的通知文字。
+  技術：四語 `privacyPage.sectionThirdPartyItems` 加一條、更新日期改為 2026-10-23；文案經 Grok 審（#1826）。
+
+- **Android App 1.9.0 起可以收到定期收支提醒（#968）**
+  使用者：裝了 1.9.0 以上 Android App 的人，打開後會被問是否允許通知，之後會收到「有待確認的定期收支」；更舊的 Android App 不受影響、不會跳通知權限。
+  技術：`registerPushToken` 在 Android 先讀殼版本（`FCM_MIN_ANDROID_SHELL`，讀不到一律不註冊）再註冊 FCM；登出刪 token 不再限定 APNs，長度上限 4096；新增只在 `next dev` 存在的 `/dev/push-gate` 探測頁。
+
+### 技術變更
+
+- **每晚推播的伺服器端可以送 Android（FCM）（#968）**
+  使用者：還沒有變化；等 Android 殼註冊推播（v1.9.0）後，Android 也會收到「有待確認的定期收支」。
+  技術：`send-recurring-push` 依 `platform` 分流，FCM HTTP v1 以三個 function secret 換 OAuth token，兩平台互不影響；失效 token 只依錯誤代碼刪、超過一半 400 就不刪；supabase-js pin 2.105.1。
+
+- **登入事件分出 Android 殼與 iOS 殼的瀏覽器登入（#1769）**
+  使用者：無感；登入流程與畫面不變。
+  技術：殼內瀏覽器登入依 runtime 平台在 `redirectTo` 加 `p`，callback 只收 `android_native`／`ios_browser`、其餘記 `web_oauth`，`signed_in`／`signed_up` 與 callback 失敗事件的 `path` 跟著分；部署日前後不可比。
+
+### Security
+
+- **只有排程能觸發每晚推播（#968）**
+  使用者：無感；拿到公開 anon key 的人不能再隨時讓所有人的手機收到推播。
+  技術：函式在任何 DB 查詢前驗呼叫者，不符回 401；原本的 JWT 聲明檢查（`verify_jwt = true`）已由 #1834 的具名 secret key 取代，見下一條。
+
+- **每晚推播改用具名 secret key 驗證排程，legacy key 停用後照常送出（#1834）**
+  使用者：無感；Supabase 年底停用舊金鑰後，「有待確認的定期收支」推播不會無聲停掉。
+  技術：`0100` 讓 cron 從 Vault 帶 `apikey`（`cron` key）與網址；函式 `verify_jwt = false`，只認 `SUPABASE_SECRET_KEYS.cron`、常數時間比對、fail closed，DB client 改用 `default`；需 owner 先建 key 與 Vault。
+
+- **Android 殼在同意推播前不產生推播 ID；Firebase 設定檔不會進 repo（#968）**
+  使用者：之後的 Android 殼要等你允許通知，才建立推播用的裝置 ID；不用 Firebase 分析。
+  技術：manifest 關 FCM auto-init 與 Analytics；`.gitignore`＋guard 測試擋金鑰進 repo；release 缺 `google-services.json` 即失敗，上傳前驗 AAB 的 versionName ≥ 1.9.0 與 `google_app_id`。
+
+- **一個帳號塞大量推播註冊，不再能擠掉其他家庭的每晚推播（#1827）**
+  使用者：無感；「有待確認的定期收支」照常送達，每人最多保留最近 10 台裝置的註冊。
+  技術：`0101` 加 PushTokens 格式 CHECK、每人 10 筆（淘汰最久沒註冊的）與 `updated_at` trigger；`send-recurring-push` 分頁讀完、依帳本輪流、每人／帳本／次上限、8 併發與約 100 秒截止，log 只記計數；寫入被拒時 client 只回報錯誤代碼。
+
 ## [1.8.0] - 2026-10-19
 
 主題：**品牌頁．讓陌生人信任**——登入前的品牌頁整體升級（award review 第 6 輪 7.45 通過）；iPhone 捷徑能把付款送進待確認；匯入多了三個來源。
@@ -1978,7 +2073,8 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 - **每頁 `generateMetadata` 接 OG image（#487）**：`public/og-image.png` 從 #282 ship 但未 wire 進 metadata，造成 prod HTML 缺 `og:image` / `twitter:image`；本版 4 個 public page 各加 `openGraph.images` + `twitter.images`，`alt` 用 `t.title` locale-aware，無需新增 i18n key。
 - **`settings.local.json` 列入 gitignore（#478）**：避免本地 hook / 權限設定外洩。
 
-[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.9.0...HEAD
+[1.9.0]: https://github.com/redtear1115/oikos/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/redtear1115/oikos/compare/v1.7.4...v1.8.0
 [1.7.4]: https://github.com/redtear1115/oikos/compare/v1.7.3...v1.7.4
 [1.7.3]: https://github.com/redtear1115/oikos/compare/v1.7.2...v1.7.3

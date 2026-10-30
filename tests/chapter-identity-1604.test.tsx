@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, renderHook } from '@testing-library/react'
+import { render, screen, renderHook, fireEvent } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -46,7 +46,11 @@ vi.mock('@/app/(dashboard)/_components/ContextStrip', () => ({ ContextStrip: () 
 vi.mock('@/app/(dashboard)/dashboard/_components/ContinuityRow', () => ({ ContinuityRow: () => null }))
 vi.mock('@/app/(dashboard)/dashboard/_components/ModeTogglePlaceholder', () => ({ ModeTogglePlaceholder: () => null }))
 vi.mock('@/app/(dashboard)/dashboard/_components/FirstRecordCard', () => ({ FirstRecordCard: () => null }))
-vi.mock('@/app/(dashboard)/dashboard/_components/DashboardFeed', () => ({ DashboardFeed: () => null, DashboardFeedSkeleton: () => null }))
+// #1851 — the filter row heads the records list, so the stub renders the header it is handed.
+vi.mock('@/app/(dashboard)/dashboard/_components/DashboardFeed', () => ({
+  DashboardFeed: ({ header }: { header?: (title: React.ReactNode) => React.ReactNode }) => <>{header?.(null)}</>,
+  DashboardFeedSkeleton: () => null,
+}))
 vi.mock('@/app/(dashboard)/assets/[id]/_components/NewFuelLog', () => ({ NewFuelLog: () => null }))
 vi.mock('@/actions/fuelLog', () => ({ getFuelLogById: vi.fn() }))
 vi.mock('@/app/(dashboard)/_components/RealtimeProvider', () => ({ useRealtimeEvents: () => {} }))
@@ -217,9 +221,13 @@ describe.each(CASES)('pinned to the closed chapter Amy + Ben — %s', (_label, m
   })
 
   it('Dashboard income mode: no pending income stack either', () => {
-    // Mode lives in the reducer; the gate is the same `!isPast` as expense.
+    // Mode lives in the reducer; the gate is the same `!isPast` as expense:
+    // every stack sits inside the one `!isPast` PendingSummary (#1851).
     const src = readFileSync(join(process.cwd(), 'app/(dashboard)/dashboard/_components/Dashboard.tsx'), 'utf8')
-    expect(src).toContain("{!isPast && mode === 'income' && (")
+    const gate = src.indexOf('{!isPast && (\n        <PendingSummary')
+    expect(gate).toBeGreaterThan(-1)
+    const end = src.indexOf('</PendingSummary>', gate)
+    expect(src.slice(gate, end)).toContain("{mode === 'income' && (")
   })
 })
 
@@ -253,10 +261,19 @@ describe('live (unpinned) surfaces are unchanged', () => {
     expect(container.querySelector('img')?.getAttribute('src')).toBe(CLEO_AVATAR)
   })
 
+  // #1851 — the stacks sit behind the 「N 筆待確認」 line. Its open state lasts
+  // the app session (module scope), so open it only if it is still closed.
+  const openPendingSummary = () => {
+    const line = screen.getByRole('button', { name: /1 筆待確認/ })
+    if (line.getAttribute('aria-expanded') === 'false') fireEvent.click(line)
+    expect(line.getAttribute('aria-expanded')).toBe('true')
+  }
+
   it('duo dashboard: filter row, BalanceHero and the pending stack all render', () => {
     renderAs(LIVE_DUO, <Dashboard {...dashboardProps({ pendings: 1 })} />)
     expect(screen.getByRole('button', { name: /篩選/ })).toBeInTheDocument()
     expect(screen.getByTestId('balance-hero')).toBeInTheDocument()
+    openPendingSummary()
     expect(screen.getByTestId('pending-expense')).toBeInTheDocument()
   })
 
@@ -264,6 +281,7 @@ describe('live (unpinned) surfaces are unchanged', () => {
     renderAs(LIVE_SOLO, <Dashboard {...dashboardProps({ pendings: 1 })} />)
     expect(screen.queryByRole('button', { name: /篩選/ })).toBeNull()
     expect(screen.getByTestId('solo-hero')).toBeInTheDocument()
+    openPendingSummary()
     expect(screen.getByTestId('pending-expense')).toBeInTheDocument()
   })
 })

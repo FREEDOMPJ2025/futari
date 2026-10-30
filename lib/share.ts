@@ -1,3 +1,5 @@
+import { hasShareSheet, openShareSheet } from '@/lib/shareSheet'
+
 /**
  * Share an invite URL: always copies to clipboard first (desktop safety net),
  * then opens the native share sheet on top if available (mobile convenience).
@@ -32,17 +34,14 @@ export async function shareInviteLink(
   }
 
   // Step 2: try the native share sheet (mobile users get LINE / iMessage / etc.).
-  if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+  // Web Share, or @capacitor/share inside the Android shell (#1749).
+  if (hasShareSheet()) {
     try {
-      await navigator.share({ title, text, url })
+      await openShareSheet({ title, text, url })
       return 'shared'
-    } catch (e) {
-      // AbortError = user dismissed the share sheet. Anything else = share
-      // unavailable for some reason. In both cases the clipboard copy from
-      // step 1 still gives them a usable result.
-      if (!(e instanceof Error) || e.name !== 'AbortError') {
-        // Non-abort failure — share is broken, but we may still have copied.
-      }
+    } catch {
+      // The user dismissed the sheet, or sharing failed for some reason. In both
+      // cases the clipboard copy from step 1 still gives them a usable result.
     }
   }
 

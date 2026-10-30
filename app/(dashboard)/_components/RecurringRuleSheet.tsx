@@ -248,6 +248,7 @@ export function RecurringRuleSheet(props: Props) {
   const handleSave = () => {
     if (!amount || amount <= 0) { setError(tNs.errors.amountRequired); return }
     if (!isSolo && personUnresolved) { setError(personFormerHint); return }
+    if (endsOn && endsOn < startsOn) { setError(t.errors.actions.recurring_ends_before_start); return }
 
     if (isIncome) {
       setError(null)
@@ -669,6 +670,7 @@ export function RecurringRuleSheet(props: Props) {
               </div>
               <TextInput
                 type="date"
+                min={startsOn || undefined}
                 value={endsOn}
                 onChange={(e) => setEndsOn(e.target.value)}
               />

@@ -98,7 +98,7 @@ export function CompactRow({ tx, isLast, onClick }: CompactRowProps) {
     ? (payerIsViewer ? tx.amount - delta : -delta)
     : 0
   const showMyShare = tx.kind === 'transaction' && myShare !== 0
-  const myShareColor = tx.kind === 'income' ? 'var(--credit)' : 'var(--debit)'
+  const myShareColor = tx.kind === 'income' ? 'var(--credit-text)' : 'var(--debit-text)'
 
   // For income rows, fall back to category label when source/description is empty.
   const displayLabel = tx.kind === 'income'
@@ -109,6 +109,8 @@ export function CompactRow({ tx, isLast, onClick }: CompactRowProps) {
 
   const noteText = tx.notes?.trim() || null
   const isPending = tx.kind === 'transaction' && tx.status === 'pending'
+  // Pending (#1864): the main amount steps down to --ink-3; the rest keeps its token.
+  const amountColor = isPending ? 'var(--ink-3)' : 'var(--ink)'
 
   const inner = (
     <>
@@ -152,7 +154,7 @@ export function CompactRow({ tx, isLast, onClick }: CompactRowProps) {
           <>
             <div
               className="tnum text-sm font-medium tracking-[-0.2px]"
-              style={{ fontFamily: 'var(--font-numeric)', color: 'var(--ink)' }}
+              style={{ fontFamily: 'var(--font-numeric)', color: amountColor }}
             >
               {formatLedgerAmount(tx.originalAmount, tx.originalCurrency)}
             </div>
@@ -166,7 +168,7 @@ export function CompactRow({ tx, isLast, onClick }: CompactRowProps) {
         ) : (
           <div
             className="tnum text-sm font-medium tracking-[-0.2px]"
-            style={{ fontFamily: 'var(--font-numeric)', color: 'var(--ink)' }}
+            style={{ fontFamily: 'var(--font-numeric)', color: amountColor }}
           >
             {currencySymbol(baseCurrency)}{formatRowAmount(tx.amount, t.compactRow.trillion, t.compactRow.hundredMillion)}
           </div>
@@ -191,11 +193,11 @@ export function CompactRow({ tx, isLast, onClick }: CompactRowProps) {
   // Grid cols = the old flex (auto | 1fr | content-sized).
   const cls = "block w-full px-3.5 py-3 text-left bg-transparent border-0"
   const gridCls = "@container text-base grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3"
-  // Pending records read as "still in motion" — drop opacity so they recede
-  // visually next to settled rows. Badge label still reads at full contrast.
+  // Pending records read as "still in motion" through the 待結算 badge (the main
+  // signal) and a --ink-3 main amount (#1864), not through opacity: a faded row
+  // took every line under 4.5:1 (DESIGN.md, Derived-Contrast Rule).
   const style = {
     borderBottom: isLast ? 'none' : '1px solid var(--hairline)',
-    opacity: isPending ? 0.6 : 1,
   }
 
   if (onClick) {

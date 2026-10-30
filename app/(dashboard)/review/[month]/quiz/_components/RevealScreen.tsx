@@ -138,7 +138,7 @@ export function RevealScreen({
                     </div>
                     <div
                       className="text-xs font-mono"
-                      style={{ color: 'var(--credit)', letterSpacing: '0.08em' }}
+                      style={{ color: 'var(--credit-text)', letterSpacing: '0.08em' }}
                     >
                       ✦ {tq.revealSameAnswer}
                     </div>

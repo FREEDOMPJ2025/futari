@@ -12,6 +12,7 @@ import { describe, it, expect } from 'vitest'
 import {
   ESCALATION_RESET_BACKGROUND_MS,
   ESCALATION_RESET_SHOWN_MS,
+  isFragmentOnlyNavigation,
   loadPageLogic,
   shouldResetEscalationAfterBackground,
   shouldResetEscalationAfterShown,
@@ -69,6 +70,53 @@ describe('原生看門狗：升級與歸零', () => {
     expect(ESCALATION_RESET_BACKGROUND_MS).toBe(300_000)
     expect(shouldResetEscalationAfterBackground(300_000)).toBe(false)
     expect(shouldResetEscalationAfterBackground(300_001)).toBe(true)
+  })
+})
+
+describe('原生看門狗：頁內錨點不啟動（#1680，只有 Swift 鏡射）', () => {
+  const O = 'https://futari.example'
+
+  it('case 1：首頁的錨點 #sec → 略過', () => {
+    expect(isFragmentOnlyNavigation(`${O}/#sec`, `${O}/`, false)).toBe(true)
+  })
+
+  it('case 2：pushState 到 /b 之後，/b 上的錨點 → 略過（current 是 webView.url，不是啟動時的網址）', () => {
+    expect(isFragmentOnlyNavigation(`${O}/b#sec`, `${O}/b`, false)).toBe(true)
+  })
+
+  it('case 3：/a#x → /a（拿掉 fragment 是真的重新載入）→ 啟動', () => {
+    expect(isFragmentOnlyNavigation(`${O}/a`, `${O}/a#x`, false)).toBe(false)
+  })
+
+  it('case 4：/#x 上 reload → 啟動（即使網址帶 fragment）', () => {
+    expect(isFragmentOnlyNavigation(`${O}/#x`, `${O}/#x`, true)).toBe(false)
+  })
+
+  it('case 5：跨頁導覽 → 啟動（含跨頁且帶 fragment）', () => {
+    expect(isFragmentOnlyNavigation(`${O}/a`, `${O}/`, false)).toBe(false)
+    expect(isFragmentOnlyNavigation(`${O}/a#sec`, `${O}/`, false)).toBe(false)
+  })
+
+  it('fragment 換成另一個 fragment（#x → #y）→ 略過', () => {
+    expect(isFragmentOnlyNavigation(`${O}/a#y`, `${O}/a#x`, false)).toBe(true)
+  })
+
+  it('query 不同 → 啟動', () => {
+    expect(isFragmentOnlyNavigation(`${O}/a?p=2#sec`, `${O}/a?p=1`, false)).toBe(false)
+  })
+
+  it('不同 origin（host / scheme / port）→ 啟動', () => {
+    expect(isFragmentOnlyNavigation(`https://other.example/#sec`, `${O}/`, false)).toBe(false)
+    expect(isFragmentOnlyNavigation(`http://futari.example/#sec`, `${O}/`, false)).toBe(false)
+    expect(isFragmentOnlyNavigation(`${O}:8443/#sec`, `${O}/`, false)).toBe(false)
+  })
+
+  it('目前網址未知（nil）→ 啟動：寧可多盯一次，不要漏掉真正的載入', () => {
+    expect(isFragmentOnlyNavigation(`${O}/#sec`, null, false)).toBe(false)
+  })
+
+  it('沒有 fragment 的同網址（重新導覽同一頁）→ 啟動', () => {
+    expect(isFragmentOnlyNavigation(`${O}/a`, `${O}/a`, false)).toBe(false)
   })
 })
 

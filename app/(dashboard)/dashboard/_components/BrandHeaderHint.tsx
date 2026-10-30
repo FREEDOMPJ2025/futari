@@ -19,17 +19,19 @@ function reducer(phase: Phase, action: Action): Phase {
 }
 
 /**
- * One-time first-use floating labels below the BrandHeader icon buttons (#765).
+ * One-time first-use floating label below the BrandHeader avatar stack (#765).
  *
- * Two small pill callouts appear below the ✈ and avatar-stack buttons on the
- * user's first visit. They auto-dismiss after 3.5 s or on the first tap/click
- * anywhere. The `futari_header_hint_v1` localStorage key prevents re-display.
+ * A small pill callout appears below the avatar-stack button on the user's
+ * first visit. The ✈ callout went with the header trip button (#1851): the
+ * trip entry is now the labelled 「✈ 旅行 ›」 row, which needs no hint.
+ * It auto-dismisses after 3.5 s or on the first tap/click anywhere. The
+ * `futari_header_hint_v1` localStorage key prevents re-display.
  *
  * Positioned absolute inside the BrandHeader's right `relative` container so
- * each callout sits naturally below its respective button. Respects
+ * the callout sits naturally below its button. Respects
  * `prefers-reduced-motion`.
  */
-export function BrandHeaderHint({ showTripButton }: { showTripButton: boolean }) {
+export function BrandHeaderHint() {
   const t = useTranslations()
   const [phase, dispatch] = useReducer(reducer, 'idle')
 
@@ -105,7 +107,6 @@ export function BrandHeaderHint({ showTripButton }: { showTripButton: boolean })
           : 'opacity 150ms ease-in, transform 150ms ease-in',
       }}
     >
-      {showTripButton && <Callout label={t.dashboard.headerHint.trip} />}
       <Callout label={t.dashboard.headerHint.settings} />
     </div>
   )

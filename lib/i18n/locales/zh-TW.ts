@@ -273,6 +273,15 @@ export type Translations = {
     phoneMockFeed2Sub: string
     phoneMockFeed3Title: string
     phoneMockFeed3Sub: string
+    /** Mobile example card under the sign-in link (#1852): one expense plus how it
+     *  splits. Demo data, the card is built from real components. The amounts
+     *  live inside the strings because the figures differ per locale. */
+    exampleCardTitle: string
+    exampleCardSub: string
+    exampleCardAmount: string
+    exampleCardResult: string
+    /** Visually hidden figcaption — the one sentence a screen reader gets. */
+    exampleCardCaption: string
   }
 
   /** Wayfinding strings shared by every brand page (landing, sign-in,
@@ -444,6 +453,9 @@ export type Translations = {
       tripEmpty: string
       tripAria: string
     }
+    /** #1851 — one-line summary standing in for the pending stacks until tapped.
+     *  `{n}` is the number of cards behind it (expense + shortcut, or income). */
+    pendingSummary: { one: string; other: string }
     /** Solo expense hero. `{month}` is the locale's own month name, resolved
      *  at render with Intl (「9月」/ "September"), never string-concatenated. */
     soloHero: {
@@ -3512,6 +3524,8 @@ export type Translations = {
       pending_former_member: string
       rule_payer_not_member: string
       rule_recipient_not_member: string
+      /** #1837 — recurring rule end date earlier than its start date. */
+      recurring_ends_before_start: string
       pending_income_not_found: string
       pending_income_handled_elsewhere: string
       shortcut_pending_handled_elsewhere: string
@@ -3759,6 +3773,12 @@ export const zhTW: Translations = {
     phoneMockFeed2Sub: '昨天',
     phoneMockFeed3Title: '小白看醫生',
     phoneMockFeed3Sub: '5/11',
+    // TODO(i18n): 待 Aria 定稿 #1852（文案出自 #1858 規格提案）
+    exampleCardTitle: '週五晚餐・拉麵',
+    exampleCardSub: '你付 · 各付一半',
+    exampleCardAmount: '−840',
+    exampleCardResult: '對方待還你 420',
+    exampleCardCaption: '範例：週五晚餐 840 元，你付，各付一半，對方待還你 420 元。',
   },
 
   brand: {
@@ -3893,6 +3913,7 @@ export const zhTW: Translations = {
       tripEmpty: '開始一趟旅行帳',
       tripAria: '旅行：前往旅行列表',
     },
+    pendingSummary: { one: '{n} 筆待確認', other: '{n} 筆待確認' },
     soloHero: {
       monthLabel: '{month}記下',
       countLabel: { one: '{count} 筆', other: '{count} 筆' },
@@ -5748,7 +5769,7 @@ export const zhTW: Translations = {
 
   privacyPage: {
     heading: '隱私權政策',
-    lastUpdated: '最後更新：2026 年 10 月 15 日',
+    lastUpdated: '最後更新：2026 年 10 月 23 日',
     intro: '本頁說明 Futari 如何蒐集、使用與保護您的個人資料。',
     sectionCollectTitle: '蒐集的資料',
     sectionCollectItems: [
@@ -5784,6 +5805,7 @@ export const zhTW: Translations = {
       'PostHog（產品分析，收集匿名操作事件，不含個人識別資訊）',
       'Google Analytics 4（流量來源分析，IP 匿名化，不啟用跨站個人化）',
       'Google Drive（存放加密的資料庫備份）',
+      'Apple 推播通知服務、Google Firebase 雲端通訊（推播通知，只收到裝置的推播識別碼與固定的通知文字，不含帳本內容）',
     ],
     sectionRightsTitle: '您的權利',
     sectionRightsBody: '您可隨時透過設定頁登出或刪除帳號。如需匯出或查詢您的個人資料，',
@@ -6116,7 +6138,7 @@ export const zhTW: Translations = {
         },
         moneybook: {
           name: '麻布記帳',
-          description: '台灣的自動同步記帳 App，匯出 CSV 帶過來。',
+          description: '台灣的自動同步記帳 App，截圖請 ChatGPT 整理成 CSV 帶過來。',
         },
         andromoney: {
           name: 'AndroMoney',
@@ -6124,7 +6146,7 @@ export const zhTW: Translations = {
         },
         mobills: {
           name: 'Mobills',
-          description: '國際個人理財 App，匯出 CSV 帶過來。',
+          description: '國際個人理財 App，截圖請 ChatGPT 整理成 CSV 帶過來。',
         },
         manebo: {
           name: 'Manebo',
@@ -6334,7 +6356,7 @@ export const zhTW: Translations = {
       moneybook: {
         heroKicker: 'MONEYBOOK → FUTARI',
         heroTitle: '你的麻布記帳資料，可以帶走',
-        heroSubtitle: '從麻布記帳搬到 Futari：匯出交易明細 CSV，上傳預覽後，和伴侶一起把這些記錄接著寫下去。',
+        heroSubtitle: '從麻布記帳搬到 Futari：把交易畫面截圖，請 ChatGPT 整理成 CSV，上傳預覽後，和伴侶一起把這些記錄接著寫下去。',
         intro: '麻布記帳自 2026 年 4 月起改為全面收費：未訂閱的帳號無法再同步，也無法手動記帳；依官方公告，年費將於 2027 年起調整為 NT$1,499。如果你們正在重新考慮，想把這些年的記錄帶去一個核心功能免費的雙人帳本，這一頁是為此準備的。',
         differentiators: [
           {
@@ -6351,21 +6373,29 @@ export const zhTW: Translations = {
           },
         ],
         stepsHeading: '麻布記帳搬遷三步',
-        step1: '在麻布記帳（訂閱會員）用「明細匯出」把交易輸出成 CSV。',
-        step2: '把 CSV 上傳到這裡預覽，先確認交易明細的日期範圍和筆數沒有缺一段。',
-        step3: '建立 Futari 帳號，匯入時對照類別、指定付款人，之後和伴侶一起接著記。',
+        step1: '在麻布記帳把要搬的交易一頁一頁截圖，不必處理匯出的加密檔（下方有完整做法）。',
+        step2: '用 ChatGPT 把截圖整理成 CSV，免費版就夠；分類文字會原樣寫進 CSV，匯入時對得上的會歸到 Futari 的類別，其餘歸在「其他」。',
+        step3: '把 CSV 上傳到這裡預覽，確認筆數和日期範圍對得上，再建立帳號完成匯入。',
         faq: [
           {
             question: '免費帳號還能把資料匯出來嗎？',
-            answer: '2026 年 4 月收費制上路後，明細匯出屬於訂閱會員功能。若你們還在訂閱期，建議先把明細匯出留存一份。',
+            answer: '2026 年 4 月收費制上路後，明細匯出屬於訂閱會員功能。不想為了搬家先訂閱的話，可以改用截圖：把交易畫面截下來請 ChatGPT 整理成 CSV，下方有完整步驟和可複製的提示詞。',
           },
           {
-            question: '匯出的 CSV 和 Futari 的格式對得起來嗎？',
-            answer: '不完全一樣。上傳到這頁會先在瀏覽器預覽，看得到筆數、日期範圍和常出現的分類；正式匯入時，付款人與分攤方式整批指定，讀不出來的列會被略過並留下紀錄。',
+            question: '麻布記帳匯出的檔案打不開，怎麼辦？',
+            answer: '麻布記帳匯出的檔案有加密，密碼是你的身分證字號，輸入前打不開。不想處理這一步的話，改用截圖：把交易畫面截下來請 ChatGPT 整理成 CSV，下方有完整步驟和可複製的提示詞。',
+          },
+          {
+            question: '要截幾張圖？',
+            answer: '建議 5–10 張，往下捲動蓋過你想搬的時間範圍即可。同一筆重複出現的，提示詞已請 ChatGPT 只留一筆。',
           },
           {
             question: '搬過來之後要訂閱嗎？',
             answer: '不用。Futari 的核心記帳、分攤與結算都在免費層，匯入也不收費。',
+          },
+          {
+            question: 'ChatGPT 整理的分類會不會跑掉？',
+            answer: '分類文字會原樣寫進 CSV；匯入時名稱對得上的會自動歸到 Futari 的類別，其餘先歸在「其他」，匯入後可以再逐筆改。',
           },
           {
             question: '麻布記帳會自動同步銀行，Futari 也會嗎？',
@@ -6422,7 +6452,7 @@ export const zhTW: Translations = {
       mobills: {
         heroKicker: 'MOBILLS → FUTARI',
         heroTitle: '你的 Mobills 資料，可以帶走',
-        heroSubtitle: '從 Mobills 搬到 Futari：匯出 CSV，上傳預覽後，和伴侶一起把記錄接著寫下去。',
+        heroSubtitle: '從 Mobills 搬到 Futari：把交易畫面截圖，請 ChatGPT 整理成 CSV，上傳預覽後，和伴侶一起把記錄接著寫下去。',
         differentiators: [
           {
             title: '雙人共用，不是各記各的',
@@ -6438,10 +6468,18 @@ export const zhTW: Translations = {
           },
         ],
         stepsHeading: 'Mobills 搬遷三步',
-        step1: '在 Mobills 匯出交易紀錄，下載 CSV 檔。',
-        step2: '把 CSV 上傳到這裡，先看預覽裡的日期範圍，確認你要搬的那段時間都在。',
-        step3: '建立 Futari 帳號，兩個人各自匯入各自的檔案，記錄都會落在同一本共同帳本。',
+        step1: '在 Mobills 把要搬的交易一頁一頁截圖（下方有完整做法）。',
+        step2: '用 ChatGPT 把截圖整理成 CSV，免費版就夠；分類文字會原樣寫進 CSV，匯入時對得上的會歸到 Futari 的類別，其餘歸在「其他」。',
+        step3: '把 CSV 上傳到這裡預覽，確認筆數和日期範圍對得上，再建立帳號完成匯入。兩個人各自匯入各自的 CSV，記錄都會落在同一本共同帳本。',
         faq: [
+          {
+            question: 'Mobills 的匯出檔可以直接上傳嗎？',
+            answer: 'Futari 目前沒有針對 Mobills 匯出檔的讀取支援，格式對不上的列會讀不到。改用截圖：把交易畫面截下來請 ChatGPT 整理成 CSV，下方有完整步驟和可複製的提示詞。',
+          },
+          {
+            question: '要截幾張圖？',
+            answer: '建議 5–10 張，往下捲動蓋過你想搬的時間範圍即可。同一筆重複出現的，提示詞已請 ChatGPT 只留一筆。',
+          },
           {
             question: '匯錯了可以重來嗎？',
             answer: '可以。匯入完成後 24 小時內能一鍵復原整批，不會留下半份資料，也不會動到 Mobills 裡的原始記錄。',
@@ -6453,6 +6491,10 @@ export const zhTW: Translations = {
           {
             question: '我們兩個人都有 Mobills 的記錄，要怎麼合併？',
             answer: '各自匯入各自的檔案就好。每次匯入都可以指定預設付款人（你或對方）與分攤方式，兩份記錄最後落在同一本共同帳本。同一筆共同支出如果兩邊都記了，匯入前先留下其中一份；Futari 不會自動合併重複的記錄。',
+          },
+          {
+            question: 'ChatGPT 整理的分類會不會跑掉？',
+            answer: '分類文字會原樣寫進 CSV；匯入時名稱對得上的會自動歸到 Futari 的類別，其餘先歸在「其他」，匯入後可以再逐筆改。',
           },
           {
             question: 'Mobills 有預算功能，Futari 有嗎？',
@@ -6545,7 +6587,7 @@ export const zhTW: Translations = {
           },
           {
             question: 'ChatGPT 整理的分類會不會跑掉？',
-            answer: '分類文字會原樣保留，上傳後先預覽，正式匯入時可以對照調整成 Futari 的分類。',
+            answer: '分類文字會原樣寫進 CSV；匯入時名稱對得上的會自動歸到 Futari 的類別，其餘先歸在「其他」，匯入後可以再逐筆改。',
           },
           {
             question: '我在簡單記帳買的（永久）VIP，搬過來會浪費嗎？',
@@ -6851,9 +6893,9 @@ export const zhTW: Translations = {
         ogDescription: 'CWMoney 用戶的下一站：免費分帳，Excel 轉 CSV 搬進 Futari。',
       },
       moneybook: {
-        title: '從麻布記帳搬家到 Futari｜CSV 匯入',
-        description: '麻布記帳資料怎麼搬到雙人帳本？把交易明細匯出成 CSV，上傳到 Futari 這個專為夫妻、伴侶設計的共同帳本，和對方一起接著記。免費、無廣告、只開放給你們倆。',
-        ogDescription: '麻布記帳用戶的雙人記帳新選擇：匯出 CSV，搬進 Futari。',
+        title: '從麻布記帳搬家到 Futari｜截圖匯入',
+        description: '麻布記帳資料怎麼搬到雙人帳本？把交易畫面截圖，請 ChatGPT 整理成 CSV，再上傳到 Futari 這個專為夫妻、伴侶設計的共同帳本，和對方一起接著記。免費、無廣告、只開放給你們倆。',
+        ogDescription: '麻布記帳用戶的雙人記帳新選擇：截圖整理成 CSV，搬進 Futari。',
       },
       andromoney: {
         title: '從 AndroMoney 搬家到 Futari｜CSV 匯入',
@@ -6861,9 +6903,9 @@ export const zhTW: Translations = {
         ogDescription: 'AndroMoney 用戶的雙人記帳新選擇：匯出 CSV，搬進 Futari。',
       },
       mobills: {
-        title: '從 Mobills 搬家到 Futari｜CSV 匯入',
-        description: 'Mobills 資料匯出後怎麼搬到雙人帳本？把 CSV 匯入 Futari 這個專為夫妻、伴侶設計的共同帳本，和對方一起接著記帳。免費、無廣告、只開放給你們倆。',
-        ogDescription: 'Mobills 用戶的雙人記帳新選擇：匯出 CSV，搬進 Futari。',
+        title: '從 Mobills 搬家到 Futari｜截圖匯入',
+        description: 'Mobills 資料怎麼搬到雙人帳本？把交易畫面截圖，請 ChatGPT 整理成 CSV，再上傳到 Futari 這個專為夫妻、伴侶設計的共同帳本，和對方一起接著記帳。免費、無廣告、只開放給你們倆。',
+        ogDescription: 'Mobills 用戶的雙人記帳新選擇：截圖整理成 CSV，搬進 Futari。',
       },
       manebo: {
         title: '從 Manebo 搬家到 Futari｜情侶共同記帳',
@@ -7501,7 +7543,7 @@ export const zhTW: Translations = {
         },
         {
           title: '用「文字」組出網址',
-          body: '加一個「文字」動作，貼上下面的網址，把 [金額] 換成第 2 步的結果、[商家] 換成第 3 步的結果（沒加第 2 步，就換成「捷徑輸入」→「數量」）。想換分類，就改 category= 後面的 id（見下方分類表）。',
+          body: '加一個「文字」動作，貼上下面的網址，把 [金額] 換成第 2 步的結果、[商家] 換成第 3 步的結果（沒加第 2 步，就換成「捷徑輸入」→「數量」）。分類不用寫：記過的商家會沿用上次的分類，第一次記的商家先用「飲食」，存之前都可以改。',
         },
         {
           title: '打開 URL',
@@ -7556,8 +7598,8 @@ export const zhTW: Translations = {
         },
         {
           param: 'category',
-          rule: '下表其中一個 id，要全小寫、完全一樣。',
-          fallback: '用預設的「飲食」',
+          rule: '下表其中一個 id，要全小寫、完全一樣。只有第一次記這個商家時會採用，記過的商家沿用上次的分類。',
+          fallback: '這個商家記過就沿用上次的分類，沒記過用「飲食」',
         },
         {
           param: 'note',
@@ -7597,8 +7639,8 @@ export const zhTW: Translations = {
           cause: '商家名稱沒有先經過「URL 編碼」。',
         },
         {
-          symptom: '分類變成「飲食」，不是我寫的',
-          cause: 'category 的 id 拼錯，或用了大寫。',
+          symptom: '分類不是我網址裡寫的',
+          cause: '這個商家記過，會沿用上次的分類；第一次記的商家，id 拼錯或用了大寫就會用「飲食」。',
         },
       ],
     },
@@ -7673,6 +7715,7 @@ export const zhTW: Translations = {
       pending_former_member: '這張卡片的付款人已離開這本帳本，請先改一下再確認。',
       rule_payer_not_member: '這條規則的付款人已離開這本帳本，請先修改再恢復。',
       rule_recipient_not_member: '這條規則的收入歸屬已離開這本帳本，請先修改再恢復。',
+      recurring_ends_before_start: '結束日期不能早於開始日期',
       pending_income_not_found: '待確認收入已被處理或找不到',
       pending_income_handled_elsewhere: '待確認收入已被其他裝置處理',
       shortcut_pending_handled_elsewhere: '這張待確認已在其他裝置處理或已過期',

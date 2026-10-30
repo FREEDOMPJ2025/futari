@@ -233,10 +233,56 @@ describe('design-contrast — math sanity check against documented figures', () 
 // ---------------------------------------------------------------------------
 
 const GROUNDS = ['--bg', '--bg-committed', '--surface', '--surface-alt']
-const INKS = ['--ink', '--ink-2', '--ink-3', '--debit-text', '--debit-quiet', '--credit', '--accent', '--destructive', '--on-fill']
+const INKS = ['--ink', '--ink-2', '--ink-3', '--debit-text', '--debit-quiet', '--credit', '--credit-text', '--accent', '--accent-fill', '--accent-text', '--destructive', '--on-fill']
 
 const NORMAL_TEXT_MIN = 4.5
 const GRAPHICAL_MIN = 3
+
+describe('design-contrast — PhilosophyCards text opacity', () => {
+  const source = readFileSync(join(REPO_ROOT, 'app/onboarding/PhilosophyCards.tsx'), 'utf8')
+
+  it('keeps the eyebrow, skip button and payday mark free of opacity utilities', () => {
+    const elements = [
+      source.match(/<p\b[^>]*>\s*\{pad\(index \+ 1\)\}[^<]*\{card\.eyebrow\}/)?.[0],
+      source.match(/<button\b[^>]*>\s*\{copy\.skip\}/)?.[0],
+      source.match(/<div\b[^>]*>\s*\{props\.copy\.paydayMark\}/)?.[0],
+    ]
+    for (const [index, element] of elements.entries()) {
+      expect(element).toBeDefined()
+      expect(element).toContain(index === 0 ? '${TEXT[tone]}' : 'text-ink-2')
+      expect(element).not.toMatch(/opacity-/)
+    }
+    expect(source).toMatch(/const TEXT:[^\n]*credit: 'text-credit-text'/)
+  })
+
+  it('full-opacity TEXT.credit and text-ink-2 on --bg clear normal-text AA', () => {
+    expect(contrastOf('--credit-text', '--bg')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+    expect(contrastOf('--ink-2', '--bg')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+  })
+
+  it('the accent eyebrow uses --accent-text, which clears normal-text AA on --bg (~5.30:1) and --surface (~6.08:1)', () => {
+    expect(source).toMatch(/const TEXT:[^\n]*accent: 'text-accent-text'/)
+    expect(contrastOf('--accent-text', '--bg')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+    expect(contrastOf('--accent-text', '--surface')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+    // Pinned so a lighter --accent-text shows up here first, not only on the card 2 band.
+    expect(contrastOf('--accent-text', '--bg')).toBeCloseTo(5.30, 1)
+    expect(contrastOf('--accent-text', '--surface')).toBeCloseTo(6.08, 1)
+  })
+
+  it('renderQuote’s <em> uses --accent-text, which clears normal-text AA on --bg and card 2’s --accent-soft band', () => {
+    expect(source).toMatch(/<em\b[^>]*className="italic text-accent-text"/)
+    expect(source).not.toMatch(/<em\b[^>]*className="[^"]*text-accent"/)
+    expect(contrastOf('--accent-text', '--bg')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+    expect(contrastOf('--accent-text', '--accent-soft')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+  })
+
+  it('--accent-text clears normal-text AA on --accent-soft (~4.55:1), the band under onboarding card 2’s eyebrow', () => {
+    // Card 2 draws a --bg → --accent-soft gradient behind a transparent surface, and its eyebrow sits
+    // on the --accent-soft part (PhilosophyCards Card02). That band is the worst case for this token.
+    expect(source).toMatch(/linear-gradient\(180deg, var\(--bg\) 0%, var\(--bg\) 38%, var\(--accent-soft\) 38%/)
+    expect(contrastOf('--accent-text', '--accent-soft')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+  })
+})
 
 /** The full ink x ground matrix, computed once and printed for
  *  discoverability regardless of which assertions below pass or fail. */
@@ -309,6 +355,39 @@ describe('design-contrast — pairings the system claims are safe', () => {
   })
 })
 
+// #1864 — a pending CompactRow no longer fades the whole row with opacity (every line fell under
+// 4.5:1). The 待結算 badge is the signal, plus a --ink-3 main amount; each line keeps its token.
+describe('design-contrast — #1864 pending CompactRow', () => {
+  const rowSource = readFileSync(join(REPO_ROOT, 'app/(dashboard)/dashboard/_components/CompactRow.tsx'), 'utf8')
+    .replace(/\/\/.*$/gm, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+
+  it('CompactRow sets no opacity at all, pending or settled', () => {
+    expect(rowSource).not.toMatch(/opacity/)
+  })
+
+  // The amount colors themselves are checked on the rendered row: tests/CompactRow-pending-1864.test.tsx.
+
+  it('every line of a pending row clears 4.5:1 on --surface', () => {
+    const surface = resolve('--surface')
+    const on = (fg: string, ground: RGB) => contrastRatio(compositeOver(resolve(fg), ground), ground)
+    const badgeGround = compositeOver(resolve('--hairline'), surface)
+    const pairs: Array<[string, number]> = [
+      ['title --ink', on('--ink', surface)],
+      ['date/payer --ink-3', on('--ink-3', surface)],
+      ['note --ink-2', on('--ink-2', surface)],
+      ['main amount --ink-3', on('--ink-3', surface)],
+      ['foreign line --ink-3', on('--ink-3', surface)],
+      ['badge --ink-2 on --hairline', on('--ink-2', badgeGround)],
+      ['hover --ink-3', on('--ink-3', compositeOver({ r: 31, g: 27, b: 22, a: 0.03 }, surface))],
+    ]
+    for (const [label, ratio] of pairs) {
+      console.log(`[design-contrast] #1864 ${label} = ${ratio.toFixed(2)}:1`)
+      expect(ratio, label).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+    }
+  })
+})
+
 describe('design-contrast — known-bad pairings, encoded as passing assertions on the current (broken) ratio', () => {
   // Each assertion pins today's actual ratio. If someone changes the
   // underlying token values, the ratio here will no longer match and the
@@ -338,11 +417,11 @@ describe('design-contrast — known-bad pairings, encoded as passing assertions 
     expect(resolve('--on-fill')).toEqual({ r: 255, g: 255, b: 255, a: 1 })
   })
 
-  // The settlement commit button no longer uses this pairing (#1197 moved it
-  // to --btn-primary-*, asserted above). The pairing itself is unchanged and
-  // still backs --btn-accent-bg / --btn-accent-text wherever the accent
-  // button is used, so the known-bad ratio stays pinned here.
-  it('#1197 — white on --accent is below 4.5:1 (~2.68:1); was the settlement commit button, still the --btn-accent-* pairing', () => {
+  // No button uses this pairing any more: #1197 moved the settlement commit
+  // button to --btn-primary-*, and #1850 moved --btn-accent-bg to
+  // --accent-fill (asserted below). --accent itself is unchanged and stays
+  // for rings, dots and soft fills, so the ratio stays pinned here.
+  it('#1197 — white on --accent is below 4.5:1 (~2.68:1); no longer a button pairing since #1850', () => {
     const ratio = contrastOf('--on-fill', '--accent')
     console.log(`[design-contrast] #1197 --on-fill on --accent = ${ratio.toFixed(2)}:1`)
     expect(Math.abs(ratio - 2.68)).toBeLessThan(0.05)
@@ -359,5 +438,31 @@ describe('design-contrast — #1197 TransactionFeed error toast', () => {
     console.log(`[design-contrast] #1197 TransactionFeed toast --debit-text on --debit-soft-over-surface = ${ratio.toFixed(2)}:1`)
     expect(ratio).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
     expect(contrastOf('--on-fill', '--debit')).toBeLessThan(NORMAL_TEXT_MIN)
+  })
+})
+
+describe('design-contrast — #1850 accent fill and amount text', () => {
+  it('--btn-accent-text on --btn-accent-bg (now --accent-fill) clears normal-text AA (~5.14:1)', () => {
+    const ratio = contrastOf('--btn-accent-text', '--btn-accent-bg')
+    console.log(`[design-contrast] #1850 --btn-accent-text on --btn-accent-bg = ${ratio.toFixed(2)}:1`)
+    expect(ratio).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+  })
+
+  it('--accent-fill on --bg clears graphical-object AA (3:1) for the FAB edge (~4.48:1)', () => {
+    expect(contrastOf('--accent-fill', '--bg')).toBeGreaterThanOrEqual(GRAPHICAL_MIN)
+  })
+
+  it('--debit-text on --bg clears normal-text AA (~5.00:1) — CompactRow expense share', () => {
+    expect(contrastOf('--debit-text', '--bg')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+  })
+
+  it('--credit-text on --surface clears normal-text AA (~5.22:1) — outing settlement, income hero card', () => {
+    expect(contrastOf('--credit-text', '--surface')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+  })
+
+  it('--credit-text on --bg clears normal-text AA (~4.54:1) — CompactRow income share', () => {
+    const ratio = contrastOf('--credit-text', '--bg')
+    console.log(`[design-contrast] #1850 --credit-text on --bg = ${ratio.toFixed(3)}:1`)
+    expect(ratio).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
   })
 })

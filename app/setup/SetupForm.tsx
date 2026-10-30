@@ -282,7 +282,7 @@ export default function SetupForm({ t, intent = null }: { t: Translations; inten
               type="button"
               onClick={handleShare}
               className="h-12 rounded-xl border-0 text-sm font-medium cursor-pointer"
-              style={{ background: 'var(--accent)', color: 'var(--on-fill)' }}
+              style={{ background: 'var(--btn-accent-bg)', color: 'var(--btn-accent-text)' }}
             >
               {invite.share}
             </button>

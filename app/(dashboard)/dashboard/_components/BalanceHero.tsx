@@ -180,7 +180,7 @@ export function BalanceHero({
   const canSettle = balance !== 0 && !isPast && !isProjectionView
   // Semantic color for the debt amount: green when partner owes you, red/orange
   // when you owe partner, neutral when even. Surfaces direction at a glance (#146).
-  const balanceColor = balance > 0 ? 'var(--credit)' : balance < 0 ? 'var(--debit-quiet)' : 'var(--ink)'
+  const balanceColor = balance > 0 ? 'var(--credit-text)' : balance < 0 ? 'var(--debit-quiet)' : 'var(--ink)'
 
   const toggleCollapsed = () => {
     const next = !heroCollapsed

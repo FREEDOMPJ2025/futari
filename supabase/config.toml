@@ -1,0 +1,29 @@
+# Supabase CLI config — functions section only (#968).
+#
+# This file exists to pin per-function deploy settings that
+# `supabase functions deploy` reads. It is NOT a full project config:
+# do not run `supabase config push` (it would push the CLI's local
+# defaults for auth, storage, etc. over the hosted projects' settings).
+#
+# send-recurring-push: verify_jwt = false (#1834). Its only caller, the
+# notify-recurring-push cron, authenticates with the project's named secret key
+# `cron` on the `apikey` header. Secret keys (`sb_secret_…`) are not JWTs, so
+# the gateway cannot verify them; Supabase's docs say to set verify_jwt = false
+# for a function called with a secret key and to authorize the key in code
+# (https://supabase.com/docs/guides/api/api-keys). callerAuth.ts does that and
+# is the ONLY barrier in front of the function — weakening it opens the
+# function to anyone.
+#
+# Do not flip this back to true. It adds no safety (the gateway also passes
+# sb_ keys and the public anon key), and once the cron stops sending the legacy
+# `Authorization` header (#1834 S5) or Supabase disables the legacy keys, the
+# gateway refuses the cron. Failure looks like: cron 401 at 16:10 UTC, no
+# `[auth]` line in the function log, no push, nothing else errors.
+#
+# Withdrawn (2026-10-25, #1834): this file used to say "verify_jwt must stay
+# true … do not deploy it with --no-verify-jwt". That held only while
+# callerAuth.ts checked the legacy JWT's claims behind the gateway's signature
+# check; that check is gone. See docs/superpowers/ops-runbook.md「呼叫者驗證」.
+
+[functions.send-recurring-push]
+verify_jwt = false

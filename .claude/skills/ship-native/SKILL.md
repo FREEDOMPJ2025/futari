@@ -41,6 +41,11 @@ description: >
   `MARKETING_VERSION` / `versionName` **只在使用者明講「這版要讓使用者看到新版號」時才動**，
   且照 [§E](../../../docs/app-store-submission-runbook.md#e-版本號規則策略-a純單調計數器) 鐵則 5：
   改了版號，計數**照樣只 +1，不歸零**。
+  - **明列例外（#968，使用者 2026-10-23 核准）**：v1.9.0 的 Android 殼 `versionName` 定為 **`1.9.0`**，
+    不必再問。它是 Android 推播門檻 `FCM_MIN_ANDROID_SHELL`：web 只對 `versionName ≥ 1.9.0` 的殼註冊 FCM。
+    之後的 Android 殼 `versionName` 不得低於它（規則見 [runbook §E](../../../docs/app-store-submission-runbook.md#android-推播門檻fcm_min_android_shell968)）。
+    這個例外只涵蓋這一次；之後改 `versionName` 照樣要使用者明講。
+- **Android release build 一定帶 `google-services.json`，絕不帶 service account。** 見 §3B 步驟 0／3。
 - **文件的勾選狀態不可信。** runbook 上的 ✅ 只代表「寫的時候是這樣」。動手前先用
   ASC API / Play Console / `git log` 看實況。這條踩過兩次：2026-08-07 重做了早就存在的
   Play 商店素材；2026-09-11 以為截圖已上傳，ASC 上掛的其實是六月手機拍的舊圖。
@@ -245,6 +250,22 @@ xcrun altool --upload-app  -f "$IPA" -t ios --apiKey LRB54C7D5X --apiIssuer <ISS
 
 ### 3B. Android：bundleRelease + 簽章驗證
 
+#### 0) 放 `google-services.json`（#968，每次 Android release 必做）
+
+Firebase 的 client 設定檔被 gitignore（repo 是公開的），每次打 release 前從加密 dmg 複製：
+
+```bash
+# ⚠️ 只複製 google-services.json。同資料夾的 fcm-service-account.json 是伺服器金鑰，
+#    永遠不放進 repo 樹（它只在 dmg 與 Supabase secrets）。不要 cat／印出任一檔。
+cp "/Volumes/Futari Secrets/android/google-services.json" android/app/google-services.json
+git check-ignore -q android/app/google-services.json && echo "ignored OK"   # 沒印 OK 就停
+```
+
+缺檔或空檔時 `bundleRelease` 會在 `:app:requireGoogleServicesJson` 直接失敗（`android/app/build.gradle`）；
+debug build 不受影響、照舊略過。`tests/no-tracked-secrets-968.test.ts` 會擋下被 `git add -f` 的這個檔。
+
+#### 1) 建置
+
 ```bash
 # 簽章參數由 build.gradle 從環境變數讀取；值在 repo 根目錄 .env（gitignored）
 # ⚠️ KEYSTORE_PATH 指向加密 dmg，**要先掛載 /Volumes/Futari Secrets**。
@@ -258,6 +279,8 @@ export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 cd android && ./gradlew bundleRelease
 # 產物：android/app/build/outputs/bundle/release/app-release.aab
 ```
+
+#### 2) 簽章驗證
 
 `.env` 要有 `KEYSTORE_PATH` / `KEYSTORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD`
 （store 與 key 同值）。**缺變數時 gradle 不會失敗**——`build.gradle` 對密碼有 `?: ""` fallback，
@@ -284,8 +307,48 @@ LC_ALL=C "$JAVA_HOME/bin/keytool" -J-Duser.language=en -printcert -file "$F" | g
 > build 會成功、`jarsigner -verify` 會回 `jar verified.`，一路綠燈到 Play Console 最後一步才拒收。
 > v1.5.15 送審時撞過一次。**換過簽章金鑰之後，唯一能證明它可用的方法是實際上傳一次。**
 
-指紋對上、`versionCode` 確認過之後，**把 AAB 路徑交給使用者自己上傳 Play Console**
-（或經明確同意後代傳）。
+#### 3) FCM 門檻檢查（#968，上傳前必過）
+
+從 AAB 本身讀，不看 `build.gradle`：`versionName` 必須 ≥ `FCM_MIN_ANDROID_SHELL`（`1.9.0`），
+且帶 `google_app_id` 字串資源（= google-services plugin 真的套上了）。沒有 bundletool，
+所以把 AAB 的 base module 重新包成 proto 格式 APK，交給 build-tools 內的 `aapt2`：
+
+```bash
+(
+  FCM_MIN_ANDROID_SHELL=1.9.0   # = web 端 FCM_MIN_ANDROID_SHELL；改一處要改兩處（runbook §E）
+  AAB="$(git rev-parse --show-toplevel)/android/app/build/outputs/bundle/release/app-release.aab"
+  AAPT2=$(ls -d "$HOME"/Library/Android/sdk/build-tools/*/aapt2 | sort -V | tail -1)
+  P=$(mktemp -d)
+  (cd "$P" && unzip -q -j "$AAB" base/manifest/AndroidManifest.xml base/resources.pb \
+     && zip -q proto.apk AndroidManifest.xml resources.pb) || { echo "STOP: cannot read $AAB"; exit 1; }
+  VN=$("$AAPT2" dump badging "$P/proto.apk" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p")
+  GAI=$("$AAPT2" dump resources "$P/proto.apk" | grep -c ' string/google_app_id$')   # 只數名稱，不印值
+  rm -rf "$P"
+  echo "versionName=$VN  google_app_id resources=$GAI  (gate $FCM_MIN_ANDROID_SHELL)"
+  LOW=$(printf '%s\n%s\n' "$FCM_MIN_ANDROID_SHELL" "$VN" | sort -V | head -1)
+  if [ -z "$VN" ] || [ "$LOW" != "$FCM_MIN_ANDROID_SHELL" ]; then
+    echo "STOP: versionName '$VN' < $FCM_MIN_ANDROID_SHELL"; exit 1
+  fi
+  [ "$GAI" -ge 1 ] || { echo "STOP: google_app_id missing"; exit 1; }
+  echo "OK: FCM gate passed"
+)
+```
+
+**印出 `STOP` 就不上傳**，回報原因。兩種 STOP 的樣子：
+
+- `versionName ... < 1.9.0`：殼帶了 Firebase，web 卻把它當舊殼、永遠不註冊推播（或反過來：之後
+  有人把版號調低，舊行為回來）。修 `versionName` 再 build，不要調低門檻。
+- `google_app_id missing`：plugin 沒套上。release 的 Gradle 護欄會先擋，所以這裡出現通常是拿錯檔
+  （例如 debug 的 AAB）。
+
+2026-10-23 對實際產物驗過：1.7.3 的 release AAB（有檔）→ `STOP: versionName`；無檔的 debug AAB →
+`STOP: google_app_id missing`；門檻暫設 1.7.3 時同一顆 release AAB → `OK`。
+
+#### 4) 交付
+
+指紋對上、`versionCode` 確認過、FCM 門檻通過之後，**把 AAB 路徑交給使用者自己上傳 Play Console**
+（或經明確同意後代傳）。上傳後把 `android/app/google-services.json` 刪掉（它被 ignore，不會進 commit，
+但留在 worktree 裡沒有用處）。
 
 > ⚠️ Upload keystore 在 **加密 dmg**：`/Volumes/Futari Secrets/android/futari-release.keystore`
 > （alias `futari`，2026-05-30 建，效期至 2053-10）。**要先掛載 dmg。**
@@ -321,7 +384,8 @@ LC_ALL=C "$JAVA_HOME/bin/keytool" -J-Duser.language=en -printcert -file "$F" | g
        □ 出口合規：build 的 usesNonExemptEncryption 若為 null 是 blocker，
          可 PATCH /v1/builds/{id} 補 false，不需重 build
        □ Add for Review → Submit
-  Play □ 上傳 AAB 到對應軌道
+  Play □ 上傳前 FCM 門檻檢查通過（versionName ≥ 1.9.0、有 google_app_id）
+       □ 上傳 AAB 到對應軌道
        □ 正式版權限條件：封閉測試 ≥12 人 × 連續 14 天（未滿足時按鈕是灰的）
 
 版本計數已 +1：iOS CURRENT_PROJECT_VERSION=<n> / Android versionCode=<n>
@@ -342,6 +406,8 @@ LC_ALL=C "$JAVA_HOME/bin/keytool" -J-Duser.language=en -printcert -file "$F" | g
 | `BUG! exception in phase 'semantic analysis' ... Unsupported class file major version 69`（或 70…） | JBR 隨 Android Studio 更新漂到比 Gradle 支援的還新（69 = Java 25 需 Gradle 9.1+、70 = Java 26 需 9.4+） | 升 `android/gradle/wrapper/gradle-wrapper.properties`（連帶 AGP），見 #1207；不要另裝舊 JDK |
 | `getDefaultProguardFile('proguard-android.txt') is no longer supported`（出錯的是 `:capacitor-community-apple-sign-in`） | apple-sign-in 的 Android patch 沒套上。常見於 #1207 之前就裝好的 `node_modules`：對已套過舊 patch 的目錄套新 patch 會失敗，而 postinstall 是 `patch-package \|\| exit 0`，npm 不會報錯 | `rm -rf node_modules && npm ci`，確認輸出有 `@capacitor-community/apple-sign-in@7.1.0 ✔` |
 | patch-package 重產的 patch 多出幾百行 `android/build/**` 二進位 | Gradle 把 plugin 的 build 產物寫進 `node_modules/<plugin>/android/build/`，patch-package 會一起收 | 重產前 `rm -rf node_modules/<plugin>/android/build`，產完 `grep '^diff --git' patches/*.patch` 確認只有預期檔案 |
+| `Execution failed for task ':app:requireGoogleServicesJson'` … `google-services.json is missing or empty (#968)` | release build 沒放 Firebase client 設定檔（被 gitignore，乾淨 worktree 一定沒有） | §3B 步驟 0：從 dmg 複製 `android/google-services.json`；不要用 service account 檔 |
+| FCM 門檻檢查印 `STOP: versionName ... < 1.9.0` | 殼的 `versionName` 低於 `FCM_MIN_ANDROID_SHELL` | 改 `versionName`（v1.9.0 殼定為 `1.9.0`，見硬性約束的例外）再 build；**不要調低門檻** |
 | AAB 出來了但 `jarsigner -verify` 不過 | `.env` 沒 source 進來；`build.gradle` 的密碼有 `?: ""` fallback，不會讓 build 失敗 | `set -a; . ./.env; set +a` 後重跑 |
 | ASC 回「build number 已存在」 | 同一 `MARKETING_VERSION` 下 build number 必須唯一遞增，TestFlight 也吃這規則 | 計數再 +1 重傳。**不要**改 `MARKETING_VERSION` 繞過 |
 | 要送審時發現版本沒有可用的 build | TestFlight build 90 天過期（1.5.1(1) 踩過：06-11 傳、09-09 過期、09-10 要送審） | 重新 archive 上傳；之後別提早卡位 |

@@ -75,8 +75,8 @@ export function BlogSection({
           <Image
             src="/illustration-hero.png"
             alt=""
-            width={1376}
-            height={768}
+            width={1170}
+            height={620}
             sizes="(min-width: 1280px) 1216px, 100vw"
             className={s.windowImg}
           />

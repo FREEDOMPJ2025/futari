@@ -316,7 +316,7 @@ function NetAmount({ net, currency }: { net: number; currency: string }) {
   return (
     <span
       className="text-sm tabular-nums shrink-0"
-      style={{ color: positive ? 'var(--credit)' : 'var(--debit-quiet)' }}
+      style={{ color: positive ? 'var(--credit-text)' : 'var(--debit-quiet)' }}
     >
       {positive ? '+' : '−'}{formatAmount(Math.abs(net), currency)}
     </span>

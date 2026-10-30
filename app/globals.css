@@ -18,7 +18,13 @@
   --grabber: rgba(58, 36, 25, 0.18);  /* sheet drag-handle bar */
   --accent: #E08856;
   --accent-soft: #F8D9C2;
+  /* Ember fill for white-text buttons only (5.14:1 vs white). --accent stays for rings, dots, art. #1850 */
+  --accent-fill: #A9572A;
+  /* Ember text on --bg / --surface / --accent-soft (5.30 / 6.08 / 4.55). #1850 */
+  --accent-text: #984E26;
   --credit: #7A9F7E;
+  /* Income amount text (#1850): --credit is 2.58:1 on --bg, so text uses this. */
+  --credit-text: #557458;
   --debit: #D17561;
   --debit-soft: rgba(209, 117, 97, 0.10);  /* error message bg tint */
   /* Muted clay for the balance-hero "you owe" amount: clay shifted toward
@@ -83,7 +89,7 @@
    * issues build on these (#262 destructive treatment, #261 Settings split). */
   --btn-primary-bg:       var(--ink);          /* 主要 commit: 記下 / 儲存 / 繼續 / 確認 */
   --btn-primary-text:     var(--on-fill);
-  --btn-accent-bg:        var(--accent);       /* 重點 CTA: FAB / 邀請 / 月結 entry */
+  --btn-accent-bg:        var(--accent-fill);       /* 重點 CTA: FAB / 邀請 / 月結 entry */
   --btn-accent-text:      var(--on-fill);
   --btn-secondary-bg:     var(--surface);      /* 次要: 取消 / 輔助 */
   --btn-secondary-text:   var(--ink);
@@ -175,6 +181,8 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-credit: var(--credit);
+  --color-credit-text: var(--credit-text);
+  --color-accent-text: var(--accent-text);
   --color-debit: var(--debit);
   --color-destructive: var(--destructive);
   --color-hairline: var(--hairline);

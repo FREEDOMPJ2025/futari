@@ -35,7 +35,7 @@ describe('validateRecurringIncomeRuleInput', () => {
   it('rejects endsOn before startsOn', () => {
     expect(() => validateRecurringIncomeRuleInput({
       ...base, startsOn: '2026-05-01', endsOn: '2026-04-30',
-    })).toThrow(/結束/)
+    })).toThrow(/recurring_ends_before_start/)
   })
   it('trims source and converts empty to null', () => {
     expect(validateRecurringIncomeRuleInput({ ...base, source: '   ' }).source).toBeNull()

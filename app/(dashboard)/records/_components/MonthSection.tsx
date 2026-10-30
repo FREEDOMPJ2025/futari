@@ -30,6 +30,14 @@ interface Props {
     expenseTotal: number
     incomeTotal: number
   }
+  /**
+   * Dashboard only (#1851): on the home feed the month row is a divider, not a
+   * heading to read, so it shrinks to keep the first entry above the SE fold.
+   * The records page keeps the full row.
+   * Weight stays 500 (Daphne asked for semibold, but only 400/500 are
+   * self-hosted; 600 would be synthesized, see font-weight-loaded.test.ts).
+   */
+  dense?: boolean
 }
 
 /**
@@ -44,7 +52,7 @@ interface Props {
  *   both — omitting a zero segment, except when both are zero, in which
  *   case the 支出 segment stays as the anchor.
  */
-export function MonthSection({ monthKey, count, totalAmount, summary }: Props) {
+export function MonthSection({ monthKey, count, totalAmount, summary, dense }: Props) {
   const t = useTranslations()
   const locale = useLocale()
   const baseCurrency = useBaseCurrency()
@@ -53,9 +61,9 @@ export function MonthSection({ monthKey, count, totalAmount, summary }: Props) {
     : formatLedgerAmount(totalAmount ?? 0, baseCurrency)
 
   return (
-    <div className="px-6 pt-4 pb-2 flex items-baseline justify-between gap-2">
+    <div className={`px-6 ${dense ? 'pt-2 pb-1' : 'pt-4 pb-2'} flex items-baseline justify-between gap-2`}>
       <span
-        className="text-base font-medium tracking-tight shrink-0"
+        className={`${dense ? 'text-sm' : 'text-base'} font-medium tracking-tight shrink-0`}
         style={{ color: 'var(--ink)' }}
       >
         {monthLabel(monthKey, locale)}

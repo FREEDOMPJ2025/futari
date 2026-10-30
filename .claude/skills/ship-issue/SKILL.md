@@ -270,6 +270,8 @@ gh pr list --state open --json number,title,headRefName,baseRefName,milestone,me
 
 修正項目轉交給 owner session 時要寫清楚：PR 編號、file:line、症狀、建議修法。**使用者的決定可以轉述，但對方應該向使用者本人再確認一次**，這是對的，不要催。
 
+**merge 同意綁定驗過的 head。** 使用者同意 merge 某條 PR 時，記下當時驗過的 head sha，merge 用 `gh pr merge <N> --merge --match-head-commit <sha>`。之後若 rebase 或 head 移動，先讓 verifier 確認新舊 head 的差異只有 CHANGELOG 或預期的變動（`git range-diff`，或比對 merge-base 起算的 diff），再重新問使用者，不沿用舊的同意。失效的樣子：沒有任何錯誤，merge 照樣成功，只是 merge 進去的那顆 commit 從來沒人驗過（例如 rebase 時解衝突改了文案）。
+
 **批次的 merge 後檢查（一定要做，不是選配）。** 使用者 merge 之後，對**每一條**跑第 7 步的 ancestry 檢查，再到 main 上實跑受影響的測試：
 
 ```bash

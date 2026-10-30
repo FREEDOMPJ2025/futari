@@ -2,6 +2,7 @@
 
 import { useTranslations } from '@/lib/i18n/client'
 import { ContinuityCell } from './ContinuityCell'
+import { PlaneIcon } from './BrandHeader'
 
 /**
  * Where the dashboard's 旅行 cell goes (#1364).
@@ -22,8 +23,8 @@ export function TripEntryCell() {
     <ContinuityCell
       href={TRIP_ENTRY_HREF}
       title={c.tripTitle}
-      subtitle={c.tripEmpty}
       ariaLabel={c.tripAria}
+      icon={<PlaneIcon size={16} />}
     />
   )
 }

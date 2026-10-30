@@ -29,6 +29,14 @@
 //   /?go=replace:/dashboard&after=3      location.replace('/dashboard')
 //   /?go=replace:/offsite&after=3        (offorigin mode)
 //   /__mode?m=normal&rootgo=reload&rootafter=3   the NEXT `/` served auto-runs the action once (no taps needed)
+// Fragment-only navigation cases (#1680). Every page has `<a id=anchor href="#sec">` and a `#sec` target:
+//   /?go=anchor&after=3                  click the anchor            -> watchdog log: SKIP fragment-only
+//   /?go=push-anchor&after=3             history.pushState to /b, then click the anchor (/b#sec) -> SKIP
+//   /?go=unfrag&after=3                  replaceState to /a#x, 1 s later location.href='/a'     -> ARM
+//   /?go=reload-frag&after=3             replaceState to /#x, 1 s later location.reload()       -> ARM
+//   (cross-page case: /?go=replace:/a&after=3 -> ARM). Combine with `hangimg` (15 s image) and after=3
+//   to see the old bug: ARM on an anchor, then FIRE at 6 s over a page that already showed.
+//   Same via the one-shot: /__mode?m=hangimg&rootgo=anchor&rootafter=3
 // Start the app on `/` (it loads server.url), then use the on-page links or a `go` URL; the server
 // log prints request and close timestamps, which is what the acceptance cases compare against.
 import http from 'node:http'
@@ -48,6 +56,10 @@ const page = (title, extra = '', head = '', query = new URLSearchParams()) => {
   const after = Math.max(0, Number(query.get('after') || 0)) * 1000
   let auto = ''
   if (go === 'reload') auto = 'location.reload()'
+  else if (go === 'anchor') auto = `document.getElementById('anchor').click()`
+  else if (go === 'push-anchor') auto = `history.pushState(null,'','/b');document.getElementById('anchor').click()`
+  else if (go === 'unfrag') auto = `history.replaceState(null,'','/a#x');setTimeout(function(){location.href='/a'},1000)`
+  else if (go === 'reload-frag') auto = `history.replaceState(null,'','/#x');setTimeout(function(){location.reload()},1000)`
   else if (go && go.startsWith('replace:')) auto = `location.replace(${JSON.stringify(go.slice('replace:'.length))})`
   return `<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -58,7 +70,8 @@ const page = (title, extra = '', head = '', query = new URLSearchParams()) => {
 ${auto ? `setTimeout(function(){${auto}}, ${after});` : ''}</script>
 <a href="/?go=reload&after=3">reload in 3 s</a>
 <a href="/?go=replace:/dashboard&after=3">replace /dashboard in 3 s</a>
-<a href="/a">link /a</a><a href="/dashboard">link /dashboard</a><a href="/offsite">link /offsite</a>
+<a id="anchor" href="#sec">anchor #sec</a><a href="/a">link /a</a><a href="/dashboard">link /dashboard</a><a href="/offsite">link /offsite</a>
+<div id="sec" style="margin-top:60px">#sec target</div>
 ${extra}</body></html>`
 }
 

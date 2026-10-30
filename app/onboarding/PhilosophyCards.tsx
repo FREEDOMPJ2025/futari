@@ -22,7 +22,7 @@ const UNTOKENISED = {
 type Tone = 'ink' | 'accent' | 'credit'
 const FILL: Record<Tone, string> = { ink: 'fill-ink', accent: 'fill-accent', credit: 'fill-credit' }
 const STROKE: Record<Tone, string> = { ink: 'stroke-ink', accent: 'stroke-accent', credit: 'stroke-credit' }
-const TEXT: Record<Tone, string> = { ink: 'text-ink', accent: 'text-accent', credit: 'text-credit' }
+const TEXT: Record<Tone, string> = { ink: 'text-ink', accent: 'text-accent-text', credit: 'text-credit-text' }
 const BG: Record<Tone, string> = { ink: 'bg-ink', accent: 'bg-accent', credit: 'bg-credit' }
 
 // The eyebrow and the skip label have always been set in the platform
@@ -83,7 +83,7 @@ function renderQuote(lines: readonly string[]) {
       {i > 0 && <br />}
       {line.split(/(\*[^*]+\*)/).map((part, j) =>
         part.startsWith('*') && part.endsWith('*') && part.length > 2
-          ? <em key={j} className="italic text-accent">{part.slice(1, -1)}</em>
+          ? <em key={j} className="italic text-accent-text">{part.slice(1, -1)}</em>
           : <Fragment key={j}>{part}</Fragment>,
       )}
     </Fragment>
@@ -118,7 +118,7 @@ function CardShell({ index, copy, surface, tone, motif, onSkip, onNext }: CardSh
       <button
         type="button"
         onClick={onSkip}
-        className="absolute right-5 top-[calc(var(--safe-top)+16px)] z-10 h-8 cursor-pointer rounded-lg border-0 bg-transparent px-3 text-xs uppercase tracking-[1.2px] text-ink-2 opacity-70"
+        className="absolute right-5 top-[calc(var(--safe-top)+16px)] z-10 h-8 cursor-pointer rounded-lg border-0 bg-transparent px-3 text-xs uppercase tracking-[1.2px] text-ink-2"
         style={MONO}
       >
         {copy.skip}
@@ -132,7 +132,7 @@ function CardShell({ index, copy, surface, tone, motif, onSkip, onNext }: CardSh
 
       {/* Quote zone */}
       <div className="flex flex-1 flex-col justify-start px-8">
-        <p className={`mb-3.5 text-xs uppercase tracking-[2px] opacity-80 ${TEXT[tone]}`} style={MONO}>
+        <p className={`mb-3.5 text-xs uppercase tracking-[2px] ${TEXT[tone]}`} style={MONO}>
           {pad(index + 1)} / {pad(TOTAL)} · {card.eyebrow}
         </p>
         {/* Focus lands here when the card changes (see PhilosophyCards). */}
@@ -247,7 +247,7 @@ function Card03(props: CardProps) {
             <TwoLeaves size={64} left="ink" right="accent" />
           </div>
           <div
-            className="text-mini tracking-[1.5px] text-ink-2 opacity-60"
+            className="text-mini tracking-[1.5px] text-ink-2"
             style={{ ...MONO, position: 'absolute', top: 38, right: 220 }}
           >
             {props.copy.paydayMark}

@@ -53,9 +53,11 @@ interface Props {
    * asset-detail / insurance SavingsView keep the legacy unlabeled render.
    */
   monthSummaries?: { mode: 'all' | 'expense' | 'income'; byMonth: Record<string, FeedMonthSummary> }
+  /** Compact month headers (#1851). Only DashboardFeed passes it. */
+  denseMonths?: boolean
 }
 
-export function TransactionFeed({ initial, pageSize, emptyState, onItemClick, label, header, filter, loader, monthKey, acceptInsert, renderRow, monthSummaries }: Props) {
+export function TransactionFeed({ initial, pageSize, emptyState, onItemClick, label, header, filter, loader, monthKey, acceptInsert, renderRow, monthSummaries, denseMonths }: Props) {
   const t = useTranslations()
   const online = useOnlineStatus()
   const [items, setItems] = useState<PagedTxnRow[]>(initial)
@@ -280,7 +282,13 @@ export function TransactionFeed({ initial, pageSize, emptyState, onItemClick, la
   ) : null
 
   if (items.length === 0) {
-    return <>{emptyState}{errorToast}</>
+    return (
+      <>
+        {filter && label && <div className="px-6 pt-2 pb-1">{label}</div>}
+        {emptyState}
+        {errorToast}
+      </>
+    )
   }
 
   const groups = groupByMonth(items, (i) => i.transactedAt)
@@ -322,7 +330,7 @@ export function TransactionFeed({ initial, pageSize, emptyState, onItemClick, la
         }
         return (
           <div key={g.monthKey}>
-            <MonthSection monthKey={g.monthKey} count={count} totalAmount={totalAmount} summary={summary} />
+            <MonthSection monthKey={g.monthKey} count={count} totalAmount={totalAmount} summary={summary} dense={denseMonths} />
             <div
               className="mx-4 rounded-tile overflow-hidden"
               style={{ background: 'var(--surface)', border: '1px solid var(--hairline)' }}
