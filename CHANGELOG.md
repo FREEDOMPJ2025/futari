@@ -43,7 +43,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 _Nothing unreleased yet._
 
-## [1.9.0] - 2026-10-30
+## [1.9.0] - 2026-10-31
 
 主題：**原生殼．Android 推播與分享**——Android App 開始收到定期收支提醒、分享打開系統面板；iPhone 錢包自動化一個動作就能記一筆，捷徑帶入的記帳沿用同一商家上次的分類；記帳首頁收斂層級、文字對比達標；首頁換上新主視覺與一張範例小卡；每晚推播改用具名金鑰，舊金鑰年底停用後照常送出。
 完整 diff：[v1.8.0...v1.9.0](https://github.com/redtear1115/oikos/compare/v1.8.0...v1.9.0)
