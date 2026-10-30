@@ -444,6 +444,9 @@ export type Translations = {
       tripEmpty: string
       tripAria: string
     }
+    /** #1851 — one-line summary standing in for the pending stacks until tapped.
+     *  `{n}` is the number of cards behind it (expense + shortcut, or income). */
+    pendingSummary: { one: string; other: string }
     /** Solo expense hero. `{month}` is the locale's own month name, resolved
      *  at render with Intl (「9月」/ "September"), never string-concatenated. */
     soloHero: {
@@ -3895,6 +3898,7 @@ export const zhTW: Translations = {
       tripEmpty: '開始一趟旅行帳',
       tripAria: '旅行：前往旅行列表',
     },
+    pendingSummary: { one: '{n} 筆待確認', other: '{n} 筆待確認' },
     soloHero: {
       monthLabel: '{month}記下',
       countLabel: { one: '{count} 筆', other: '{count} 筆' },

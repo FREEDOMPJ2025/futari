@@ -28,4 +28,18 @@ describe('MonthSection', () => {
     expect(screen.getByText(/0 筆/)).toBeInTheDocument()
     expect(screen.getByText(/NT\$0/)).toBeInTheDocument()
   })
+
+  // #1851: the dashboard feed passes `dense`; the records page does not.
+  it('dense shrinks padding and the month label; default is unchanged', () => {
+    const { unmount } = wrap(<MonthSection monthKey="2026-05" count={1} totalAmount={500} dense />)
+    let label = screen.getByText(/2026/)
+    expect(label.className).toContain('text-sm')
+    expect(label.className).toContain('font-medium')
+    expect(label.parentElement!.className).toContain('pt-2 pb-1')
+    unmount()
+    wrap(<MonthSection monthKey="2026-05" count={1} totalAmount={500} />)
+    label = screen.getByText(/2026/)
+    expect(label.className).toContain('text-base')
+    expect(label.parentElement!.className).toContain('pt-4 pb-2')
+  })
 })

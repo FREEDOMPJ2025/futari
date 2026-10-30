@@ -52,18 +52,20 @@ describe('ContinuityRow — 月回顧 cell', () => {
     const [cell] = links()
     expect(cell.getAttribute('href')).toBe('/review/2026-08')
     expect(cell.textContent).toContain('月回顧')
-    expect(cell.textContent).toContain('8月的回顧 · 看一看')
+    // #1851 — a one-line text button now: the month lives in the aria-label.
+    expect(cell.textContent).not.toContain('看一看')
     expect(cell.getAttribute('aria-label')).toBe('月回顧：打開8月的回顧')
   })
 
   it.each<[ReviewCellState, string]>([
     [{ kind: 'return' }, '回到回顧'],
     [{ kind: 'empty' }, '記滿一個月後會在這裡'],
-  ])('%o → /review in one tap: "%s"', (review, text) => {
+  ])('%o → /review in one tap, no status line: "%s"', (review, text) => {
     wrap(<ContinuityRow review={review} hasActiveTrip />)
     const [cell] = links()
     expect(cell.getAttribute('href')).toBe('/review')
-    expect(cell.textContent).toContain(text)
+    expect(cell.textContent).toContain('月回顧')
+    expect(cell.textContent).not.toContain(text)
     expect(cell.getAttribute('aria-label')).toBe('月回顧：打開回顧列表')
   })
 
@@ -73,7 +75,7 @@ describe('ContinuityRow — 月回顧 cell', () => {
         <ContinuityRow review={{ kind: 'latest', month: aug }} hasActiveTrip />
       </TranslationsProvider>,
     )
-    expect(links()[0].textContent).toContain('August review · take a look')
+    expect(links()[0].getAttribute('aria-label')).toContain('August')
   })
 })
 
@@ -85,7 +87,7 @@ describe('ContinuityRow — 旅行 cell (option α)', () => {
     expect(all[1].getAttribute('href')).toBe(TRIP_ENTRY_HREF)
     expect(TRIP_ENTRY_HREF).toBe('/trips')
     expect(all[1].textContent).toContain('旅行')
-    expect(all[1].textContent).toContain('開始一趟旅行帳')
+    expect(all[1].getAttribute('aria-label')).toBe(zhTW.dashboard.continuity.tripAria)
   })
 
   it('with an active trip, only 月回顧 renders (ActiveTripBanner carries the trip)', () => {
@@ -100,7 +102,13 @@ describe('ContinuityRow — presentation rules', () => {
     const { container } = wrap(<ContinuityRow review={{ kind: 'latest', month: aug }} hasActiveTrip={false} />)
     expect(container.querySelector('.font-serif')).toBeNull()
     expect(container.textContent).not.toMatch(/[!！]|NT\$|\d{3,}/)
-    for (const a of links()) expect(a.className).toContain('min-h-11')
+    // #1851 — 36px text buttons whose ::before reaches 4px up and down: 44px.
+    for (const a of links()) {
+      const cls = a.className.split(/\s+/)
+      expect(cls).toEqual(expect.arrayContaining(['relative', 'h-9', 'before:absolute', 'before:-inset-y-1']))
+      expect(cls).not.toContain('bg-surface')
+      expect(cls).not.toContain('border')
+    }
   })
 
   it('no banned words in any locale\'s new copy', () => {

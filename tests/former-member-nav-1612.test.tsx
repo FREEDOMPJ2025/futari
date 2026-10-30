@@ -88,11 +88,19 @@ describe('#1612 — hidden entries in a former member\'s look-back', () => {
   })
 
   it('BrandHeader: no avatar-menu button and no trip button', () => {
-    render(<Shell former><BrandHeader showTripButton onTripClick={() => {}} /></Shell>)
+    render(<Shell former><BrandHeader /></Shell>)
     expect(screen.queryByRole('button', { name: zhTW.settings.quickAccessRow })).toBeNull()
     expect(screen.queryByRole('button', { name: zhTW.dashboard.activeTripBanner.addAriaLabel })).toBeNull()
     // The chapter's partner is still shown, as the chapter recorded them.
     expect(screen.getAllByText('A').length).toBeGreaterThan(0)
+  })
+
+  // #1851: the header trip button is gone for everyone; the trip entry is the
+  // dashboard's continuation row.
+  it('BrandHeader: no trip button for a current member either', () => {
+    render(<Shell former={false}><BrandHeader /></Shell>)
+    expect(screen.getByRole('button', { name: zhTW.settings.quickAccessRow })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: zhTW.dashboard.activeTripBanner.addAriaLabel })).toBeNull()
   })
 
   it('the avatar menu cannot be opened (no sheet mounts)', () => {
