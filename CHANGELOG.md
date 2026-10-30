@@ -43,6 +43,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **記帳首頁收斂層級，第一眼是餘額、最近紀錄和記一筆（#1851、#1866）**
+  使用者：待確認收成一行「N 筆待確認」、點了才展開；月回顧與旅行入口改成一行文字按鈕，頁首的飛機鈕拿掉；篩選移到紀錄清單上方，篩選後 0 筆時顯示「沒有符合條件的紀錄」並可清掉篩選。
+  技術：依 #1857 規格新增 `PendingSummary`（展開狀態只記在本次 App 期間）、`ContinuityRow` 改文字按鈕、月份列緊湊版；新增四語 `dashboard.pendingSummary`（單複數），篩選後 0 筆改用既有的 `feed.noFiltered`。
+
+- **按鈕與金額文字的對比達標（#1850）**
+  使用者：記一筆按鈕、邀請按鈕的白字，以及收入金額、正餘額、支出份額的文字更清楚；引導卡片的小字不再半透明。
+  技術：新增 `--accent-fill`（`--btn-accent-bg` 改指向它）、`--credit-text`、`--accent-text`，收入金額改用 `--credit-text`、支出份額改用 `--debit-text`；`--accent`／`--credit`／`--debit` 保留給圖示與圖表；`tests/design-contrast.test.ts` 釘住新組合。
+
+- **待結算的紀錄不再整列變淡（#1864）**
+  使用者：待結算的紀錄改用「待結算」膠囊和較淡的金額表示，標題、日期、備註照常清楚可讀。
+  技術：`CompactRow` 拿掉整列 `opacity`，待結算主金額改 `--ink-3`；每段文字對 `--surface` ≥ 4.5:1。
+
 - **定期收支的結束日不能早於開始日（#1837）**
   使用者：結束日期選得比開始日期早時，儲存前就會看到提示，日期選擇器也不再讓人選到更早的日子；以前只會看到一般的失敗訊息。
   技術：`RecurringRuleSheet` 結束日加 `min` 並在送出前擋下；兩個 rule validator 改丟 `recurring_ends_before_start`（四語），不再丟原始中文 `Error`（PRJ-FUTARI-T）。
