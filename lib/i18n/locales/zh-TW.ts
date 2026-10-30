@@ -3777,8 +3777,8 @@ export const zhTW: Translations = {
     exampleCardTitle: '週五晚餐・拉麵',
     exampleCardSub: '你付 · 各付一半',
     exampleCardAmount: '−840',
-    exampleCardResult: '對方要給你 420',
-    exampleCardCaption: '範例：週五晚餐 840 元，你付，各付一半，對方要給你 420 元。',
+    exampleCardResult: '對方待還你 420',
+    exampleCardCaption: '範例：週五晚餐 840 元，你付，各付一半，對方待還你 420 元。',
   },
 
   brand: {

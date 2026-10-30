@@ -22,6 +22,9 @@ vi.stubGlobal('matchMedia', (query: string) => ({
 
 import { Landing } from '@/app/[locale]/_landing/Landing'
 import { zhTW } from '@/lib/i18n/locales/zh-TW'
+import { zhCN } from '@/lib/i18n/locales/zh-CN'
+import { en } from '@/lib/i18n/locales/en'
+import { ja } from '@/lib/i18n/locales/ja'
 
 const renderLanding = () =>
   render(
@@ -191,6 +194,26 @@ describe('Landing — example card (#1852)', () => {
     expect(visual.textContent).toContain(zhTW.landing.exampleCardSub)
     expect(visual.textContent).toContain(zhTW.landing.exampleCardAmount)
     expect(visual.textContent).toContain(zhTW.landing.exampleCardResult)
+  })
+
+  // The card stands in for the real app screen, so its numbers have to add up
+  // and its result line has to read exactly like the app's own split result.
+  it.each([
+    ['zh-TW', zhTW],
+    ['zh-CN', zhCN],
+    ['en', en],
+    ['ja', ja],
+  ] as const)('%s: the result is half the amount, in the app\'s wording', (_, t) => {
+    const amountText = t.landing.exampleCardAmount.match(/[\d,]+/)![0]
+    const resultText = t.landing.exampleCardResult.match(/[\d,]+/)![0]
+    const toNumber = (s: string) => Number(s.replace(/,/g, ''))
+    expect(toNumber(resultText) * 2).toBe(toNumber(amountText))
+    const resultMoney = t.landing.exampleCardResult.match(/[^\s\d,]*[\d,]+/)![0]
+    expect(t.landing.exampleCardResult).toBe(
+      t.splitTypeSelector.partnerOwesYouAmount.replace('{amount}', resultMoney),
+    )
+    expect(t.landing.exampleCardCaption).toContain(amountText)
+    expect(t.landing.exampleCardCaption).toContain(resultText)
   })
 
   it('hides from xl up and ships no image, script or interactive element', () => {

@@ -195,8 +195,8 @@ export const zhCN: Translations = {
     exampleCardTitle: '周五晚餐・拉面',
     exampleCardSub: '你付 · 各付一半',
     exampleCardAmount: '−840',
-    exampleCardResult: '对方要给你 420',
-    exampleCardCaption: '示例：周五晚餐 840 元，你付，各付一半，对方要给你 420 元。',
+    exampleCardResult: '对方待还你 420',
+    exampleCardCaption: '示例：周五晚餐 840 元，你付，各付一半，对方待还你 420 元。',
   },
 
   brand: {
