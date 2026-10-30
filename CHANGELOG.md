@@ -41,6 +41,13 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+_Nothing unreleased yet._
+
+## [1.9.0] - 2026-10-30
+
+主題：**原生殼．Android 推播與分享**——Android App 開始收到定期收支提醒、分享打開系統面板；iPhone 錢包自動化一個動作就能記一筆，捷徑帶入的記帳沿用同一商家上次的分類；記帳首頁收斂層級、文字對比達標；首頁換上新主視覺與一張範例小卡；每晚推播改用具名金鑰，舊金鑰年底停用後照常送出。
+完整 diff：[v1.8.0...v1.9.0](https://github.com/redtear1115/oikos/compare/v1.8.0...v1.9.0)
+
 ### 使用者可見變化
 
 - **首頁在「登入」下方多一張範例小卡（#1852）**
@@ -2066,7 +2073,8 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 - **每頁 `generateMetadata` 接 OG image（#487）**：`public/og-image.png` 從 #282 ship 但未 wire 進 metadata，造成 prod HTML 缺 `og:image` / `twitter:image`；本版 4 個 public page 各加 `openGraph.images` + `twitter.images`，`alt` 用 `t.title` locale-aware，無需新增 i18n key。
 - **`settings.local.json` 列入 gitignore（#478）**：避免本地 hook / 權限設定外洩。
 
-[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.9.0...HEAD
+[1.9.0]: https://github.com/redtear1115/oikos/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/redtear1115/oikos/compare/v1.7.4...v1.8.0
 [1.7.4]: https://github.com/redtear1115/oikos/compare/v1.7.3...v1.7.4
 [1.7.3]: https://github.com/redtear1115/oikos/compare/v1.7.2...v1.7.3
