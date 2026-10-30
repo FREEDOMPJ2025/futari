@@ -53,8 +53,15 @@ import json,sys,re
 rs=[r for r in json.load(sys.stdin)["runtimes"] if r.get("isAvailable") and r["identifier"].startswith("com.apple.CoreSimulator.SimRuntime.iOS-")]
 if not rs: sys.exit(1)
 r=max(rs,key=lambda r:[int(x) for x in r["version"].split(".")])
+# iOS 27.1 shipped supporting only "iPhone Duo": prefer the newest "iPhone <n>",
+# else any iPhone the runtime supports (the newest runtime is the point, not the model).
 ds=[d for d in r["supportedDeviceTypes"] if re.fullmatch(r"iPhone \d+",d["name"])]
-d=max(ds,key=lambda d:int(d["name"].split()[1]))
+if ds:
+    d=max(ds,key=lambda d:int(d["name"].split()[1]))
+else:
+    ds=[d for d in r["supportedDeviceTypes"] if d["name"].startswith("iPhone")]
+    if not ds: sys.exit(1)
+    d=ds[-1]
 print(r["identifier"],r["version"],d["identifier"])
 ') || fail "找不到可用的 iOS runtime——新 runtime 要先 \`xcodebuild -downloadPlatform iOS\`（約 8 GB）"
 read -r RUNTIME_ID RUNTIME_VER DEVTYPE <<< "$PICK"
@@ -151,9 +158,21 @@ PY
 # scripts/build-native-offline-page.ts），實測佔中段取樣點 96.2%；真正的落地頁 13,226 色、最大色塊 #EFDDC4 僅佔 56.2%。
 # 閾值 0.90 落在兩者之間；底色改了要同步改這裡（失效的樣子：離線頁又被當成 PASS）。
 OFFLINE_BG="fbede0"; OFFLINE_SHARE_MIN="0.90"
+# 多螢幕機型（iOS 27.1 的 iPhone Duo 有兩個 display）不指定 --display 時 screenshot 直接失敗
+# （"Cannot choose between 2 displays"），截圖是空的、會被當成純色誤判 FAIL。
+# 先照常拍；失敗就逐一拍每個 display，留下色數最多的那張（App 畫在哪一面就是哪一張）。
+shot() {
+  xcrun simctl io "$UDID" screenshot "$SHOT" >/dev/null 2>&1 && [ -s "$SHOT" ] && return 0
+  local best=-1 d n
+  for d in $(xcrun simctl io "$UDID" screenshot /dev/null 2>&1 | sed -n 's/.*--display=\([0-9]*\).*/\1/p'); do
+    xcrun simctl io "$UDID" screenshot --display="$d" "$SHOT.d$d.png" >/dev/null 2>&1 || continue
+    read -r n _ _ <<< "$(colors "$SHOT.d$d.png")"; rm -f "$SHOT.d$d.png.bmp"
+    if [ "${n:-0}" -gt "$best" ]; then best=${n:-0}; mv -f "$SHOT.d$d.png" "$SHOT"; else rm -f "$SHOT.d$d.png"; fi
+  done
+}
 RENDERED=0; WAITED=0; OFFLINE=0; TOP="-"; SHARE="0"
 while [ "$FAILED" -eq 0 ]; do
-  xcrun simctl io "$UDID" screenshot "$SHOT" >/dev/null 2>&1
+  shot
   if [ -s "$SHOT" ]; then read -r N TOP SHARE <<< "$(colors "$SHOT")"; else N=0; TOP="-"; SHARE=0; fi
   rm -f "$SHOT.bmp"
   OFFLINE=0
@@ -165,7 +184,7 @@ while [ "$FAILED" -eq 0 ]; do
   sleep 5; WAITED=$((WAITED+5))
 done
 if [ "$FAILED" -ne 0 ]; then
-  xcrun simctl io "$UDID" screenshot "$SHOT" >/dev/null 2>&1
+  shot
   echo "（前面已失敗，略過渲染檢查；失敗當下的畫面：${SHOT}）"
 elif [ "$RENDERED" -eq 1 ]; then
   echo "OK   WebView 已畫出內容（中段 ${N} 色，啟動後約 $((WAIT+WAITED))s）"
