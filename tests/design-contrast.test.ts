@@ -348,6 +348,39 @@ describe('design-contrast — pairings the system claims are safe', () => {
   })
 })
 
+// #1864 — a pending CompactRow no longer fades the whole row with opacity (every line fell under
+// 4.5:1). The 待結算 badge is the signal, plus a --ink-3 main amount; each line keeps its token.
+describe('design-contrast — #1864 pending CompactRow', () => {
+  const rowSource = readFileSync(join(REPO_ROOT, 'app/(dashboard)/dashboard/_components/CompactRow.tsx'), 'utf8')
+    .replace(/\/\/.*$/gm, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+
+  it('CompactRow sets no opacity at all, pending or settled', () => {
+    expect(rowSource).not.toMatch(/opacity/)
+  })
+
+  // The amount colors themselves are checked on the rendered row: tests/CompactRow-pending-1864.test.tsx.
+
+  it('every line of a pending row clears 4.5:1 on --surface', () => {
+    const surface = resolve('--surface')
+    const on = (fg: string, ground: RGB) => contrastRatio(compositeOver(resolve(fg), ground), ground)
+    const badgeGround = compositeOver(resolve('--hairline'), surface)
+    const pairs: Array<[string, number]> = [
+      ['title --ink', on('--ink', surface)],
+      ['date/payer --ink-3', on('--ink-3', surface)],
+      ['note --ink-2', on('--ink-2', surface)],
+      ['main amount --ink-3', on('--ink-3', surface)],
+      ['foreign line --ink-3', on('--ink-3', surface)],
+      ['badge --ink-2 on --hairline', on('--ink-2', badgeGround)],
+      ['hover --ink-3', on('--ink-3', compositeOver({ r: 31, g: 27, b: 22, a: 0.03 }, surface))],
+    ]
+    for (const [label, ratio] of pairs) {
+      console.log(`[design-contrast] #1864 ${label} = ${ratio.toFixed(2)}:1`)
+      expect(ratio, label).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
+    }
+  })
+})
+
 describe('design-contrast — known-bad pairings, encoded as passing assertions on the current (broken) ratio', () => {
   // Each assertion pins today's actual ratio. If someone changes the
   // underlying token values, the ratio here will no longer match and the
