@@ -12,7 +12,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const TOKEN = 'ABCDEF0123456789'.repeat(4)
 const report = vi.fn()
-let upsertResult: { error: unknown } = { error: null }
+let upsertResult: { error: unknown; status?: number } = { error: null }
 const listeners: Record<string, (e: unknown) => unknown> = {}
 
 vi.mock('@/lib/observability/reportClientError', () => ({ reportClientError: report }))
@@ -31,8 +31,8 @@ vi.mock('@/lib/pushTokenStorage', () => ({ storePushToken: vi.fn() }))
 
 const { registerPushToken } = await import('@/lib/pushNotifications')
 
-async function registerWith(error: unknown) {
-  upsertResult = { error }
+async function registerWith(error: unknown, status = 400) {
+  upsertResult = { error, status }
   await registerPushToken('u', 'g')
   await listeners.registration({ value: TOKEN })
 }
@@ -61,9 +61,25 @@ describe('#1827 PushTokens upsert failure report', () => {
 
   it('a code that is not a short identifier is reported as other', async () => {
     await registerWith({ code: `x ${TOKEN}`, message: '' })
-    expect((report.mock.calls[0][0] as Error).message).toBe('push token upsert failed code=other')
-    await registerWith({ message: 'no code at all' })
-    expect((report.mock.calls[1][0] as Error).message).toBe('push token upsert failed code=other')
+    expect((report.mock.calls[0][0] as Error).message).toBe('push token upsert failed code=other status=400')
+    await registerWith({ message: 'no code at all' }, 502)
+    expect((report.mock.calls[1][0] as Error).message).toBe('push token upsert failed code=other status=502')
+  })
+
+  // #1883 — postgrest-js turns a fetch that never reached the server into
+  // { code: '', message: 'TypeError: Load failed' } with status 0.
+  it('a request that never reached the server is reported as network', async () => {
+    await registerWith({ code: '', message: 'TypeError: Load failed', details: 'stack', hint: '' }, 0)
+    const [err] = report.mock.calls[0]
+    expect((err as Error).message).toBe('push token upsert failed code=network')
+    expect(JSON.stringify(report.mock.calls)).not.toContain('Load failed')
+  })
+
+  it('a missing status is reported as unknown, never as network', async () => {
+    upsertResult = { error: { code: '' } }
+    await registerPushToken('u', 'g')
+    await listeners.registration({ value: TOKEN })
+    expect((report.mock.calls[0][0] as Error).message).toBe('push token upsert failed code=other status=unknown')
   })
 
   it('a successful upsert reports nothing', async () => {
