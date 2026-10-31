@@ -6,6 +6,8 @@ export const en: Translations = {
     continueWithGoogle: 'Continue with Google',
     authFailedNotice: "That sign-in didn't finish. You can try again.",
     appleFallbackHint: "Apple sign-in didn't finish. You can try again. You can also continue with Google, but a ledger you started with Apple won't be there when you sign in with Google.",
+    // TODO(i18n): 待確認 #1891
+    unreachableHint: "We couldn't reach the sign-in server this time. The connection may be unsteady. Wait a moment and try again.",
     signingIn: 'Signing you in',
     continueWithApple: 'Continue with Apple',
     termsPrefix: 'By continuing, you agree to our',

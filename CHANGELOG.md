@@ -43,6 +43,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **iPhone 登入成功後，不再閃過錯誤畫面（#1768）**
+  使用者：用 Apple 登入成功、正要進入帳本時，偶爾會先閃一下「出了點問題」的頁面，現在不會了。
+  技術：跳轉前標記 `markNavigatingAway()`，global-error 遇到被取消的 fetch 時先空白不回報，4 秒後頁面還在才照常顯示並回報；Sentry PRJ-FUTARI-9 的登入雜訊應該跟著消失。
+
+- **iPhone 連不上登入伺服器時會說明原因（#1845）**
+  使用者：用 Apple 登入卻連不上伺服器時（中國大陸偶爾會發生），登入頁會提示「這次沒連上登入伺服器……稍等一下再試一次就好」，不會再無聲地回到登入按鈕。
+  技術：`AuthRetryableFetchError` 或 status 0 時回傳新的 outcome `unreachable`，顯示 `signIn.unreachableHint`；四語文案待審（#1891）。
+
 - **iPhone 用 Apple 註冊時，Apple 沒給名字和 email 也能建好帳號（#1885）**
   使用者：原本這種 Apple ID 在 iPhone 上怎麼試都註冊不了；現在帳號會先用「新成員」當顯示名稱，之後可以在設定裡改。
   技術：`handle_new_user` 的 display_name 改成依序取名字、email、`'新成員'`（空白也算沒有）；要由 owner 手動套到 dev 和 prod。
