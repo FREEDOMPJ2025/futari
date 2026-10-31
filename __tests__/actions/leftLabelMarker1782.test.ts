@@ -557,7 +557,7 @@ describe.skipIf(!isLocalDb)('#1782 (a) — reserved names', () => {
     expect(rows.find((r) => r.profile_id === w.R)).toMatchObject({ name: 'R 本名' })
   })
 
-  it('handle_new_user: a reserved provider name falls back to the email; anything else is kept as given', async () => {
+  it('handle_new_user: a reserved provider name falls back to the email; anything else is kept as given; no name and no email gets 新成員', async () => {
     const cases: [string, string | null][] = [
       [L.zhTW, null], [L.zhCN, null], [L.en.toUpperCase(), null], [L.ja, null],
       ['已離​開的伙伴', null], [' a  partner who left ', null], [' Partner  who left ', null], ['退出したﾊﾟｰﾄﾅｰ', null],
@@ -569,6 +569,18 @@ describe.skipIf(!isLocalDb)('#1782 (a) — reserved names', () => {
       await sql`INSERT INTO auth.users (id, email, raw_user_meta_data) VALUES (${id}, ${email}, jsonb_build_object('full_name', ${name}::text))`
       const [p] = await sql<{ display_name: string }[]>`SELECT display_name FROM "Profiles" WHERE id = ${id}`
       expect([name, p.display_name]).toEqual([name, expected ?? email])
+    }
+    // #1885 — no usable name and no email used to fail the signup on NOT NULL.
+    const fallbacks: [string | null, string | null, string][] = [
+      [null, null, '新成員'], ['   ', null, '新成員'], [null, '', '新成員'], ['  ', 'x', 'email'],
+    ]
+    for (const [name, emailKind, expected] of fallbacks) {
+      const [{ id }] = await sql<{ id: string }[]>`SELECT gen_random_uuid() AS id`
+      const email = emailKind === 'x' ? `${id}@example.invalid` : emailKind
+      const meta = name === null ? sql`'{}'::jsonb` : sql`jsonb_build_object('full_name', ${name}::text)`
+      await sql`INSERT INTO auth.users (id, email, raw_user_meta_data) VALUES (${id}, ${email}, ${meta})`
+      const [p] = await sql<{ display_name: string }[]>`SELECT display_name FROM "Profiles" WHERE id = ${id}`
+      expect([name, emailKind, p.display_name]).toEqual([name, emailKind, expected === 'email' ? email : expected])
     }
     const [f] = await sql<{ cfg: string[]; sd: boolean; anon: boolean; auth: boolean }[]>`
       SELECT proconfig AS cfg, prosecdef AS sd,
