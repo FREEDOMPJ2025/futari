@@ -27,9 +27,9 @@ node render.mjs
 Outputs:
 
 ```
-✓ og-image.png    → /path/to/oikos/public/og-image.png      (1200×630 px)
-✓ og-line.png     → /path/to/oikos/public/og-line.png       (1200×600 px)
-✓ og-square.png   → /path/to/oikos/public/og-square.png     (1200×1200 px)
+✓ og-image.png    → /path/to/futari/public/og-image.png      (1200×630 px)
+✓ og-line.png     → /path/to/futari/public/og-line.png       (1200×600 px)
+✓ og-square.png   → /path/to/futari/public/og-square.png     (1200×1200 px)
 ```
 
 ## How it works
