@@ -3996,11 +3996,11 @@ I will upload the screenshots once you confirm.`,
     },
     applePay: {
       heading: 'Apple Pay: open New entry after you tap to pay',
-      intro: 'Before you start: your iPhone needs iOS 16 or later and the Futari iOS app 1.9.0 or later, installed and signed in. This Wallet automation brings Futari to the front with New entry filled in after each Apple Pay payment. Nothing is saved until you check it and tap Save.',
+      intro: 'Before you start: your iPhone needs iOS 17 or later and the Futari iOS app 1.9.0 or later, installed and signed in. This Wallet automation brings Futari to the front with New entry filled in after each Apple Pay payment. Nothing is saved until you check it and tap Save.',
       steps: [
         {
           title: 'Create a Wallet automation',
-          body: 'Open the Shortcuts app, go to Automation, tap + and choose Wallet. On the screen that follows, tick the cards you want to log; you can leave all the categories ticked. Tap Next, then New Shortcut. Finally, on the automation\'s settings row, choose Run Immediately, so you do not have to tap a notification first.',
+          body: 'Open the Shortcuts app, go to Automation, tap + and choose Wallet. Select the cards you want to log; you can leave all the categories selected. On the same screen, choose Run Immediately, so you don\'t have to tap a notification first. Tap Next, then New Blank Automation.',
         },
         {
           title: 'Add the "Futari 記一筆" action',
@@ -4016,11 +4016,11 @@ I will upload the screenshots once you confirm.`,
     },
     applePayUrl: {
       heading: 'Fallback: open a link if the action is not available yet',
-      intro: 'The "Futari 記一筆" action above is simpler when available. If your iOS version is older than 16 or your Futari app is older than 1.9.0, use the five-step link fallback below.',
+      intro: 'The "Futari 記一筆" action above is simpler when available. If your Futari app isn\'t on 1.9.0 yet, use the five-step link fallback below.',
       steps: [
         {
           title: 'Create a Wallet automation',
-          body: 'Open the Shortcuts app, go to Automation, tap + and choose Wallet. On the screen that follows, tick the cards you want to log; you can leave all the categories ticked. Tap Next, then New Shortcut. Finally, on the automation\'s settings row, choose Run Immediately, so you do not have to tap a notification first.',
+          body: 'Open the Shortcuts app, go to Automation, tap + and choose Wallet. Select the cards you want to log; you can leave all the categories selected. On the same screen, choose Run Immediately, so you don\'t have to tap a notification first. Tap Next, then New Blank Automation.',
         },
         {
           title: 'Round the amount (recommended)',
@@ -4102,7 +4102,7 @@ I will upload the screenshots once you confirm.`,
       rows: [
         {
           symptom: 'The "Futari 記一筆" action is missing',
-          cause: 'Update iOS to 16 or later and the Futari iOS app to 1.9.0 or later, then open Futari once.',
+          cause: 'Update iOS to 17 or later and the Futari iOS app to 1.9.0 or later, then open Futari once.',
         },
         {
           symptom: 'Link fallback: New entry opens but the amount is blank',
@@ -4113,7 +4113,7 @@ I will upload the screenshots once you confirm.`,
           cause: 'The merchant name was not passed through URL Encode.',
         },
         {
-          symptom: "The category isn't the one in my link",
+          symptom: "Link fallback: the category isn't the one in my link",
           cause: "You've recorded this merchant before, so it uses the category from last time. For a new merchant, a misspelled or capitalized id falls back to Dining.",
         },
       ],

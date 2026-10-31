@@ -34,7 +34,15 @@ describe.each(SUPPORTED_LOCALES)('%s', (locale) => {
     }
     expect(doc.querySelectorAll('#apple-pay ol > li')).toHaveLength(3)
     expect(doc.querySelector('#apple-pay pre')).toBeNull()
-    expect(doc.getElementById('apple-pay')!.textContent).toContain('iOS 16')
+    expect(doc.getElementById('apple-pay')!.textContent).toContain('iOS 17')
+    expect(t.applePay.intro).not.toContain('16')
+    expect(t.applePayUrl.intro).not.toContain('16')
+    if (locale === 'zh-TW') {
+      const stepOne = doc.querySelector('#apple-pay ol > li')!.textContent ?? ''
+      expect(stepOne).toContain('立即執行')
+      expect(stepOne).toContain('新增空白自動化')
+      expect(stepOne.indexOf('立即執行')).toBeLessThan(stepOne.indexOf('新增空白自動化'))
+    }
     expect(doc.getElementById('apple-pay')!.textContent).toContain('1.9.0')
     expect(doc.querySelector('#apple-pay ol')!.textContent).toContain('Futari 記一筆')
     for (const field of ['金額', '備註', '分類']) {
