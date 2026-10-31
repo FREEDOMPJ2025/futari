@@ -59,6 +59,11 @@ export type Translations = {
      *  the other way in, and says plainly that an Apple-created ledger does not
      *  carry over — there is no identity linking. Sign-in tone, no exclamation. */
     appleFallbackHint: string
+    /** Shown on /sign-in when the iOS Apple sign-in got no answer from the
+     *  auth server (#1845; seen from mainland China, retrying later works).
+     *  Says what happened and that waiting is enough — no blame on the user's
+     *  network, no alarm. Sign-in tone, no exclamation. */
+    unreachableHint: string
     /** Shown while an OAuth attempt is in flight (#1083). On the native
      *  shells the sign-in page stays mounted underneath the in-app browser,
      *  so without a curtain the user returns to a fully interactive form and
@@ -3589,6 +3594,7 @@ export const zhTW: Translations = {
     continueWithApple: '以 Apple 帳號繼續',
     authFailedNotice: '剛才的登入沒有完成，再試一次就好。',
     appleFallbackHint: 'Apple 登入沒有完成，可以再試一次。也可以改用 Google 登入；不過用 Apple 建立過的帳本，不會出現在 Google 帳號裡。',
+    unreachableHint: '這次沒連上登入伺服器，可能是網路不太穩。稍等一下再試一次就好。',
     signingIn: '正在帶你進去',
     termsPrefix: '繼續即表示您同意我們的',
     termsLink: '服務條款',
@@ -3773,12 +3779,11 @@ export const zhTW: Translations = {
     phoneMockFeed2Sub: '昨天',
     phoneMockFeed3Title: '小白看醫生',
     phoneMockFeed3Sub: '5/11',
-    // TODO(i18n): 待 Aria 定稿 #1852（文案出自 #1858 規格提案）
-    exampleCardTitle: '週五晚餐・拉麵',
+    exampleCardTitle: '週五晚餐 · 拉麵',
     exampleCardSub: '你付 · 各付一半',
     exampleCardAmount: '−840',
     exampleCardResult: '對方待還你 420',
-    exampleCardCaption: '範例：週五晚餐 840 元，你付，各付一半，對方待還你 420 元。',
+    exampleCardCaption: '範例：週五晚餐 840 元，你付、各付一半，對方待還你 420 元。',
   },
 
   brand: {

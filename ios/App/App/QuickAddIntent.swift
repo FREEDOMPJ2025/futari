@@ -5,43 +5,48 @@ import UIKit
 // (`dev.southernlight.futari://add?...`); every check (amount range, pickable category,
 // note sanitising) stays in lib/quickAdd.ts on the web side. This file only builds the URL.
 // Never log amount / note: they are user data.
+//
+// #1878 Localization: the literals below are English *keys* into App/Localizable.xcstrings
+// (en, zh-Hant, zh-Hans, ja). Edit translations there, not here. Languages the catalog does not
+// cover fall back to the development region (en). An interpolated `Summary` key reads
+// "Add ${amount} to Futari" in the catalog.
 
 // The 9 pickable ids from lib/categories.ts (everything except `settle`).
 @available(iOS 16.0, *)
 enum QuickAddCategory: String, AppEnum {
     case dining, clothing, housing, transit, education, entertainment, health, financial, other
 
-    static var typeDisplayRepresentation: TypeDisplayRepresentation = "分類"
+    static var typeDisplayRepresentation: TypeDisplayRepresentation = "Category"
     static var caseDisplayRepresentations: [QuickAddCategory: DisplayRepresentation] = [
-        .dining: "飲食",
-        .clothing: "服飾",
-        .housing: "居住",
-        .transit: "交通",
-        .education: "教育",
-        .entertainment: "娛樂",
-        .health: "醫療",
-        .financial: "金融",
-        .other: "其他",
+        .dining: "Dining",
+        .clothing: "Clothing",
+        .housing: "Housing",
+        .transit: "Transit",
+        .education: "Education",
+        .entertainment: "Entertainment",
+        .health: "Health",
+        .financial: "Financial",
+        .other: "Other",
     ]
 }
 
 @available(iOS 16.0, *)
 struct QuickAddIntent: AppIntent {
-    static var title: LocalizedStringResource = "Futari 記一筆"
-    static var description = IntentDescription("打開 Futari 的記一筆畫面，帶入金額、備註與分類。")
+    static var title: LocalizedStringResource = "Add Entry to Futari"
+    static var description = IntentDescription("Opens Futari's Add entry screen with the amount, note and category filled in.")
     static var openAppWhenRun: Bool = true
 
-    @Parameter(title: "金額")
+    @Parameter(title: "Amount")
     var amount: Double
 
-    @Parameter(title: "備註")
+    @Parameter(title: "Note")
     var note: String?
 
-    @Parameter(title: "分類")
+    @Parameter(title: "Category")
     var category: QuickAddCategory?
 
     static var parameterSummary: some ParameterSummary {
-        Summary("在 Futari 記一筆 \(\.$amount)") {
+        Summary("Add \(\.$amount) to Futari") {
             \.$note
             \.$category
         }

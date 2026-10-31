@@ -6,6 +6,7 @@ export const zhCN: Translations = {
     continueWithGoogle: '以 Google 账号继续',
     authFailedNotice: '刚才的登录没有完成，再试一次就好。',
     appleFallbackHint: 'Apple 登录没有完成，可以再试一次。也可以改用 Google 登录；不过用 Apple 创建的账本，不会出现在 Google 账号里。',
+    unreachableHint: '这次没连上登录服务器，可能是网络不太稳定。稍等一下再试一次就好。',
     signingIn: '正在带你进去',
     continueWithApple: '以 Apple 账号继续',
     termsPrefix: '继续即表示您同意我们的',
@@ -191,12 +192,11 @@ export const zhCN: Translations = {
     phoneMockFeed2Sub: '昨天',
     phoneMockFeed3Title: '小白看医生',
     phoneMockFeed3Sub: '5/11',
-    // TODO(i18n): 待 Aria 定稿 #1852（zh-TW 提案跟進，保留繁簡差異）
-    exampleCardTitle: '周五晚餐・拉面',
+    exampleCardTitle: '周五晚餐 · 拉面',
     exampleCardSub: '你付 · 各付一半',
-    exampleCardAmount: '−840',
-    exampleCardResult: '对方待还你 420',
-    exampleCardCaption: '示例：周五晚餐 840 元，你付，各付一半，对方待还你 420 元。',
+    exampleCardAmount: '−96',
+    exampleCardResult: '对方待还你 48',
+    exampleCardCaption: '示例：周五晚餐 96 元，你付、各付一半，对方待还你 48 元。',
   },
 
   brand: {

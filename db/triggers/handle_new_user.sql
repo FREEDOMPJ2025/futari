@@ -19,6 +19,16 @@
 -- Check after applying (both must be the email / the name):
 --   __tests__/actions/leftLabelMarker1782.test.ts › handle_new_user
 --
+-- #1885 — with no usable name AND no email the insert used to write NULL into
+-- display_name (NOT NULL), which rolls back the auth.users INSERT: GoTrue
+-- answers `unexpected_failure` and that person can never sign up, however
+-- often they retry. iOS native Apple sign-in sends an identity token with no
+-- full_name, and some Apple IDs share no email (seen in prod 2026-10-29). A
+-- blank name or email counts as missing; the last fallback is the fixed
+-- neutral '新成員' (not localised; the user can rename in settings).
+-- Check after applying: SELECT prosrc LIKE '%新成員%' FROM pg_proc
+--   WHERE oid = 'public.handle_new_user()'::regprocedure;  -- must be true
+--
 -- SET search_path and the grants repeat 0022 / 0023: CREATE OR REPLACE resets
 -- the function's SET clauses, so leaving the clause out here would quietly
 -- undo 0022's hardening on every manual apply.
@@ -45,7 +55,11 @@ BEGIN
   INSERT INTO public."Profiles" (id, display_name, avatar_url)
   VALUES (
     NEW.id,
-    COALESCE(v_name, NEW.email),
+    COALESCE(
+      CASE WHEN btrim(v_name) <> '' THEN v_name END,
+      CASE WHEN btrim(NEW.email) <> '' THEN NEW.email END,
+      '新成員'
+    ),
     NEW.raw_user_meta_data->>'avatar_url'
   )
   ON CONFLICT (id) DO NOTHING;

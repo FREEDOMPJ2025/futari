@@ -101,12 +101,21 @@ export async function registerPushToken(userId: string, groupId: string): Promis
     // either as `{ error }`. #1827 — report the code and nothing else: the
     // error's message / details can quote the failing row, token included.
     // Failure looks like (unreported): no push on this phone, no error anywhere.
-    const { error } = await supabase.from('PushTokens').upsert(
+    const { error, status } = await supabase.from('PushTokens').upsert(
       { user_id: userId, group_id: groupId, platform: pushPlatform, token },
       { onConflict: 'user_id,platform,token' }
     )
     if (error) {
-      const code = typeof error.code === 'string' && /^[A-Za-z0-9]{1,16}$/.test(error.code) ? error.code : 'other'
+      // #1883 — a request that never reached the server comes back with
+      // status 0 and an empty code (postgrest-js's fetch catch); that is
+      // `network`, retried by the next dashboard mount. Anything else without
+      // a usable code is `other`, with the HTTP status so it can be told apart.
+      const code =
+        typeof error.code === 'string' && /^[A-Za-z0-9]{1,16}$/.test(error.code)
+          ? error.code
+          : status === 0
+            ? 'network'
+            : `other status=${Number.isInteger(status) ? status : 'unknown'}`
       reportClientError(new Error(`push token upsert failed code=${code}`), { area: 'push', op: 'token_upsert' })
     }
   })

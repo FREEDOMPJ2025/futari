@@ -61,9 +61,9 @@ async function seedProfile(tx: Tx, name: string, pendingDeletion: boolean, withA
   const requested = pendingDeletion ? sql`now() - interval '15 days'` : sql`NULL`
   if (withAuth) {
     // on_auth_user_created (handle_new_user) inserts the Profiles row. It reads
-    // `full_name` and falls back to `email`; with neither, display_name is NULL
-    // and the insert fails on its NOT NULL (#1810), so pass both like the other
-    // fixtures (_authUser.ts, _deletionWorld1701.ts).
+    // `full_name`, then `email`, then the fixed '新成員' (#1885; before that,
+    // neither failed the insert on NOT NULL, #1810). Pass both so the profile
+    // carries `name`, like the other fixtures (_authUser.ts, _deletionWorld1701.ts).
     await tx.execute(sql`
       INSERT INTO auth.users (id, email, raw_user_meta_data)
       VALUES (${id}, ${`${id}@example.invalid`}, jsonb_build_object('full_name', ${name}::text))`)

@@ -1,7 +1,10 @@
 {
   "name": "oikos",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "private": true,
+  "engines": {
+    "node": "26.x"
+  },
   "license": "AGPL-3.0-or-later",
   "scripts": {
     "dev": "next dev",
@@ -58,7 +61,7 @@
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
-    "@types/node": "^20",
+    "@types/node": "^26",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.1",

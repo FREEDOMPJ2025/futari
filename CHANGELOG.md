@@ -43,6 +43,45 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 _Nothing unreleased yet._
 
+## [1.9.1] - 2026-10-31
+
+主題：**iPhone 登入路上的修補**——用 Apple 註冊不再因為沒給名字和 email 而失敗、登入成功不再閃錯誤頁、連不上伺服器時會說明；未登入頁捲動不再壓到狀態列；開發與部署環境升到 Node 26。
+完整 diff：[v1.9.0...v1.9.1](https://github.com/redtear1115/oikos/compare/v1.9.0...v1.9.1)
+
+### 使用者可見變化
+
+- **iPhone 用 Apple 註冊時，Apple 沒給名字和 email 也能建好帳號（#1885）**
+  使用者：原本這種 Apple ID 在 iPhone 上怎麼試都註冊不了；現在帳號會先用「新成員」當顯示名稱，之後可以在設定裡改。
+  技術：`handle_new_user` 的 display_name 改成依序取名字、email、`'新成員'`（空白也算沒有）；已於 10-31 手動套到 dev 和 prod。
+
+- **iPhone 登入成功後，不再閃過錯誤畫面（#1768）**
+  使用者：用 Apple 登入成功、正要進入帳本時，偶爾會先閃一下「出了點問題」的頁面，現在不會了。
+  技術：跳轉前標記 `markNavigatingAway()`，global-error 遇到被取消的 fetch 時先空白不回報，4 秒後頁面還在才照常顯示並回報；Sentry PRJ-FUTARI-9 的登入雜訊應該跟著消失。
+
+- **iPhone 連不上登入伺服器時會說明原因（#1845）**
+  使用者：用 Apple 登入卻連不上伺服器時（中國大陸偶爾會發生），登入頁會提示「這次沒連上登入伺服器……稍等一下再試一次就好」，不會再無聲地回到登入按鈕。
+  技術：`AuthRetryableFetchError` 或 status 0 時回傳新的 outcome `unreachable`，顯示 `signIn.unreachableHint`；四語文案待審（#1891）。
+
+- **iPhone App 未登入的頁面往下捲時，文字不再跑到狀態列底下（#1877）**
+  使用者：首頁、功能介紹、使用情境、搬遷和登入頁捲動時，時間和電量那一列會維持頁面底色。
+  技術：`app/[locale]/layout.tsx` 的 brand CSS 加一條固定在頂端、高度為 safe-area inset 的底色條（z 80）；瀏覽器上 inset 是 0，不會出現。
+
+- **首頁範例小卡與日文分攤句定稿（#1876）**
+  使用者：範例小卡四語文案定稿（簡中、英文改成當地合理的金額）；日文 App 裡「對方欠你」的分攤句改成「パートナーに ¥… 貸している」，不再和反方向只差一個助詞，「支払」也補成「支払い」。
+  技術：`landing.exampleCard*` 四語套用 Grok 審稿並移除 `TODO(i18n)`；ja `splitTypeSelector.partnerOwesYouAmount`／`allTheirsYouPaid`／`allTheirsNoAmount` 與 `compactRow.youPaid`／`partnerPaid` 一起改。
+
+- **捷徑裡的「Futari 記一筆」動作顯示成手機的語言（#1878）**
+  使用者：英文、日文、簡體中文的 iPhone 在捷徑 App 裡會看到自己語言的動作名稱、參數和分類（例如英文是「Add Entry to Futari」）；其他語言顯示英文。
+  技術：新增 `Localizable.xcstrings`，`QuickAddIntent` 改用英文 key，`knownRegions` 加 zh-Hant／zh-Hans／ja；需隨 iOS 殼 1.9.0 上架。
+
+### 技術變更
+
+- **推播 token 寫入失敗時分出網路錯誤（#1883）**
+  技術：PushTokens upsert 沒有錯誤代碼時，status 0 記 `code=network`，其他失敗記 `code=other status=<HTTP 狀態>`；仍不帶錯誤原文和 token。
+
+- **開發、CI、Vercel 的 Node 版本升到 26**
+  技術：`.nvmrc` 改 26（CI 和 native smoke 都讀它）、`package.json` 加 `engines.node: 26.x`（Vercel 會照它選 runtime）、`@types/node` 升到 ^26；Supabase Edge Functions 跑 Deno，不受影響。
+
 ## [1.9.0] - 2026-10-31
 
 主題：**原生殼．Android 推播與分享**——Android App 開始收到定期收支提醒、分享打開系統面板；iPhone 錢包自動化一個動作就能記一筆，捷徑帶入的記帳沿用同一商家上次的分類；記帳首頁收斂層級、文字對比達標；首頁換上新主視覺與一張範例小卡；每晚推播改用具名金鑰，舊金鑰年底停用後照常送出。
@@ -2073,7 +2112,8 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 - **每頁 `generateMetadata` 接 OG image（#487）**：`public/og-image.png` 從 #282 ship 但未 wire 進 metadata，造成 prod HTML 缺 `og:image` / `twitter:image`；本版 4 個 public page 各加 `openGraph.images` + `twitter.images`，`alt` 用 `t.title` locale-aware，無需新增 i18n key。
 - **`settings.local.json` 列入 gitignore（#478）**：避免本地 hook / 權限設定外洩。
 
-[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.9.0...HEAD
+[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.9.1...HEAD
+[1.9.1]: https://github.com/redtear1115/oikos/compare/v1.9.0...v1.9.1
 [1.9.0]: https://github.com/redtear1115/oikos/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/redtear1115/oikos/compare/v1.7.4...v1.8.0
 [1.7.4]: https://github.com/redtear1115/oikos/compare/v1.7.3...v1.7.4

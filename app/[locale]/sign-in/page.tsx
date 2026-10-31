@@ -221,6 +221,7 @@ export default async function SignInPage({
               appleLabel={t.signIn.continueWithApple}
               pendingLabel={t.signIn.signingIn}
               appleFallbackHint={t.signIn.appleFallbackHint}
+              unreachableHint={t.signIn.unreachableHint}
             />
             <InstallHint t={t.signIn.installHint} />
             <p className="text-xs text-ink-2 text-center">
