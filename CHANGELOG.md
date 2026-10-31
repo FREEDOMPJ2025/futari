@@ -64,6 +64,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - **推播 token 寫入失敗時分出網路錯誤（#1883）**
   技術：PushTokens upsert 沒有錯誤代碼時，status 0 記 `code=network`，其他失敗記 `code=other status=<HTTP 狀態>`；仍不帶錯誤原文和 token。
 
+- **開發、CI、Vercel 的 Node 版本升到 26**
+  技術：`.nvmrc` 改 26（CI 和 native smoke 都讀它）、`package.json` 加 `engines.node: 26.x`（Vercel 會照它選 runtime）、`@types/node` 升到 ^26；Supabase Edge Functions 跑 Deno，不受影響。
+
 ## [1.9.0] - 2026-10-31
 
 主題：**原生殼．Android 推播與分享**——Android App 開始收到定期收支提醒、分享打開系統面板；iPhone 錢包自動化一個動作就能記一筆，捷徑帶入的記帳沿用同一商家上次的分類；記帳首頁收斂層級、文字對比達標；首頁換上新主視覺與一張範例小卡；每晚推播改用具名金鑰，舊金鑰年底停用後照常送出。
