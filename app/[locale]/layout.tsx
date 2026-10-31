@@ -32,6 +32,12 @@ const FRAUNCES_LATIN =
 //   The outline is transparent, not 0: forced colors drops box-shadow and paints a
 //   transparent outline in the system colour, so without it keyboard focus vanished
 //   entirely under High Contrast (no error; the row just shows no ring).
+// - .brand::before (#1877): viewport-fit=cover makes the status bar transparent,
+//   and the pages' `padding-top: env(safe-area-inset-top)` only offsets the first
+//   screen — scrolled content slid under the clock and battery in the iOS shell
+//   (no error; text just overlaps the status bar). A fixed strip in the page
+//   background covers the inset, at the nav layer (80, below sheets / curtains).
+//   Height is 0 wherever the inset is 0, so browsers see no box.
 const BRAND_CSS =
   '.brand{--focus-ring-color:var(--ink)}' +
   '.brand :where(a,summary):focus-visible{outline:2px solid transparent;box-shadow:0 0 0 2px var(--ink)}' +
@@ -39,6 +45,7 @@ const BRAND_CSS =
   '.ph{word-break:keep-all;overflow-wrap:anywhere}' +
   '.skip{position:fixed;left:8px;top:8px;z-index:60;padding:12px 16px;border-radius:var(--radius-bubble);background:var(--ink);color:var(--on-fill);transform:translateY(-200%)}' +
   '.skip:focus{transform:none}' +
+  '.brand::before{content:"";position:fixed;inset:0 0 auto;z-index:80;height:env(safe-area-inset-top);background:var(--bg-committed);pointer-events:none}' +
   '@media(forced-colors:active){.skip,.fc-edge{border:1px solid ButtonText}}'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://futari.southern-light.dev'
