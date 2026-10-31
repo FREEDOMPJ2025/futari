@@ -98,7 +98,7 @@ Play 則寫「顯示比例**應為** 16:9 或 9:16」——是建議不是硬性
    有一部分綁 Keychain 與機器，跨機器複製不保證有效，Google 也可能因為裝置變了而要求重驗。
    在新機器上跑一次 `node capture-screens.mjs --login` 重登比較快也比較可靠。
 
-Node 版本走 repo 根目錄的 `.nvmrc`（Node 24 LTS）。若 `node -v` 不是 24，
+Node 版本走 repo 根目錄的 `.nvmrc`（Node 26 LTS）。若 `node -v` 不是 26，
 檢查 PATH 有沒有被其他工具自帶的 Node 遮掉。
 
 **為什麼要人工登入一次**：本 app 只有 Google / Apple OAuth，沒有 email 密碼表單，
