@@ -37,13 +37,15 @@ const FRAUNCES_LATIN =
 //   screen — scrolled content slid under the clock and battery in the iOS shell
 //   (no error; text just overlaps the status bar). A fixed strip in the page
 //   background covers the inset, at the nav layer (80, below sheets / curtains).
-//   Height is 0 wherever the inset is 0, so browsers see no box.
+//   Height is 0 wherever the inset is 0, so browsers see no box. The skip link
+//   sits below the inset and one layer above the strip (81): at top 8px / z 60
+//   the strip hid it entirely when focused in the shell (WCAG 2.4.7).
 const BRAND_CSS =
   '.brand{--focus-ring-color:var(--ink)}' +
   '.brand :where(a,summary):focus-visible{outline:2px solid transparent;box-shadow:0 0 0 2px var(--ink)}' +
   '.fc-edge:focus-visible,.skip:focus-visible,.oik-btn:focus-visible{box-shadow:0 0 0 2px var(--on-fill),0 0 0 4px var(--ink)}' +
   '.ph{word-break:keep-all;overflow-wrap:anywhere}' +
-  '.skip{position:fixed;left:8px;top:8px;z-index:60;padding:12px 16px;border-radius:var(--radius-bubble);background:var(--ink);color:var(--on-fill);transform:translateY(-200%)}' +
+  '.skip{position:fixed;left:8px;top:calc(env(safe-area-inset-top) + 8px);z-index:81;padding:12px 16px;border-radius:var(--radius-bubble);background:var(--ink);color:var(--on-fill);transform:translateY(-200%)}' +
   '.skip:focus{transform:none}' +
   '.brand::before{content:"";position:fixed;inset:0 0 auto;z-index:80;height:env(safe-area-inset-top);background:var(--bg-committed);pointer-events:none}' +
   '@media(forced-colors:active){.skip,.fc-edge{border:1px solid ButtonText}}'
