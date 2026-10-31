@@ -5,4 +5,4 @@
 - 來源：本機 `next build` + `next start`，Playwright headless Chromium，375×667 @2x（768、1024、1280 為 @1x）。卡片裡是示範資料，不是真實使用者的紀錄。
 - 文案是 #1858 規格的四語建議版，待 Aria 定稿。
 
-Issue：https://github.com/redtear1115/oikos/issues/1852
+Issue：https://github.com/FREEDOMPJ2025/futari/issues/1852

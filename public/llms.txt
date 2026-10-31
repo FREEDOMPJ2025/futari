@@ -2,7 +2,7 @@
 
 > 兩個人的記帳框架。Two-person companion expense tracker for couples and partners — mobile-first PWA built around shared chapters of life rather than balance sheets.
 
-Futari (codebase name: Oikos) is a Traditional-Chinese-first expense tracker designed for exactly two users in a long-term relationship (spouses, partners, or co-living roommates). It is not a generic budgeting app: it assumes one shared ledger, one shared life, and zero account-visibility gating. Everything entered belongs to both people by default.
+Futari is a Traditional-Chinese-first expense tracker designed for exactly two users in a long-term relationship (spouses, partners, or co-living roommates). It is not a generic budgeting app: it assumes one shared ledger, one shared life, and zero account-visibility gating. Everything entered belongs to both people by default.
 
 ## What it is
 

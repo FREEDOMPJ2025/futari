@@ -41,12 +41,16 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
-_Nothing unreleased yet._
+### 技術變更
+
+- **repo 搬到 FREEDOMPJ2025/futari，專案改名為 Futari**
+  使用者：服務條款、隱私權頁的「回報問題」連結改指向新的 GitHub repo（舊網址也會自動轉過去）。
+  技術：所有 `redtear1115/oikos` 改成 `FREEDOMPJ2025/futari`，`package.json` 的 name 改成 `futari`，CLAUDE.md／README 換成新名稱並寫明刻意保留 oikos 的地方（資料表 `OikosGroups`、裝置上的 `oikos_*` key、外部 ID），llms.txt 拿掉舊名和「source code is private」的錯誤說法。
 
 ## [1.9.1] - 2026-10-31
 
 主題：**iPhone 登入路上的修補**——用 Apple 註冊不再因為沒給名字和 email 而失敗、登入成功不再閃錯誤頁、連不上伺服器時會說明；未登入頁捲動不再壓到狀態列；開發與部署環境升到 Node 26。
-完整 diff：[v1.9.0...v1.9.1](https://github.com/redtear1115/oikos/compare/v1.9.0...v1.9.1)
+完整 diff：[v1.9.0...v1.9.1](https://github.com/FREEDOMPJ2025/futari/compare/v1.9.0...v1.9.1)
 
 ### 使用者可見變化
 
@@ -85,7 +89,7 @@ _Nothing unreleased yet._
 ## [1.9.0] - 2026-10-31
 
 主題：**原生殼．Android 推播與分享**——Android App 開始收到定期收支提醒、分享打開系統面板；iPhone 錢包自動化一個動作就能記一筆，捷徑帶入的記帳沿用同一商家上次的分類；記帳首頁收斂層級、文字對比達標；首頁換上新主視覺與一張範例小卡；每晚推播改用具名金鑰，舊金鑰年底停用後照常送出。
-完整 diff：[v1.8.0...v1.9.0](https://github.com/redtear1115/oikos/compare/v1.8.0...v1.9.0)
+完整 diff：[v1.8.0...v1.9.0](https://github.com/FREEDOMPJ2025/futari/compare/v1.8.0...v1.9.0)
 
 ### 使用者可見變化
 
@@ -180,7 +184,7 @@ _Nothing unreleased yet._
 ## [1.8.0] - 2026-10-19
 
 主題：**品牌頁．讓陌生人信任**——登入前的品牌頁整體升級（award review 第 6 輪 7.45 通過）；iPhone 捷徑能把付款送進待確認；匯入多了三個來源。
-完整 diff：[v1.7.4...v1.8.0](https://github.com/redtear1115/oikos/compare/v1.7.4...v1.8.0)
+完整 diff：[v1.7.4...v1.8.0](https://github.com/FREEDOMPJ2025/futari/compare/v1.7.4...v1.8.0)
 
 ### 使用者可見變化
 
@@ -244,7 +248,7 @@ _Nothing unreleased yet._
 ## [1.7.4] - 2026-10-16
 
 主題：**被找到．出遊帶朋友進來**——出遊頁更容易被搜尋和 AI 找到；朋友能用分享面板或 QR 加入，結束後也看得到兩人帳本的邀請。
-完整 diff：[v1.7.3...v1.7.4](https://github.com/redtear1115/oikos/compare/v1.7.3...v1.7.4)
+完整 diff：[v1.7.3...v1.7.4](https://github.com/FREEDOMPJ2025/futari/compare/v1.7.3...v1.7.4)
 
 ### 使用者可見變化
 
@@ -286,7 +290,7 @@ _Nothing unreleased yet._
 ## [1.7.3] - 2026-10-15
 
 主題：**離開之後．章節完整、能回看**——離開或被移除的人、以及對方刪除帳號之後，兩人的那段章節都完整留下、只在那段章節裡看得到；匯出補上進帳與結算；網頁與 App 斷線時都有離線畫面，登出會把裝置上的帳本資料清乾淨。
-完整 diff：[v1.7.2...v1.7.3](https://github.com/redtear1115/oikos/compare/v1.7.2...v1.7.3)
+完整 diff：[v1.7.2...v1.7.3](https://github.com/FREEDOMPJ2025/futari/compare/v1.7.2...v1.7.3)
 
 #1675、#1607 已於 2026-10-12 隨 v1.7.2 的部署提前上線。
 
@@ -364,7 +368,7 @@ _Nothing unreleased yet._
 ## [1.7.2] - 2026-10-12
 
 主題：**Android 測試．一條連結就能加入**——封閉測試從「填表、等人工加進名單」改成加入 Google 群組後自己就能安裝；Android App 內多了回饋入口，出遊分享頁與設定也多了邀請測試者的入口。
-完整 diff：[v1.7.1...v1.7.2](https://github.com/redtear1115/oikos/compare/v1.7.1...v1.7.2)
+完整 diff：[v1.7.1...v1.7.2](https://github.com/FREEDOMPJ2025/futari/compare/v1.7.1...v1.7.2)
 
 ### 使用者可見變化
 
@@ -378,7 +382,7 @@ _Nothing unreleased yet._
 ## [1.7.1] - 2026-10-09
 
 主題：**出遊．朋友看得懂、帳算得對**——新增出遊介紹頁，讓朋友知道出遊怎麼用；結束出遊寫回兩人帳本的金額改為跟著建議轉帳，寫回後不再重複列出。
-完整 diff：[v1.7.0...v1.7.1](https://github.com/redtear1115/oikos/compare/v1.7.0...v1.7.1)
+完整 diff：[v1.7.0...v1.7.1](https://github.com/FREEDOMPJ2025/futari/compare/v1.7.0...v1.7.1)
 
 ### 使用者可見變化
 
@@ -406,7 +410,7 @@ _Nothing unreleased yet._
 ## [1.7.0] - 2026-10-08
 
 主題：**出遊．朋友從連結加入**——分享一條連結，朋友就能加入出遊、認領自己的名字、一起記帳與還款；同時把「有人離開帳本之後」的舊章節、名字、推播與資料保留整理成一致的規則（spec: after-leaving）。
-完整 diff：[v1.6.8...v1.7.0](https://github.com/redtear1115/oikos/compare/v1.6.8...v1.7.0)
+完整 diff：[v1.6.8...v1.7.0](https://github.com/FREEDOMPJ2025/futari/compare/v1.6.8...v1.7.0)
 
 ### 使用者可見變化
 
@@ -544,7 +548,7 @@ _Nothing unreleased yet._
 ## [1.6.8] - 2026-10-06
 
 主題：**找得到，也留得住**——紀錄頁可以用文字搜尋；Apple 登入沒完成時說清楚下一步；正式站每日加密備份的腳本與唯讀角色就位，還原演練已在 dev 跑通。
-完整 diff：[v1.6.7...v1.6.8](https://github.com/redtear1115/oikos/compare/v1.6.7...v1.6.8)
+完整 diff：[v1.6.7...v1.6.8](https://github.com/FREEDOMPJ2025/futari/compare/v1.6.7...v1.6.8)
 
 ### 使用者可見變化
 
@@ -569,7 +573,7 @@ _Nothing unreleased yet._
 ## [1.6.7] - 2026-10-04
 
 主題：**登入前的門面，登入後的界線**——品牌頁換成同一個暖燈世界、載入更快、換行與文案都順了；帳本資料在資料庫層收到自己在場的章節，正式站改用權限受限的資料庫角色。
-完整 diff：[v1.6.6...v1.6.7](https://github.com/redtear1115/oikos/compare/v1.6.6...v1.6.7)
+完整 diff：[v1.6.6...v1.6.7](https://github.com/FREEDOMPJ2025/futari/compare/v1.6.6...v1.6.7)
 
 ### 使用者可見變化
 
@@ -663,7 +667,7 @@ _Nothing unreleased yet._
 ## [1.6.6] - 2026-10-03
 
 主題：**送審前先把殼看牢**——iOS 殼加上原生崩潰回報與上傳前的啟動檢查，帳本之間的資料界線再收緊一層。
-完整 diff：[v1.6.5...v1.6.6](https://github.com/redtear1115/oikos/compare/v1.6.5...v1.6.6)
+完整 diff：[v1.6.5...v1.6.6](https://github.com/FREEDOMPJ2025/futari/compare/v1.6.5...v1.6.6)
 
 ### 使用者可見變化
 
@@ -710,7 +714,7 @@ _Nothing unreleased yet._
 ## [1.6.5] - 2026-10-02
 
 主題：**離開家計簿後舊紀錄留得住愛物**——跨帳本連結改成唯讀副本，加密密文不再送到瀏覽器，並備好較窄的 DB 角色。
-完整 diff：[v1.6.4...v1.6.5](https://github.com/redtear1115/oikos/compare/v1.6.4...v1.6.5)
+完整 diff：[v1.6.4...v1.6.5](https://github.com/FREEDOMPJ2025/futari/compare/v1.6.4...v1.6.5)
 
 ### 使用者可見變化
 
@@ -737,7 +741,7 @@ _Nothing unreleased yet._
 ## [1.6.4] - 2026-09-29
 
 主題：**iOS 27 上又打得開了**——原生殼改用 iOS 27 要求的新生命週期，另外把欄位加密的金鑰輪替工具收整。
-完整 diff：[v1.6.3...v1.6.4](https://github.com/redtear1115/oikos/compare/v1.6.3...v1.6.4)
+完整 diff：[v1.6.3...v1.6.4](https://github.com/FREEDOMPJ2025/futari/compare/v1.6.3...v1.6.4)
 
 ### 使用者可見變化
 
@@ -757,7 +761,7 @@ _Nothing unreleased yet._
 ## [1.6.3] - 2026-09-27
 
 主題：**帳本的邊界更穩**——記帳、旅行、匯出都守在自己的章節裡，名下有愛物也能離開帳本，送往錯誤追蹤的資料先清乾淨。
-完整 diff：[v1.6.2...v1.6.3](https://github.com/redtear1115/oikos/compare/v1.6.2...v1.6.3)
+完整 diff：[v1.6.2...v1.6.3](https://github.com/FREEDOMPJ2025/futari/compare/v1.6.2...v1.6.3)
 
 ### 使用者可見變化
 
@@ -807,7 +811,7 @@ _Nothing unreleased yet._
 ## [1.6.2] - 2026-09-26
 
 主題：**首頁的主要按鈕看你用什麼裝置**——iPhone 直接去 App Store，Android 可以報名測試版。
-完整 diff：[v1.6.1...v1.6.2](https://github.com/redtear1115/oikos/compare/v1.6.1...v1.6.2)
+完整 diff：[v1.6.1...v1.6.2](https://github.com/FREEDOMPJ2025/futari/compare/v1.6.1...v1.6.2)
 
 ### 使用者可見變化
 
@@ -830,7 +834,7 @@ _Nothing unreleased yet._
 ## [1.6.1] - 2026-09-22
 
 主題：**設計審查的統一優化**——標題字體、按鈕狀態與金額格式收斂成同一套；邀請連結改為 24 小時內有效。
-完整 diff：[v1.6.0...v1.6.1](https://github.com/redtear1115/oikos/compare/v1.6.0...v1.6.1)
+完整 diff：[v1.6.0...v1.6.1](https://github.com/FREEDOMPJ2025/futari/compare/v1.6.0...v1.6.1)
 
 ### 使用者可見變化
 
@@ -861,7 +865,7 @@ _Nothing unreleased yet._
 ## [1.6.0] - 2026-09-22
 
 主題：**出遊**——和朋友出去玩時，由你們兩人代記一本多人分帳；結束時只把你們倆之間的帳折回主帳本。
-完整 diff：[v1.5.21...v1.6.0](https://github.com/redtear1115/oikos/compare/v1.5.21...v1.6.0)
+完整 diff：[v1.5.21...v1.6.0](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.21...v1.6.0)
 
 ### 使用者可見變化
 
@@ -879,7 +883,7 @@ _Nothing unreleased yet._
 ## [1.5.21] - 2026-09-21
 
 主題：**章節的邊界更可靠**——旅行、匯入回滾、過去章節的愛物都只作用在該作用的章節；首頁多了常駐的月回顧與旅行入口。
-完整 diff：[v1.5.20...v1.5.21](https://github.com/redtear1115/oikos/compare/v1.5.20...v1.5.21)
+完整 diff：[v1.5.20...v1.5.21](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.20...v1.5.21)
 
 ### 使用者可見變化
 
@@ -913,7 +917,7 @@ _Nothing unreleased yet._
 ## [1.5.20] - 2026-09-21
 
 主題：**修補旅行編輯的欄位寫入**——hotfix 版，另外帶上出遊的 spec 與版本主題更新。
-完整 diff：[v1.5.19...v1.5.20](https://github.com/redtear1115/oikos/compare/v1.5.19...v1.5.20)
+完整 diff：[v1.5.19...v1.5.20](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.19...v1.5.20)
 
 ### 技術變更
 
@@ -932,7 +936,7 @@ _Nothing unreleased yet._
 ## [1.5.19] - 2026-09-21
 
 主題：**凌晨的「今天」對得上了**——伺服器和手機用同一個今天，確認框不再被誤關，四語文案與 token 紀律收尾。
-完整 diff：[v1.5.18...v1.5.19](https://github.com/redtear1115/oikos/compare/v1.5.18...v1.5.19)
+完整 diff：[v1.5.18...v1.5.19](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.18...v1.5.19)
 
 ### 使用者可見變化
 
@@ -971,7 +975,7 @@ _Nothing unreleased yet._
 ## [1.5.18] - 2026-09-21
 
 主題：**先看見關係，再看見金額**——愛物列表把年齡與陪伴天數放到前面、金額退成安靜的一行，過去章節不再排出一整排 NT$0；邊界狀態留下的空洞補起來，頭貼也可以選擇不顯示。
-完整 diff：[v1.5.17...v1.5.18](https://github.com/redtear1115/oikos/compare/v1.5.17...v1.5.18)
+完整 diff：[v1.5.17...v1.5.18](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.17...v1.5.18)
 
 ### 使用者可見變化
 
@@ -1048,7 +1052,7 @@ _Nothing unreleased yet._
 ## [1.5.17] - 2026-09-19
 
 主題：**按下去就會有回應**——記帳錯誤提示不再擋住按鈕，App 冷啟動不再被登入畫面打斷，iOS 與 Android 殼的 Google 登入走得完。
-完整 diff：[v1.5.16...v1.5.17](https://github.com/redtear1115/oikos/compare/v1.5.16...v1.5.17)
+完整 diff：[v1.5.16...v1.5.17](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.16...v1.5.17)
 
 ### 使用者可見變化
 
@@ -1075,7 +1079,7 @@ _Nothing unreleased yet._
 ## [1.5.16] - 2026-09-17
 
 主題：**網址裡的東西不再外流，走錯路也還在 Futari 裡**——分析工具的網址清洗、自家的 404 與錯誤頁、landing 手機版收尾。
-完整 diff：[v1.5.15...v1.5.16](https://github.com/redtear1115/oikos/compare/v1.5.15...v1.5.16)
+完整 diff：[v1.5.15...v1.5.16](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.15...v1.5.16)
 
 ### 使用者可見變化
 
@@ -1117,7 +1121,7 @@ _Nothing unreleased yet._
 ## [1.5.15] - 2026-09-16
 
 主題：**上線了，不等於送到了**——這一版把一批「已經出貨、畫面正常、CI 全綠」的東西拿到 prod 上實際量一次，結果多數根本沒送達使用者：v1.5.14 翻好的 82 句錯誤訊息被 production 序列化剝成 digest、一句都沒到過 client；weighted 分攤比例每期落帳都是 null；最近 21 張待確認卡片全部晚一天出現；帳本描述與金額隨著每一次點擊送進第三方分析；隱私頁掛著一句程式碼不支持的宣稱。共同點是它們都不會報錯——要發現只能去量 prod 本身。
-完整 diff：[v1.5.14...v1.5.15](https://github.com/redtear1115/oikos/compare/v1.5.14...v1.5.15)
+完整 diff：[v1.5.14...v1.5.15](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.14...v1.5.15)
 
 ### 使用者可見變化
 
@@ -1181,7 +1185,7 @@ _Nothing unreleased yet._
 ## [1.5.14] - 2026-09-15
 
 主題：**看起來正常，不等於成立**——這一版把一批「畫面沒破、測試全綠、review 會過」的東西成批打開來看：對外宣稱的端對端加密其實是 server 持鑰的欄位級加密、四個 CSS 變數從來沒有定義過、關起來的 sheet 一直待在 Tab 順序裡、五張理念卡只有中文。每一項的共同點都是它不會報錯，所以沒有人回報過。
-完整 diff：[v1.5.13...v1.5.14](https://github.com/redtear1115/oikos/compare/v1.5.13...v1.5.14)
+完整 diff：[v1.5.13...v1.5.14](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.13...v1.5.14)
 
 ### 使用者可見變化
 
@@ -1248,7 +1252,7 @@ _Nothing unreleased yet._
 ## [1.5.13] - 2026-09-14
 
 主題：**solo 不是等待狀態**——一個人記帳本來就是完整的用法。dashboard 上那塊位置不再放「邀請對方」，而是使用者自己的數字；設定裡不再有一排灰掉、等著另一個人來才能按的選項。同一版還撞出一批「宣稱與實際不符」的東西：一個從來沒生效過的字距 token、一個恆為 false 的旗標、一個從未送出過的埋點——它們都不會報錯。
-完整 diff：[v1.5.12...v1.5.13](https://github.com/redtear1115/oikos/compare/v1.5.12...v1.5.13)
+完整 diff：[v1.5.12...v1.5.13](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.12...v1.5.13)
 
 ### 使用者可見變化
 
@@ -1285,7 +1289,7 @@ _Nothing unreleased yet._
 ## [1.5.12] - 2026-09-13
 
 主題：**讓文件與 code 對帳**——把 36 條文件宣稱逐條打開 code 驗證，撞出三個沒人回報過的 bug：匯入舊帳後可以繞過幣別鎖、截圖轉 CSV 那條路走不到終點、檔案選擇器選不到一半支援的格式。這版修的都是「文件寫得好好的，但 code 沒照著做」——沒有一項是使用者抱怨出來的。
-完整 diff：[v1.5.11...v1.5.12](https://github.com/redtear1115/oikos/compare/v1.5.11...v1.5.12)
+完整 diff：[v1.5.11...v1.5.12](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.11...v1.5.12)
 
 ### 使用者可見變化
 
@@ -1307,7 +1311,7 @@ _Nothing unreleased yet._
 ## [1.5.11] - 2026-09-12
 
 主題：**讓頁面被找到，讓點擊被算到**——三個語系子樹沒有任何一條可爬的連結、情境頁的 CTA 從來沒有歸因、`/use-case` 根本是 404。這版修的都是「東西在那裡，但 Google 找不到、我們也量不到」。沒有一項是使用者抱怨出來的，全部來自一次 GSC + Lighthouse + 程式碼的對帳。
-完整 diff：[v1.5.10...v1.5.11](https://github.com/redtear1115/oikos/compare/v1.5.10...v1.5.11)
+完整 diff：[v1.5.10...v1.5.11](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.10...v1.5.11)
 
 ### 使用者可見變化
 
@@ -1328,7 +1332,7 @@ _Nothing unreleased yet._
 ## [1.5.10] - 2026-09-12
 
 主題：**看得見、按得到、算得準**——瀏海機種吃掉的按鈕、永遠空白的月度回顧、以及三個只在特定時刻才浮現的計算錯誤。這版修的都是「東西在那裡，但你碰不到或看不到」。
-完整 diff：[v1.5.9...v1.5.10](https://github.com/redtear1115/oikos/compare/v1.5.9...v1.5.10)
+完整 diff：[v1.5.9...v1.5.10](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.9...v1.5.10)
 
 ### 使用者可見變化
 
@@ -1353,7 +1357,7 @@ _Nothing unreleased yet._
 ## [1.5.9] - 2026-09-12
 
 主題：**讓伴侶真的進得來**——實測發現 72% 的人建立帳本後連試都沒試就跳過邀請，而真正送出去的有 83% 成功。所以問題不在連結、不在接受流程，在於「把連結交到對方手上」這一步。這版補上面對面的路徑，順手把整條漏斗從幾乎全黑修到看得見。
-完整 diff：[v1.5.8...v1.5.9](https://github.com/redtear1115/oikos/compare/v1.5.8...v1.5.9)
+完整 diff：[v1.5.8...v1.5.9](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.8...v1.5.9)
 
 ### 使用者可見變化
 
@@ -1377,7 +1381,7 @@ _Nothing unreleased yet._
 ## [1.5.8] - 2026-09-12
 
 主題：**自然搜尋體質**——一次 90 天體檢，結果大半的工作是「查證後決定不做」。真正動手的只有兩處：讓 sitemap 的日期說實話，以及把搬家教學從落地頁的主流程收起來。
-完整 diff：[v1.5.7...v1.5.8](https://github.com/redtear1115/oikos/compare/v1.5.7...v1.5.8)
+完整 diff：[v1.5.7...v1.5.8](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.7...v1.5.8)
 
 ### 使用者可見變化
 
@@ -1402,7 +1406,7 @@ _Nothing unreleased yet._
 ## [1.5.7] - 2026-09-12
 
 主題：**讓三個平台分得開**——同一份網站送到瀏覽器、安裝版與原生殼，觀測上卻混成一團。這版補上平台維度，往後每筆事件與每個錯誤都知道自己來自哪個平台。
-完整 diff：[v1.5.6...v1.5.7](https://github.com/redtear1115/oikos/compare/v1.5.6...v1.5.7)
+完整 diff：[v1.5.6...v1.5.7](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.6...v1.5.7)
 
 ### 使用者可見變化
 
@@ -1419,7 +1423,7 @@ _沒有；純觀測面改動。_
 ## [1.5.6] - 2026-09-12
 
 主題：**讓殼跟上網站**——iOS 原生 Apple 登入修到真正可用，三平台的 CI、發版流程與殼版本偵測一次補齊；殼與網站之間的兩個盲區（登入漏斗、潛伏的編譯壞損）從此有訊號。
-完整 diff：[v1.5.5...v1.5.6](https://github.com/redtear1115/oikos/compare/v1.5.5...v1.5.6)
+完整 diff：[v1.5.5...v1.5.6](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.5...v1.5.6)
 
 ### 使用者可見變化
 
@@ -1442,7 +1446,7 @@ _沒有；純觀測面改動。_
 ## [1.5.5] - 2026-08-12
 
 主題：**讓失敗被看見**——修掉 solo 模式一個看得見的重複，把登入失敗路徑從三層靜音補成有訊號、有提示，並補齊首次送審在素材端的最後缺口。
-完整 diff：[v1.5.4...v1.5.5](https://github.com/redtear1115/oikos/compare/v1.5.4...v1.5.5)
+完整 diff：[v1.5.4...v1.5.5](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.4...v1.5.5)
 
 ### 使用者可見變化
 
@@ -1455,14 +1459,14 @@ _沒有；純觀測面改動。_
 - **#973 失敗埋點**：`/auth/callback` 兩條失敗分支（缺 `code` / `exchangeCodeForSession` 出錯）各發一筆 `sign_in_failed`，帶 `reason` 與 `had_anon_id`；有 `aid` 時以該匿名 distinct_id 為 distinctId，讓失敗接回同一個人的 `sign_in_started`。缺 code 時另外記下 provider 自己回傳的 `error` / `error_description`（先前直接丟棄），可區分「使用者取消授權」與「什麼都沒拿到」。
 - **#973 不再吞錯**：`lib/analytics/server.ts` 的 `captureServer` / `aliasServer` 與 `actions/auth.ts` 的 `recordNativeAuthConversion` 原本是空 catch，改為回報 Sentry（仍不向呼叫端拋錯）。exchange 失敗只送 `error.name` / `error.status`，不傳原始 error 物件，避免一次性 auth code 外流。
 - **#973 client 端**：`SignInButton` 四條靜默 return（apple 無 idToken、idToken 被拒、拿不到 OAuth URL、web `signInWithOAuth` 回錯）補上 `sign_in_failed`，帶 `reason` / `provider` / `path`。
-- 這批埋點是為了診斷 [#972](https://github.com/redtear1115/oikos/issues/972)（Google 登入在 iOS Safari 上幾乎全數失敗：16 人出發、1 人回來）。#972 本身仍待實機重現，未包含在本版。
+- 這批埋點是為了診斷 [#972](https://github.com/FREEDOMPJ2025/futari/issues/972)（Google 登入在 iOS Safari 上幾乎全數失敗：16 人出發、1 人回來）。#972 本身仍待實機重現，未包含在本版。
 - **上架素材與產生腳本（#971 / #935）**：`docs/store-assets/` 補齊 Play 512×512 圖示、四語 1024×500 feature graphic、App Store 6.7"（1290×2796）與 Play（1080×1920）截圖各 4 張；`scripts/og/` 新增 `capture-screens.mjs` / `render-store.mjs` / `store-graphic.html`。兩種截圖尺寸不可共用——Play 規定長邊不得超過短邊 2 倍，6.7" 的 2.167 比例會被退件。App Store submission runbook 同步更新實跑結果。
 - **文件稽核（#976）**：三份 implementation 味道過重的 spec（`brand-register` / `migrate-pages` / `ia-unified-header`）剝除 schema、TS type、wireframe、檔案清單，淨 −323 行且未刪任何設計理由；五份 spec 的 `status` 從 `planned` / `approved` / `ready-to-implement` 查證後修正為 `shipped` 並補上實際首發版本；三份 spec 檔名去掉日期前綴改為 `<key>-design.md`；`CLAUDE.md` 補上漏列的 `--asset-color-item` 與「專案內建 skill」段（`run-oikos` / `ja-i18n` 先前沒有任何連結指向）。
 
 ## [1.5.4] - 2026-07-13
 
 主題：**站穩地基**——修掉一次 prod 資料庫連線事故的根因，並把 migrate 競品頁從模板文案升級成查證過的專屬內容。
-完整 diff：[v1.5.3...v1.5.4](https://github.com/redtear1115/oikos/compare/v1.5.3...v1.5.4)
+完整 diff：[v1.5.3...v1.5.4](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.3...v1.5.4)
 
 ### 使用者可見變化
 
@@ -1480,7 +1484,7 @@ _沒有；純觀測面改動。_
 ## [1.5.3] - 2026-06-30
 
 主題：**測試版回報修正**——安卓 / iOS 測試期間回報的三個問題：solo 旅行 500、鍵盤留白、已登入仍停在 landing。
-完整 diff：[v1.5.2...v1.5.3](https://github.com/redtear1115/oikos/compare/v1.5.2...v1.5.3)
+完整 diff：[v1.5.2...v1.5.3](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.2...v1.5.3)
 
 ### 使用者可見變化
 
@@ -1497,7 +1501,7 @@ _沒有；純觀測面改動。_
 ## [1.5.2] - 2026-06-11
 
 主題：**首次送審就緒**——App Store / Play 首次送審前的最後收尾：暖燈品牌 app icon 正式落地、隱私頁補上 Apple 登入揭露、iOS 推播能力、上架 runbook 與原生版本號規則。
-完整 diff：[v1.5.1...v1.5.2](https://github.com/redtear1115/oikos/compare/v1.5.1...v1.5.2)
+完整 diff：[v1.5.1...v1.5.2](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.1...v1.5.2)
 
 ### 使用者可見變化
 
@@ -1513,7 +1517,7 @@ _沒有；純觀測面改動。_
 ## [1.5.1] - 2026-06-10
 
 主題：**上架準備 · 帳號刪除 · 落地頁提速**——App Store / Play 上架前置（帳號刪除）、落地頁效能與無障礙打磨。
-完整 diff：[v1.5.0...v1.5.1](https://github.com/redtear1115/oikos/compare/v1.5.0...v1.5.1)
+完整 diff：[v1.5.0...v1.5.1](https://github.com/FREEDOMPJ2025/futari/compare/v1.5.0...v1.5.1)
 
 ### 使用者可見變化
 
@@ -1534,7 +1538,7 @@ _沒有；純觀測面改動。_
 ## [1.5.0] - 2026-06-09
 
 主題：**iOS 啟程 · Sign in with Apple · 推播提醒**——iOS 改用 Capacitor 殼並加入推播；Sign in with Apple 滿足 App Store Guideline 4.8；GA4 + Ko-fi 開始長線經營。
-完整 diff：[v1.4.3...v1.5.0](https://github.com/redtear1115/oikos/compare/v1.4.3...v1.5.0)
+完整 diff：[v1.4.3...v1.5.0](https://github.com/FREEDOMPJ2025/futari/compare/v1.4.3...v1.5.0)
 
 ### 使用者可見變化
 
@@ -1558,7 +1562,7 @@ _沒有；純觀測面改動。_
 ## [1.4.3] - 2026-05-31
 
 主題：**品牌面升溫 · 插圖欄位上線**——Landing、Sign-in、Migrate、Terms、Privacy 換上 Committed 暖底色；Landing hero 加入插圖欄位，Mobile 以插圖開場取代大 mark。
-完整 diff：[v1.4.2...v1.4.3](https://github.com/redtear1115/oikos/compare/v1.4.2...v1.4.3)
+完整 diff：[v1.4.2...v1.4.3](https://github.com/FREEDOMPJ2025/futari/compare/v1.4.2...v1.4.3)
 
 ### 使用者可見變化
 
@@ -1573,7 +1577,7 @@ _沒有；純觀測面改動。_
 ## [1.4.2] - 2026-05-31
 
 主題：**解密修復 · 設計 token 收斂**——修正愛物車牌／房子地址在正式環境無法解密顯示的問題（#881）；設計 token 全面收斂；無障礙與 SEO 打磨。
-完整 diff：[v1.4.1...v1.4.2](https://github.com/redtear1115/oikos/compare/v1.4.1...v1.4.2)
+完整 diff：[v1.4.1...v1.4.2](https://github.com/FREEDOMPJ2025/futari/compare/v1.4.1...v1.4.2)
 
 ### 使用者可見變化
 
@@ -1593,7 +1597,7 @@ _沒有；純觀測面改動。_
 ## [1.4.1] - 2026-05-30
 
 主題：**Android 登入修復**——修正 Android app 內 Google 登入後被導回首頁、無法進入主畫面的問題（#866）。
-完整 diff：[v1.4.0...v1.4.1](https://github.com/redtear1115/oikos/compare/v1.4.0...v1.4.1)
+完整 diff：[v1.4.0...v1.4.1](https://github.com/FREEDOMPJ2025/futari/compare/v1.4.0...v1.4.1)
 
 ### 使用者可見變化
 
@@ -1620,7 +1624,7 @@ _沒有；純觀測面改動。_
 ## [1.3.2] - 2026-05-30
 
 主題：**競品搬遷頁全面鋪開 · futari = 記帳 品牌詞鞏固**——把 `/migrate/*` 從 Honeydue / Spendee / CWMoney 三頁擴成 10 個 Taiwan 競品搬遷頁，並把整個 migrate 子系統重構成 CMS / 資料驅動架構（#839 / #852 / #844）；沒有官方 CSV 匯出的 App 改走「截圖→ChatGPT→CSV」流程，新增 `futari_generic` parser 自動解析（#839）；用 structured data + site name 把 `futari = 記帳` 的品牌詞釘穩，跟同名社交 App 區隔（#843 / #845）；schema 面完成愛物 PII 加密遷移第二階段，移除車牌 / 地址 legacy 明文欄位（#837）。
-完整 diff：[v1.3.1...v1.3.2](https://github.com/redtear1115/oikos/compare/v1.3.1...v1.3.2)
+完整 diff：[v1.3.1...v1.3.2](https://github.com/FREEDOMPJ2025/futari/compare/v1.3.1...v1.3.2)
 
 ### 使用者可見變化
 
@@ -1639,7 +1643,7 @@ _沒有；純觀測面改動。_
 ## [1.3.1] - 2026-05-30
 
 主題：**公開 surface 清掃 · 愛物 PII 加密第一階段**——對 `/` 跟所有 non-login surface 跑了一輪 `/impeccable critique → polish → audit` 循環，把絕對 ban 的 side-stripe border 拆掉、補齊 WCAG AA 對比、把 landing 拉出 editorial-typographic reflex lane、四語 em dash 一次掃除（#828）；landing hero 字級升級＋PhonePreview 換上真實 `CategoryChip` / `AssetIcon`，順手修掉 logout 卡在 `/settings` 的 server-action redirect bug（#833）；把 dev server 啟動流程固定成 `run-oikos` project skill（#834）；愛物 PII 加密第一階段——車牌、房屋地址、孩子全名加密落庫、tap-to-reveal UI、backfill 腳本（#826 / #835 / #838）。
-完整 diff：[v1.3.0...v1.3.1](https://github.com/redtear1115/oikos/compare/v1.3.0...v1.3.1)
+完整 diff：[v1.3.0...v1.3.1](https://github.com/FREEDOMPJ2025/futari/compare/v1.3.0...v1.3.1)
 
 ### 使用者可見變化
 
@@ -1687,7 +1691,7 @@ _沒有；純觀測面改動。_
 ## [1.2.5] - 2026-05-27
 
 主題：**效能基礎建設 + 細節打磨**——DB 複合索引補齊（CashTransactions / Settlements）、Avatar 遷移到 next/image（AVIF/WebP + srcset）、bundle analyzer 接入、BrandHeader icon-only 按鈕 first-use hint、ja i18n 修正、font-semibold 全站清理。
-完整 diff：[v1.2.4...v1.2.5](https://github.com/redtear1115/oikos/compare/v1.2.4...v1.2.5)
+完整 diff：[v1.2.4...v1.2.5](https://github.com/FREEDOMPJ2025/futari/compare/v1.2.4...v1.2.5)
 
 ### 使用者可見變化
 
@@ -1705,7 +1709,7 @@ _沒有；純觀測面改動。_
 ## [1.2.4] - 2026-05-26
 
 主題：**settings 一輪精煉 + split ratio viewer 邊界補完 + dashboard 接上 Impeccable**——settings 頁面從清理開始（dead i18n keys / props、chevron a11y、token 對齊、query 收斂 #778）、補直接登出入口（#780）、重畫 loading skeleton 對齊真實版面（#779）、把預設分攤比例改成 optimistic 即時存（#782）；同步修掉分攤比例在 member B 視角顯示反邊的 bug（#785）、把 guardian 描述殘留的「DB」技術詞拿掉（#781）；dashboard 接上 Impeccable 設計脈絡（PRODUCT.md / DESIGN.md / 設計系統 token，#760 / #761）；README 版本歷史回填 v1.1.3–v1.2.3（#767）。
-完整 diff：[v1.2.3...v1.2.4](https://github.com/redtear1115/oikos/compare/v1.2.3...v1.2.4)
+完整 diff：[v1.2.3...v1.2.4](https://github.com/FREEDOMPJ2025/futari/compare/v1.2.3...v1.2.4)
 
 ### 使用者可見變化
 
@@ -1728,7 +1732,7 @@ _沒有；純觀測面改動。_
 ## [1.2.3] - 2026-05-25
 
 主題：**records 邊角修正 + profile 無障礙整備**——補一批 records 正確性／體驗缺口（手動輸入金額沒上限、篩選金額範圍顛倒會靜默清空列表、收支 tab 展開時當月總計消失），並把「個人資料」面板（avatar 選單）做一輪無障礙整備（共用 SheetFrame 的 dialog 語意 + focus trap、分攤方式改 radiogroup），順手修掉點「幣別」沒反應的導航 bug。
-完整 diff：[v1.2.2...v1.2.3](https://github.com/redtear1115/oikos/compare/v1.2.2...v1.2.3)
+完整 diff：[v1.2.2...v1.2.3](https://github.com/FREEDOMPJ2025/futari/compare/v1.2.2...v1.2.3)
 
 ### 使用者可見變化
 
@@ -1750,7 +1754,7 @@ _沒有；純觀測面改動。_
 ## [1.2.2] - 2026-05-25
 
 主題：**收支 tab 看見當月節奏 + records 篩選體驗修正**——records 同時看支出與收入時，把該 tab 的分類圓環換成一張當月日趨勢圖（每日收入／支出長條 + 累計淨額折線），讓人一眼讀出「這個月的節奏長怎樣、月底落在淨流入還是淨流出」；同時修一批 records 篩選體驗 bug：付款人篩選沒同步過濾下方列表、月度統計展開時當月總額消失、按「套用」後網址被關面板的返回動作還原、每日趨勢圖與支出圓餅圖沒套到全部篩選維度。
-完整 diff：[v1.2.1...v1.2.2](https://github.com/redtear1115/oikos/compare/v1.2.1...v1.2.2)
+完整 diff：[v1.2.1...v1.2.2](https://github.com/FREEDOMPJ2025/futari/compare/v1.2.1...v1.2.2)
 
 ### 使用者可見變化
 
@@ -1773,7 +1777,7 @@ _沒有；純觀測面改動。_
 ## [1.2.1] - 2026-05-25
 
 主題：**觀測性收尾——PostHog reverse proxy + Sentry 設定補齊**——把 v1.1.7~v1.2.0 接上的分析 / 錯誤追蹤實際接通：PostHog 改走 managed reverse proxy（#738），降低被瀏覽器隱私 / 廣告攔截外掛擋下的比例；Sentry 補上確認的 org / project slug 並啟用 logs（#739）。純後端設定，對使用者無可見變化。
-完整 diff：[v1.2.0...v1.2.1](https://github.com/redtear1115/oikos/compare/v1.2.0...v1.2.1)
+完整 diff：[v1.2.0...v1.2.1](https://github.com/FREEDOMPJ2025/futari/compare/v1.2.0...v1.2.1)
 
 ### 使用者可見變化
 
@@ -1787,7 +1791,7 @@ _本版無使用者可見變化（觀測性設定補齊）。_
 ## [1.2.0] - 2026-05-24
 
 主題：**看見光從哪裡來——入口轉換追蹤**——為三個入口面（首頁 `/`、migrate 著陸頁 `/migrate/*`、伴侶邀請）接入 PostHog 轉換漏斗事件，量測「來訪 → 註冊 / 加入」的轉換率並歸因到來源。維持既有 cookieless（`persistence: 'memory'`、免同意橫幅）立場：OAuth 邊界以 server-side alias 串接匿名與註冊後事件，不新增 cookie / localStorage。本版對使用者無可見變化。
-完整 diff：[v1.1.8...v1.2.0](https://github.com/redtear1115/oikos/compare/v1.1.8...v1.2.0)
+完整 diff：[v1.1.8...v1.2.0](https://github.com/FREEDOMPJ2025/futari/compare/v1.1.8...v1.2.0)
 
 ### 使用者可見變化
 
@@ -1803,7 +1807,7 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 ## [1.1.8] - 2026-05-21
 
 主題：**修正收合狀態 hydration 閃退 + PostHog 收斂到 production**——修掉 v1.1.7 (#726) 引入的 hydration mismatch：餘額卡與月度統計改用 `useState` lazy-init 直接讀 localStorage，讓「曾收合過」的使用者一載入就觸發 React #418（收合任一區塊後重新整理即重現）；改以 cookie 持久化，讓 server 端就 render 正確的收合狀態，根治 mismatch 又保留無閃爍。同時把 PostHog 收斂成只在 production 初始化，避免本機開發把事件送進正式專案。
-完整 diff：[v1.1.7...v1.1.8](https://github.com/redtear1115/oikos/compare/v1.1.7...v1.1.8)
+完整 diff：[v1.1.7...v1.1.8](https://github.com/FREEDOMPJ2025/futari/compare/v1.1.7...v1.1.8)
 
 ### 使用者可見變化
 
@@ -1817,7 +1821,7 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 ## [1.1.7] - 2026-05-21
 
 主題：**可觀測性接入 + 兩處體驗修正**——接入 Sentry 錯誤追蹤（#719）與 PostHog 產品分析（#720）兩套觀測工具，兩者皆只在 production 送出、本機開發不外送；Sentry 在送出前移除 cookie / header 做 PII scrubbing，PostHog 採 cookieless（memory persistence）模式免同意橫幅。另修兩個體驗 bug：在愛物 Sheet 內切換類型後 Android 返回鍵會誤離開 App 而非收起 Sheet（#723），以及儀表板餘額與月度統計的收合狀態在載入時會先閃一下（#726）。
-完整 diff：[v1.1.6...v1.1.7](https://github.com/redtear1115/oikos/compare/v1.1.6...v1.1.7)
+完整 diff：[v1.1.6...v1.1.7](https://github.com/FREEDOMPJ2025/futari/compare/v1.1.6...v1.1.7)
 
 ### 使用者可見變化
 
@@ -1835,7 +1839,7 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 ## [1.1.6] - 2026-05-21
 
 主題：**Android PWA 體驗修正**——集中修正 Android edge-to-edge PWA 的多項體驗問題：safe-area inset 失效（#714）、系統返回鍵直接離開 App 而非收起開啟中的 Sheet（#716 / #683），以及 overscroll 回彈、tap highlight 灰閃、軟鍵盤遮擋輸入框、ja / zh-CN CJK 字型 fallback 缺字等一輪細節（#715 / #713）。
-完整 diff：[v1.1.5...v1.1.6](https://github.com/redtear1115/oikos/compare/v1.1.5...v1.1.6)
+完整 diff：[v1.1.5...v1.1.6](https://github.com/FREEDOMPJ2025/futari/compare/v1.1.5...v1.1.6)
 
 ### 使用者可見變化
 
@@ -1852,7 +1856,7 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 ## [1.1.5] - 2026-05-21
 
 主題：**分頁載入改用 skeleton 骨架畫面**——承接 v1.1.4 (#690) 的載入過場工作，把四個主分頁原本共用的全螢幕 dim/blur 遮罩換成各自對應版面的 skeleton 骨架載入畫面（#710），讓載入過程更貼近實際內容、不再有黑屏閃爍。
-完整 diff：[v1.1.4...v1.1.5](https://github.com/redtear1115/oikos/compare/v1.1.4...v1.1.5)
+完整 diff：[v1.1.4...v1.1.5](https://github.com/FREEDOMPJ2025/futari/compare/v1.1.4...v1.1.5)
 
 ### 使用者可見變化
 
@@ -1865,7 +1869,7 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 ## [1.1.4] - 2026-05-21
 
 主題：**設計系統收尾 + 前端品質續推 + 兩處 UX 微調**——承接 v1.1.2~v1.1.3 的 design system 工作，把 asset-sheet 最後 8 個殘留 raw `<input>` 收進 TextInput primitive（#695），完成 primitive 遷移；同時把 MonthlyStatsBars 的 chart 專用色抽成 `lib/chartPalette.ts` 單一 source of truth（#693）、arbitrary decimal font size 對齊 text scale token（#694）、~735 行的 Dashboard.tsx 拆成多個 sub-component（#696）。UX 面把 BottomNav 內容列高度從 56px 提到 64px 改善觸控目標（#689），並在四個主分頁切換時加上 dim+blur 載入遮罩讓過場更明確（#690）。
-完整 diff：[v1.1.3...v1.1.4](https://github.com/redtear1115/oikos/compare/v1.1.3...v1.1.4)
+完整 diff：[v1.1.3...v1.1.4](https://github.com/FREEDOMPJ2025/futari/compare/v1.1.3...v1.1.4)
 
 ### 使用者可見變化
 
@@ -1883,7 +1887,7 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 ## [1.1.3] - 2026-05-20
 
 主題：**品質打磨 — UX / 前端 / SEO 三輪 audit + design system 續推 + bug 修正**——承接 v1.1.2 的 design system primitives，把 TextInput / Button / FilterSheet 正式收進共用 primitive（#670），同時跑了三輪 audit：前端設計 audit #2（a11y / token / perf / RSC quick wins）、UX round 1（copy / ARIA / safe-area / error 頁）、SEO audit #2（JSON-LD 去重、HowTo schema、SERP 文案長度、footer 法務連結）。另修兩個使用者可見 bug：dashboard L3 篩選器文案語意不一致（#679）與旅行列表載入失敗（#685）。
-完整 diff：[v1.1.2...v1.1.3](https://github.com/redtear1115/oikos/compare/v1.1.2...v1.1.3)
+完整 diff：[v1.1.2...v1.1.3](https://github.com/FREEDOMPJ2025/futari/compare/v1.1.2...v1.1.3)
 
 ### 使用者可見變化
 
@@ -1903,7 +1907,7 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 ## [1.1.2] - 2026-05-19
 
 主題：**Design system primitives + 前端品質重構 + SEO 收尾**——issue #629 的 design system phase 0：token layer（control-height / sheet-spacing / focus-ring）+ Button / TextInput / Sheet 三組 primitive 一次到位，pilot 用 `InstallGuide` 驗 API，接著把 SettlementSheet / IncomeSheet / RecurringRuleSheet / AddSheet 4 個重點 sheet 收進來。issue #610 的前端品質重構同步推一輪（lazy-load sheets / SVG 改 server / CSS token 取代 hardcoded `#fff` / Dashboard state → useReducer / wizard 共用 hook 與 widget 抽取 / 統一 CSV parser 層 / 刪除 dead banner），把先前累積的 ad-hoc 樣式與 client boundary 清乾淨。SEO 收尾把 /migrate cross-link / 標題長度 / FAQ JSON-LD per-locale / GSC verification 補齊，承接 v1.1.0~v1.1.1 的 /migrate 站台。
-完整 diff：[v1.1.1...v1.1.2](https://github.com/redtear1115/oikos/compare/v1.1.1...v1.1.2)
+完整 diff：[v1.1.1...v1.1.2](https://github.com/FREEDOMPJ2025/futari/compare/v1.1.1...v1.1.2)
 
 ### 使用者可見變化
 
@@ -1939,7 +1943,7 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 ## [1.1.1] - 2026-05-19
 
 主題：**CSV 匯入續做（Spendee / 銀行對帳單 / OFX / QIF）+ /migrate SEO 強化**——把 v1.1.0 的 CSV import + /migrate landing pages 再推一輪。CSV mapper 修了 Spendee Transfer row 被誤分類成收入的 bug，並補銀行對帳單 → Futari 通用格式的 .xlsx 轉換模板（#585）；新增 OFX + QIF parser，把 `.ofx` / `.qif` 也走同一條 import pipeline（#586，Moze 樣本待補）。SEO 面把 /migrate 三條 landing 加 BreadcrumbList + FAQPage JSON-LD（#593, #599）、長尾關鍵字（Honeydue/Spendee/CWMoney 替代方案）+ Futari vs source app 比較表（#599）、sitemap/robots 對齊（#595, #596）、hreflang 行為鎖 regression test（#594）、meta description + og:description 4 語對齊（#597）、H1 下方 body 自然帶入「伴侶／夫妻記帳」關鍵字（#598）。
-完整 diff：[v1.1.0...v1.1.1](https://github.com/redtear1115/oikos/compare/v1.1.0...v1.1.1)
+完整 diff：[v1.1.0...v1.1.1](https://github.com/FREEDOMPJ2025/futari/compare/v1.1.0...v1.1.1)
 
 ### 使用者可見變化
 
@@ -1966,7 +1970,7 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 ## [1.1.0] - 2026-05-18
 
 主題：**CSV 匯入歷史紀錄 + /migrate 站台（#51）**——換 app 最大的摩擦是「過去三年的紀錄怎麼辦」。Futari 提供通用 CSV 匯入（schema + parser + dedup + 預覽 wizard）和 CWMoney → Futari Excel 轉換模板（#557），讓 Honeydue / Spendee / CWMoney 出走者把歷史資料帶進來不用重打。順手做 /migrate/{honeydue,spendee,cwmoney} 三條 SEO landing 頁，把「Futari 是替代品」這件事說清楚。順帶 perf 優化把 landing 從 render-blocking 字型 chunk 解放（#572），LCP 7076ms → 2345ms、Lighthouse 61 → 98；修 dashboard 右上角小飛機按鈕點了沒反應的 bug（#587）。
-完整 diff：[v1.0.5...v1.1.0](https://github.com/redtear1115/oikos/compare/v1.0.5...v1.1.0)
+完整 diff：[v1.0.5...v1.1.0](https://github.com/FREEDOMPJ2025/futari/compare/v1.0.5...v1.1.0)
 
 ### 使用者可見變化
 
@@ -1987,7 +1991,7 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 ## [1.0.5] - 2026-05-18
 
 主題：**三大入口 header / filter 統一（#545）**——Dashboard / Records / Assets 三頁 L1Header 規格對齊；Records L2 三 tab 收成「支出 + 收入」雙 toggle 並把月份切換改成 month picker popover；Dashboard 拆掉多餘 FilterSheet，payer / 負擔兩維直接做成 L3 雙 toggle，順手把「分攤」語意修成正確的 viewer × payer 負擔 cross-product；定期收支入口從 feed 中間 card 移到 L1 右側；愛物頁類型篩選改成 icon-only chip + 篩到空 bucket 的智慧 CTA。
-完整 diff：[v1.0.4...v1.0.5](https://github.com/redtear1115/oikos/compare/v1.0.4...v1.0.5)
+完整 diff：[v1.0.4...v1.0.5](https://github.com/FREEDOMPJ2025/futari/compare/v1.0.4...v1.0.5)
 
 ### 使用者可見變化
 
@@ -2014,7 +2018,7 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 ## [1.0.4] - 2026-05-17
 
 主題：**前端 refactor 大掃除 + 效能優化**——清掉 `actions/` + `app/(dashboard)/` 累積的重複 / 巨大 component / 散落 helpers（#512 八個 PR），同時把首次載入跟靜態資源體積順手優化（#511 三個 PR + #517 一個 RLS 補洞）。零 schema 改動、零使用者 flow 變化，但啟動更快、icon 更小。
-完整 diff：[v1.0.3...v1.0.4](https://github.com/redtear1115/oikos/compare/v1.0.3...v1.0.4)
+完整 diff：[v1.0.3...v1.0.4](https://github.com/FREEDOMPJ2025/futari/compare/v1.0.3...v1.0.4)
 
 ### 使用者可見變化
 
@@ -2039,7 +2043,7 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 ## [1.0.3] - 2026-05-17
 
 主題：**Supabase Advisor 全面清零**——把 security advisor 與 performance advisor 上累積的 RLS / SECURITY DEFINER / search_path / 多重 permissive policy 警告一次掃乾淨。沒有 schema 改動、沒有 UI 變化；其中 5 張表（CurrencyRates / PetDetails / PlantDetails / Trips / TripExpenses）原本因為缺 RLS policy，Realtime 訂閱者收不到 INSERT/UPDATE 事件，本版修好。
-完整 diff：[v1.0.2...v1.0.3](https://github.com/redtear1115/oikos/compare/v1.0.2...v1.0.3)
+完整 diff：[v1.0.2...v1.0.3](https://github.com/FREEDOMPJ2025/futari/compare/v1.0.2...v1.0.3)
 
 ### 使用者可見變化
 
@@ -2085,7 +2089,7 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 ## [1.0.0] - 2026-05-17
 
 主題：**公開 landing．接住歷史**——v1.0.0 把 Futari 從「兩個人的內部記帳工具」翻成「對外有臉面的產品」。`/` landing 全新三欄敘事（SEO 長文 + brand mark + 場景卡 + 部落格 feed），公開頁面改 URL-prefix locale routing（`/en` `/zh-CN` `/ja`），OG / Twitter / FAQ / SoftwareApplication / Organization JSON-LD 全套接好，品牌語氣與 i18n 全面收斂——任何陌生人從搜尋或社群點進來看到的，都是同一個產品聲音。沒有 schema migration，純前台 + SEO + copy。
-完整 diff：[v0.17.6...v1.0.0](https://github.com/redtear1115/oikos/compare/v0.17.6...v1.0.0)
+完整 diff：[v0.17.6...v1.0.0](https://github.com/FREEDOMPJ2025/futari/compare/v0.17.6...v1.0.0)
 
 ### 使用者可見變化
 
@@ -2112,71 +2116,71 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 - **每頁 `generateMetadata` 接 OG image（#487）**：`public/og-image.png` 從 #282 ship 但未 wire 進 metadata，造成 prod HTML 缺 `og:image` / `twitter:image`；本版 4 個 public page 各加 `openGraph.images` + `twitter.images`，`alt` 用 `t.title` locale-aware，無需新增 i18n key。
 - **`settings.local.json` 列入 gitignore（#478）**：避免本地 hook / 權限設定外洩。
 
-[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.9.1...HEAD
-[1.9.1]: https://github.com/redtear1115/oikos/compare/v1.9.0...v1.9.1
-[1.9.0]: https://github.com/redtear1115/oikos/compare/v1.8.0...v1.9.0
-[1.8.0]: https://github.com/redtear1115/oikos/compare/v1.7.4...v1.8.0
-[1.7.4]: https://github.com/redtear1115/oikos/compare/v1.7.3...v1.7.4
-[1.7.3]: https://github.com/redtear1115/oikos/compare/v1.7.2...v1.7.3
-[1.7.2]: https://github.com/redtear1115/oikos/compare/v1.7.1...v1.7.2
-[1.7.1]: https://github.com/redtear1115/oikos/compare/v1.7.0...v1.7.1
-[1.7.0]: https://github.com/redtear1115/oikos/compare/v1.6.8...v1.7.0
-[1.6.8]: https://github.com/redtear1115/oikos/compare/v1.6.7...v1.6.8
-[1.6.7]: https://github.com/redtear1115/oikos/compare/v1.6.6...v1.6.7
-[1.6.6]: https://github.com/redtear1115/oikos/compare/v1.6.5...v1.6.6
-[1.6.5]: https://github.com/redtear1115/oikos/compare/v1.6.4...v1.6.5
-[1.6.4]: https://github.com/redtear1115/oikos/compare/v1.6.3...v1.6.4
-[1.6.3]: https://github.com/redtear1115/oikos/compare/v1.6.2...v1.6.3
-[1.6.2]: https://github.com/redtear1115/oikos/compare/v1.6.1...v1.6.2
-[1.6.1]: https://github.com/redtear1115/oikos/compare/v1.6.0...v1.6.1
-[1.6.0]: https://github.com/redtear1115/oikos/compare/v1.5.21...v1.6.0
-[1.5.21]: https://github.com/redtear1115/oikos/compare/v1.5.20...v1.5.21
-[1.5.20]: https://github.com/redtear1115/oikos/compare/v1.5.19...v1.5.20
-[1.5.19]: https://github.com/redtear1115/oikos/compare/v1.5.18...v1.5.19
-[1.5.18]: https://github.com/redtear1115/oikos/compare/v1.5.17...v1.5.18
-[1.5.17]: https://github.com/redtear1115/oikos/compare/v1.5.16...v1.5.17
-[1.5.16]: https://github.com/redtear1115/oikos/compare/v1.5.15...v1.5.16
-[1.5.15]: https://github.com/redtear1115/oikos/compare/v1.5.14...v1.5.15
-[1.5.14]: https://github.com/redtear1115/oikos/compare/v1.5.13...v1.5.14
-[1.5.13]: https://github.com/redtear1115/oikos/compare/v1.5.12...v1.5.13
-[1.5.12]: https://github.com/redtear1115/oikos/compare/v1.5.11...v1.5.12
-[1.5.11]: https://github.com/redtear1115/oikos/compare/v1.5.10...v1.5.11
-[1.5.10]: https://github.com/redtear1115/oikos/compare/v1.5.9...v1.5.10
-[1.5.9]: https://github.com/redtear1115/oikos/compare/v1.5.8...v1.5.9
-[1.5.8]: https://github.com/redtear1115/oikos/compare/v1.5.7...v1.5.8
-[1.5.7]: https://github.com/redtear1115/oikos/compare/v1.5.6...v1.5.7
-[1.5.6]: https://github.com/redtear1115/oikos/compare/v1.5.5...v1.5.6
-[1.5.5]: https://github.com/redtear1115/oikos/compare/v1.5.4...v1.5.5
-[1.5.4]: https://github.com/redtear1115/oikos/compare/v1.5.3...v1.5.4
-[1.5.3]: https://github.com/redtear1115/oikos/compare/v1.5.2...v1.5.3
-[1.5.2]: https://github.com/redtear1115/oikos/compare/v1.5.1...v1.5.2
-[1.5.1]: https://github.com/redtear1115/oikos/compare/v1.5.0...v1.5.1
-[1.5.0]: https://github.com/redtear1115/oikos/compare/v1.4.3...v1.5.0
-[1.4.3]: https://github.com/redtear1115/oikos/compare/v1.4.2...v1.4.3
-[1.4.2]: https://github.com/redtear1115/oikos/compare/v1.4.1...v1.4.2
-[1.4.1]: https://github.com/redtear1115/oikos/compare/v1.4.0...v1.4.1
-[1.4.0]: https://github.com/redtear1115/oikos/compare/v1.3.2...v1.4.0
-[1.3.2]: https://github.com/redtear1115/oikos/compare/v1.3.1...v1.3.2
-[1.3.1]: https://github.com/redtear1115/oikos/compare/v1.3.0...v1.3.1
-[1.3.0]: https://github.com/redtear1115/oikos/compare/v1.2.5...v1.3.0
-[1.2.5]: https://github.com/redtear1115/oikos/compare/v1.2.4...v1.2.5
-[1.2.4]: https://github.com/redtear1115/oikos/compare/v1.2.3...v1.2.4
-[1.2.3]: https://github.com/redtear1115/oikos/compare/v1.2.2...v1.2.3
-[1.2.2]: https://github.com/redtear1115/oikos/compare/v1.2.1...v1.2.2
-[1.2.1]: https://github.com/redtear1115/oikos/compare/v1.2.0...v1.2.1
-[1.2.0]: https://github.com/redtear1115/oikos/compare/v1.1.8...v1.2.0
-[1.1.8]: https://github.com/redtear1115/oikos/compare/v1.1.7...v1.1.8
-[1.1.7]: https://github.com/redtear1115/oikos/compare/v1.1.6...v1.1.7
-[1.1.6]: https://github.com/redtear1115/oikos/compare/v1.1.5...v1.1.6
-[1.1.5]: https://github.com/redtear1115/oikos/compare/v1.1.4...v1.1.5
-[1.1.4]: https://github.com/redtear1115/oikos/compare/v1.1.3...v1.1.4
-[1.1.3]: https://github.com/redtear1115/oikos/compare/v1.1.2...v1.1.3
-[1.1.2]: https://github.com/redtear1115/oikos/compare/v1.1.1...v1.1.2
-[1.1.1]: https://github.com/redtear1115/oikos/compare/v1.1.0...v1.1.1
-[1.1.0]: https://github.com/redtear1115/oikos/compare/v1.0.5...v1.1.0
-[1.0.5]: https://github.com/redtear1115/oikos/compare/v1.0.4...v1.0.5
-[1.0.4]: https://github.com/redtear1115/oikos/compare/v1.0.3...v1.0.4
-[1.0.3]: https://github.com/redtear1115/oikos/compare/v1.0.2...v1.0.3
-[1.0.2]: https://github.com/redtear1115/oikos/compare/v1.0.1...v1.0.2
-[1.0.1]: https://github.com/redtear1115/oikos/compare/v1.0.0...v1.0.1
-[1.0.0]: https://github.com/redtear1115/oikos/compare/v0.17.6...v1.0.0
+[Unreleased]: https://github.com/FREEDOMPJ2025/futari/compare/v1.9.1...HEAD
+[1.9.1]: https://github.com/FREEDOMPJ2025/futari/compare/v1.9.0...v1.9.1
+[1.9.0]: https://github.com/FREEDOMPJ2025/futari/compare/v1.8.0...v1.9.0
+[1.8.0]: https://github.com/FREEDOMPJ2025/futari/compare/v1.7.4...v1.8.0
+[1.7.4]: https://github.com/FREEDOMPJ2025/futari/compare/v1.7.3...v1.7.4
+[1.7.3]: https://github.com/FREEDOMPJ2025/futari/compare/v1.7.2...v1.7.3
+[1.7.2]: https://github.com/FREEDOMPJ2025/futari/compare/v1.7.1...v1.7.2
+[1.7.1]: https://github.com/FREEDOMPJ2025/futari/compare/v1.7.0...v1.7.1
+[1.7.0]: https://github.com/FREEDOMPJ2025/futari/compare/v1.6.8...v1.7.0
+[1.6.8]: https://github.com/FREEDOMPJ2025/futari/compare/v1.6.7...v1.6.8
+[1.6.7]: https://github.com/FREEDOMPJ2025/futari/compare/v1.6.6...v1.6.7
+[1.6.6]: https://github.com/FREEDOMPJ2025/futari/compare/v1.6.5...v1.6.6
+[1.6.5]: https://github.com/FREEDOMPJ2025/futari/compare/v1.6.4...v1.6.5
+[1.6.4]: https://github.com/FREEDOMPJ2025/futari/compare/v1.6.3...v1.6.4
+[1.6.3]: https://github.com/FREEDOMPJ2025/futari/compare/v1.6.2...v1.6.3
+[1.6.2]: https://github.com/FREEDOMPJ2025/futari/compare/v1.6.1...v1.6.2
+[1.6.1]: https://github.com/FREEDOMPJ2025/futari/compare/v1.6.0...v1.6.1
+[1.6.0]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.21...v1.6.0
+[1.5.21]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.20...v1.5.21
+[1.5.20]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.19...v1.5.20
+[1.5.19]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.18...v1.5.19
+[1.5.18]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.17...v1.5.18
+[1.5.17]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.16...v1.5.17
+[1.5.16]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.15...v1.5.16
+[1.5.15]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.14...v1.5.15
+[1.5.14]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.13...v1.5.14
+[1.5.13]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.12...v1.5.13
+[1.5.12]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.11...v1.5.12
+[1.5.11]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.10...v1.5.11
+[1.5.10]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.9...v1.5.10
+[1.5.9]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.8...v1.5.9
+[1.5.8]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.7...v1.5.8
+[1.5.7]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.6...v1.5.7
+[1.5.6]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.5...v1.5.6
+[1.5.5]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.4...v1.5.5
+[1.5.4]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.3...v1.5.4
+[1.5.3]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.2...v1.5.3
+[1.5.2]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.1...v1.5.2
+[1.5.1]: https://github.com/FREEDOMPJ2025/futari/compare/v1.5.0...v1.5.1
+[1.5.0]: https://github.com/FREEDOMPJ2025/futari/compare/v1.4.3...v1.5.0
+[1.4.3]: https://github.com/FREEDOMPJ2025/futari/compare/v1.4.2...v1.4.3
+[1.4.2]: https://github.com/FREEDOMPJ2025/futari/compare/v1.4.1...v1.4.2
+[1.4.1]: https://github.com/FREEDOMPJ2025/futari/compare/v1.4.0...v1.4.1
+[1.4.0]: https://github.com/FREEDOMPJ2025/futari/compare/v1.3.2...v1.4.0
+[1.3.2]: https://github.com/FREEDOMPJ2025/futari/compare/v1.3.1...v1.3.2
+[1.3.1]: https://github.com/FREEDOMPJ2025/futari/compare/v1.3.0...v1.3.1
+[1.3.0]: https://github.com/FREEDOMPJ2025/futari/compare/v1.2.5...v1.3.0
+[1.2.5]: https://github.com/FREEDOMPJ2025/futari/compare/v1.2.4...v1.2.5
+[1.2.4]: https://github.com/FREEDOMPJ2025/futari/compare/v1.2.3...v1.2.4
+[1.2.3]: https://github.com/FREEDOMPJ2025/futari/compare/v1.2.2...v1.2.3
+[1.2.2]: https://github.com/FREEDOMPJ2025/futari/compare/v1.2.1...v1.2.2
+[1.2.1]: https://github.com/FREEDOMPJ2025/futari/compare/v1.2.0...v1.2.1
+[1.2.0]: https://github.com/FREEDOMPJ2025/futari/compare/v1.1.8...v1.2.0
+[1.1.8]: https://github.com/FREEDOMPJ2025/futari/compare/v1.1.7...v1.1.8
+[1.1.7]: https://github.com/FREEDOMPJ2025/futari/compare/v1.1.6...v1.1.7
+[1.1.6]: https://github.com/FREEDOMPJ2025/futari/compare/v1.1.5...v1.1.6
+[1.1.5]: https://github.com/FREEDOMPJ2025/futari/compare/v1.1.4...v1.1.5
+[1.1.4]: https://github.com/FREEDOMPJ2025/futari/compare/v1.1.3...v1.1.4
+[1.1.3]: https://github.com/FREEDOMPJ2025/futari/compare/v1.1.2...v1.1.3
+[1.1.2]: https://github.com/FREEDOMPJ2025/futari/compare/v1.1.1...v1.1.2
+[1.1.1]: https://github.com/FREEDOMPJ2025/futari/compare/v1.1.0...v1.1.1
+[1.1.0]: https://github.com/FREEDOMPJ2025/futari/compare/v1.0.5...v1.1.0
+[1.0.5]: https://github.com/FREEDOMPJ2025/futari/compare/v1.0.4...v1.0.5
+[1.0.4]: https://github.com/FREEDOMPJ2025/futari/compare/v1.0.3...v1.0.4
+[1.0.3]: https://github.com/FREEDOMPJ2025/futari/compare/v1.0.2...v1.0.3
+[1.0.2]: https://github.com/FREEDOMPJ2025/futari/compare/v1.0.1...v1.0.2
+[1.0.1]: https://github.com/FREEDOMPJ2025/futari/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/FREEDOMPJ2025/futari/compare/v0.17.6...v1.0.0

@@ -67,7 +67,7 @@ npm version X.Y.Z --no-git-tag-version
 ## [X.Y.Z] - YYYY-MM-DD
 
 主題：**一句話主題**——這版在講什麼。
-完整 diff：[vPREV...vX.Y.Z](https://github.com/redtear1115/oikos/compare/vPREV...vX.Y.Z)
+完整 diff：[vPREV...vX.Y.Z](https://github.com/FREEDOMPJ2025/futari/compare/vPREV...vX.Y.Z)
 
 ### 使用者可見變化
 
@@ -157,7 +157,7 @@ git log vPREV..HEAD -p -- package.json | grep -E '^[+-].*"@capacitor(-community)
 再看本版 milestone 的描述開頭有沒有 `[shell]`（代表這版預定要送原生殼）：
 
 ```bash
-gh api repos/redtear1115/oikos/milestones --jq '[.[] | select(.title=="vX.Y.Z")] | if length==1 then .[0].description else error("找不到 milestone vX.Y.Z") end'
+gh api repos/FREEDOMPJ2025/futari/milestones --jq '[.[] | select(.title=="vX.Y.Z")] | if length==1 then .[0].description else error("找不到 milestone vX.Y.Z") end'
 ```
 
 - **有命中** → 收尾 checklist 明確標示：**本版含原生殼變更，需依 [runbook](../../../docs/app-store-submission-runbook.md) 重送商店（版本計數 +1 規則見 §E）**，並列出命中的路徑。
@@ -257,7 +257,7 @@ git fetch origin && git merge-base --is-ancestor vX.Y.Z origin/main \
 2. deploy PR：#<M> main → release —— 由你 merge，merge 後 Vercel 自動部 prod
    ※ 第 7b 步有 prod schema 變更時：先套用 <migration 編號／handle_new_user> 並檢查完，才 merge
 3. (optional) gh release create vX.Y.Z --notes-from-tag  或用 CHANGELOG 該段內容
-4. prod 部署後關閉 milestone：gh api -X PATCH repos/redtear1115/oikos/milestones/<number> -f state=closed
+4. prod 部署後關閉 milestone：gh api -X PATCH repos/FREEDOMPJ2025/futari/milestones/<number> -f state=closed
    ※ 第 5 步 (b) 已把它從 CLAUDE.md backlog 表移除，這步讓 GitHub 那邊也對齊
 5. 原生影響：<第 7 步的結論>
 6. 商店素材：<第 7 步 docs/store-assets/ 的結論>
