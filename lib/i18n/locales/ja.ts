@@ -4013,7 +4013,7 @@ I will upload the screenshots once you confirm.`,
     },
     applePayUrl: {
       heading: '代わりの方法：まだアクションが使えない場合はリンクで開く',
-      intro: '上の「Futari 記一筆」アクションが使える場合は、そちらのほうが簡単です。Futari アプリがまだ 1.9.0 になっていない場合は、次の5つの手順でリンクを使えます。',
+      intro: '上の「Futari 記一筆」アクションが使える場合は、そちらのほうが簡単です。Futari アプリがまだ 1.9.0 になっていない場合は（iPhone は iOS 17 以降が必要です）、次の5つの手順でリンクを使えます。',
       steps: [
         {
           title: '「ウォレット」のオートメーションを作る',

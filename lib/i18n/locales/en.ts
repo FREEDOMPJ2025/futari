@@ -4016,7 +4016,7 @@ I will upload the screenshots once you confirm.`,
     },
     applePayUrl: {
       heading: 'Fallback: open a link if the action is not available yet',
-      intro: 'The "Futari 記一筆" action above is simpler when available. If your Futari app isn\'t on 1.9.0 yet, use the five-step link fallback below.',
+      intro: 'The "Futari 記一筆" action above is simpler when available. If your Futari app isn\'t on 1.9.0 yet (your iPhone still needs iOS 17 or later), use the five-step link fallback below.',
       steps: [
         {
           title: 'Create a Wallet automation',

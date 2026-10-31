@@ -3961,7 +3961,7 @@ export const zhCN: Translations = {
     },
     applePayUrl: {
       heading: '备用：还不能使用动作时，用网址打开',
-      intro: '上面的「Futari 記一筆」动作可用时，设置更简单。如果 Futari App 还没更新到 1.9.0，可以先用下面的五步网址做法。',
+      intro: '上面的「Futari 記一筆」动作可用时，设置更简单。如果 Futari App 还没更新到 1.9.0（iPhone 同样要 iOS 17 或以上版本），可以先用下面的五步网址做法。',
       steps: [
         {
           title: '新建「钱包」自动化',

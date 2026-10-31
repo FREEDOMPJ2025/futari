@@ -7537,7 +7537,7 @@ export const zhTW: Translations = {
     },
     applePayUrl: {
       heading: '備用：還不能使用動作時，用網址打開',
-      intro: '上面的「Futari 記一筆」動作能用時，設定比較簡單。如果 Futari App 還沒更新到 1.9.0，可以先用下面的五步網址做法。',
+      intro: '上面的「Futari 記一筆」動作能用時，設定比較簡單。如果 Futari App 還沒更新到 1.9.0（iPhone 一樣要 iOS 17 以上），可以先用下面的五步網址做法。',
       steps: [
         {
           title: '新增「錢包」自動化',

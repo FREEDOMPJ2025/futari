@@ -5,6 +5,8 @@
  * no longer accepts still renders and sends people to a blank "記一筆"; a LINE
  * Pay block leaking into en/ja/zh-CN just reads as a stray section.
  */
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
 import { describe, it, expect, vi } from 'vitest'
 import { renderToString } from 'react-dom/server'
 
@@ -37,11 +39,20 @@ describe.each(SUPPORTED_LOCALES)('%s', (locale) => {
     expect(doc.getElementById('apple-pay')!.textContent).toContain('iOS 17')
     expect(t.applePay.intro).not.toContain('16')
     expect(t.applePayUrl.intro).not.toContain('16')
-    if (locale === 'zh-TW') {
-      const stepOne = doc.querySelector('#apple-pay ol > li')!.textContent ?? ''
-      expect(stepOne).toContain('立即執行')
-      expect(stepOne).toContain('新增空白自動化')
-      expect(stepOne.indexOf('立即執行')).toBeLessThan(stepOne.indexOf('新增空白自動化'))
+    expect(t.applePayUrl.intro).toContain('iOS 17')
+    expect(doc.getElementById('apple-pay-url')!.textContent).toContain('iOS 17')
+    expect(doc.getElementById('apple-pay-url')!.textContent).not.toContain('16')
+    const [runImmediately, newBlankAutomation] = {
+      'zh-TW': ['立即執行', '新增空白自動化'],
+      'zh-CN': ['立即运行', '新建空白自动化'],
+      en: ['Run Immediately', 'New Blank Automation'],
+      ja: ['すぐに実行', '新規の空のオートメーション'],
+    }[locale]
+    for (const id of ['apple-pay', 'apple-pay-url']) {
+      const stepOne = doc.querySelector(`#${id} ol > li`)!.textContent ?? ''
+      expect(stepOne).toContain(runImmediately)
+      expect(stepOne).toContain(newBlankAutomation)
+      expect(stepOne.indexOf(runImmediately)).toBeLessThan(stepOne.indexOf(newBlankAutomation))
     }
     expect(doc.getElementById('apple-pay')!.textContent).toContain('1.9.0')
     expect(doc.querySelector('#apple-pay ol')!.textContent).toContain('Futari 記一筆')
@@ -53,6 +64,21 @@ describe.each(SUPPORTED_LOCALES)('%s', (locale) => {
     expect(doc.querySelector('#apple-pay-url pre')!.textContent).toBe(appUrl(t.vars.amount, t.vars.merchant))
     expect(doc.querySelectorAll('#line-pay pre')).toHaveLength(locale === 'zh-TW' ? 1 : 0)
     expect(doc.getElementById('answer')!.textContent).toContain(t.answer)
+  })
+
+  it('labels the link fallback troubleshooting symptoms consistently', async () => {
+    const { doc } = await renderPage(locale)
+    const label = {
+      'zh-TW': '網址備用做法：',
+      'zh-CN': '网址备用做法：',
+      en: 'Link fallback: ',
+      ja: 'リンクを使う方法：',
+    }[locale]
+    for (const row of t.trouble.rows.slice(1, 4)) {
+      expect(row.symptom.startsWith(label)).toBe(true)
+    }
+    const fourthRow = doc.querySelectorAll('#trouble tbody tr')[3]
+    expect(fourthRow.textContent!.startsWith(label)).toBe(true)
   })
 
   it('shows the LINE Pay section only in zh-TW', async () => {
@@ -110,6 +136,20 @@ describe.each(SUPPORTED_LOCALES)('%s', (locale) => {
       url: expect.stringContaining(`#step-${i + 1}`),
     })))
   })
+})
+
+it('keeps the llms Shortcuts section aligned with the Apple Pay guide', () => {
+  const body = readFileSync(path.join(process.cwd(), 'public', 'llms-full.txt'), 'utf8')
+  // Up to the next ## or ### heading, so terms from a later section can't satisfy (or fail) it.
+  const section = body.match(/^### 16\. Shortcuts[^\n]*\n[\s\S]*?(?=^#{2,3} |$(?![\s\S]))/m)?.[0]
+  expect(section).toBeDefined()
+  for (const term of [
+    'iOS 17', '1.9.0', 'Run Immediately', 'Futari 記一筆',
+    'Shortcut Input → Amount', 'Shortcut Input → Merchant',
+  ]) {
+    expect(section).toContain(term)
+  }
+  expect(section).not.toContain('iOS 16')
 })
 
 describe('sitemap', () => {
