@@ -5,10 +5,14 @@ import { DEFAULT_LOCALE } from '@/lib/i18n/locales-meta'
 import { globalErrorCopy, pickGlobalErrorLocale } from '@/lib/i18n/globalErrorCopy'
 import { reportClientError } from '@/lib/observability/reportClientError'
 import { sanitizeAnalyticsUrl } from '@/lib/analytics/urlSanitizer'
+import { isCancelledFetchError, isNavigatingAway } from '@/lib/observability/navigatingAway'
 import './globals.css'
 // 根 layout 被整個取代，Fraunces 的 @font-face 與 `.font-fraunces`（定義 --font-fraunces）
 // 也要自己帶；少了它 `font-serif` 會靜默退回內文字體，不會報錯。
 import './fonts/fraunces.css'
+
+/** How long a "navigating away" error page stays blank before it gives up and shows itself (#1768). */
+const LEAVING_GRACE_MS = 4000
 
 export default function GlobalError({
   error,
@@ -26,8 +30,21 @@ export default function GlobalError({
   // users, which is the right side to take it on: this page exists because
   // something already broke, so a correctness-over-flash choice here is fine.
   const [locale, setLocale] = useState(DEFAULT_LOCALE)
+  // #1768 — a request cancelled because this page is already navigating away
+  // on purpose (sign-in success → window.location) is not an error. Stay blank
+  // and quiet; the next page replaces this one. If it is still here after
+  // LEAVING_GRACE_MS the navigation did not happen, so fall through to the
+  // normal page and report — the user must never be stuck on a blank screen.
+  const [leaving, setLeaving] = useState(() => isNavigatingAway() && isCancelledFetchError(error))
 
   useEffect(() => {
+    if (!leaving) return
+    const timer = setTimeout(() => setLeaving(false), LEAVING_GRACE_MS)
+    return () => clearTimeout(timer)
+  }, [leaving])
+
+  useEffect(() => {
+    if (leaving) return
     // reportClientError loads Sentry through a dynamic import (#1520): Next
     // lists this entry in every page's HTML, so a static Sentry import here put
     // the whole SDK back in the public pages' first load. The module is the same
@@ -45,9 +62,17 @@ export default function GlobalError({
       digest: error.digest,
     })
     setLocale(pickGlobalErrorLocale())
-  }, [error])
+  }, [error, leaving])
 
   const t = globalErrorCopy[locale]
+
+  if (leaving) {
+    return (
+      <html lang={locale} className="font-fraunces" suppressHydrationWarning>
+        <body className="min-h-dvh bg-bg" />
+      </html>
+    )
+  }
 
   return (
     // suppressHydrationWarning: 同 app/layout.tsx（#1424）——Android 殼在 hydrate

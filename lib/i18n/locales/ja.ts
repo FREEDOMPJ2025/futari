@@ -8,6 +8,8 @@ export const ja: Translations = {
     continueWithGoogle: 'Google アカウントで続ける',
     authFailedNotice: 'サインインが完了しませんでした。もう一度お試しください。',
     appleFallbackHint: 'Apple でのサインインが完了しませんでした。もう一度お試しください。Google アカウントで続けることもできますが、Apple で作った家計簿は、そのアカウントには表示されません。',
+    // TODO(i18n): 待確認 #1891
+    unreachableHint: 'サインインのサーバーにつながりませんでした。通信が不安定なのかもしれません。少し待ってから、もう一度お試しください。',
     signingIn: 'サインインしています',
     continueWithApple: 'Apple で続ける',
     termsPrefix: '続行すると、当社の',

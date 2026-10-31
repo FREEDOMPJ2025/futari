@@ -10,6 +10,7 @@ import { appleAuthorizationErrorCode, isUserCancelled } from '@/lib/auth/appleSi
 import { idTokenErrorLabel } from '@/lib/auth/idTokenErrorLabel'
 import { nativeCallbackUrl, safeSameOriginUrl } from '@/lib/auth/nativeRedirect'
 import { unwrapAction } from '@/lib/action-errors'
+import { markNavigatingAway } from '@/lib/observability/navigatingAway'
 
 // Deep link scheme registered in AndroidManifest.xml / capacitor.config.ts
 const CAPACITOR_SCHEME = 'dev.southernlight.futari'
@@ -32,8 +33,11 @@ type Provider = 'google' | 'apple'
  * leaving), so the curtain must come down. Getting this backwards strands the
  * user behind a full-screen overlay with no way out, which is worse than the
  * double-tap bug the curtain exists to prevent.
+ * `'unreachable'` — like `'aborted'`, but because the auth server could not be
+ * reached (#1845: no response at all, or a 5xx GoTrue marks retryable), so the
+ * page tells the user to try again in a moment instead of saying nothing.
  */
-type SignInOutcome = 'navigating' | 'aborted'
+type SignInOutcome = 'navigating' | 'aborted' | 'unreachable'
 
 /**
  * Why an aborted attempt ended, when the page should say something about it
@@ -41,8 +45,10 @@ type SignInOutcome = 'navigating' | 'aborted'
  * already failed, so landing silently back on the sign-in page after the
  * fallback also ends gives the user nothing to go on. A plain cancel (the
  * native sheet's own Cancel, or any Google / Android abort) passes nothing.
+ * `'unreachable'` (#1845): the iOS Apple identity token never got an answer
+ * from the auth server — seen from mainland China; retrying later works.
  */
-export type SignInAbortReason = 'apple_fallback_failed'
+export type SignInAbortReason = 'apple_fallback_failed' | 'unreachable'
 
 /**
  * Labels which caller is running the in-app browser flow, for telemetry only.
@@ -202,7 +208,10 @@ async function appleNativeSignIn(
       error_code: typeof error.code === 'string' && /^[a-z0-9_]{1,64}$/.test(error.code) ? error.code : null,
       error_label: idTokenErrorLabel(error.message),
     })
-    return 'aborted'
+    // #1845 — AuthRetryableFetchError is supabase-js's "no usable response"
+    // (fetch rejected, status 0, or a 502/503/504). Anything else is a real
+    // refusal and keeps the silent abort it always had.
+    return error.name === 'AuthRetryableFetchError' || error.status === 0 ? 'unreachable' : 'aborted'
   }
 
   // Bypasses /auth/callback, so replay its attribution here (best-effort).
@@ -212,6 +221,7 @@ async function appleNativeSignIn(
 
   // `next` comes from the query string — safeSameOriginUrl refuses anything
   // that would leave this origin (e.g. `@evil.com`, `//evil.com`).
+  markNavigatingAway()
   window.location.href = safeSameOriginUrl(window.location.origin, ctx.next)
   return 'navigating'
 }
@@ -298,6 +308,7 @@ async function browserOAuthSignIn(
       // callback and the navigation (#1552).
       if (via) safeTrack('sign_in_fallback_callback', { provider, via, elapsed_ms: Date.now() - openedAt })
       await Browser.close()
+      markNavigatingAway()
       window.location.href = target
     }),
   )
@@ -460,7 +471,9 @@ export function SignInButton({
       outcome = 'aborted'
     } finally {
       // Only 'navigating' keeps the curtain — see SignInOutcome.
-      if (outcome === 'aborted') {
+      if (outcome === 'unreachable') {
+        onAbort('unreachable')
+      } else if (outcome === 'aborted') {
         if (appleFallback) onAbort('apple_fallback_failed')
         else onAbort()
       }
