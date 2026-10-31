@@ -4003,11 +4003,31 @@ I will upload the screenshots once you confirm.`,
     },
     applePay: {
       heading: 'Apple Pay: open New entry after you tap to pay',
-      intro: 'Before you start: Futari is installed on your iPhone and you are signed in. This uses a Wallet automation, so each Apple Pay payment opens a filled-in New entry.',
+      intro: 'Before you start: your iPhone needs iOS 17 or later and the Futari iOS app 1.9.0 or later, installed and signed in. This Wallet automation brings Futari to the front with New entry filled in after each Apple Pay payment. Nothing is saved until you check it and tap Save.',
       steps: [
         {
           title: 'Create a Wallet automation',
-          body: 'Open the Shortcuts app, go to Automation, tap + and choose Wallet. On the screen that follows, tick the cards you want to log; you can leave all the categories ticked. Tap Next, then New Shortcut. Finally, on the automation\'s settings row, choose Run Immediately, so you do not have to tap a notification first.',
+          body: 'Open the Shortcuts app, go to Automation, tap + and choose Wallet. Select the cards you want to log; you can leave all the categories selected. On the same screen, choose Run Immediately, so you don\'t have to tap a notification first. Tap Next, then New Blank Automation.',
+        },
+        {
+          title: 'Add the "Futari 記一筆" action',
+          body: 'Search for Futari in the action list and add "Futari 記一筆".',
+        },
+        {
+          title: 'Set the amount and note, leaving category empty',
+          body: 'Set the 金額 (amount) field to Shortcut Input → Amount, and the 備註 (note) field to Shortcut Input → Merchant. Leave 分類 (category) empty: a merchant you have recorded before gets the category you used last time, and a new merchant starts as Dining. You can change it before saving. The action rounds the amount itself, and the note needs no URL Encode. Running it brings Futari to the front with New entry filled in. Check it, make any changes and tap Save; nothing is saved automatically.',
+        },
+      ],
+      platformNote: 'This works only with the Shortcuts app on iPhone.',
+      foreignNote: 'Foreign currency: when you pay in another currency, the Shortcut passes the foreign amount, and Futari fills it in as an amount in your ledger\'s main currency. Change it in New entry to the amount you were actually charged.',
+    },
+    applePayUrl: {
+      heading: 'Fallback: open a link if the action is not available yet',
+      intro: 'The "Futari 記一筆" action above is simpler when available. If your Futari app isn\'t on 1.9.0 yet (your iPhone still needs iOS 17 or later), use the five-step link fallback below.',
+      steps: [
+        {
+          title: 'Create a Wallet automation',
+          body: 'Open the Shortcuts app, go to Automation, tap + and choose Wallet. Select the cards you want to log; you can leave all the categories selected. On the same screen, choose Run Immediately, so you don\'t have to tap a notification first. Tap Next, then New Blank Automation.',
         },
         {
           title: 'Round the amount (recommended)',
@@ -4027,8 +4047,6 @@ I will upload the screenshots once you confirm.`,
         },
       ],
       urlLabel: 'Link (app)',
-      platformNote: 'This works only with the Shortcuts app on iPhone.',
-      foreignNote: 'Foreign currency: when you pay in another currency, the Shortcut passes the foreign amount, and Futari fills it in as an amount in your ledger\'s main currency. Change it in New entry to the amount you were actually charged.',
     },
     linePay: {
       heading: '',
@@ -4090,15 +4108,19 @@ I will upload the screenshots once you confirm.`,
       },
       rows: [
         {
-          symptom: 'New entry opens but the amount is blank',
+          symptom: 'The "Futari 記一筆" action is missing',
+          cause: 'Update iOS to 17 or later and the Futari iOS app to 1.9.0 or later, then open Futari once.',
+        },
+        {
+          symptom: 'Link fallback: New entry opens but the amount is blank',
           cause: 'The amount is not a whole number. Usually the Round Number step is missing, or the amount carries a currency symbol or unit.',
         },
         {
-          symptom: 'The description is blank or cut short',
+          symptom: 'Link fallback: the description is blank or cut short',
           cause: 'The merchant name was not passed through URL Encode.',
         },
         {
-          symptom: "The category isn't the one in my link",
+          symptom: "Link fallback: the category isn't the one in my link",
           cause: "You've recorded this merchant before, so it uses the category from last time. For a new merchant, a misspelled or capitalized id falls back to Dining.",
         },
       ],

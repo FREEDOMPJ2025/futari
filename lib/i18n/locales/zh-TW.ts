@@ -3423,9 +3423,14 @@ export type Translations = {
       heading: string
       intro: string
       steps: readonly { title: string; body: string }[]
-      urlLabel: string
       platformNote: string
       foreignNote: string
+    }
+    applePayUrl: {
+      heading: string
+      intro: string
+      steps: readonly { title: string; body: string }[]
+      urlLabel: string
     }
     linePay: {
       heading: string
@@ -7532,11 +7537,31 @@ export const zhTW: Translations = {
     },
     applePay: {
       heading: 'Apple Pay：刷完卡就跳出「新增紀錄」',
-      intro: '前提：iPhone 已安裝 Futari 並登入。下面用「錢包」的自動化，每次用 Apple Pay 付款，就打開一次填好的「新增紀錄」。',
+      intro: '前提：iPhone 使用 iOS 17 或以上版本，已安裝 Futari iOS App 1.9.0 或以上版本並登入。下面用「錢包」的自動化，每次用 Apple Pay 付款，就把 Futari 帶到前景，打開填好的「新增紀錄」。你確認後按儲存，紀錄才會寫進帳本。',
       steps: [
         {
           title: '新增「錢包」自動化',
-          body: '打開「捷徑」App，到「自動化」，點 ＋ 選「錢包」（在我感應錢包卡片或票卡時）。在「感應時」畫面勾選要記的卡片；「類別」可以維持全部勾選。點「下一步」→「新增捷徑」。最後在這個自動化的設定列，執行方式選「立即執行」，這樣不必每次先點通知。',
+          body: '打開「捷徑」App，到「自動化」，點 ＋ 選「錢包」。勾選要記的卡片，「類別」可以維持全部勾選；同一個畫面下方選「立即執行」，這樣不必每次先點通知。點「下一步」，再選「新增空白自動化」。',
+        },
+        {
+          title: '加入「Futari 記一筆」動作',
+          body: '在動作列表搜尋 Futari，加入「Futari 記一筆」。',
+        },
+        {
+          title: '設定金額與備註，分類留空',
+          body: '把「金額」設為「捷徑輸入」→「數量」，「備註」設為「捷徑輸入」→「商家」。「分類」留空：記過的商家會沿用上次的分類，第一次記的商家先用「飲食」，存之前都可以改。動作會把金額取整數，備註不用 URL 編碼。執行時會把 Futari 帶到前景並打開填好的「新增紀錄」；你看過、需要就改，再按儲存，不會自行存下紀錄。',
+        },
+      ],
+      platformNote: '這個流程只適用於 iPhone 的「捷徑」App。',
+      foreignNote: '外幣提醒：用 Apple Pay 付外幣時，捷徑給的是外幣金額，Futari 會把它當成帳本主幣別的金額帶入。請在「新增紀錄」裡改成實際的金額。',
+    },
+    applePayUrl: {
+      heading: '備用：還不能使用動作時，用網址打開',
+      intro: '上面的「Futari 記一筆」動作能用時，設定比較簡單。如果 Futari App 還沒更新到 1.9.0（iPhone 一樣要 iOS 17 以上），可以先用下面的五步網址做法。',
+      steps: [
+        {
+          title: '新增「錢包」自動化',
+          body: '打開「捷徑」App，到「自動化」，點 ＋ 選「錢包」。勾選要記的卡片，「類別」可以維持全部勾選；同一個畫面下方選「立即執行」，這樣不必每次先點通知。點「下一步」，再選「新增空白自動化」。',
         },
         {
           title: '把金額取整數（建議）',
@@ -7556,8 +7581,6 @@ export const zhTW: Translations = {
         },
       ],
       urlLabel: '網址（App）',
-      platformNote: '這個流程只適用於 iPhone 的「捷徑」App。',
-      foreignNote: '外幣提醒：用 Apple Pay 付外幣時，捷徑給的是外幣金額，Futari 會把它當成帳本主幣別的金額帶入。請在「新增紀錄」裡改成實際的金額。',
     },
     linePay: {
       heading: 'LINE Pay：用「付款完成」的通知觸發',
@@ -7636,15 +7659,19 @@ export const zhTW: Translations = {
       },
       rows: [
         {
-          symptom: '跳出來了，但金額是空的',
+          symptom: '找不到「Futari 記一筆」動作',
+          cause: '將 iOS 更新到 17 或以上版本、Futari iOS App 更新到 1.9.0 或以上版本，並先打開 Futari 一次。',
+        },
+        {
+          symptom: '網址備用做法：跳出來了，但金額是空的',
           cause: '金額不是整數。通常是少了「取整數」那一步，或帶了「元」「NT$」。',
         },
         {
-          symptom: '描述空白或只有一半',
+          symptom: '網址備用做法：描述空白或只有一半',
           cause: '商家名稱沒有先經過「URL 編碼」。',
         },
         {
-          symptom: '分類不是我網址裡寫的',
+          symptom: '網址備用做法：分類不是我網址裡寫的',
           cause: '這個商家記過，會沿用上次的分類；第一次記的商家，id 拼錯或用了大寫就會用「飲食」。',
         },
       ],

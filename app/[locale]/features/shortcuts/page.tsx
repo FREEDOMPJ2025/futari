@@ -70,7 +70,7 @@ function Steps({
 }: {
   idPrefix: string
   steps: readonly { title: string; body: string }[]
-  code: { label: string; value: string }
+  code?: { label: string; value: string }
 }) {
   return (
     <ol className="m-0 p-0 list-none flex flex-col gap-4">
@@ -85,7 +85,7 @@ function Steps({
             {step.title}
           </h3>
           <p className="m-0 text-sm leading-[1.7] text-ink-2">{step.body}</p>
-          {i === URL_STEP && <CodeBlock label={code.label} code={code.value} />}
+          {code && i === URL_STEP && <CodeBlock label={code.label} code={code.value} />}
         </li>
       ))}
     </ol>
@@ -99,7 +99,7 @@ export default async function FeatureShortcutsPage({ params }: { params: Params 
   const dict = dictionaries[locale]
   const t = dict.featureShortcuts
   const h2 = `${s.h2} m-0 text-xl md:text-title font-medium`
-  const { applePay, linePay, web, params: p, whenNot, trouble } = t
+  const { applePay, applePayUrl, linePay, web, params: p, whenNot, trouble } = t
 
   return (
     <div className={s.flow}>
@@ -132,10 +132,23 @@ export default async function FeatureShortcutsPage({ params }: { params: Params 
           <Steps
             idPrefix="step-"
             steps={applePay.steps}
-            code={{ label: applePay.urlLabel, value: appUrl(t.vars.amount, t.vars.merchant) }}
           />
           <p className="m-0 text-sm leading-[1.7] text-ink-2">{applePay.foreignNote}</p>
           <p className="m-0 text-sm leading-[1.7] text-ink-2">{applePay.platformNote}</p>
+        </div>
+      </section>
+
+      <section id="apple-pay-url" className={s.band}>
+        <h2 className={h2}>
+          <Phrase text={applePayUrl.heading} />
+        </h2>
+        <div className="flex flex-col gap-6">
+          <p className="m-0 text-base leading-[1.7] text-ink-2">{applePayUrl.intro}</p>
+          <Steps
+            idPrefix="apple-pay-url-step-"
+            steps={applePayUrl.steps}
+            code={{ label: applePayUrl.urlLabel, value: appUrl(t.vars.amount, t.vars.merchant) }}
+          />
         </div>
       </section>
 
@@ -149,7 +162,7 @@ export default async function FeatureShortcutsPage({ params }: { params: Params 
             <Steps
               idPrefix="line-pay-step-"
               steps={linePay.steps}
-              code={{ label: applePay.urlLabel, value: appUrl(t.vars.amount, linePay.noteVar) }}
+              code={{ label: applePayUrl.urlLabel, value: appUrl(t.vars.amount, linePay.noteVar) }}
             />
           </div>
         </section>
