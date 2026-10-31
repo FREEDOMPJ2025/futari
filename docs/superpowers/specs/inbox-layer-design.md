@@ -16,9 +16,9 @@ related_issues: ["#101"]
 
 v0.13.0 引入 `PendingExpenseOccurrences`，承接 cron 產生的定期支出 proposal — 使用者按確認 / 跳過 / 改一下再確認。同期 PR #89（issue #49 v1）為 `CashTransactions` 加 `status` enum（`settled` | `pending`），表達「已承諾但未實際扣款」。
 
-兩個 pending 概念並存（見 [#101](https://github.com/redtear1115/oikos/issues/101)）。短期不衝突，但**新增 LINE 訊息解析** — 使用者貼訊息進來、系統解析成 proposal、等使用者確認 — 跟 cron pending 本質完全一樣，只是來源不同。如果各自再開一張表、各自一套 review UI，碎片化會雪崩。
+兩個 pending 概念並存（見 [#101](https://github.com/FREEDOMPJ2025/futari/issues/101)）。短期不衝突，但**新增 LINE 訊息解析** — 使用者貼訊息進來、系統解析成 proposal、等使用者確認 — 跟 cron pending 本質完全一樣，只是來源不同。如果各自再開一張表、各自一套 review UI，碎片化會雪崩。
 
-[#101](https://github.com/redtear1115/oikos/issues/101) 一開始討論三個方向（A 吸收進 `CashTransactions.status`、B 純視覺統一、C 留兩個概念），但都不夠：
+[#101](https://github.com/FREEDOMPJ2025/futari/issues/101) 一開始討論三個方向（A 吸收進 `CashTransactions.status`、B 純視覺統一、C 留兩個概念），但都不夠：
 
 - **A** 破壞 Ledger layer invariant，且不能擴充多來源
 - **B** 純 UI 不夠 — 不同來源要顯示來源資訊

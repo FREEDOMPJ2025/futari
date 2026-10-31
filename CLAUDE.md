@@ -1,6 +1,7 @@
-# Oikos — Agent Guide
+# Futari — Agent Guide
 
-> 家庭記帳工具，對使用者顯示為 **Futari**；codebase 用 Oikos。絕不對使用者顯示 Oikos，也不把 codebase 改名成 Futari。
+> 家庭記帳工具 **Futari**，repo 是 [`FREEDOMPJ2025/futari`](https://github.com/FREEDOMPJ2025/futari)。2026-10-31 起專案從舊名 Oikos 改名為 Futari：新寫的程式碼、文件、對外文字一律用 Futari，也絕不對使用者顯示 Oikos。
+> **刻意保留 oikos 的地方，不要改**：資料表 `"OikosGroups"`（程式裡的 `oikosGroups`）、使用者裝置上的 localStorage／cookie key `oikos_*`、Vault 裡所有 `oikos_*` 名稱（`oikos_cron_secret_key`、`oikos_project_url`、`oikos_service_role_key`：每晚推播的 cron 靠它們呼叫 Edge Function）、`oikos_groups_*` 約束與 `*_OikosGroups_id_fk` 外鍵、`Symbol.for('oikos.db.errorSanitizer')`、Firebase 專案 ID `oikos-pj`、Supabase 專案名 `oikos`／`oikos-dev`、`run-oikos` skill。這份清單不一定完整：改名前先 grep，碰到 DB、Vault、外部服務、使用者裝置上的名稱一律保留。原因：改這些要動 prod schema 或重置使用者狀態，換不到使用者看得到的好處。失效的樣子：把 `oikos_philosophy_seen` 改名後，所有人的開場卡片會再跳一次，沒有任何錯誤；改資料表名時漏掉 RLS、Realtime publication、cron 其中一處，那個功能就靜默壞掉；改了 Vault 的 `oikos_project_url`，每晚推播就不再呼叫 function，也不會有錯誤。舊 commit、CHANGELOG、spec 裡的「Oikos」也不回頭改。
 > 固定兩人（夫妻／伴侶）使用。Mobile-first PWA。
 
 這份是 agent 工作指南——架構、domain model、慣例、邊界。要把專案跑起來或部署，看 [README.md](README.md)。動文案、判讀指標、做產品取捨之前，看 [PRODUCT.md](PRODUCT.md)：各 surface 的意圖與「哪些低數字是預期的」寫在那裡。視覺 token 與元件規則在 [DESIGN.md](DESIGN.md)。後兩份由 Impeccable 維護，改動前先讀「設計脈絡（Impeccable）」那段。
@@ -23,11 +24,11 @@ This is **Next.js 16** with breaking changes. APIs, conventions, and file struct
 
 | 版本 | 主題 |
 |---|---|
-| [v2.0.0](https://github.com/redtear1115/oikos/milestone/92) | 順心堂．Futari 加入堂口 |
-| [v3.0.0](https://github.com/redtear1115/oikos/milestone/2) | 買斷層．長線一起守 |
-| [v4.0.0](https://github.com/redtear1115/oikos/milestone/3) | 訂閱層．AI 與資產管家 |
+| [v2.0.0](https://github.com/FREEDOMPJ2025/futari/milestone/92) | 順心堂．Futari 加入堂口 |
+| [v3.0.0](https://github.com/FREEDOMPJ2025/futari/milestone/2) | 買斷層．長線一起守 |
+| [v4.0.0](https://github.com/FREEDOMPJ2025/futari/milestone/3) | 訂閱層．AI 與資產管家 |
 
-→ 沒指派 milestone 的候選：[no-milestone issues](https://github.com/redtear1115/oikos/issues?q=is%3Aopen+no%3Amilestone) · [`backlog` 標籤](https://github.com/redtear1115/oikos/issues?q=is%3Aopen+label%3Abacklog)
+→ 沒指派 milestone 的候選：[no-milestone issues](https://github.com/FREEDOMPJ2025/futari/issues?q=is%3Aopen+no%3Amilestone) · [`backlog` 標籤](https://github.com/FREEDOMPJ2025/futari/issues?q=is%3Aopen+label%3Abacklog)
 
 ---
 

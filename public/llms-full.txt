@@ -1,6 +1,6 @@
 # Futari (ふたり) — Full Product Description
 
-> Two-person companion expense tracker for couples and partners. Mobile-first PWA built around the shared chapters of a relationship rather than balance sheets. Codebase name: Oikos.
+> Two-person companion expense tracker for couples and partners. Mobile-first PWA built around the shared chapters of a relationship rather than balance sheets.
 
 **Product URL**: https://futari.southern-light.dev/?utm_source=llms_txt&utm_medium=ai_agent
 **Status**: Public beta, free to use
@@ -353,4 +353,4 @@ This is reflected in the UI:
 - **Full description (this file)**: https://futari.southern-light.dev/llms-full.txt
 - **Sitemap**: https://futari.southern-light.dev/sitemap.xml
 
-Source code is private. Codebase internal name: **Oikos**. User-facing name: **Futari (ふたり)**.
+Name: **Futari (ふたり)**. Source code: https://github.com/FREEDOMPJ2025/futari

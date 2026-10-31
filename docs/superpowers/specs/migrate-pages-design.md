@@ -8,11 +8,11 @@ updates:
   - Unreleased — comparison table fully translated: feature names and verdict labels join the conditional cells in `migrate.comparisonText` ×4 locales; the "verdict-only labels stay literal" rule is withdrawn (#1538)
   - v1.5.14 — comparison-table cells that carry a condition (all △ cells + `未說明` + the interface-language row) moved into `migrate.comparisonText` ×4 locales; verdict-only ✓/✕ labels stay literal (#1185)
 related_issues:
-  - https://github.com/redtear1115/oikos/issues/852
-  - https://github.com/redtear1115/oikos/issues/839
-  - https://github.com/redtear1115/oikos/issues/939
-  - https://github.com/redtear1115/oikos/issues/1185
-  - https://github.com/redtear1115/oikos/issues/1538
+  - https://github.com/FREEDOMPJ2025/futari/issues/852
+  - https://github.com/FREEDOMPJ2025/futari/issues/839
+  - https://github.com/FREEDOMPJ2025/futari/issues/939
+  - https://github.com/FREEDOMPJ2025/futari/issues/1185
+  - https://github.com/FREEDOMPJ2025/futari/issues/1538
 related_specs:
   - csv-import-design.md
 ---

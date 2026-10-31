@@ -6,7 +6,7 @@ last_updated: 2026-10-17
 
 上架用的圖形素材。文案在 [app-store-listing.md](../app-store-listing.md)，
 操作流程在 [app-store-submission-runbook.md](../app-store-submission-runbook.md)，
-追蹤 issue [#935](https://github.com/redtear1115/oikos/issues/935)。
+追蹤 issue [#935](https://github.com/FREEDOMPJ2025/futari/issues/935)。
 
 ## 現況
 
