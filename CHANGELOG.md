@@ -43,6 +43,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **iPhone 用 Apple 註冊時，Apple 沒給名字和 email 也能建好帳號（#1885）**
+  使用者：原本這種 Apple ID 在 iPhone 上怎麼試都註冊不了；現在帳號會先用「新成員」當顯示名稱，之後可以在設定裡改。
+  技術：`handle_new_user` 的 display_name 改成依序取名字、email、`'新成員'`（空白也算沒有）；要由 owner 手動套到 dev 和 prod。
+
 - **首頁範例小卡與日文分攤句定稿（#1876）**
   使用者：範例小卡四語文案定稿（簡中、英文改成當地合理的金額）；日文 App 裡「對方欠你」的分攤句改成「パートナーに ¥… 貸している」，不再和反方向只差一個助詞，「支払」也補成「支払い」。
   技術：`landing.exampleCard*` 四語套用 Grok 審稿並移除 `TODO(i18n)`；ja `splitTypeSelector.partnerOwesYouAmount`／`allTheirsYouPaid`／`allTheirsNoAmount` 與 `compactRow.youPaid`／`partnerPaid` 一起改。
