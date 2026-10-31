@@ -41,7 +41,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+_Nothing unreleased yet._
+
+## [1.9.1] - 2026-10-31
+
+主題：**iPhone 登入路上的修補**——用 Apple 註冊不再因為沒給名字和 email 而失敗、登入成功不再閃錯誤頁、連不上伺服器時會說明；未登入頁捲動不再壓到狀態列；開發與部署環境升到 Node 26。
+完整 diff：[v1.9.0...v1.9.1](https://github.com/redtear1115/oikos/compare/v1.9.0...v1.9.1)
+
 ### 使用者可見變化
+
+- **iPhone 用 Apple 註冊時，Apple 沒給名字和 email 也能建好帳號（#1885）**
+  使用者：原本這種 Apple ID 在 iPhone 上怎麼試都註冊不了；現在帳號會先用「新成員」當顯示名稱，之後可以在設定裡改。
+  技術：`handle_new_user` 的 display_name 改成依序取名字、email、`'新成員'`（空白也算沒有）；已於 10-31 手動套到 dev 和 prod。
 
 - **iPhone 登入成功後，不再閃過錯誤畫面（#1768）**
   使用者：用 Apple 登入成功、正要進入帳本時，偶爾會先閃一下「出了點問題」的頁面，現在不會了。
@@ -50,10 +61,6 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - **iPhone 連不上登入伺服器時會說明原因（#1845）**
   使用者：用 Apple 登入卻連不上伺服器時（中國大陸偶爾會發生），登入頁會提示「這次沒連上登入伺服器……稍等一下再試一次就好」，不會再無聲地回到登入按鈕。
   技術：`AuthRetryableFetchError` 或 status 0 時回傳新的 outcome `unreachable`，顯示 `signIn.unreachableHint`；四語文案待審（#1891）。
-
-- **iPhone 用 Apple 註冊時，Apple 沒給名字和 email 也能建好帳號（#1885）**
-  使用者：原本這種 Apple ID 在 iPhone 上怎麼試都註冊不了；現在帳號會先用「新成員」當顯示名稱，之後可以在設定裡改。
-  技術：`handle_new_user` 的 display_name 改成依序取名字、email、`'新成員'`（空白也算沒有）；要由 owner 手動套到 dev 和 prod。
 
 - **iPhone App 未登入的頁面往下捲時，文字不再跑到狀態列底下（#1877）**
   使用者：首頁、功能介紹、使用情境、搬遷和登入頁捲動時，時間和電量那一列會維持頁面底色。
@@ -2105,7 +2112,8 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 - **每頁 `generateMetadata` 接 OG image（#487）**：`public/og-image.png` 從 #282 ship 但未 wire 進 metadata，造成 prod HTML 缺 `og:image` / `twitter:image`；本版 4 個 public page 各加 `openGraph.images` + `twitter.images`，`alt` 用 `t.title` locale-aware，無需新增 i18n key。
 - **`settings.local.json` 列入 gitignore（#478）**：避免本地 hook / 權限設定外洩。
 
-[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.9.0...HEAD
+[Unreleased]: https://github.com/redtear1115/oikos/compare/v1.9.1...HEAD
+[1.9.1]: https://github.com/redtear1115/oikos/compare/v1.9.0...v1.9.1
 [1.9.0]: https://github.com/redtear1115/oikos/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/redtear1115/oikos/compare/v1.7.4...v1.8.0
 [1.7.4]: https://github.com/redtear1115/oikos/compare/v1.7.3...v1.7.4
