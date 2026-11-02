@@ -4003,23 +4003,43 @@ I will upload the screenshots once you confirm.`,
     },
     applePay: {
       heading: 'Apple Pay: open New entry after you tap to pay',
-      intro: 'Before you start: Futari is installed on your iPhone and you are signed in. This uses a Wallet automation, so each Apple Pay payment opens a filled-in New entry.',
+      intro: 'Before you start: your iPhone needs iOS 17 or later and the Futari iOS app 1.9.0 or later, installed and signed in. This Wallet automation brings Futari to the front with New entry filled in after each Apple Pay payment. Nothing is saved until you check it and tap Save.',
       steps: [
         {
           title: 'Create a Wallet automation',
-          body: 'Open the Shortcuts app, go to Automation, tap + and choose Wallet. On the screen that follows, tick the cards you want to log; you can leave all the categories ticked. Tap Next, then New Shortcut. Finally, on the automation\'s settings row, choose Run Immediately, so you do not have to tap a notification first.',
+          body: 'Open the Shortcuts app, tap + to start a new shortcut, then tap Edit. In the action categories, choose Automation → Wallet. A "When Any Card is tapped" card appears at the top of the shortcut. Tap Any Card to pick the cards you want to log; Categories and Merchants can stay at Any Category and Any Merchant. Keep Automation on and Notify off in that card, so it runs right after you pay, without a notification to tap. On iOS 26 and earlier the screens differ: go to Automation, tap + and choose Wallet, choose Run Immediately on the same screen, tap Next, then New Blank Automation.',
+        },
+        {
+          title: 'Add the "Add Entry to Futari" action',
+          body: 'In the search field at the bottom of the same screen, search for Futari and add "Add Entry to Futari".',
+        },
+        {
+          title: 'Set the amount and note, leaving category empty',
+          body: 'Tap Amount and choose Shortcut Input. Tap that Shortcut Input, change Type to Transaction, and choose Amount. Do the same for Note: Shortcut Input, Type set to Transaction, then Merchant. Adding Shortcut Input also puts a "Receive … from …" card at the top; leave it as it is. Leave Category empty: a merchant you have recorded before gets the category you used last time, and a new merchant starts as Dining. You can change it before saving. The action rounds the amount itself, and the note needs no URL Encode. Running it brings Futari to the front with New entry filled in. Check it, make any changes and tap Save; nothing is saved automatically.',
+        },
+      ],
+      platformNote: 'This works only with the Shortcuts app on iPhone.',
+      foreignNote: 'Foreign currency: when you pay in another currency, the Shortcut passes the foreign amount, and Futari fills it in as an amount in your ledger\'s main currency. Change it in New entry to the amount you were actually charged.',
+    },
+    applePayUrl: {
+      heading: 'Fallback: open a link if the action is not available yet',
+      intro: 'The "Add Entry to Futari" action above is simpler when available. If your Futari app isn\'t on 1.9.0 yet (your iPhone still needs iOS 17 or later), use the five-step link fallback below.',
+      steps: [
+        {
+          title: 'Create a Wallet automation',
+          body: 'Open the Shortcuts app, tap + to start a new shortcut, then tap Edit. In the action categories, choose Automation → Wallet. A "When Any Card is tapped" card appears at the top of the shortcut. Tap Any Card to pick the cards you want to log; Categories and Merchants can stay at Any Category and Any Merchant. Keep Automation on and Notify off in that card, so it runs right after you pay, without a notification to tap. On iOS 26 and earlier the screens differ: go to Automation, tap + and choose Wallet, choose Run Immediately on the same screen, tap Next, then New Blank Automation.',
         },
         {
           title: 'Round the amount (recommended)',
-          body: 'Recommended: add a Round Number action and set its input to Shortcut Input, then choose Amount. If the amount carries decimals (for example 120.00), Futari leaves the amount blank, so rounding first is safer. "120", "1,280" and full-width digits work; "120.00", "NT$120.00" and "120 dollars" leave it blank.',
+          body: 'Recommended: add a Round Number action and set its input to Shortcut Input, change its Type to Transaction, then choose Amount. If the amount carries decimals (for example 120.00), Futari leaves the amount blank, so rounding first is safer. "120", "1,280" and full-width digits work; "120.00", "NT$120.00" and "120 dollars" leave it blank.',
         },
         {
           title: 'URL-encode the merchant name',
-          body: 'Add a URL Encode action and set its input to Shortcut Input, then choose Merchant. Without encoding, spaces and non-Latin characters break the link in the middle and the description comes out blank or cut short. The description is optional: to leave it out, skip this step and remove the whole &note=… part of the link.',
+          body: 'Add a URL Encode action and set its input to Shortcut Input with Type set to Transaction, then choose Merchant. Without encoding, spaces and non-Latin characters break the link in the middle and the description comes out blank or cut short. The description is optional: to leave it out, skip this step and remove the whole &note=… part of the link.',
         },
         {
           title: 'Build the link with a Text action',
-          body: 'Add a Text action and paste the link below, replacing [Amount] with the result of step 2 and [Merchant] with the result of step 3 (if you skipped step 2, use Shortcut Input, then Amount). You don\'t need to set a category: a merchant you\'ve recorded before gets the category you used last time, and a new merchant starts as Dining. You can change it before saving.',
+          body: 'Add a Text action and paste the link below, replacing [Amount] with the result of step 2 and [Merchant] with the result of step 3 (if you skipped step 2, use Shortcut Input, change its Type to Transaction, then choose Amount). You don\'t need to set a category: a merchant you\'ve recorded before gets the category you used last time, and a new merchant starts as Dining. You can change it before saving.',
         },
         {
           title: 'Open the URL',
@@ -4027,8 +4047,6 @@ I will upload the screenshots once you confirm.`,
         },
       ],
       urlLabel: 'Link (app)',
-      platformNote: 'This works only with the Shortcuts app on iPhone.',
-      foreignNote: 'Foreign currency: when you pay in another currency, the Shortcut passes the foreign amount, and Futari fills it in as an amount in your ledger\'s main currency. Change it in New entry to the amount you were actually charged.',
     },
     linePay: {
       heading: '',
@@ -4090,15 +4108,19 @@ I will upload the screenshots once you confirm.`,
       },
       rows: [
         {
-          symptom: 'New entry opens but the amount is blank',
+          symptom: 'The "Add Entry to Futari" action is missing',
+          cause: 'Update iOS to 17 or later and the Futari iOS app to 1.9.0 or later, then open Futari once.',
+        },
+        {
+          symptom: 'Link fallback: New entry opens but the amount is blank',
           cause: 'The amount is not a whole number. Usually the Round Number step is missing, or the amount carries a currency symbol or unit.',
         },
         {
-          symptom: 'The description is blank or cut short',
+          symptom: 'Link fallback: the description is blank or cut short',
           cause: 'The merchant name was not passed through URL Encode.',
         },
         {
-          symptom: "The category isn't the one in my link",
+          symptom: "Link fallback: the category isn't the one in my link",
           cause: "You've recorded this merchant before, so it uses the category from last time. For a new merchant, a misspelled or capitalized id falls back to Dining.",
         },
       ],
