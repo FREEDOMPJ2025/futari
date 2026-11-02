@@ -42,23 +42,37 @@ describe.each(SUPPORTED_LOCALES)('%s', (locale) => {
     expect(t.applePayUrl.intro).toContain('iOS 17')
     expect(doc.getElementById('apple-pay-url')!.textContent).toContain('iOS 17')
     expect(doc.getElementById('apple-pay-url')!.textContent).not.toContain('16')
-    const [runImmediately, newBlankAutomation] = {
-      'zh-TW': ['立即執行', '新增空白自動化'],
-      'zh-CN': ['立即运行', '新建空白自动化'],
-      en: ['Run Immediately', 'New Blank Automation'],
-      ja: ['すぐに実行', '新規の空のオートメーション'],
+    // #1872: iOS 27 has no separate "new automation" entry; Quella's iOS 27.2 screenshots
+    // (6572104529) show new shortcut → Edit → Automation → Wallet, with the trigger card's
+    // Automation switch on and Notify off. The iOS 26 and earlier path stays as one sentence after it.
+    const ui = {
+      'zh-TW': { category: '自動化操作', wallet: '錢包', notify: '通知', runImmediately: '立即執行', newBlank: '新增空白自動化', action: 'Futari 記一筆', fields: ['金額', '備註', '分類'], input: '捷徑輸入', type: '類型', transaction: '交易', amount: '數量', merchant: '商家' },
+      'zh-CN': { category: '自动化', wallet: '钱包', notify: '通知', runImmediately: '立即运行', newBlank: '新建空白自动化', action: 'Futari 记一笔', fields: ['金额', '备注', '分类'], input: '输入快捷指令的信息', type: '类型', transaction: '交易', amount: '数量', merchant: '商家' },
+      en: { category: 'Automation', wallet: 'Wallet', notify: 'Notify', runImmediately: 'Run Immediately', newBlank: 'New Blank Automation', action: 'Add Entry to Futari', fields: ['Amount', 'Note', 'Category'], input: 'Shortcut Input', type: 'Type', transaction: 'Transaction', amount: 'Amount', merchant: 'Merchant' },
+      ja: { category: 'オートメーション', wallet: 'ウォレット', notify: '通知', runImmediately: 'すぐに実行', newBlank: '新規の空のオートメーション', action: 'Futari に記録する', fields: ['金額', 'メモ', 'カテゴリー'], input: 'ショートカットの入力', type: '種類', transaction: '取引', amount: '金額', merchant: '店舗' },
     }[locale]
     for (const id of ['apple-pay', 'apple-pay-url']) {
       const stepOne = doc.querySelector(`#${id} ol > li`)!.textContent ?? ''
-      expect(stepOne).toContain(runImmediately)
-      expect(stepOne).toContain(newBlankAutomation)
-      expect(stepOne.indexOf(runImmediately)).toBeLessThan(stepOne.indexOf(newBlankAutomation))
+      for (const term of [ui.category, ui.wallet, ui.notify, ui.runImmediately, ui.newBlank]) {
+        expect(stepOne, `${id}: ${term}`).toContain(term)
+      }
+      // The iOS 27 path comes first; the older Run Immediately → New Blank Automation path after it.
+      expect(stepOne.indexOf(ui.notify)).toBeLessThan(stepOne.indexOf(ui.runImmediately))
+      expect(stepOne.indexOf(ui.runImmediately)).toBeLessThan(stepOne.indexOf(ui.newBlank))
     }
     expect(doc.getElementById('apple-pay')!.textContent).toContain('1.9.0')
-    expect(doc.querySelector('#apple-pay ol')!.textContent).toContain('Futari 記一筆')
-    for (const field of ['金額', '備註', '分類']) {
-      expect(doc.querySelector('#apple-pay ol')!.textContent).toContain(field)
+    const applePaySteps = doc.querySelector('#apple-pay ol')!.textContent ?? ''
+    // #1878: the action, its fields and Shortcut Input read in the phone's language.
+    for (const term of [ui.action, ...ui.fields, ui.input, ui.type, ui.transaction, ui.amount, ui.merchant]) {
+      expect(applePaySteps, term).toContain(term)
     }
+    // Shortcut Input arrives as Text; both link fallback steps that read it say to switch it to Transaction.
+    const urlSteps = [...doc.querySelectorAll('#apple-pay-url ol > li')].map((li) => li.textContent ?? '')
+    for (const i of [1, 2]) {
+      expect(urlSteps[i]).toContain(ui.input)
+      expect(urlSteps[i]).toContain(ui.transaction)
+    }
+    expect(t.trouble.rows[0].symptom).toContain(ui.action)
     expect(doc.querySelectorAll('#apple-pay-url ol > li')).toHaveLength(5)
     expect(doc.getElementById('apple-pay')!.nextElementSibling?.id).toBe('apple-pay-url')
     expect(doc.querySelector('#apple-pay-url pre')!.textContent).toBe(appUrl(t.vars.amount, t.vars.merchant))
@@ -144,8 +158,9 @@ it('keeps the llms Shortcuts section aligned with the Apple Pay guide', () => {
   const section = body.match(/^### 16\. Shortcuts[^\n]*\n[\s\S]*?(?=^#{2,3} |$(?![\s\S]))/m)?.[0]
   expect(section).toBeDefined()
   for (const term of [
-    'iOS 17', '1.9.0', 'Run Immediately', 'Futari 記一筆',
-    'Shortcut Input → Amount', 'Shortcut Input → Merchant',
+    'iOS 17', '1.9.0', 'Add Entry to Futari', 'Futari 記一筆',
+    'Edit → Automation → Wallet', 'Notify off', 'Run Immediately',
+    'Shortcut Input (Type: Transaction) → Amount', 'Shortcut Input (Type: Transaction) → Merchant',
   ]) {
     expect(section).toContain(term)
   }

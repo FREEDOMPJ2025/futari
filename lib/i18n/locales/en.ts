@@ -4000,15 +4000,15 @@ I will upload the screenshots once you confirm.`,
       steps: [
         {
           title: 'Create a Wallet automation',
-          body: 'Open the Shortcuts app, go to Automation, tap + and choose Wallet. Select the cards you want to log; you can leave all the categories selected. On the same screen, choose Run Immediately, so you don\'t have to tap a notification first. Tap Next, then New Blank Automation.',
+          body: 'Open the Shortcuts app, tap + to start a new shortcut, then tap Edit. In the action categories, choose Automation → Wallet. A "When Any Card is tapped" card appears at the top of the shortcut. Tap Any Card to pick the cards you want to log; Categories and Merchants can stay at Any Category and Any Merchant. Keep Automation on and Notify off in that card, so it runs right after you pay, without a notification to tap. On iOS 26 and earlier the screens differ: go to Automation, tap + and choose Wallet, choose Run Immediately on the same screen, tap Next, then New Blank Automation.',
         },
         {
-          title: 'Add the "Futari 記一筆" action',
-          body: 'Search for Futari in the action list and add "Futari 記一筆".',
+          title: 'Add the "Add Entry to Futari" action',
+          body: 'In the search field at the bottom of the same screen, search for Futari and add "Add Entry to Futari".',
         },
         {
           title: 'Set the amount and note, leaving category empty',
-          body: 'Set the 金額 (amount) field to Shortcut Input → Amount, and the 備註 (note) field to Shortcut Input → Merchant. Leave 分類 (category) empty: a merchant you have recorded before gets the category you used last time, and a new merchant starts as Dining. You can change it before saving. The action rounds the amount itself, and the note needs no URL Encode. Running it brings Futari to the front with New entry filled in. Check it, make any changes and tap Save; nothing is saved automatically.',
+          body: 'Tap Amount and choose Shortcut Input. Tap that Shortcut Input, change Type to Transaction, and choose Amount. Do the same for Note: Shortcut Input, Type set to Transaction, then Merchant. Adding Shortcut Input also puts a "Receive … from …" card at the top; leave it as it is. Leave Category empty: a merchant you have recorded before gets the category you used last time, and a new merchant starts as Dining. You can change it before saving. The action rounds the amount itself, and the note needs no URL Encode. Running it brings Futari to the front with New entry filled in. Check it, make any changes and tap Save; nothing is saved automatically.',
         },
       ],
       platformNote: 'This works only with the Shortcuts app on iPhone.',
@@ -4016,19 +4016,19 @@ I will upload the screenshots once you confirm.`,
     },
     applePayUrl: {
       heading: 'Fallback: open a link if the action is not available yet',
-      intro: 'The "Futari 記一筆" action above is simpler when available. If your Futari app isn\'t on 1.9.0 yet (your iPhone still needs iOS 17 or later), use the five-step link fallback below.',
+      intro: 'The "Add Entry to Futari" action above is simpler when available. If your Futari app isn\'t on 1.9.0 yet (your iPhone still needs iOS 17 or later), use the five-step link fallback below.',
       steps: [
         {
           title: 'Create a Wallet automation',
-          body: 'Open the Shortcuts app, go to Automation, tap + and choose Wallet. Select the cards you want to log; you can leave all the categories selected. On the same screen, choose Run Immediately, so you don\'t have to tap a notification first. Tap Next, then New Blank Automation.',
+          body: 'Open the Shortcuts app, tap + to start a new shortcut, then tap Edit. In the action categories, choose Automation → Wallet. A "When Any Card is tapped" card appears at the top of the shortcut. Tap Any Card to pick the cards you want to log; Categories and Merchants can stay at Any Category and Any Merchant. Keep Automation on and Notify off in that card, so it runs right after you pay, without a notification to tap. On iOS 26 and earlier the screens differ: go to Automation, tap + and choose Wallet, choose Run Immediately on the same screen, tap Next, then New Blank Automation.',
         },
         {
           title: 'Round the amount (recommended)',
-          body: 'Recommended: add a Round Number action and set its input to Shortcut Input, then choose Amount. If the amount carries decimals (for example 120.00), Futari leaves the amount blank, so rounding first is safer. "120", "1,280" and full-width digits work; "120.00", "NT$120.00" and "120 dollars" leave it blank.',
+          body: 'Recommended: add a Round Number action and set its input to Shortcut Input, change its Type to Transaction, then choose Amount. If the amount carries decimals (for example 120.00), Futari leaves the amount blank, so rounding first is safer. "120", "1,280" and full-width digits work; "120.00", "NT$120.00" and "120 dollars" leave it blank.',
         },
         {
           title: 'URL-encode the merchant name',
-          body: 'Add a URL Encode action and set its input to Shortcut Input, then choose Merchant. Without encoding, spaces and non-Latin characters break the link in the middle and the description comes out blank or cut short. The description is optional: to leave it out, skip this step and remove the whole &note=… part of the link.',
+          body: 'Add a URL Encode action and set its input to Shortcut Input with Type set to Transaction, then choose Merchant. Without encoding, spaces and non-Latin characters break the link in the middle and the description comes out blank or cut short. The description is optional: to leave it out, skip this step and remove the whole &note=… part of the link.',
         },
         {
           title: 'Build the link with a Text action',
@@ -4101,7 +4101,7 @@ I will upload the screenshots once you confirm.`,
       },
       rows: [
         {
-          symptom: 'The "Futari 記一筆" action is missing',
+          symptom: 'The "Add Entry to Futari" action is missing',
           cause: 'Update iOS to 17 or later and the Futari iOS app to 1.9.0 or later, then open Futari once.',
         },
         {
