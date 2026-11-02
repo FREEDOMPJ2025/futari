@@ -66,12 +66,17 @@ describe.each(SUPPORTED_LOCALES)('%s', (locale) => {
     for (const term of [ui.action, ...ui.fields, ui.input, ui.type, ui.transaction, ui.amount, ui.merchant]) {
       expect(applePaySteps, term).toContain(term)
     }
-    // Shortcut Input arrives as Text; both link fallback steps that read it say to switch it to Transaction.
+    // Shortcut Input arrives as Text; every link fallback step that reads it says to switch it to
+    // Transaction, including step 4's "skipped step 2" clause (#1872 round 5, 6572551967).
     const urlSteps = [...doc.querySelectorAll('#apple-pay-url ol > li')].map((li) => li.textContent ?? '')
     for (const i of [1, 2]) {
       expect(urlSteps[i]).toContain(ui.input)
       expect(urlSteps[i]).toContain(ui.transaction)
     }
+    const skipped = urlSteps[3].slice(urlSteps[3].indexOf(ui.input))
+    expect(urlSteps[3]).toContain(ui.input)
+    expect(skipped.indexOf(ui.transaction), 'step 4: Type → Transaction after Shortcut Input').toBeGreaterThan(0)
+    expect(skipped.indexOf(ui.transaction)).toBeLessThan(skipped.indexOf(ui.amount, ui.input.length))
     expect(t.trouble.rows[0].symptom).toContain(ui.action)
     expect(doc.querySelectorAll('#apple-pay-url ol > li')).toHaveLength(5)
     expect(doc.getElementById('apple-pay')!.nextElementSibling?.id).toBe('apple-pay-url')
@@ -161,6 +166,7 @@ it('keeps the llms Shortcuts section aligned with the Apple Pay guide', () => {
     'iOS 17', '1.9.0', 'Add Entry to Futari', 'Futari 記一筆',
     'Edit → Automation → Wallet', 'Notify off', 'Run Immediately',
     'Shortcut Input (Type: Transaction) → Amount', 'Shortcut Input (Type: Transaction) → Merchant',
+    'when the rounding step is skipped) needs Type: Transaction',
   ]) {
     expect(section).toContain(term)
   }

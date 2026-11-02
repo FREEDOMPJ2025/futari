@@ -4032,7 +4032,7 @@ I will upload the screenshots once you confirm.`,
         },
         {
           title: 'Build the link with a Text action',
-          body: 'Add a Text action and paste the link below, replacing [Amount] with the result of step 2 and [Merchant] with the result of step 3 (if you skipped step 2, use Shortcut Input, then Amount). You don\'t need to set a category: a merchant you\'ve recorded before gets the category you used last time, and a new merchant starts as Dining. You can change it before saving.',
+          body: 'Add a Text action and paste the link below, replacing [Amount] with the result of step 2 and [Merchant] with the result of step 3 (if you skipped step 2, use Shortcut Input, change its Type to Transaction, then choose Amount). You don\'t need to set a category: a merchant you\'ve recorded before gets the category you used last time, and a new merchant starts as Dining. You can change it before saving.',
         },
         {
           title: 'Open the URL',
