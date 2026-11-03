@@ -195,6 +195,15 @@
            scene: '../../docs/store-assets/illustrations/story-5.png', pos: '50% 60%', brief: '旅行的回程。兩人拖著行李走出車站，行李箱上掛著御守，一人手上提著伴手禮。黃昏，路燈剛亮。' },
     }
 
+    // en / zh-CN / ja are captured from today's app (#1904), whose dashboard has
+    // a "monthly review / trips" row and whose assets page lists 家裡的 before
+    // 一起照顧的, so the zh-TW crops (2026-09-20 captures) miss the balance card
+    // and the plant. Same heights as zh-TW, so the layout doesn't move.
+    if (locale !== 'zh-TW') {
+      frames[1].crop = [0, 400, 1290, 910]   // balance card, whole
+      frames[4].crop = [50, 1650, 1240, 2440] // 一起照顧的: child, pet, plant
+    }
+
     // zh-TW is the master (CLAUDE.md i18n rule). Its text is fixed: the
     // numbers and names in it are the ones in the zh-TW screenshots.
     //

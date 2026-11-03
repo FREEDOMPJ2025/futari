@@ -416,8 +416,11 @@ function buildPlan(locale: Locale, members: { A: string; B: string }, inactiveAt
   }
 
   const cash: Plan['cash'] = c.expenses.map((e, i) => {
-    const [off0, h, m] = SLOTS[i]
+    const [off0, h0, m0] = SLOTS[i]
     const off = clampOffsets ? Math.min(off0, DAY_OF_MONTH - 1) : off0
+    // Rows pushed onto a shared day keep the slot order in the feed (newest first),
+    // so the first rows stay the ones the story copy names ({item1..3}).
+    const [h, m] = clampOffsets && off === DAY_OF_MONTH - 1 ? [Math.max(0, 22 - i), 0] : [h0, m0]
     const day = addDays(TODAY, -off)
     return {
       id: id(`cash:${e.key}`), groupId, paidBy: who(e.by), amount: e.amount, splitType: e.split,
