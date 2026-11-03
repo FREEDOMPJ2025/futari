@@ -95,12 +95,19 @@ export const zhCN: Translations = {
     alreadyHaveAccount: '已有账号 · 登录',
     appStoreCta: '在 App Store 下载',
     appStoreCtaHint: 'iPhone 与 iPad 都能用',
-    androidBetaCta: '加入 Android 测试版',
-    androidBetaCtaHint: '用你在 Play 商店的 Google 账号加入测试群组，接着就能安装 App。',
+    playStoreCta: '在 Google Play 下载',
+    playStoreCtaHint: '目前仅在台湾上架',
+    playBadgeAlt: '去商店下载 Google Play',
+    playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
+    launchBanner: {
+      text: 'Futari 的 Android App 上架了！',
+      link: '到 Google Play 下载',
+      closeAria: '关闭',
+    },
     useWebVersion: '先用网页版',
     trustEncrypted: '只开放给你们俩',
     trustFree: '免费使用',
-    trustPwa: 'iPhone App · 网页版',
+    trustPwa: 'iPhone App · Android App · 网页版',
     trust: {
       narrative: '你们的记录只属于你们两个人。我们不靠广告，不卖数据。',
       encryption: {
@@ -1239,28 +1246,18 @@ export const zhCN: Translations = {
   },
 
   androidBetaInvite: {
-    heading: 'Android App 正在找测试伙伴',
-    body: '你用 Android 打开 Futari。想先试试 App 版的话，用 Play 商店的 Google 账号加入测试群组，接着就能安装。',
-    cta: '加入 Android 测试版',
+    heading: 'Android App 上架了',
+    body: '你用 Android 打开 Futari。想改用 App，到 Google Play 下载。',
+    cta: '在 Google Play 下载',
   },
 
-  /** /android-beta self-serve join page (#1648). Temporary, removed with #1553. */
+  /** /android-beta: closed testing is over, the app is on Google Play (#1901). */
   androidBeta: {
-    metaTitle: 'Android 测试版',
-    title: '加入 Futari 的 Android 测试',
-    intro: 'Android App 还在 Google Play 的封闭测试阶段。照下面两步做，就能先装起来用。',
-    step1Title: '加入测试群组',
-    step1Body: '用你在 Play 商店登录的 Google 账号，加入「Futari Android 測試」群组。',
-    step1Cta: '加入群组',
-    step2Title: '安装 App',
-    step2Body: '加入群组后，打开 Play 的测试页，点「成为测试人员」，再到 Play 商店安装。',
-    step2Cta: '打开 Play 测试页',
-    askTitle: '测试期间',
-    askBody: '像平常一样用它记账。遇到不顺的地方或有想法，在 App 的「设置 › 给我们反馈」告诉我们。',
-    privacy: '加入群组后，群组所有者（也就是我们）看得到你的 Google 账号的 Email 地址，只用来给你测试资格，和发送测试相关的通知。不想测了，退出群组就好。',
-    closed: '测试名额目前没有开放，可以先用网页版。',
+    metaTitle: 'Android App',
+    title: 'Futari 的 Android App 已上架',
+    body: '封闭测试已经结束，谢谢每一位帮忙测试的人。Android App 已在 Google Play 上架。',
     useWebVersion: '先用网页版',
-    outingLine: 'Futari 的 Android App 正在测试，用 Android 的你可以先加入',
+    outingLine: 'Futari 的 Android App 已在 Google Play 上架',
   },
 
   pastTimes: {
@@ -1575,10 +1572,10 @@ export const zhCN: Translations = {
 
   /** Settings row: share the Android test page with a partner or friend; hidden in the iOS app (#1648). Removed with #1553. */
   androidTesterInvite: {
-    title: '邀请用 Android 的伴侣或朋友来测试',
-    hint: '分享测试页的链接，对方加入群组就能安装',
-    shareTitle: 'Futari Android 测试',
-    shareText: 'Futari 的 Android App 正在封闭测试，照这页的两步就能先装起来用。',
+    title: '邀请用 Android 的伴侣或朋友下载',
+    hint: '分享 Google Play 的链接，对方点开就能安装',
+    shareTitle: 'Futari 的 Android App',
+    shareText: 'Futari 的 Android App 已在 Google Play 上架，用 Android 的你也能一起记账。',
     copied: '链接已复制',
   },
 
@@ -3290,11 +3287,11 @@ export const zhCN: Translations = {
     },
     terms: {
       title: '服务条款 · Futari',
-      description: 'Futari alpha 测试版本的服务条款与用户注意事项。',
+      description: 'Futari 的服务条款：使用双人共用账本前需要知道的事，包括账号删除、服务调整与适用法律。',
     },
     privacy: {
       title: '隐私权政策 · Futari',
-      description: 'Futari alpha 测试版本的数据收集与隐私权处理方式。',
+      description: 'Futari 如何收集、使用和保存你的数据：收集哪些数据、怎么加密、保留多久、用到哪些第三方服务，以及你的权利。',
     },
     migrate: {
       honeydue: {

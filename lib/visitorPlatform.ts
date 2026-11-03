@@ -10,7 +10,7 @@
  * synchronous, fully-testable mapping from those inputs to a CTA variant.
  */
 
-export type VisitorPlatformTarget = 'dashboard' | 'sign_in' | 'app_store' | 'android_beta'
+export type VisitorPlatformTarget = 'dashboard' | 'sign_in' | 'app_store' | 'play_store'
 
 export interface ResolveVisitorPlatformInput {
   /** `navigator.userAgent`. */
@@ -23,9 +23,6 @@ export interface ResolveVisitorPlatformInput {
   isStandalone: boolean
   /** A local Supabase session already exists. */
   hasSession: boolean
-  /** Closed-test Google Group URL; defaults to {@link ANDROID_TEST_GROUP_URL}.
-   *  Injectable so the empty-URL fallback can be tested for real. */
-  testGroupUrl?: string
 }
 
 // #1413 — region-neutral: Apple redirects `/app/id...` to the visitor's own
@@ -40,40 +37,32 @@ export interface ResolveVisitorPlatformInput {
 // campaign once ≥5 distinct Apple accounts installed through it.
 export const APP_STORE_URL = 'https://apps.apple.com/app/id6779264784?pt=128976951&ct=landing&mt=8'
 
-// #1648 — Android closed testing is self-serve through a Google Group. Play's
-// tester list contains the group, so joining the group is what grants
-// testing rights; nobody copies addresses between a form and Play Console.
-// The group's member list is visible to managers only. The /android-beta
-// privacy line says exactly that (the group owner, us, can see the tester's
-// Google account email) and that it is used only for test access and
-// test-related notices (owner decision 2026-10-09, #1649: group posts such
-// as "install is open" are allowed). If the group's "who can view members"
-// setting ever widens, or the group is used for anything beyond the test,
-// that sentence becomes false with no error.
-//
-// Join flow: ANDROID_BETA_PATH explains it → ANDROID_TEST_GROUP_URL (step 1)
-// → ANDROID_TEST_OPTIN_URL (step 2, Play's opt-in page, which only works once
-// the group is on the tester list).
-//
-// If the group URL is ever emptied, `resolveVisitorPlatform` falls back to
-// 'sign_in' for Android visitors, the dashboard card hides, and the page shows
-// no step buttons, so nothing ever points at a dead link. Failure of that
-// guard looks like: an Android visitor taps the CTA and lands on a page whose
-// only action goes nowhere.
-export const ANDROID_TEST_GROUP_URL = 'https://groups.google.com/g/futari-android-testers'
-export const ANDROID_TEST_OPTIN_URL = 'https://play.google.com/apps/testing/dev.southernlight.futari'
-/** Public page (no locale prefix); always build the href with `localizedHref`. */
+// #1901 — Android 1.9.0 is live on Google Play (production track, Taiwan only,
+// since 2026-11-02). It replaces the #1648 closed-test join flow (Google Group
+// + Play opt-in page). This is the one URL every Android "download" link uses:
+// landing CTA, Play badge, launch banner, dashboard card, settings share row,
+// outing line and /android-beta.
+// Visitors outside Taiwan who open it get Play's "not available in your
+// country" page, which is why the CTA carries the "Taiwan only" hint
+// (`landing.playStoreCtaHint`). Failure looks like: a ja/en visitor taps the
+// CTA and hits that page with no warning. Remove the hint once more countries
+// open, not before.
+export const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=dev.southernlight.futari'
+
+/** Public page (no locale prefix); always build the href with `localizedHref`.
+ *  Since #1901 it is the "closed testing is over, the app is on Play" page,
+ *  kept (not redirected) so links shared during the test still make sense. */
 export const ANDROID_BETA_PATH = '/android-beta'
 
 /**
  * Which primary-CTA variant a visitor should see. Precedence:
  *
  *   1. signed in                              → dashboard
- *   2. Capacitor shell / installed PWA         → sign_in (never app_store —
- *      Apple Guideline 3.1.1: no "download the app" link from inside the app)
+ *   2. Capacitor shell / installed PWA         → sign_in (never a store link —
+ *      Apple Guideline 3.1.1, and #1901: no "download the app" link from
+ *      inside the app on either shell)
  *   3. iPhone / iPad browser                   → app_store
- *   4. Android browser                         → android_beta (or sign_in if
- *      the group URL above is still empty)
+ *   4. Android browser                         → play_store (#1901)
  *   5. everything else (desktop, etc.)         → sign_in
  */
 export function resolveVisitorPlatform({
@@ -82,7 +71,6 @@ export function resolveVisitorPlatform({
   isCapacitor,
   isStandalone,
   hasSession,
-  testGroupUrl = ANDROID_TEST_GROUP_URL,
 }: ResolveVisitorPlatformInput): VisitorPlatformTarget {
   if (hasSession) return 'dashboard'
   if (isCapacitor || isStandalone) return 'sign_in'
@@ -93,9 +81,7 @@ export function resolveVisitorPlatform({
   const isIos = /iphone|ipad|ipod/.test(ua) || (/macintosh/.test(ua) && maxTouchPoints > 1)
   if (isIos) return 'app_store'
 
-  if (/android/.test(ua)) {
-    return testGroupUrl ? 'android_beta' : 'sign_in'
-  }
+  if (/android/.test(ua)) return 'play_store'
 
   return 'sign_in'
 }

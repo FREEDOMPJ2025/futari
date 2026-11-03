@@ -158,7 +158,8 @@ export type Translations = {
     /** Caption under mobile CTA, e.g. 「免費 · 兩人一本帳 · 用 Google 或 Apple 繼續」 */
     ctaHint: string
     /** Secondary desktop CTA — sign-in link for returning users. Swaps to
-     *  `useWebVersion` when the primary CTA is the Android beta form (#1413). */
+     *  `useWebVersion` when the primary CTA is the Google Play link
+     *  (`playStoreCta`, Android browsers; #1413, #1901). */
     alreadyHaveAccount: string
     /** Primary-CTA label for an iPhone/iPad browser visitor (#1413), replacing
      *  #1333's `appStoreNote`: the CTA itself now links out to the App Store,
@@ -169,25 +170,40 @@ export type Translations = {
     /** Mobile hint under `appStoreCta` — the default `ctaHint` describes the
      *  sign-in flow, which is wrong once the CTA points at the App Store. */
     appStoreCtaHint: string
-    /** Primary-CTA label for an Android browser visitor (#1413): links out to
-     *  the /android-beta join page (#1648; the group flow lives in
-     *  `lib/visitorPlatform.ts#ANDROID_TEST_GROUP_URL`). Falls back to the
-     *  default sign-in CTA if that URL is ever emptied. */
-    androidBetaCta: string
-    /** Mobile hint under `androidBetaCta` — must say which Google account to
-     *  use (the one on Play) and what happens next (#1648): join the test
-     *  group, then install. */
-    androidBetaCtaHint: string
+    /** Primary-CTA label for an Android browser visitor (#1901, replacing the
+     *  #1413/#1648 closed-test `androidBetaCta`): links out to Google Play
+     *  (`lib/visitorPlatform.ts#PLAY_STORE_URL`). Never shown inside either
+     *  native shell. Copy is Aria's proposal, pending Ray's approval. */
+    playStoreCta: string
+    /** Mobile hint under `playStoreCta`, also shown under the Play badge: the
+     *  app is only listed in Taiwan, and Play shows everyone else a "not
+     *  available in your country" page. Remove when more countries open. */
+    playStoreCtaHint: string
+    /** Alt text of the official Google Play badge image (#1901): the words
+     *  printed on that locale's badge, verbatim — not a translation of ours. */
+    playBadgeAlt: string
+    /** Google's trademark attribution, required on any page showing the badge.
+     *  English in every locale on purpose (Google's wording); don't translate. */
+    playTrademark: string
+    /** Dismissible launch banner at the top of the landing (#1901). `text` is
+     *  plain, `link` is the Play link that follows it, `closeAria` labels the ✕.
+     *  Shown until `PLAY_LAUNCH_BANNER_LAST_DAY` (lib/playLaunchBanner.ts). */
+    launchBanner: {
+      text: string
+      link: string
+      closeAria: string
+    }
     /** Secondary link shown instead of `alreadyHaveAccount` when the primary
-     *  CTA is `androidBetaCta` (#1413) — that CTA isn't a returning-user
+     *  CTA is `playStoreCta` (#1413, #1901) — that CTA isn't a returning-user
      *  sign-in, so this offers the web app as the alternative instead. */
     useWebVersion: string
     /** Trust pills next to the desktop CTA (compact variant of `<TrustSection>`). */
     trustEncrypted: string
     trustFree: string
     /** Device-availability trust pill. Kept in sync with reality (#1333):
-     *  iPhone app is live, Android is not on Play Store yet — don't promise a
-     *  listing that doesn't exist. */
+     *  the iPhone app is on the App Store and, since #1901 (2026-11-02), the
+     *  Android app is on Google Play (Taiwan only). Don't list a platform
+     *  whose store listing doesn't exist. */
     trustPwa: string
     /** Full trust section (#538) — shown between Features and footer. The
      *  compact variant above stays available via `<TrustSection variant="compact">`
@@ -1653,11 +1669,10 @@ export type Translations = {
   }
 
   /**
-   * Dashboard invite card for Android web users to join the Play closed test
-   * (#1553). Temporary: remove the card, this namespace and the
-   * `android_beta_invite_*` events once Play production access is granted.
-   * `cta` repeats `landing.androidBetaCta` on purpose: different namespace,
-   * same string, so the two buttons read as one offer.
+   * Dashboard card for Android *browser* users (#1553, #1901): the app is on
+   * Google Play now. Never inside either native shell. `cta` repeats
+   * `landing.playStoreCta` on purpose: different namespace, same string, so
+   * the two buttons read as one offer. Copy pending Ray's approval.
    */
   androidBetaInvite: {
     heading: string
@@ -1666,29 +1681,15 @@ export type Translations = {
   }
 
   /**
-   * /android-beta self-serve join page (#1648): step 1 joins the Google Group
-   * that is on Play's closed-test tester list, step 2 opens Play's opt-in page.
-   * `privacy` must stay true to the group's real settings (member list visible
-   * to managers only) and to how the group is used (test access + test-related
-   * notices only, #1649) — if either changes, this sentence becomes a false
-   * claim without any code failing. `closed` shows only when the group URL constant
-   * is empty (`lib/visitorPlatform.ts`). Temporary: removed with #1553.
+   * /android-beta (#1648 → #1901): no longer a join page. Closed testing is
+   * over, so it thanks the testers and points at Google Play, kept as a page
+   * (not a redirect) so links shared during the test still make sense. The
+   * Play button reuses `landing.playStoreCta` / `playStoreCtaHint`.
    */
   androidBeta: {
     metaTitle: string
     title: string
-    intro: string
-    step1Title: string
-    step1Body: string
-    step1Cta: string
-    step2Title: string
-    step2Body: string
-    step2Cta: string
-    /** Points at Settings › `testerFeedback.title`; keep the two labels identical. */
-    askTitle: string
-    askBody: string
-    privacy: string
-    closed: string
+    body: string
     useWebVersion: string
     /** One quiet line on the public outing page, Android browsers only. */
     outingLine: string
@@ -2068,8 +2069,10 @@ export type Translations = {
     frameTitle: string
   }
 
-  /** Settings row that shares the /android-beta page with an Android tester
-   *  (#1648). Hidden in the iOS shell (Apple 2.3.10). Temporary, removed with #1553. */
+  /** Settings row that shares the Google Play link with a partner or friend
+   *  on Android (#1648 → #1901). Browser only: hidden in both native shells
+   *  (iOS: Apple 2.3.10; Android: no download link inside the app). `hint`
+   *  and `shareTitle` reviewed by Aria (#1905). */
   androidTesterInvite: {
     title: string
     hint: string
@@ -3687,12 +3690,19 @@ export const zhTW: Translations = {
     alreadyHaveAccount: '已經有帳號 · 登入',
     appStoreCta: '在 App Store 下載',
     appStoreCtaHint: 'iPhone 與 iPad 都能用',
-    androidBetaCta: '加入 Android 測試版',
-    androidBetaCtaHint: '用你在 Play 商店的 Google 帳號加入測試群組，接著就能安裝 App。',
+    playStoreCta: '在 Google Play 下載',
+    playStoreCtaHint: '目前只在台灣上架',
+    playBadgeAlt: 'Google Play 立即下載',
+    playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
+    launchBanner: {
+      text: 'Futari 的 Android App 上架了！',
+      link: '到 Google Play 下載',
+      closeAria: '關閉',
+    },
     useWebVersion: '先用網頁版',
     trustEncrypted: '只開放給你們倆',
     trustFree: '免費使用',
-    trustPwa: 'iPhone App · 網頁版',
+    trustPwa: 'iPhone App · Android App · 網頁版',
     trust: {
       narrative: '你的記錄只屬於你們兩個人。我們不靠廣告，不賣資料。',
       encryption: {
@@ -4831,27 +4841,17 @@ export const zhTW: Translations = {
   },
 
   androidBetaInvite: {
-    heading: 'Android App 正在找測試夥伴',
-    body: '你用 Android 開 Futari。想先試試 App 版的話，用 Play 商店的 Google 帳號加入測試群組，接著就能安裝。',
-    cta: '加入 Android 測試版',
+    heading: 'Android App 上架了',
+    body: '你用 Android 開 Futari。想改用 App，到 Google Play 下載。',
+    cta: '在 Google Play 下載',
   },
 
   androidBeta: {
-    metaTitle: 'Android 測試版',
-    title: '加入 Futari 的 Android 測試',
-    intro: 'Android App 還在 Google Play 的封閉測試階段。照下面兩步做，就能先裝起來用。',
-    step1Title: '加入測試群組',
-    step1Body: '用你在 Play 商店登入的 Google 帳號，加入「Futari Android 測試」群組。',
-    step1Cta: '加入群組',
-    step2Title: '安裝 App',
-    step2Body: '加入群組後，打開 Play 的測試頁，按「成為測試人員」，再到 Play 商店安裝。',
-    step2Cta: '打開 Play 測試頁',
-    askTitle: '測試期間',
-    askBody: '像平常一樣用它記帳。遇到不順的地方或有想法，在 App 的「設定 › 給我們回饋」告訴我們。',
-    privacy: '加入群組後，群組擁有者（也就是我們）看得到你的 Google 帳號 email，只用來給你測試資格，和寄測試相關的通知。不想測了，退出群組就好。',
-    closed: '測試名額目前沒有開放，可以先用網頁版。',
+    metaTitle: 'Android App',
+    title: 'Futari 的 Android App 已上架',
+    body: '封閉測試已經結束，謝謝每一位幫忙測試的人。Android App 已在 Google Play 上架。',
     useWebVersion: '先用網頁版',
-    outingLine: 'Futari 的 Android App 正在測試，用 Android 的你可以先加入',
+    outingLine: 'Futari 的 Android App 已在 Google Play 上架',
   },
 
   pastTimes: {
@@ -5165,10 +5165,10 @@ export const zhTW: Translations = {
   },
 
   androidTesterInvite: {
-    title: '邀請用 Android 的伴侶或朋友來測試',
-    hint: '分享測試頁的連結，對方加入群組就能安裝',
-    shareTitle: 'Futari Android 測試',
-    shareText: 'Futari 的 Android App 正在封閉測試，照這頁的兩步就能先裝起來用。',
+    title: '邀請用 Android 的伴侶或朋友下載',
+    hint: '分享 Google Play 的連結，對方點開就能安裝',
+    shareTitle: 'Futari 的 Android App',
+    shareText: 'Futari 的 Android App 已在 Google Play 上架，用 Android 的你也能一起記帳。',
     copied: '連結已複製',
   },
 
@@ -6880,11 +6880,11 @@ export const zhTW: Translations = {
     },
     terms: {
       title: '服務條款 · Futari',
-      description: 'Futari alpha 測試版本的服務條款與使用者注意事項。',
+      description: 'Futari 的服務條款：使用雙人共用帳本前需要知道的事，包括帳號刪除、服務調整與適用法律。',
     },
     privacy: {
       title: '隱私權政策 · Futari',
-      description: 'Futari alpha 測試版本的資料蒐集與隱私權處理方式。',
+      description: 'Futari 如何蒐集、使用和保存你的資料：蒐集哪些資料、怎麼加密、保留多久、用到哪些第三方服務，以及你的權利。',
     },
     migrate: {
       honeydue: {

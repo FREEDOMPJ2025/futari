@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation'
 import { SUPPORTED_LOCALES, isLocale, type Locale } from '@/lib/i18n/locales-meta'
 import { dictionaries } from '@/lib/i18n/t'
 import { localizedHref } from '@/lib/i18n/path'
-import { ANDROID_TEST_GROUP_URL, ANDROID_TEST_OPTIN_URL } from '@/lib/visitorPlatform'
 import { AndroidBetaSteps } from './_components/AndroidBetaSteps'
 
 type Params = Promise<{ locale: string }>
@@ -14,11 +13,12 @@ export function generateStaticParams() {
 }
 
 /**
- * Self-serve Android closed-test join page (#1648). Reached from the landing
- * CTA and the dashboard card, never from search: `noindex`, and deliberately
- * absent from app/sitemap.ts (tests/seo-sitemap-robots.test.ts pins both).
- * Failure of that looks like a temporary tester page showing up in results.
- * Temporary: removed with #1553.
+ * Was the self-serve Android closed-test join page (#1648). Since #1901 the
+ * app is on Google Play, so this is a short "testing is over, get it on Play"
+ * page, kept (not redirected) so links shared during the test still make
+ * sense. Nothing links here any more; still `noindex` and absent from
+ * app/sitemap.ts (tests/seo-sitemap-robots.test.ts pins both). Failure of that
+ * looks like a leftover tester page showing up in results.
  */
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { locale: raw } = await params
@@ -39,8 +39,8 @@ export default async function AndroidBetaPage({ params }: { params: Params }) {
       <div className="max-w-md md:max-w-2xl mx-auto">
         <AndroidBetaSteps
           t={dictionaries[locale].androidBeta}
-          groupUrl={ANDROID_TEST_GROUP_URL}
-          optinUrl={ANDROID_TEST_OPTIN_URL}
+          playStoreCta={dictionaries[locale].landing.playStoreCta}
+          playStoreCtaHint={dictionaries[locale].landing.playStoreCtaHint}
           webHref={localizedHref('/sign-in', locale)}
         />
       </div>

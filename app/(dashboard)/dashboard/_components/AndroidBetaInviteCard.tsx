@@ -2,36 +2,34 @@
 
 import { useEffect, useState } from 'react'
 import { track } from '@/lib/analytics/track'
-import { useLocale, useTranslations } from '@/lib/i18n/client'
-import { DEFAULT_LOCALE, isLocale, localizedHref } from '@/lib/i18n/path'
+import { useTranslations } from '@/lib/i18n/client'
 import { getPlatform } from '@/lib/install-guide'
 import { detectPlatform } from '@/lib/platform'
-import { ANDROID_BETA_PATH, ANDROID_TEST_GROUP_URL } from '@/lib/visitorPlatform'
+import { PLAY_STORE_URL } from '@/lib/visitorPlatform'
 
-/** Global, one-time: the invite is about the device, not about a ledger or chapter. */
-const DISMISS_KEY = 'futari_android_beta_invite_dismissed'
+/** Global, one-time: the card is about the device, not about a ledger or chapter.
+ *  A new key for #1901 on purpose: people who closed the old closed-test invite
+ *  (`futari_android_beta_invite_dismissed`) haven't seen the Play launch yet. */
+const DISMISS_KEY = 'futari_android_play_card_dismissed'
 
 /**
- * One-time invite for Android *web* users (browser or installed PWA) to join
- * the Play closed test (#1553: Play wants real testers before production
- * access); the CTA goes to the self-serve join page (#1648). Never on iOS,
- * desktop or inside the Capacitor shell: the shell user already has the app,
- * so the invite would be asking for something done.
+ * One-time card for Android *web* users (browser or installed PWA): the app is
+ * on Google Play now (#1901; until then this invited them to the closed test,
+ * #1553/#1648). Never on iOS, desktop or inside the Capacitor shell: the shell
+ * user already has the app, and the app shows no "download the app" link.
  *
  * Hidden on first render and decided in an effect, so server HTML and the
  * first client render agree. A failing `localStorage` (private mode) reads as
  * "not dismissed": the worst case is the card showing again next visit.
  *
- * TEMPORARY: remove this card, the `androidBetaInvite` i18n namespace and the
- * `android_beta_invite_*` events once Play production access is granted.
+ * Events keep their `android_beta_invite_*` names so the series continues;
+ * since #1901 `clicked` means "opened the Play listing" (observability-design.md).
  */
 export function AndroidBetaInviteCard() {
   const t = useTranslations()
-  const rawLocale = useLocale()
   const [show, setShow] = useState(false)
 
   useEffect(() => {
-    if (!ANDROID_TEST_GROUP_URL) return
     if (getPlatform() !== 'android') return
     if (detectPlatform() === 'android_native') return
     try {
@@ -59,7 +57,7 @@ export function AndroidBetaInviteCard() {
     markDismissed()
   }
 
-  // Signing up is the answer to the invite, so a click retires the card too.
+  // Opening the listing is the answer to the card, so a click retires it too.
   const handleCta = () => {
     track('android_beta_invite_clicked')
     markDismissed()
@@ -86,16 +84,18 @@ export function AndroidBetaInviteCard() {
             {t.androidBetaInvite.body}
           </p>
           <a
-            // Locale-pinned: a bare /android-beta for en/ja/zh-CN is rewritten to
-            // zh-TW by proxy.ts, which overwrites the locale cookie and silently
-            // switches the whole app to zh-TW. Internal link, same tab.
-            href={localizedHref(ANDROID_BETA_PATH, isLocale(rawLocale) ? rawLocale : DEFAULT_LOCALE)}
+            href={PLAY_STORE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={handleCta}
             className="inline-block text-sm mt-2 underline underline-offset-4"
             style={{ color: 'var(--ink)' }}
           >
             {t.androidBetaInvite.cta}
           </a>
+          <p className="text-xs mt-1" style={{ color: 'var(--ink-3)' }}>
+            {t.landing.playStoreCtaHint}
+          </p>
         </div>
         <button
           type="button"

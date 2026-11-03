@@ -18,6 +18,10 @@ import { LandingPrimaryCta } from './LandingPrimaryCta'
 import { LandingSecondaryCta } from './LandingSecondaryCta'
 import { LandingStandaloneRedirect } from './LandingStandaloneRedirect'
 import { PhonePreview } from './PhonePreview'
+import { PlayLaunchBanner } from './PlayLaunchBanner'
+import { PlayStoreBadge } from './PlayStoreBadge'
+import type { Locale } from '@/lib/i18n/locales-meta'
+import { landingPrePaintScript } from '@/lib/playLaunch'
 import { TrustSection } from './TrustSection'
 import { Phrase } from '../_components/Phrase'
 import { phraseHtml } from '@/lib/i18n/phrase'
@@ -32,9 +36,12 @@ type Props = {
   signInHref: string
   /** 主 CTA 已登入時的目的地（/dashboard）— client-side 才會切過去。 */
   dashboardHref: string
-  /** Android 瀏覽器訪客的主 CTA 目的地：/android-beta，必須帶 locale（#1648）。
-   *  裸 `/android-beta` 對非預設 locale 會被 proxy 改寫成 zh-TW 並覆寫 locale cookie。 */
-  androidBetaHref: string
+  /** Picks the locale's official Google Play badge image (#1901). */
+  locale: Locale
+  /** Render the Google Play launch banner (#1901): the caller passes
+   *  `isPlayLaunchBannerActive()`. The pre-paint script hides it client-side
+   *  too once the date passes, in case this HTML was cached. */
+  showLaunchBanner: boolean
   /** 殼／PWA 冷啟動確認既有 session 時，等待遮罩上的文字（沿用 signIn.signingIn，#1318）。 */
   checkingLabel: string
   /** Locale-aware /use-case/* hrefs (#851). Three internal links to
@@ -80,7 +87,7 @@ function phraseBodyHtml(html: string) {
   return { __html: out, ph: out.includes('<wbr>') ? 'ph ' : '' }
 }
 
-export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkingLabel, useCaseHrefs, migrateHrefs, featureOutingHref, legalLinks, languageSwitcher }: Props) {
+export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner, checkingLabel, useCaseHrefs, migrateHrefs, featureOutingHref, legalLinks, languageSwitcher }: Props) {
   const body = phraseBodyHtml(t.bodyHtml)
   const subtitle = phraseBodyHtml(t.featuresSubtitleHtml)
   return (
@@ -93,9 +100,18 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
         paddingTop: 'env(safe-area-inset-top)',
       }}
     >
+      {/* #1901 — must come before the launch banner and the Play badge: marks
+          <html> (native shell / banner dismissed or expired) so CSS hides them
+          before first paint instead of after hydration. See lib/playLaunch.ts. */}
+      <script dangerouslySetInnerHTML={{ __html: landingPrePaintScript() }} />
+
       {/* #949 — installed-app (PWA / Capacitor) signed-in users skip the public
           landing and go straight to the dashboard. No-op in a browser tab. */}
       <LandingStandaloneRedirect dashboardHref={dashboardHref} checkingLabel={checkingLabel} />
+
+      {/* #1901 — dismissible "Android app is on Google Play" bar, until
+          PLAY_LAUNCH_BANNER_LAST_DAY. */}
+      {showLaunchBanner && <PlayLaunchBanner t={t.launchBanner} />}
 
       {/* TOP BAR */}
       <header className="relative z-10 flex items-center justify-between px-6 md:px-12 pt-3 md:pt-6 pb-1">
@@ -132,8 +148,7 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
             textDecoration: 'none',
           }}
           appStoreLabel={t.appStoreCta}
-          androidBetaLabel={t.androidBetaCta}
-          androidBetaHref={androidBetaHref}
+          playStoreLabel={t.playStoreCta}
         >
           {t.cta}
         </LandingPrimaryCta>
@@ -231,8 +246,7 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
                   textDecoration: 'none',
                 }}
                 appStoreLabel={t.appStoreCta}
-                androidBetaLabel={t.androidBetaCta}
-                androidBetaHref={androidBetaHref}
+                playStoreLabel={t.playStoreCta}
               >
                 {t.cta}
               </LandingPrimaryCta>
@@ -255,7 +269,7 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
               className="md:hidden m-0 mt-3 text-center text-xs"
               style={{ color: 'var(--ink-2)', letterSpacing: '0.3px' }}
               appStoreHint={t.appStoreCtaHint}
-              androidBetaHint={t.androidBetaCtaHint}
+              playStoreHint={t.playStoreCtaHint}
             >
               {t.ctaHint}
             </LandingCtaHint>
@@ -264,8 +278,8 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
                 sign-in link inline in the CTA row above; on mobile there was
                 no way for a returning user to reach it without retracing the
                 Google/Apple OAuth flow behind the primary CTA. Swaps to "先用
-                網頁版" when the primary CTA above is the Android beta form
-                (#1413) — that CTA isn't a returning-user sign-in, so the
+                網頁版" when the primary CTA above is Google Play (#1413,
+                #1901) — that CTA isn't a returning-user sign-in, so the
                 default label would be wrong. */}
             <div className="md:hidden mt-1 flex justify-center">
               <LandingSecondaryCta
@@ -276,6 +290,18 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
                 {t.alreadyHaveAccount}
               </LandingSecondaryCta>
             </div>
+
+            {/* #1901 — official Google Play badge alongside the store CTA
+                above (which is the App Store button on iPhone/iPad). Every
+                browser sees it, so desktop visitors get a way to Android too;
+                hidden pre-paint in the native shells. The Taiwan-only hint
+                appears only under the main CTA above, not under the badge
+                (#1905). Trademark line: footer. */}
+            <PlayStoreBadge
+              locale={locale}
+              alt={t.playBadgeAlt}
+              className="mt-4 flex flex-col items-center md:items-start gap-1"
+            />
 
             {/* #1852 — example card below the sign-in link: one expense and how it
                 splits. Below the CTA so the button keeps its first-screen spot;
@@ -449,6 +475,12 @@ export function Landing({ t, signInHref, dashboardHref, androidBetaHref, checkin
               © 2026 · MADE IN TAIWAN
             </span>
           </div>
+          {/* #1901 — Google's required attribution for the Play badge in the
+              hero; English in every locale. Hidden with the badge in the
+              native shells (no Play mention inside the iOS app, Apple 2.3.10). */}
+          <p lang="en" className="[html[data-native-shell]_&]:hidden m-0 text-xs text-ink-3 text-center md:text-right">
+            {t.playTrademark}
+          </p>
         </div>
       </footer>
     </main>
