@@ -41,7 +41,14 @@
       transform-origin: top left;
       overflow: hidden;
     }
+    /* data-lang is the app locale (zh-TW | zh-CN | en | ja). zh-TW and en use
+     * Noto Sans TC (its Latin is what the zh-TW frames have always shown);
+     * zh-CN and ja need their own CJK face so simplified hanzi and kana get
+     * the regional glyph shapes. The SC stylesheet is added by the script
+     * below only for zh-CN, so the zh-TW render requests exactly what it
+     * always did. */
     body[data-lang="ja"] { font-family: 'Noto Sans JP', 'Noto Sans TC', sans-serif; }
+    body[data-lang="zh-CN"] { font-family: 'Noto Sans SC', 'Noto Sans TC', sans-serif; }
 
     /* The scene. Full-bleed, fading into the ground so the copy reads as
      * part of the same room rather than a caption under a photo. */
@@ -142,7 +149,13 @@
   <div id="root"></div>
   <script>
     const params = new URLSearchParams(location.search)
-    const lang = params.get('lang') || 'zh'
+    // App locale codes (lib/i18n/locales-meta.ts). render-store-screens.mjs
+    // passes ?locale=; the old ?lang=zh still means zh-TW.
+    const LOCALES = ['zh-TW', 'zh-CN', 'en', 'ja']
+    const rawLocale = params.get('locale') || params.get('lang') || 'zh-TW'
+    const locale = rawLocale === 'zh' ? 'zh-TW' : rawLocale
+    if (!LOCALES.includes(locale)) throw new Error(`unknown locale ${rawLocale}`)
+    document.documentElement.lang = locale
     const W = Number(params.get('w') || 430)
     const H = Number(params.get('h') || 932)
     document.documentElement.style.setProperty('--w', W + 'px')
@@ -153,9 +166,14 @@
     rootEl.style.left = `${(W - 430 * S) / 2}px`
     rootEl.style.top = `${(H - 932 * S) / 2}px`
     const frameId = params.get('frame') || '1'
-    document.body.dataset.lang = lang
+    document.body.dataset.lang = locale
 
-    const SHOTS = '../../docs/store-assets/screenshots/'
+    // Device screenshots of the same locale: zh-TW keeps the original flat
+    // folder, the others live in screenshots/<locale>/ (capture-screens.mjs
+    // --locale). The image is a CSS background, so a missing file renders as
+    // an empty card without any error; render-store-screens.mjs checks the
+    // files listed in __STORE_META__ exist before it screenshots anything.
+    const SHOTS = '../../docs/store-assets/screenshots/' + (locale === 'zh-TW' ? '' : locale + '/')
     const SHOT_W = 1290 // source screenshots are iPhone 6.7" 1290×2796
 
     /* crop: [x0, y0, x1, y1] in source pixels. Crops stay clear of the bottom
@@ -177,20 +195,41 @@
            scene: '../../docs/store-assets/illustrations/story-5.png', pos: '50% 60%', brief: '旅行的回程。兩人拖著行李走出車站，行李箱上掛著御守，一人手上提著伴手禮。黃昏，路燈剛亮。' },
     }
 
-    // zh-TW is the master (CLAUDE.md i18n rule). Other locales follow once
-    // the zh-TW draft is approved by the designer.
+    // zh-TW is the master (CLAUDE.md i18n rule). The other three locales
+    // follow once their copy is approved (#1904, needs-copy). Until then each
+    // carries `pending: true` and a verbatim copy of the zh-TW text as a
+    // placeholder; render-store-screens.mjs refuses to render a pending locale
+    // unless --allow-pending-copy is passed. When approved copy lands: replace
+    // the frames, delete `pending`, and keep the numbers in line with the
+    // screenshots (frame 4's day count, see docs/store-assets/README.md).
+    const ZH_TW = {
+      1: { head: ['誰先付的，', '<span class="lit">不用再算。</span>'], sub: '每一筆都分好了。想結清的時候，點一下就好。' },
+      2: { head: ['兩個人，', '<span class="lit">一本帳。</span>'], sub: '一起記，回頭看會很暖。' },
+      3: { head: ['一起記下的，', '<span class="lit">都是日子。</span>'], sub: '晚餐、看牙、營養液，兩個人的日常都在這裡。' },
+      4: { head: ['小仙子陪了我們', '<span class="lit">285 天。</span>'], sub: '孩子、毛孩、植物，家裡的每一個都記得。' },
+      5: { head: ['大阪七天，', '<span class="lit">回家就結清。</span>'], sub: '日圓、台幣照常記，旅行的帳自己分開算。' },
+    }
     const copy = {
-      zh: {
-        1: { head: ['誰先付的，', '<span class="lit">不用再算。</span>'], sub: '每一筆都分好了。想結清的時候，點一下就好。' },
-        2: { head: ['兩個人，', '<span class="lit">一本帳。</span>'], sub: '一起記，回頭看會很暖。' },
-        3: { head: ['一起記下的，', '<span class="lit">都是日子。</span>'], sub: '晚餐、看牙、營養液，兩個人的日常都在這裡。' },
-        4: { head: ['小仙子陪了我們', '<span class="lit">285 天。</span>'], sub: '孩子、毛孩、植物，家裡的每一個都記得。' },
-        5: { head: ['大阪七天，', '<span class="lit">回家就結清。</span>'], sub: '日圓、台幣照常記，旅行的帳自己分開算。' },
-      },
+      'zh-TW': { frames: ZH_TW },
+      // TODO(#1904): Aria copy pending (needs-copy) — placeholder is the zh-TW text.
+      'zh-CN': { pending: true, frames: ZH_TW },
+      // TODO(#1904): Aria copy pending (needs-copy) — placeholder is the zh-TW text.
+      en: { pending: true, frames: ZH_TW },
+      // TODO(#1904): Aria copy pending (needs-copy) — placeholder is the zh-TW text.
+      ja: { pending: true, frames: ZH_TW },
+    }
+
+    // Read by render-store-screens.mjs before it takes any screenshot.
+    window.__STORE_META__ = {
+      locale,
+      pending: !!copy[locale].pending,
+      shotsByFrame: Object.fromEntries(
+        Object.entries(frames).filter(([, fr]) => fr.shot).map(([id, fr]) => [id, SHOTS + fr.shot]),
+      ),
     }
 
     const f = frames[frameId]
-    const t = (copy[lang] || copy.zh)[frameId]
+    const t = copy[locale].frames[frameId]
     const root = document.getElementById('root')
 
     const scene = document.createElement('div')
@@ -228,7 +267,19 @@
       root.appendChild(wrap)
     }
 
-    document.fonts.ready.then(() => { window.__OG_READY__ = true })
+    // zh-CN needs Noto Sans SC; wait for its stylesheet before fonts.ready,
+    // otherwise fonts.ready can resolve before the face is even declared and
+    // the headline silently falls back to Noto Sans TC's traditional glyphs.
+    const extraFont = locale === 'zh-CN'
+      ? new Promise((resolve) => {
+          const link = document.createElement('link')
+          link.rel = 'stylesheet'
+          link.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap'
+          link.onload = link.onerror = resolve
+          document.head.appendChild(link)
+        })
+      : Promise.resolve()
+    extraFont.then(() => document.fonts.ready).then(() => { window.__OG_READY__ = true })
   </script>
 </body>
 </html>
