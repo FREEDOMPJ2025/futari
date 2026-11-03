@@ -54,3 +54,36 @@ gives clean 2× output.
 
 Open `template.html?w=1200&h=630&s=1&layout=wide` directly in a browser to
 preview the design without running the script.
+
+## Store screenshots (App Store / Play)
+
+The store assets live in this folder too, but write to `docs/store-assets/`,
+not `public/`. Full workflow, language rules and file naming are in
+[docs/store-assets/README.md](../../docs/store-assets/README.md); this is the
+index.
+
+| Script | What it does | Locale option |
+|---|---|---|
+| `capture-screens.mjs` | Device screenshots from the local dev server (needs a logged-in demo ledger) | `--locale=<zh-TW\|zh-CN\|en\|ja>` sets the app's `lang` cookie, writes to `screenshots/` (zh-TW) or `screenshots/<locale>/` |
+| `render-store-screens.mjs` + `store-screens.html` | Illustration-first story images | `--locale=…`; refuses locales whose copy is `pending` unless `--allow-pending-copy` (then writes `*-DRAFT-*.png`) |
+| `asc-screenshots.mjs` | Upload story images to App Store Connect; dry-run by default | Per ASC localization (`zh-Hant`, `zh-Hans`, `en-US`, `ja`); `--local` lists local files offline |
+| `check-store-pngs.mjs` | Exact size per format + no alpha, for any PNG or folder | — |
+| `store-locales.mjs` | Shared table: locale → file names, screenshot folder, ASC code | — |
+| `render-store.mjs` + `store-graphic.html` | Play feature graphic, four locales | (renders all four) |
+
+Every locale defaults to zh-TW, and the zh-TW output names are the same as
+before #1904 (`story/0N-zh-<format>.png`, `screenshots/<name>-<format>.png`).
+
+`render-store-screens.mjs` and `capture-screens.mjs` run `check-store-pngs.mjs`
+on what they wrote. To check everything:
+
+```bash
+cd scripts/og
+node check-store-pngs.mjs                 # docs/store-assets/story + screenshots, all locales
+node asc-screenshots.mjs --local          # what each ASC localization would get, offline
+```
+
+Puppeteer uses the Chromium in `~/.cache/puppeteer`. If launching fails with
+`spawn Unknown system error -88`, that copy was only partly unpacked (the
+folder is a few hundred KB next to its `.zip`); point
+`PUPPETEER_EXECUTABLE_PATH` at a complete Chromium instead.
