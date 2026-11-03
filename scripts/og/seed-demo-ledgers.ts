@@ -297,7 +297,7 @@ const CONTENT: Record<Locale, LocaleContent> = {
   ja: {
     groupName: 'ふたりの家計簿',
     base: 'jpy',
-    copyVars: { item1: '夕食', item2: '歯医者', item3: 'サプリ', plantName: 'ぷく', tripPlace: '台北', localCurrency: '台湾ドル', homeCurrency: '円' },
+    copyVars: { item1: '夕食', item2: '歯医者', item3: 'サプリ', plantName: 'ぷく', tripPlace: '大阪', localCurrency: '円', homeCurrency: '円' },
     rent: (m) => `${m}月の家賃`,
     expenses: [
       { key: 'pet-food', desc: 'ドッグフードとおやつ', amount: 4800, by: 'B', split: 'half', category: 'other', asset: 'pet' },
@@ -319,17 +319,19 @@ const CONTENT: Record<Locale, LocaleContent> = {
       plant: { species: '多肉植物', location: 'リビング', cost: 1500 },
     },
     trip: {
-      name: '台北7日間', localCode: 'TWD', rate: 4.7,
+      // ja: a domestic trip in yen only (#1904, Aria's option (c)): a Japanese
+      // couple in Osaka pays in yen, and the story copy names no currencies.
+      name: '大阪7日間', localCode: 'JPY', rate: 1,
       expenses: [
-        { desc: '航空券', amount: 64000, currency: 'base', by: 'A', split: 'half', category: 'transit', day: 0 },
-        { desc: 'ホテル 6 泊', amount: 21000, currency: 'local', by: 'B', split: 'half', category: 'housing', day: 0 },
-        { desc: '小籠包の夕食', amount: 1200, currency: 'local', by: 'A', split: 'half', category: 'dining', day: 1 },
-        { desc: '夜市の食べ歩き', amount: 900, currency: 'local', by: 'B', split: 'half', category: 'dining', day: 2 },
-        { desc: '悠遊カード', amount: 1000, currency: 'local', by: 'A', split: 'half', category: 'transit', day: 2 },
-        { desc: '九份へのツアー', amount: 2400, currency: 'local', by: 'B', split: 'half', category: 'entertainment', day: 3 },
-        { desc: 'お土産', amount: 2000, currency: 'local', by: 'A', split: 'all_mine', category: 'entertainment', day: 5 },
-        { desc: '空港までのタクシー', amount: 1300, currency: 'local', by: 'B', split: 'half', category: 'transit', day: 6 },
-        { desc: '海外旅行保険', amount: 3500, currency: 'base', by: 'B', split: 'half', category: 'financial', day: 0 },
+        { desc: '新幹線', amount: 58000, currency: 'base', by: 'A', split: 'half', category: 'transit', day: 0 },
+        { desc: 'ホテル 6 泊', amount: 96000, currency: 'base', by: 'B', split: 'half', category: 'housing', day: 0 },
+        { desc: 'たこ焼きの夕食', amount: 2400, currency: 'base', by: 'A', split: 'half', category: 'dining', day: 1 },
+        { desc: '黒門市場の食べ歩き', amount: 4600, currency: 'base', by: 'B', split: 'half', category: 'dining', day: 2 },
+        { desc: '周遊パス', amount: 9000, currency: 'base', by: 'A', split: 'half', category: 'transit', day: 2 },
+        { desc: '海遊館のチケット', amount: 5400, currency: 'base', by: 'B', split: 'half', category: 'entertainment', day: 3 },
+        { desc: 'お土産', amount: 8000, currency: 'base', by: 'A', split: 'all_mine', category: 'entertainment', day: 5 },
+        { desc: '駅までのタクシー', amount: 2200, currency: 'base', by: 'B', split: 'half', category: 'transit', day: 6 },
+        { desc: '旅行保険', amount: 1500, currency: 'base', by: 'B', split: 'half', category: 'financial', day: 0 },
       ],
     },
   },
@@ -437,7 +439,10 @@ function buildPlan(locale: Locale, members: { A: string; B: string }, inactiveAt
   const endedAt = at(addDays(tripEnd, 1), 20, 0)
   const snapshot = validateTripCurrencySnapshot({
     default: BASE,
-    entries: [{ code: c.trip.localCode, rate: c.trip.rate, label: null }, { code: BASE, rate: 1, label: null }],
+    // One entry when the trip is in the ledger's own currency (ja, #1904 option (c)).
+    entries: c.trip.localCode === BASE
+      ? [{ code: BASE, rate: 1, label: null }]
+      : [{ code: c.trip.localCode, rate: c.trip.rate, label: null }, { code: BASE, rate: 1, label: null }],
   })
   const tripExpenses: Plan['tripExpenses'] = c.trip.expenses.map((e, i) => {
     const local = e.currency === 'local'
@@ -477,7 +482,7 @@ function buildPlan(locale: Locale, members: { A: string; B: string }, inactiveAt
     },
     demoData: {
       locale, groupId, groupName: c.groupName, tripId, tripName: c.trip.name, baseCurrency: BASE,
-      tripCurrencies: [c.trip.localCode, BASE], plantName: c.copyVars.plantName, plantSproutedAt: PLANT_SPROUTED_AT,
+      tripCurrencies: [...new Set([c.trip.localCode, BASE])], plantName: c.copyVars.plantName, plantSproutedAt: PLANT_SPROUTED_AT,
       seededOn: TODAY, copyVars: c.copyVars,
     },
   }
