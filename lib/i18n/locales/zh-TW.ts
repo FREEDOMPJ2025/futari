@@ -158,7 +158,8 @@ export type Translations = {
     /** Caption under mobile CTA, e.g. 「免費 · 兩人一本帳 · 用 Google 或 Apple 繼續」 */
     ctaHint: string
     /** Secondary desktop CTA — sign-in link for returning users. Swaps to
-     *  `useWebVersion` when the primary CTA is the Android beta form (#1413). */
+     *  `useWebVersion` when the primary CTA is the Google Play link
+     *  (`playStoreCta`, Android browsers; #1413, #1901). */
     alreadyHaveAccount: string
     /** Primary-CTA label for an iPhone/iPad browser visitor (#1413), replacing
      *  #1333's `appStoreNote`: the CTA itself now links out to the App Store,
