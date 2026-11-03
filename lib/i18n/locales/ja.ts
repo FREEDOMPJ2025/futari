@@ -100,6 +100,10 @@ export const ja: Translations = {
     playStoreCta: 'Google Play でダウンロード',
     playStoreCtaHint: '現在は台湾でのみ配信中です',
     playBadgeAlt: 'Google Play で手に入れよう',
+    appStoreBadgeAlt: 'App Store からダウンロード',
+    // TODO(i18n): 待確認 — #1906 copy awaits Ray's approval
+    downloadQrCaption: 'スマートフォンでスキャンしてダウンロード',
+    downloadQrAlt: 'Futari のダウンロードページを開く QR コード',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
     launchBanner: {
       text: 'Futari の Android アプリが登場しました！',

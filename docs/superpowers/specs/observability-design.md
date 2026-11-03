@@ -21,8 +21,9 @@ updates:
   - v1.9.0: `signed_in`／`signed_up` 與 callback 的 `sign_in_failed` 的 `path` 分出 `android_native`／`ios_browser`，部署日前後不可比（#1769）
   - v1.9.0: 推播的呼叫者驗證改成具名 secret key，補 `[auth] reject reason=` 的讀法；不記的 header 加上 `apikey`（#1834）
   - Unreleased: `landing_cta_clicked` 的 `target` 新增 `play_store`（取代 `android_beta`），新增 `cta_location` `play_badge`／`launch_banner`；Android 招募事件改成 Google Play 下載的語意（#1901）
+  - Unreleased: `landing_cta_clicked` 新增 `cta_location` `app_store_badge`（client）與 `qr`（server，`/get`），`target` 新增 `landing`（只出現在 `qr`）；`play_badge` 從此只有手機與桌機下載區塊兩個發送點（#1906）
 related_specs: [conversion-analytics, product]
-related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", "#1415", "#1453", "#1552", "#1546", "#1553", "#1648", "#1723", "#1742", "#1764", "#968", "#1769", "#1834", "#1901"]
+related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", "#1415", "#1453", "#1552", "#1546", "#1553", "#1648", "#1723", "#1742", "#1764", "#968", "#1769", "#1834", "#1901", "#1906"]
 ---
 
 # 觀測的邊界與讀數據的紀律
@@ -130,11 +131,14 @@ related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", 
   - **失效的樣子**：`android_beta_share_clicked` 的 `method=copy` 占多數不代表使用者偏好複製，Android 殼的 WebView 沒有 Web Share API，殼內一律走複製。出遊連結點擊數為 0 不代表沒人看到，可能是訪客用的不是 Android 瀏覽器；更糟的是這條連結若被改成帶 `from=` 或沿用分享頁網址，出遊分享 token 會靜默進到 /android-beta 的 referrer 或 PostHog，沒有任何錯誤。這兩個入口帶來的人，在 `/android-beta` 的 `android_beta_step_clicked` 上沒有來源欄位可區分（刻意不加 `from=`），要看成效只能比對事件時間與點擊數。
 
 - **Google Play 上架（#1901）後，Android 入口從「報名封閉測試」改成「到 Google Play 下載」，上面三條的事件名稱不變、語意改變，部署日前後不可比。**
-  - `landing_cta_clicked` 的 `target` 新增 `play_store`，取代 `android_beta`（部署後不再出現）。三個發送點：落地頁主 CTA（Android 瀏覽器，`cta_location` 是 `hero` 或 `desktop_header`）、hero 下方的 Google Play 徽章（`cta_location: 'play_badge'`，所有瀏覽器都看得到）、首頁上方的上架公告（`cta_location: 'launch_banner'`，到 `lib/playLaunch.ts` 的 `PLAY_LAUNCH_BANNER_LAST_DAY` 為止）。三者都不在 Capacitor 殼內出現。
+  - `landing_cta_clicked` 的 `target` 新增 `play_store`，取代 `android_beta`（部署後不再出現）。三個發送點：落地頁主 CTA（Android 瀏覽器，`cta_location` 是 `hero` 或 `desktop_header`）、hero 下方的 Google Play 徽章（`cta_location: 'play_badge'`，所有瀏覽器都看得到；#1906 起桌機版移進下載區塊）、首頁上方的上架公告（`cta_location: 'launch_banner'`，到 `lib/playLaunch.ts` 的 `PLAY_LAUNCH_BANNER_LAST_DAY` 為止）。三者都不在 Capacitor 殼內出現。
   - `android_beta_invite_*`：儀表板卡片改成「Android App 上架了」，`clicked` 量的是「打開 Google Play 頁」。關閉紀錄換了 localStorage key，關過舊測試邀請的人會再看到一次新卡片，所以部署後 `shown` 會跳一次，不是新增 Android 使用者。
   - `android_beta_step_clicked`：`/android-beta` 改成「已上架」說明頁，只剩一顆按鈕，`step` 固定是 `play_store`；`join_group`／`open_testing` 不再出現。
   - `android_beta_outing_link_clicked`、`android_beta_share_clicked`：連結和分享內容改成 Google Play 頁；設定那一列在兩個殼內都隱藏（以前 Android 殼內會顯示），所以 `method=copy` 不會再來自 Android 殼。
   - **失效的樣子**：這些事件只量到「點了往 Google Play 的連結」，量不到有沒有安裝（在 Google 那邊，看 Play Console）；台灣以外的訪客點下去會看到「你所在的國家／地區無法使用」，點擊數照算。徽章與公告是在伺服器 HTML 裡、靠頁面最前面的 inline script 在殼內先藏起來；那段 script 若沒跑，殼內會看到 Play 連結，但事件不會告訴你這件事。
+
+- **桌機下載區塊（#1906）是新測量點，基準從部署日起算。** 只在 `md` 以上、殼外出現：App Store 徽章（client，`app/[locale]/_landing/AppStoreBadge.tsx`，`cta_location: 'app_store_badge'`、`target: 'app_store'`）、同一列的 Google Play 徽章（沿用 `play_badge`），以及 QR code。QR 本身不能點，掃描後打到 `/get`（`app/get/route.ts`），由 **server** 用 `captureServer` 發 `landing_cta_clicked`，`cta_location: 'qr'`，`target` 是實際轉去的地方：`app_store`（iPhone／iPad UA）、`play_store`（Android）、`landing`（其他，含自稱 Macintosh 的 iPadOS）。
+  - **失效的樣子**：`qr` 事件全部掛在同一個 distinct_id `anon:landing-qr` 底下（掃描的手機在這一刻沒有 PostHog 身分），只能看筆數與 `target` 分布，不能算人數、不能跟桌機那次瀏覽串成同一個人。iPad 用預設的「桌面版網站」掃描時 UA 是 Macintosh，會記成 `target: 'landing'`，之後首頁 CTA 才在 client 端轉 App Store，所以 `qr` 的 `app_store` 偏低。App Store 這側的安裝數看 ASC 宣傳活動：徽章與「iPhone App」字樣是 `landing-desktop`，QR 是 `landing-qr`（「iPhone App」字樣的點擊不發 PostHog 事件）。
 
 - **`outing_created` 與 `outing_link_shared`（#1723）是出遊漏斗的新測量點，基準從部署日起算。** `outing_created` 由 server 在 `createOuting` 成功後發（`captureServer`，distinct_id 是使用者 id），沒有屬性；放 server 是為了跟同樣在 server、以使用者 id 為 key 的 `signed_up`、`setup_completed` 串成同一個人的漏斗。`outing_link_shared` 由 client 發，屬性只有 `method`：`copy`（剪貼簿真的寫入：「複製連結」，或沒有分享面板時「分享給朋友」改複製訊息＋連結）、`share`（系統分享面板，使用者沒取消）、`qr`（顯示 QR 給人掃）。`share`／`qr` 從 #1727 上線起才有。兩者都不帶出遊 id、名稱、分享 token 或任何 URL 內容；重設連結不算分享，剪貼簿失敗也不發。
   - **出遊分享頁的事件 0 筆，是沒有訪客，不是沒送出（2026-10-15 查證）。** v1.7.0（10-08）上線到 10-15，PostHog 在 `/<locale>/outing/*` 上連無條件發送的 `$pageview` 都是 0，但同期 `/outings` 儀表板頁有 18 筆 pageview（iOS 殼），代表 PostHog 本身正常。以 production build（`VERCEL_ENV=production`）接 DEV 資料庫、在 headless 瀏覽器開分享頁，`outing_link_opened` 與 `$pageview` 都有送出，token 在 `$current_url`／`$pathname`／`$session_entry_url` 都被換成 `:token`（請求在瀏覽器端攔下，沒有進 PostHog）。分享連結也沒有 universal link，一定是在瀏覽器開。所以 prod 那 2 次出遊的參與者沒有人是開分享頁進來的（推論自分享頁 0 個 pageview；沒有查 prod 資料庫）。

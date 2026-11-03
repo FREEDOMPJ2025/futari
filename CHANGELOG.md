@@ -41,7 +41,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
-_Nothing unreleased yet._
+### 使用者可見變化
+
+- **桌機首頁加上 App Store 徽章與下載 QR code（#1906）**
+  使用者：桌機首頁可直接點 App Store／Google Play，或用手機掃 QR 下載；「iPhone App」字樣可點。
+  技術：新增 `/get` 依 UA 轉址（`ct=landing-qr`）並由 server 記 `cta_location=qr`；徽章 `ct=landing-desktop`。
 
 ## [1.9.2] - 2026-11-04
 

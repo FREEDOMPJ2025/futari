@@ -85,3 +85,48 @@ export function resolveVisitorPlatform({
 
   return 'sign_in'
 }
+
+/**
+ * App Store Connect campaign names (`ct`) used on the landing (#1555, #1906).
+ * - `landing`: the iPhone/iPad browser primary CTA.
+ * - `landing-desktop`: the desktop App Store badge and the "iPhone App" link
+ *   in the platform line, so ASC can tell desktop visitors apart from phones.
+ * - `landing-qr`: the desktop QR code, via the `/get` redirect.
+ * Failure looks like: ASC's 宣傳活動 report lumps desktop and QR installs into
+ * `landing` (or into 「網頁推薦」 if `ct` is dropped); nothing errors.
+ */
+export type AppStoreCampaign = 'landing' | 'landing-desktop' | 'landing-qr'
+
+/** `APP_STORE_URL` with its `ct` campaign swapped; every other param kept. */
+export function appStoreUrl(campaign: AppStoreCampaign): string {
+  const url = new URL(APP_STORE_URL)
+  url.searchParams.set('ct', campaign)
+  return url.toString()
+}
+
+/** Path of the desktop QR's redirect route (`app/get/route.ts`, #1906). */
+export const QR_REDIRECT_PATH = '/get'
+
+export type QrRedirectTarget = 'app_store' | 'play_store' | 'landing'
+
+/** PostHog distinct id for `/get`'s server-side `landing_cta_clicked`: one
+ *  shared bucket, since the scanning phone has no identity yet. */
+export const QR_SCAN_BUCKET_ID = 'anon:landing-qr'
+
+/**
+ * Where `/get` sends a phone that scanned the desktop QR (#1906). Server-side
+ * the User-Agent string is all there is, so unlike `resolveVisitorPlatform`
+ * there is no `maxTouchPoints` to tell iPadOS (which reports itself as
+ * "Macintosh") from a real Mac. A Mac UA therefore goes to the landing, not
+ * the App Store: on an iPad the landing's own CTA then resolves to the App
+ * Store client-side (touch points are readable there), and a real Mac that
+ * opened the link is not sent to a store page it can't install from.
+ * Failure looks like: nothing errors; the QR's ASC/PostHog numbers just count
+ * those iPads under `landing` instead of `app_store`.
+ */
+export function resolveQrRedirect(userAgent: string): QrRedirectTarget {
+  const ua = userAgent.toLowerCase()
+  if (/iphone|ipad|ipod/.test(ua)) return 'app_store'
+  if (/android/.test(ua)) return 'play_store'
+  return 'landing'
+}

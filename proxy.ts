@@ -182,6 +182,7 @@ export async function proxy(request: NextRequest) {
     // slash is 308'd by Next to the exact path before it gets here, and that
     // path still needs the key.
     || pathname === '/api/shortcut/pending'
+    || pathname === '/get' // #1906: desktop QR → store redirect, no session needed
 
   if (isPublic && isOutingPublicPath(pathname)) {
     // #1558: the outing share pages are public but read the session (a

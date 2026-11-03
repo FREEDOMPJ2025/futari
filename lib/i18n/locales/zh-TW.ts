@@ -182,6 +182,15 @@ export type Translations = {
     /** Alt text of the official Google Play badge image (#1901): the words
      *  printed on that locale's badge, verbatim — not a translation of ours. */
     playBadgeAlt: string
+    /** Alt text of Apple's official App Store badge on the desktop landing
+     *  (#1906): the words printed on that locale's badge, verbatim. */
+    appStoreBadgeAlt: string
+    /** One line next to the desktop QR code (#1906). The QR goes to `/get`,
+     *  which sends iPhone and Android alike to their store, so it says
+     *  "phone", not "iPhone". Awaiting Ray's copy approval. */
+    downloadQrCaption: string
+    /** Accessible name of the desktop QR code image (#1906). */
+    downloadQrAlt: string
     /** Google's trademark attribution, required on any page showing the badge.
      *  English in every locale on purpose (Google's wording); don't translate. */
     playTrademark: string
@@ -3693,6 +3702,9 @@ export const zhTW: Translations = {
     playStoreCta: '在 Google Play 下載',
     playStoreCtaHint: '目前只在台灣上架',
     playBadgeAlt: 'Google Play 立即下載',
+    appStoreBadgeAlt: 'App Store 下載',
+    downloadQrCaption: '用手機掃描下載',
+    downloadQrAlt: '掃描後開啟 Futari 的下載頁面',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
     launchBanner: {
       text: 'Futari 的 Android App 上架了！',

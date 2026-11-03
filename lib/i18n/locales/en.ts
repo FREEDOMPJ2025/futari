@@ -99,6 +99,10 @@ export const en: Translations = {
     playStoreCta: 'Get it on Google Play',
     playStoreCtaHint: 'Currently available in Taiwan only',
     playBadgeAlt: 'Get it on Google Play',
+    appStoreBadgeAlt: 'Download on the App Store',
+    // TODO(i18n): 待確認 — #1906 copy awaits Ray's approval
+    downloadQrCaption: 'Scan with your phone to download',
+    downloadQrAlt: 'QR code that opens the Futari download page',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
     launchBanner: {
       text: 'The Futari Android app is here!',
