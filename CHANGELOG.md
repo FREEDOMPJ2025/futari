@@ -47,6 +47,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：Android 瀏覽器的首頁按鈕、儀表板卡片、設定的邀請列、出遊頁那一行都改連 Google Play，並註明目前只在台灣上架；首頁加上 Google Play 徽章和可關閉的上架公告；`/android-beta` 改成「封閉測試已結束」說明頁；App 內（兩個殼）不顯示任何下載連結。
   技術：`PLAY_STORE_URL` 取代測試群組／opt-in 常數，CTA 目標 `android_beta` → `play_store`（`landing_cta_clicked` 一併改）；徽章與公告由 SSR 輸出、靠 `lib/playLaunch.ts` 的 pre-paint script 在殼內與關閉後先隱藏（不跳版面），公告到 2026-11-17 為止。
 
+- **中文、日文的襯線標題改用系統的中日文字型，字重和行高跟著調（#1849）**
+  使用者：zh-TW／zh-CN／ja 的標題，中日文字不再落到瀏覽器隨機挑的字型，改用 PingFang／微軟正黑體／Hiragino 等系統字，字重 500、行高 1.35（首頁大標維持 1.15），斷行更自然；英文不變。
+  技術：`fraunces.css`（含產生器）依 `<html lang>` 在 Fraunces 後面接系統 CJK 字型，不載入網頁字型；`globals.css` 新增 `.cjk-h`／`.cjk-d`，首頁與記帳首頁的 inline 襯線標題加上 class；擋渲染 CSS 增加約 30 B。
+
 ### 技術變更
 
 - **repo 搬到 FREEDOMPJ2025/futari，專案改名為 Futari**
