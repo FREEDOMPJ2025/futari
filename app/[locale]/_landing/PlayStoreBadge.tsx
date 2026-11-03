@@ -4,7 +4,7 @@ import Image from 'next/image'
 import type { Locale } from '@/lib/i18n/locales-meta'
 import { track } from '@/lib/analytics/track'
 import { PLAY_STORE_URL } from '@/lib/visitorPlatform'
-import { useMarkNativeShell } from './PlayLaunchBanner'
+import { useMarkNativeShell } from '@/lib/useMarkNativeShell'
 
 /** Google's official badge files, one per locale, untouched (646×250 incl.
  *  Google's own clear-space padding). Don't crop, recolour or re-export them:

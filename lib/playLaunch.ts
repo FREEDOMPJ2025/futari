@@ -13,7 +13,10 @@
  * a Tailwind arbitrary variant on each element hides it before the first
  * paint. A returning visitor who dismissed the banner therefore never sees it
  * or the gap it would leave. `<html>` carries `suppressHydrationWarning`
- * (app/layout.tsx), so these attributes don't trip hydration.
+ * (app/layout.tsx), so these attributes don't trip hydration. The script only
+ * runs on a full load, so the components repeat the same checks in a layout
+ * effect (`isPlayLaunchBannerOff`, `isInNativeShell`) for client-side
+ * navigation back to the landing.
  *
  * Failure looks like: the banner appearing for a split second and the page
  * jumping up when it vanishes (script not running before the banner), or the
@@ -45,6 +48,40 @@ export function playLaunchBannerEndsAt(lastDay: string = PLAY_LAUNCH_BANNER_LAST
 
 export function isPlayLaunchBannerActive(now: number = Date.now(), lastDay: string = PLAY_LAUNCH_BANNER_LAST_DAY): boolean {
   return now < playLaunchBannerEndsAt(lastDay)
+}
+
+/**
+ * Runtime twin of the banner half of `landingPrePaintScript`: dismissed on
+ * this browser, or past the end date. The banner calls this itself on every
+ * mount, because the inline script only runs on a full page load: React does
+ * not execute a `<script>` it inserts during client-side navigation, so coming
+ * back to `/` through an in-site link renders the landing without the script.
+ * Failure looks like: the banner showing again after "close" when the visitor
+ * clicks the logo on another page and lands back on the home page, until a
+ * reload; no error anywhere. Keep in step with the script (a parity test in
+ * tests/play-launch-1901.test.tsx runs both on the same inputs).
+ */
+export function isPlayLaunchBannerOff(now: number = Date.now(), endsAt: number = playLaunchBannerEndsAt()): boolean {
+  if (now >= endsAt) return true
+  try {
+    return Boolean(window.localStorage.getItem(PLAY_LAUNCH_BANNER_DISMISS_KEY))
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Runtime twin of the shell half of `landingPrePaintScript` (same three
+ * signals, see below). `Capacitor` alone proves nothing: a web page that
+ * imported `@capacitor/core` has it too, reporting 'web' (lib/platform.ts).
+ */
+export function isInNativeShell(): boolean {
+  const w = window as unknown as {
+    Capacitor?: { isNativePlatform?: () => boolean }
+    androidBridge?: unknown
+    webkit?: { messageHandlers?: { bridge?: unknown } }
+  }
+  return Boolean(w.Capacitor?.isNativePlatform?.() || w.androidBridge || w.webkit?.messageHandlers?.bridge)
 }
 
 /**

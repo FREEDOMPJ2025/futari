@@ -12,6 +12,7 @@ import { ja } from '@/lib/i18n/locales/ja'
 import { zhCN } from '@/lib/i18n/locales/zh-CN'
 import { isPublicLocalizedPath } from '@/lib/i18n/path'
 import { PLAY_STORE_URL } from '@/lib/visitorPlatform'
+import { NATIVE_SHELL_ATTR } from '@/lib/playLaunch'
 
 afterEach(() => {
   cleanup()
@@ -51,6 +52,27 @@ describe('AndroidBetaSteps — "launched" page (#1901)', () => {
     expect(container.innerHTML).not.toContain('groups.google.com')
     expect(container.innerHTML).not.toContain('play.google.com/apps/testing')
     expect(screen.queryByRole('list')).toBeNull()
+  })
+
+  it('hides the Play button inside a native shell (flags <html>, CSS variant on the block)', () => {
+    const w = window as unknown as { Capacitor?: unknown }
+    w.Capacitor = { isNativePlatform: () => true, getPlatform: () => 'ios' }
+    try {
+      renderSteps()
+      expect(document.documentElement.hasAttribute(NATIVE_SHELL_ATTR)).toBe(true)
+      const block = screen.getByText(zhTW.landing.playStoreCta).closest('a')!.parentElement!
+      expect(block.className).toContain('[html[data-native-shell]_&]:hidden')
+      // The "use the web version" link stays visible.
+      expect(screen.getByText(zhTW.androidBeta.useWebVersion).closest('a')!.className).not.toContain('data-native-shell')
+    } finally {
+      delete w.Capacitor
+      document.documentElement.removeAttribute(NATIVE_SHELL_ATTR)
+    }
+  })
+
+  it('does not flag a regular browser', () => {
+    renderSteps()
+    expect(document.documentElement.hasAttribute(NATIVE_SHELL_ATTR)).toBe(false)
   })
 
   it('renders the en page with en copy and the locale-pinned web link', async () => {

@@ -3,6 +3,7 @@
 import { track } from '@/lib/analytics/track'
 import type { Translations } from '@/lib/i18n/locales/zh-TW'
 import { PLAY_STORE_URL } from '@/lib/visitorPlatform'
+import { useMarkNativeShell } from '@/lib/useMarkNativeShell'
 
 const BUTTON_CLASS =
   'fc-edge inline-flex items-center justify-center h-12 px-6 rounded-xl bg-ink no-underline text-[var(--on-fill)] text-base font-medium'
@@ -24,8 +25,15 @@ interface Props {
  *
  * The Play click reuses `android_beta_step_clicked` with `step: 'play_store'`
  * (the page's existing event; `join_group` / `open_testing` no longer fire).
+ *
+ * The Play button hides inside either native shell, like the landing's Play
+ * badge (Apple 2.3.10 / 3.1.1 in the iOS app; the Android app is already
+ * installed). Nothing in the app links here, so this page has no pre-paint
+ * script: in a shell the button may show until hydration.
  */
 export function AndroidBetaSteps({ t, playStoreCta, playStoreCtaHint, webHref }: Props) {
+  useMarkNativeShell()
+
   return (
     <div className="flex flex-col gap-8">
       <header>
@@ -38,7 +46,7 @@ export function AndroidBetaSteps({ t, playStoreCta, playStoreCtaHint, webHref }:
         <p className="text-sm leading-relaxed m-0 text-ink-2">{t.body}</p>
       </header>
 
-      <div className="flex flex-col gap-2 items-start">
+      <div className="[html[data-native-shell]_&]:hidden flex flex-col gap-2 items-start">
         <a
           href={PLAY_STORE_URL}
           target="_blank"

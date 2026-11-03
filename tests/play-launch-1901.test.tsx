@@ -19,7 +19,9 @@ import {
   PLAY_BANNER_OFF_ATTR,
   PLAY_LAUNCH_BANNER_DISMISS_KEY,
   PLAY_LAUNCH_BANNER_LAST_DAY,
+  isInNativeShell,
   isPlayLaunchBannerActive,
+  isPlayLaunchBannerOff,
   landingPrePaintScript,
   playLaunchBannerEndsAt,
 } from '@/lib/playLaunch'
@@ -153,6 +155,95 @@ describe('PlayLaunchBanner', () => {
     w.Capacitor = { isNativePlatform: () => true, getPlatform: () => 'android' }
     render(<PlayLaunchBanner t={t} />)
     expect(html().hasAttribute(NATIVE_SHELL_ATTR)).toBe(true)
+  })
+
+  // Client-side navigation back to `/` (e.g. the logo on /sign-in): React does
+  // not run the inline script, so <html> has no flag and the banner must decide
+  // on its own. jsdom applies no Tailwind, so "hidden" = the flag its
+  // `[html[data-play-banner-off]_&]:hidden` variant keys on.
+  describe('without the pre-paint script (client-side navigation)', () => {
+    const LAST_DAY_NOON = Date.parse(`${PLAY_LAUNCH_BANNER_LAST_DAY}T12:00:00+08:00`)
+
+    it('stays hidden when it was dismissed earlier', () => {
+      window.localStorage.setItem(PLAY_LAUNCH_BANNER_DISMISS_KEY, '1')
+      vi.spyOn(Date, 'now').mockReturnValue(LAST_DAY_NOON)
+      expect(html().hasAttribute(PLAY_BANNER_OFF_ATTR)).toBe(false)
+      render(<PlayLaunchBanner t={t} />)
+      expect(html().hasAttribute(PLAY_BANNER_OFF_ATTR)).toBe(true)
+    })
+
+    it('stays hidden after the end date (Taipei midnight after the last day)', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(Date.parse(`${PLAY_LAUNCH_BANNER_LAST_DAY}T23:59:59+08:00`) + 1000)
+      render(<PlayLaunchBanner t={t} />)
+      expect(html().hasAttribute(PLAY_BANNER_OFF_ATTR)).toBe(true)
+    })
+
+    it('still shows for a fresh visitor before the end date', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(LAST_DAY_NOON)
+      render(<PlayLaunchBanner t={t} />)
+      expect(screen.getByText(t.text)).toBeTruthy()
+      expect(html().hasAttribute(PLAY_BANNER_OFF_ATTR)).toBe(false)
+    })
+
+    it('hides when the tab comes back after the last day passed while it was open', () => {
+      const now = vi.spyOn(Date, 'now').mockReturnValue(LAST_DAY_NOON)
+      render(<PlayLaunchBanner t={t} />)
+      expect(html().hasAttribute(PLAY_BANNER_OFF_ATTR)).toBe(false)
+      now.mockReturnValue(playLaunchBannerEndsAt())
+      act(() => {
+        window.dispatchEvent(new Event('focus'))
+      })
+      expect(html().hasAttribute(PLAY_BANNER_OFF_ATTR)).toBe(true)
+    })
+
+    it.each([
+      ['Capacitor.isNativePlatform()', () => { w.Capacitor = { isNativePlatform: () => true } }],
+      ['Android bridge', () => { w.androidBridge = {} }],
+      ['iOS bridge message handler', () => { w.webkit = { messageHandlers: { bridge: {} } } }],
+    ])('flags a native shell via %s, for the banner and the badge', (_n, setup) => {
+      setup()
+      render(<PlayLaunchBanner t={t} />)
+      expect(html().hasAttribute(NATIVE_SHELL_ATTR)).toBe(true)
+      cleanup()
+      resetHtml()
+      render(<PlayStoreBadge locale="en" alt="x" />)
+      expect(html().hasAttribute(NATIVE_SHELL_ATTR)).toBe(true)
+    })
+
+    it('does not flag a web page whose Capacitor global reports web', () => {
+      w.Capacitor = { isNativePlatform: () => false, getPlatform: () => 'web' }
+      render(<PlayLaunchBanner t={t} />)
+      render(<PlayStoreBadge locale="en" alt="x" />)
+      expect(html().hasAttribute(NATIVE_SHELL_ATTR)).toBe(false)
+    })
+  })
+
+  it('the component check and the pre-paint script agree on every input', () => {
+    const endsAt = playLaunchBannerEndsAt()
+    const shells: Array<[string, () => void]> = [
+      ['none', () => {}],
+      ['web Capacitor', () => { w.Capacitor = { isNativePlatform: () => false } }],
+      ['native Capacitor', () => { w.Capacitor = { isNativePlatform: () => true } }],
+      ['androidBridge', () => { w.androidBridge = {} }],
+      ['iOS bridge', () => { w.webkit = { messageHandlers: { bridge: {} } } }],
+    ]
+    for (const dismissed of [false, true]) {
+      for (const now of [endsAt - 1, endsAt]) {
+        for (const [, setup] of shells) {
+          window.localStorage.clear()
+          if (dismissed) window.localStorage.setItem(PLAY_LAUNCH_BANNER_DISMISS_KEY, '1')
+          delete w.Capacitor
+          delete w.androidBridge
+          delete w.webkit
+          setup()
+          vi.spyOn(Date, 'now').mockReturnValue(now)
+          resetHtml()
+          new Function(landingPrePaintScript(endsAt))()
+          expect(html().hasAttribute(PLAY_BANNER_OFF_ATTR)).toBe(isPlayLaunchBannerOff(now, endsAt))
+          expect(html().hasAttribute(NATIVE_SHELL_ATTR)).toBe(isInNativeShell())
+        }
+      }
+    }
   })
 
   it('survives storage that throws on close', () => {

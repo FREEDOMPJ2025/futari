@@ -1,27 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import type { Translations } from '@/lib/i18n/locales/zh-TW'
 import { track } from '@/lib/analytics/track'
-import { nativeShellPlatform } from '@/lib/platform'
 import {
-  NATIVE_SHELL_ATTR,
   PLAY_BANNER_OFF_ATTR,
   PLAY_LAUNCH_BANNER_DISMISS_KEY,
+  isPlayLaunchBannerOff,
 } from '@/lib/playLaunch'
+import { useMarkNativeShell } from '@/lib/useMarkNativeShell'
 import { PLAY_STORE_URL } from '@/lib/visitorPlatform'
 
-/**
- * Late fallback for the pre-paint shell check (`lib/playLaunch.ts`): if the
- * shell's `Capacitor` global only appears after that script ran and neither
- * bridge object was there either, mark `<html>` once React is up. Used by the
- * banner and the Play badge.
- */
-export function useMarkNativeShell(): void {
-  useEffect(() => {
-    if (nativeShellPlatform()) document.documentElement.setAttribute(NATIVE_SHELL_ATTR, '')
-  }, [])
-}
+const markBannerOff = () => document.documentElement.setAttribute(PLAY_BANNER_OFF_ATTR, '')
 
 interface Props {
   t: Translations['landing']['launchBanner']
@@ -36,10 +26,32 @@ interface Props {
  * stores `PLAY_LAUNCH_BANNER_DISMISS_KEY`, so it doesn't come back after a
  * reload. A failing `localStorage` (private mode) only means it shows again
  * on the next visit.
+ *
+ * The script only runs on a full load, so the banner also checks for itself
+ * (`isPlayLaunchBannerOff`, the script's runtime twin) in a layout effect:
+ * coming back to `/` by client-side navigation, the attribute is set before
+ * the browser paints. It checks again when the tab regains visibility or
+ * focus, so a page left open past the last day hides it then.
  */
 export function PlayLaunchBanner({ t }: Props) {
   const [closed, setClosed] = useState(false)
   useMarkNativeShell()
+
+  useLayoutEffect(() => {
+    const check = () => {
+      if (isPlayLaunchBannerOff()) markBannerOff()
+    }
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') check()
+    }
+    check()
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('focus', check)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('focus', check)
+    }
+  }, [])
 
   if (closed) return null
 
@@ -49,7 +61,7 @@ export function PlayLaunchBanner({ t }: Props) {
     } catch {
       // private-mode storage failure: the banner may show again next visit.
     }
-    document.documentElement.setAttribute(PLAY_BANNER_OFF_ATTR, '')
+    markBannerOff()
     setClosed(true)
   }
 
