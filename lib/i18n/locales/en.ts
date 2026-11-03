@@ -2172,13 +2172,13 @@ export const en: Translations = {
 
   termsPage: {
     heading: 'Terms of Service',
-    lastUpdated: 'Last updated: October 15, 2026',
+    lastUpdated: 'Last updated: November 3, 2026',
     intro: 'By using Futari (the "Service"), you agree to the following terms. Please read them before using the Service.',
     bullets: [
       'The Service provides a shared expense tracker for two people, including transaction records, settlements, and shared asset management. All settlement results are for your own reference; the Service is not responsible for their accuracy.',
       'Your data belongs to you. The Service uses your data solely to display your ledger and calculate balances — it will never be sold or shared with third parties.',
-      'Please do not record highly sensitive personal information (such as national ID numbers or credit card numbers). The Service is designed for budgeting, not confidential document storage.',
-      'By signing in with Google, you agree that Google will share your basic account information (name, avatar, email) with the Service for account identification purposes.',
+      'Please do not enter highly sensitive information, such as national ID numbers or credit card numbers, in general fields like transaction descriptions or notes. Those fields are not separately encrypted. Enter a child\'s national ID or health card number only in the dedicated fields of a Child entry in Aibutsu, which are encrypted before they are written to the database (see "Where data is stored" in the Privacy Policy). The Service is designed for budgeting, not confidential document storage.',
+      'By signing in with Google or Apple, you agree that the provider will share your basic account information with the Service for account identification purposes: Google shares your name, avatar and email; Apple shares the name and email you choose to share.',
       'You may sign out or delete your account at any time from the settings page. A deletion request has a 14-day grace period and can be cancelled during it. After that, the records you wrote on your own are deleted, except what your partner could see. A ledger shared with a partner stays with them, and so does a past shared chapter they have since left — the records the two of you wrote together are not removed. See “Data retention” in the privacy policy for details.',
       'The Service reserves the right to suspend or adjust the Service for maintenance, security, or system requirements, and will provide advance notice where possible.',
       'These Terms are governed by the laws of the Republic of China (Taiwan). Any disputes shall be submitted to the Taipei District Court as the court of first instance.',
@@ -2192,11 +2192,11 @@ export const en: Translations = {
 
   privacyPage: {
     heading: 'Privacy Policy',
-    lastUpdated: 'Last updated: October 23, 2026',
+    lastUpdated: 'Last updated: November 3, 2026',
     intro: 'This page explains how Futari collects, uses, and protects your personal data.',
     sectionCollectTitle: 'Data we collect',
     sectionCollectItems: [
-      'Basic account information from Google or Apple sign-in: name, avatar, and email address.',
+      'Basic account information from Google or Apple sign-in: from Google, your name, avatar and email address; from Apple, the name and email address you choose to share.',
       'Expense data you enter manually, including transactions, settlements, split preferences, and shared asset records.',
       'Invite links and acceptance times (used to link the two accounts).',
       'Usage behavior and error information (used to improve the Service — see Third-party services below).',
