@@ -182,9 +182,9 @@ docs/superpowers/specs/    架構規格 + 設計決策
 
 | 版本 | 主題 |
 |---|---|
+| [v1.9.2](CHANGELOG.md#192---2026-11-04) | Android App 上架 Google Play，網站下載入口與首頁公告 · 捷徑教學改教「Futari 記一筆」動作 · 服務條款與隱私權政策對齊現況 · repo 搬家、改名 Futari |
 | [v1.9.1](CHANGELOG.md#191---2026-10-31) | iPhone 用 Apple 註冊不再失敗 · 登入成功不閃錯誤頁、連不上時會說明 · 未登入頁捲動不壓到狀態列 · Node 26 |
 | [v1.9.0](CHANGELOG.md#190---2026-10-31) | Android 定期收支推播與系統分享面板 · iPhone 錢包自動化「Futari 記一筆」與商家記憶分類 · 記帳首頁收斂層級與對比達標 · 首頁新主視覺與範例小卡 |
-| [v1.8.0](CHANGELOG.md#180---2026-10-19) | 品牌頁「紀錄化成光點」與版面整理 · iPhone 捷徑送進待確認 · 匯入新增 AndroMoney／まねーぼ／Splitwise · 「已離開的夥伴」依讀者語系顯示 |
 
 ---
 

@@ -41,13 +41,30 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+_Nothing unreleased yet._
+
+## [1.9.2] - 2026-11-04
+
+主題：**Android App 上架 Google Play**——網站的 Android 下載入口改連 Google Play，首頁有上架公告；捷徑教學改教「Futari 記一筆」動作；服務條款與隱私權政策對齊現況；repo 搬家，專案改名 Futari。
+完整 diff：[v1.9.1...v1.9.2](https://github.com/FREEDOMPJ2025/futari/compare/v1.9.1...v1.9.2)
+
 ### 使用者可見變化
 
 - **Android App 上架 Google Play，網站的測試招募改成「到 Google Play 下載」（#1901）**
   使用者：Android 瀏覽器的首頁按鈕、儀表板卡片、設定的邀請列、出遊頁那一行都改連 Google Play，並註明目前只在台灣上架；首頁加上 Google Play 徽章和可關閉的上架公告；`/android-beta` 改成「封閉測試已結束」說明頁；App 內（兩個殼）不顯示任何下載連結。
-  技術：`PLAY_STORE_URL` 取代測試群組／opt-in 常數，CTA 目標 `android_beta` → `play_store`（`landing_cta_clicked` 一併改）；徽章與公告由 SSR 輸出、靠 `lib/playLaunch.ts` 的 pre-paint script 在殼內與關閉後先隱藏（不跳版面），公告到 2026-11-17 為止。
+  技術：`PLAY_STORE_URL` 取代測試群組／opt-in 常數，CTA 目標 `android_beta` → `play_store`（`landing_cta_clicked` 一併改）；徽章與公告由 SSR 輸出、靠 `lib/playLaunch.ts` 的 pre-paint script 在殼內與關閉後先隱藏（不跳版面），站內導回首頁時由元件掛載時的 layout effect 再檢查一次；公告到 2026-11-17 為止。
+
+- **捷徑教學改教「Futari 記一筆」動作，網址做法留作備用（#1871）**
+  使用者：`/features/shortcuts` 的 Apple Pay 段改成在「錢包」自動化加入「Futari 記一筆」（iOS 17 以上、iOS App 1.9.0 以上），原本的網址做法移到新的「備用」段，疑難排解多一列「找不到動作」；四語同步。
+  技術：新增 `featureShortcuts.applePayUrl` 段（`urlLabel` 從 `applePay` 移過去），`Steps` 的 `code` 改成選填；`llms-full.txt` 同步改寫。
+
+- **服務條款與隱私權政策對齊現況（#1913）**
+  使用者：條款第 3 條改成別把身分證字號等寫在交易說明、備註（不另外加密），孩子的證號請填愛物「孩子」的加密欄位；第 4 條補上 Apple 登入；隱私權政策「蒐集的資料」第 1 項分開寫 Google 與 Apple 各提供什麼；最後更新日改為 11 月 3 日，四語同步。
 
 ### 技術變更
+
+- **商店截圖與故事圖支援 en／zh-CN／ja（#1904）**
+  技術：`scripts/og/` 的實機截圖、故事圖、ASC 上傳腳本加 `--locale`，新增商店 PNG 檢查腳本與只對 dev 的三語示範帳本 seed，三語圖檔放進 `docs/store-assets/`（要另外上傳到商店）。
 
 - **repo 搬到 FREEDOMPJ2025/futari，專案改名為 Futari**
   使用者：服務條款、隱私權頁的「回報問題」連結改指向新的 GitHub repo（舊網址也會自動轉過去）。
@@ -2122,7 +2139,8 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 - **每頁 `generateMetadata` 接 OG image（#487）**：`public/og-image.png` 從 #282 ship 但未 wire 進 metadata，造成 prod HTML 缺 `og:image` / `twitter:image`；本版 4 個 public page 各加 `openGraph.images` + `twitter.images`，`alt` 用 `t.title` locale-aware，無需新增 i18n key。
 - **`settings.local.json` 列入 gitignore（#478）**：避免本地 hook / 權限設定外洩。
 
-[Unreleased]: https://github.com/FREEDOMPJ2025/futari/compare/v1.9.1...HEAD
+[Unreleased]: https://github.com/FREEDOMPJ2025/futari/compare/v1.9.2...HEAD
+[1.9.2]: https://github.com/FREEDOMPJ2025/futari/compare/v1.9.1...v1.9.2
 [1.9.1]: https://github.com/FREEDOMPJ2025/futari/compare/v1.9.0...v1.9.1
 [1.9.0]: https://github.com/FREEDOMPJ2025/futari/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/FREEDOMPJ2025/futari/compare/v1.7.4...v1.8.0
