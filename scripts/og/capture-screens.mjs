@@ -17,6 +17,15 @@
 // 原本的值。zh-TW 寫到 screenshots/ 本身（沿用 2026-08 起的路徑），其他語系寫到
 // screenshots/<locale>/，檔名相同。路徑規則集中在 store-locales.mjs。
 //
+// zh-CN／en／ja 另外會切到該語系的示範帳本（seed-demo-ledgers.ts 建的，資料在
+// demo-data/<locale>.json）。app 沒有「目前帳本」的 cookie，看的是哪本帳由 DB 決定
+// （getActiveGroupForUser：current_epoch_started_at 最新的那本），所以截圖前跑
+// `seed-demo-ledgers.ts --activate=<locale>`、截完（含失敗）跑 `--activate=zh-TW`
+// 切回去。這兩步會寫 dev DB，腳本自己會拒絕非 dev 的目標。旅行內頁用該語系的
+// trip id。截完 /assets 會把植物卡上的天數記進 demo-data/<locale>.capture.json，
+// 故事圖第 4 張的 {days} 就用這個數字。zh-TW 的帳本與 trip id 不變。
+// 每張圖截之前核對 /dashboard 上的帳本名稱：切換沒生效的樣子不是報錯，是截到另一本帳。
+//
 // 各組尺寸不能共用：
 //   App Store 6.7" 必須正好 1290×2796（比例 2.167:1）
 //   App Store 13" iPad 必須正好 2064×2752（或 2048×2732）—— 宣告支援 iPad 就是必填
@@ -27,7 +36,10 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { dirname, resolve, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { localeArg, shotsDirFor } from './store-locales.mjs'
+import { spawnSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
+import { localeArg, shotsDirFor, DEFAULT_LOCALE } from './store-locales.mjs'
+import { readDemoData, writeCapture, demoDataPath, DEMO_DATA_DIR } from './demo-data.mjs'
 import { checkPaths } from './check-store-pngs.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -71,15 +83,33 @@ const localeCookie = (value) => ({
   expires: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
 })
 
+// 語系的示範帳本。zh-TW 是 2026-08 起截圖用的那本（3a896cf2-…），名稱與 trip 寫死；
+// 其他語系來自 seed-demo-ledgers.ts --apply 寫的 demo-data/<locale>.json。
+const ZH_TW_LEDGER = { groupId: '3a896cf2-fe3c-4525-b5d6-789ce17e3e4e', groupName: '我們的帳本', tripId: '0eeb2477-aee5-47d9-bcb2-74699abecb9a' }
+const DEMO = LOCALE === DEFAULT_LOCALE ? ZH_TW_LEDGER : readDemoData(LOCALE)
+if (!DEMO && !process.argv.includes('--login')) {
+  console.error(`✗ ${LOCALE} 還沒有示範帳本（缺 ${demoDataPath(LOCALE)}）。先在 repo 根目錄跑：\n` +
+    `    npx tsx scripts/og/seed-demo-ledgers.ts --apply --locale=${LOCALE}`)
+  process.exit(1)
+}
+const REPO = resolve(__dirname, '..', '..')
+// 有任何語系帳本存在時才需要切換；只有 zh-TW、從沒 seed 過時不碰 DB。
+const seededAny = ['zh-CN', 'en', 'ja'].some((l) => existsSync(demoDataPath(l)))
+function activate(locale) {
+  console.log(`切換示範帳本 → ${locale}（seed-demo-ledgers.ts --activate，寫 dev DB）`)
+  const r = spawnSync('npx', ['tsx', 'scripts/og/seed-demo-ledgers.ts', `--activate=${locale}`], { cwd: REPO, stdio: 'inherit' })
+  if (r.status !== 0) throw new Error(`seed-demo-ledgers.ts --activate=${locale} 失敗（exit ${r.status}）`)
+}
+
 // 底部導覽的字串直接從 app 的語系檔讀（Node 26 可直接 import .ts；語系檔只有
 // `import type`，型別剝除後沒有其他依賴）。這樣 app 改了文案，這裡不會跟著過時。
-async function navStrings(locale) {
+async function localeStrings(locale) {
   const exportName = { 'zh-TW': 'zhTW', 'zh-CN': 'zhCN', en: 'en', ja: 'ja' }[locale]
   const listeners = process.listeners('warning')
   process.removeAllListeners('warning') // 吞掉「Reparsing as ES module」那幾行提示
   try {
     const mod = await import(resolve(__dirname, '..', '..', 'lib', 'i18n', 'locales', `${locale}.ts`))
-    return mod[exportName].bottomNav
+    return mod[exportName]
   } finally {
     // 提示是在下一輪 event loop 才送出的，等它過去再把 listener 接回來。
     await new Promise((r) => setTimeout(r, 0))
@@ -156,7 +186,8 @@ const SCREENS = [
   { name: '02-records', path: '/records', label: '紀錄與分攤' },
   // 旅行截內頁而非 /trips 清單：清單只有幾行標題然後一大片空白，
   // 多幣別與分攤這些真正的賣點都在內頁。大阪7日有 11 筆支出 + 3 種匯率。
-  { name: '03-trip', path: '/trips/0eeb2477-aee5-47d9-bcb2-74699abecb9a', label: '旅行帳本' },
+  // trip id 依語系：zh-TW 沿用大阪7日，其他語系取 demo-data/<locale>.json。
+  { name: '03-trip', path: `/trips/${DEMO?.tripId}`, label: '旅行帳本' },
   { name: '04-assets', path: '/assets', label: '愛物' },
 ]
 
@@ -226,7 +257,8 @@ async function capture() {
       })
   const results = []
   const warnings = []
-  const nav = await navStrings(LOCALE)
+  const strings = await localeStrings(LOCALE)
+  const nav = strings.bottomNav
 
   const formats = ONLY.length ? FORMATS.filter((f) => ONLY.includes(f.key)) : FORMATS
   if (!formats.length) {
@@ -242,7 +274,9 @@ async function capture() {
   await cookiePage.setCookie(localeCookie(LOCALE))
   await cookiePage.close()
 
+  let plantRecord = null
   try {
+    if (seededAny) activate(LOCALE)
     for (const fmt of formats) {
       for (const screen of SCREENS) {
         const page = await browser.newPage()
@@ -274,6 +308,13 @@ async function capture() {
 
         // 登入了不等於登入的是示範帳本（--connect 尤其如此，見檔頭）。
         await assertDemoLedger(page)
+        // 而且要是這個語系的那一本：首頁標頭是帳本名稱。
+        if (screen.name === '01-dashboard') {
+          const text = await page.evaluate(() => document.body.innerText)
+          if (!text.includes(DEMO.groupName)) {
+            throw new Error(`首頁沒有看到帳本名稱「${DEMO.groupName}」—— 現在顯示的不是 ${LOCALE} 的示範帳本（切換沒生效？）`)
+          }
+        }
 
         // 隱藏捲軸 + Next.js dev overlay 的浮標 + 等動畫與字體收斂。
         // dev indicator 那顆黑色「N」是 dev server 才有的東西，2026-08 那批截圖
@@ -289,6 +330,11 @@ async function capture() {
         const file = `${screen.name}-${fmt.key}.png`
         for (const w of await checkLocale(page, LOCALE, nav)) warnings.push(`${file}: ${w}`)
 
+        // 故事圖第 4 張的 {days}：記下植物卡當下顯示的天數（zh-TW 的文案是固定字，不記）。
+        if (screen.name === '04-assets' && LOCALE !== DEFAULT_LOCALE && !plantRecord) {
+          plantRecord = await readPlantDays(page, DEMO.plantName, strings.assetListItem.plantCompanionDays)
+        }
+
         const buf = await page.screenshot({ type: 'png' })
         await writeFile(join(OUT_DIR, file), buf)
         const px = `${fmt.width * fmt.dsr}×${fmt.height * fmt.dsr}`
@@ -298,6 +344,9 @@ async function capture() {
       }
     }
   } finally {
+    if (seededAny && LOCALE !== DEFAULT_LOCALE) {
+      try { activate(DEFAULT_LOCALE) } catch (e) { console.error(`✗ 沒能切回 zh-TW 帳本：${e.message}\n  手動跑：npx tsx scripts/og/seed-demo-ledgers.ts --activate=zh-TW`) }
+    }
     const restore = await browser.newPage()
     if (previous) {
       await restore.setCookie({ ...localeCookie(previous.value), expires: previous.expires })
@@ -311,6 +360,10 @@ async function capture() {
   }
 
   console.log(`\n共 ${results.length} 張（${LOCALE}）→ ${OUT_DIR}`)
+  if (plantRecord) {
+    writeCapture(LOCALE, { locale: LOCALE, groupId: DEMO.groupId, plantName: DEMO.plantName, ...plantRecord })
+    console.log(`植物卡：${DEMO.plantName} ${plantRecord.plantDaysShown} 天（${plantRecord.capturedOn}）→ ${relativeToRepo(join(DEMO_DATA_DIR, `${LOCALE}.capture.json`))}`)
+  }
 
   if (warnings.length) {
     console.warn(`\n⚠ 語系核對有 ${warnings.length} 則警告（啟發式，請打開圖確認）：`)
@@ -319,6 +372,27 @@ async function capture() {
 
   console.log('\n尺寸／alpha 檢查：')
   if (checkPaths(results.map((f) => join(OUT_DIR, f)))) process.exitCode = 1
+}
+
+const relativeToRepo = (p) => p.slice(REPO.length + 1)
+
+// 從 /assets 的植物卡讀出天數。卡上的字是語系檔的 plantCompanionDays
+// （例 en「{days} day(s) together」），所以用同一個模板反推出數字。
+// 日期取瀏覽器的本地日期：卡片的天數是 daysSince(萌芽日, useToday())，
+// useToday() 在 hydration 後讀的就是裝置時鐘。
+async function readPlantDays(page, plantName, template) {
+  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const [before, after = ''] = template.split('{days}')
+  const found = await page.evaluate((name) => {
+    const link = [...document.querySelectorAll('a[href^="/assets/"]')].find((a) => a.innerText.split('\n')[0].trim() === name)
+    const d = new Date()
+    const ymd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    return { text: link ? link.innerText : null, capturedOn: ymd }
+  }, plantName)
+  if (!found.text) throw new Error(`/assets 上找不到植物「${plantName}」的卡片`)
+  const m = found.text.match(new RegExp(`${esc(before.trim())}\\s*([\\d,]+)\\s*${esc(after.trim())}`))
+  if (!m) throw new Error(`植物卡上找不到天數（模板「${template}」）：${found.text.replace(/\n/g, ' / ')}`)
+  return { plantDaysShown: Number(m[1].replace(/,/g, '')), capturedOn: found.capturedOn, capturedAt: new Date().toISOString() }
 }
 
 if (LOGIN_MODE) {
