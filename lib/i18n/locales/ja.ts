@@ -1578,8 +1578,8 @@ export const ja: Translations = {
   /** Settings row: share the Android test page with a partner or friend; hidden in the iOS app (#1648). Removed with #1553. */
   androidTesterInvite: {
     title: 'Android を使っているパートナーや友だちを招待',
-    hint: 'Google Play のリンクを共有します',
-    shareTitle: 'Futari Android アプリ',
+    hint: 'Google Play のリンクを共有します。相手はそこからインストールできます',
+    shareTitle: 'Futari の Android アプリ',
     shareText: 'Futari の Android アプリが Google Play で公開されました。Android でも一緒に家計簿をつけられます。',
     copied: 'リンクをコピーしました',
   },

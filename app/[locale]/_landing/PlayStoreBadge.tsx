@@ -17,8 +17,6 @@ interface Props {
   locale: Locale
   /** The words printed on that locale's badge (`landing.playBadgeAlt`). */
   alt: string
-  /** "Only listed in Taiwan" (`landing.playStoreCtaHint`). */
-  hint: string
   className?: string
 }
 
@@ -33,8 +31,11 @@ interface Props {
  * the same height as the mobile App Store CTA: Google asks that the badge be
  * no smaller than other stores' badges on the page. The trademark line Google
  * requires is in the landing footer.
+ *
+ * No "Taiwan only" line under the badge: that hint appears once, under the
+ * main CTA (`LandingCtaHint`), per the PM decision on #1905.
  */
-export function PlayStoreBadge({ locale, alt, hint, className }: Props) {
+export function PlayStoreBadge({ locale, alt, className }: Props) {
   useMarkNativeShell()
 
   return (
@@ -57,7 +58,6 @@ export function PlayStoreBadge({ locale, alt, hint, className }: Props) {
           className="block h-20 w-auto"
         />
       </a>
-      <p className="m-0 text-xs text-ink-2">{hint}</p>
     </div>
   )
 }

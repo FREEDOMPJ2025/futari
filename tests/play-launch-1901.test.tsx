@@ -176,13 +176,14 @@ describe('Google Play badge', () => {
   it.each(SUPPORTED_LOCALES)('%s: uses that locale\'s official badge and the words on it as alt', (locale) => {
     const d = dictionaries[locale].landing
     expect(d.playBadgeAlt).toBe(ALT[locale])
-    render(<PlayStoreBadge locale={locale} alt={d.playBadgeAlt} hint={d.playStoreCtaHint} />)
+    render(<PlayStoreBadge locale={locale} alt={d.playBadgeAlt} />)
     const img = screen.getByAltText(ALT[locale]) as HTMLImageElement
     expect(img.getAttribute('src')).toBe(`/badges/google-play-${locale}.png`)
     // Google's files are 646x250 incl. padding; 80px tall keeps the visible badge ~54px.
     expect(img.getAttribute('height')).toBe('80')
     expect(img.closest('a')!.getAttribute('href')).toBe(PLAY_STORE_URL)
-    expect(screen.getByText(d.playStoreCtaHint)).toBeTruthy()
+    // The Taiwan-only hint sits under the main CTA only, not the badge (#1905).
+    expect(screen.queryByText(d.playStoreCtaHint)).toBeNull()
   })
 
   it.each(SUPPORTED_LOCALES)('%s: badge file is committed under public/', (locale) => {
@@ -191,7 +192,7 @@ describe('Google Play badge', () => {
 
   it('tracks play_badge / play_store and is CSS-hidden in shells', () => {
     const d = dictionaries.en.landing
-    const { container } = render(<PlayStoreBadge locale="en" alt={d.playBadgeAlt} hint={d.playStoreCtaHint} />)
+    const { container } = render(<PlayStoreBadge locale="en" alt={d.playBadgeAlt} />)
     fireEvent.click(screen.getByAltText(d.playBadgeAlt))
     expect(track.mock.calls).toEqual([['landing_cta_clicked', { cta_location: 'play_badge', target: 'play_store' }]])
     expect(container.firstElementChild!.className).toContain('[html[data-native-shell]_&]:hidden')
@@ -259,8 +260,8 @@ describe('Landing wiring (#1901)', () => {
     const ctas = screen.getAllByText(d.playStoreCta)
     expect(ctas.length).toBe(2) // header + hero
     for (const c of ctas) expect(c.closest('a')!.getAttribute('href')).toBe(PLAY_STORE_URL)
-    // Under the hero CTA (mobile hint) and under the badge.
-    expect(screen.getAllByText(d.playStoreCtaHint).length).toBe(2)
+    // Only under the hero CTA (mobile hint); none under the Play badge (#1905).
+    expect(screen.getAllByText(d.playStoreCtaHint).length).toBe(1)
     expect(document.body.innerHTML).not.toContain('android-beta')
   })
 })

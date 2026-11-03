@@ -294,13 +294,12 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
             {/* #1901 — official Google Play badge alongside the store CTA
                 above (which is the App Store button on iPhone/iPad). Every
                 browser sees it, so desktop visitors get a way to Android too;
-                hidden pre-paint in the native shells. The Taiwan-only line
-                sits under it because Play shows other countries a "not
-                available" page. Trademark line: footer. */}
+                hidden pre-paint in the native shells. The Taiwan-only hint
+                appears only under the main CTA above, not under the badge
+                (#1905). Trademark line: footer. */}
             <PlayStoreBadge
               locale={locale}
               alt={t.playBadgeAlt}
-              hint={t.playStoreCtaHint}
               className="mt-4 flex flex-col items-center md:items-start gap-1"
             />
 

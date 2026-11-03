@@ -1573,8 +1573,8 @@ export const zhCN: Translations = {
   /** Settings row: share the Android test page with a partner or friend; hidden in the iOS app (#1648). Removed with #1553. */
   androidTesterInvite: {
     title: '邀请用 Android 的伴侣或朋友下载',
-    hint: '分享 Google Play 的下载链接',
-    shareTitle: 'Futari Android App',
+    hint: '分享 Google Play 的链接，对方点开就能安装',
+    shareTitle: 'Futari 的 Android App',
     shareText: 'Futari 的 Android App 已在 Google Play 上架，用 Android 的你也能一起记账。',
     copied: '链接已复制',
   },

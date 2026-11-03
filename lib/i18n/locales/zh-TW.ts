@@ -2072,7 +2072,7 @@ export type Translations = {
   /** Settings row that shares the Google Play link with a partner or friend
    *  on Android (#1648 → #1901). Browser only: hidden in both native shells
    *  (iOS: Apple 2.3.10; Android: no download link inside the app). `hint`
-   *  and `shareTitle` were not in Aria's proposal (drafted, pending review). */
+   *  and `shareTitle` reviewed by Aria (#1905). */
   androidTesterInvite: {
     title: string
     hint: string
@@ -5166,8 +5166,8 @@ export const zhTW: Translations = {
 
   androidTesterInvite: {
     title: '邀請用 Android 的伴侶或朋友下載',
-    hint: '分享 Google Play 的下載連結',
-    shareTitle: 'Futari Android App',
+    hint: '分享 Google Play 的連結，對方點開就能安裝',
+    shareTitle: 'Futari 的 Android App',
     shareText: 'Futari 的 Android App 已在 Google Play 上架，用 Android 的你也能一起記帳。',
     copied: '連結已複製',
   },
