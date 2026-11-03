@@ -9,6 +9,7 @@
 //   screenshots/<locale>/<name>-<format>.png   zh-CN, en, ja
 //   story/<NN>-zh-<format>.png                 zh-TW (unchanged; `zh` predates #1904)
 //   story/<NN>-<locale>-<format>.png           zh-CN, en, ja  (e.g. 01-zh-CN-ios-6.7.png)
+//   story/<NN>-<token>-DRAFT-<format>.png      rendered with --allow-pending-copy; never uploaded
 // zh-TW keeps its old names so existing commands, docs and ASC history keep
 // pointing at the same files.
 
@@ -41,9 +42,14 @@ export function assertLocale(locale) {
 /** Directory holding the raw device screenshots for a locale. */
 export const shotsDirFor = (locale) => path.join(SHOTS_DIR, STORE_LOCALES[locale].shotsSubdir)
 
-/** story/ file name for a frame, e.g. storyFileName('en', 1, 'ios-6.7') → 01-en-ios-6.7.png */
-export const storyFileName = (locale, frame, format) =>
-  `${String(frame).padStart(2, '0')}-${STORE_LOCALES[locale].storyToken}-${format}.png`
+/**
+ * story/ file name for a frame, e.g. storyFileName('en', 1, 'ios-6.7') → 01-en-ios-6.7.png.
+ * Drafts rendered from pending (unapproved) copy get `-DRAFT` after the locale
+ * token — 01-en-DRAFT-ios-6.7.png — which storyFilePattern never matches, so
+ * asc-screenshots.mjs cannot pick them up for upload.
+ */
+export const storyFileName = (locale, frame, format, { draft = false } = {}) =>
+  `${String(frame).padStart(2, '0')}-${STORE_LOCALES[locale].storyToken}${draft ? '-DRAFT' : ''}-${format}.png`
 
 /**
  * Regex matching one locale's story files for a format. Anchored on the frame
@@ -51,6 +57,9 @@ export const storyFileName = (locale, frame, format) =>
  */
 export const storyFilePattern = (locale, format) =>
   new RegExp(`^\\d{2}-${STORE_LOCALES[locale].storyToken.replace(/-/g, '\\-')}-${format.replace(/\./g, '\\.')}\\.png$`)
+
+/** App locale for an App Store Connect locale code, or null. */
+export const localeForAsc = (asc) => Object.keys(STORE_LOCALES).find((l) => STORE_LOCALES[l].asc === asc) || null
 
 export const localeArg = (argv = process.argv) => {
   const hit = argv.find((a) => a.startsWith('--locale='))

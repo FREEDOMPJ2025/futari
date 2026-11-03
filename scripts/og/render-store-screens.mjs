@@ -16,7 +16,8 @@
 //   screenshots/<locale>/ for the others; see store-locales.mjs).
 // --allow-pending-copy  render a locale whose copy is still a placeholder
 //   (`pending: true` in store-screens.html). Without it such a locale is
-//   refused, because the placeholder is the zh-TW text.
+//   refused, because the placeholder is the zh-TW text. Drafts are written as
+//   <NN>-<token>-DRAFT-<format>.png, a name asc-screenshots.mjs never uploads.
 // --lang=zh  old spelling of --locale=zh-TW, still accepted.
 //
 // Default output: ../../docs/store-assets/story/<NN>-<token>-<format>.png,
@@ -64,6 +65,7 @@ const urlFor = (frame) =>
 // the finally and leave Chromium running.
 class Refusal extends Error {}
 
+let draft = false
 const browser = await puppeteer.launch({ headless: 'new', args: ['--allow-file-access-from-files'] })
 const written = []
 
@@ -87,8 +89,9 @@ try {
         )
         throw new Refusal()
       }
+      draft = true
       const bar = '!'.repeat(72)
-      console.warn(`\n${bar}\n!! ${locale}: RENDERING WITH PENDING COPY (zh-TW placeholder text).\n!! Draft only — do not upload these images. (#1904 needs-copy)\n${bar}\n`)
+      console.warn(`\n${bar}\n!! ${locale}: RENDERING WITH PENDING COPY (zh-TW placeholder text).\n!! Draft only: written as *-DRAFT-*.png, which asc-screenshots.mjs never uploads. (#1904 needs-copy)\n${bar}\n`)
     }
 
     const missing = frames
@@ -114,7 +117,7 @@ try {
     // Without this wait the headline silently falls back to a system font.
     await page.waitForFunction(() => window.__OG_READY__ === true, { timeout: 15000 })
     const buf = await page.screenshot({ type: 'png', omitBackground: false })
-    const name = storyFileName(locale, frame, formatKey)
+    const name = storyFileName(locale, frame, formatKey, { draft })
     await writeFile(resolve(outDir, name), buf)
     written.push(resolve(outDir, name))
     console.log(`✓ ${name}`)

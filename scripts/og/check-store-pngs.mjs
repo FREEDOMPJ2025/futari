@@ -96,7 +96,8 @@ export function checkPaths(paths, { quiet = false } = {}) {
   for (const file of files) {
     if (file === null) { failures++; continue }
     const problems = checkPng(file)
-    const rel = file.startsWith(process.cwd() + path.sep) ? path.relative(process.cwd(), file) : file
+    const rel = file.startsWith(ASSETS + path.sep) ? path.relative(ASSETS, file)
+      : file.startsWith(process.cwd() + path.sep) ? path.relative(process.cwd(), file) : file
     if (problems.length) {
       failures++
       console.error(`✗ ${rel}: ${problems.join('; ')}`)
