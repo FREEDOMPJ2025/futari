@@ -96,12 +96,19 @@ export const en: Translations = {
     alreadyHaveAccount: 'I already have an account',
     appStoreCta: 'Get it on the App Store',
     appStoreCtaHint: 'Works on iPhone and iPad',
-    androidBetaCta: 'Join the Android beta',
-    androidBetaCtaHint: 'Join the test group with the Google account you use on Google Play, then install the app.',
+    playStoreCta: 'Get it on Google Play',
+    playStoreCtaHint: 'Currently available in Taiwan only',
+    playBadgeAlt: 'Get it on Google Play',
+    playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
+    launchBanner: {
+      text: 'The Futari Android app is here!',
+      link: 'Get it on Google Play',
+      closeAria: 'Close',
+    },
     useWebVersion: 'Use the web version',
     trustEncrypted: 'Open only to you two',
     trustFree: 'Free to use',
-    trustPwa: 'iPhone app · Web',
+    trustPwa: 'iPhone app · Android app · Web',
     trust: {
       narrative: 'Your records belong only to the two of you. No ads, no data selling.',
       encryption: {
@@ -1242,28 +1249,18 @@ export const en: Translations = {
   },
 
   androidBetaInvite: {
-    heading: 'The Android app is looking for testers',
-    body: 'You’re opening Futari on Android. If you’d like to try the app first, join the test group with the Google account you use on Google Play, then install it.',
-    cta: 'Join the Android beta',
+    heading: 'The Android app is here',
+    body: 'You’re opening Futari on Android. To use the app instead, get it on Google Play.',
+    cta: 'Get it on Google Play',
   },
 
-  /** /android-beta self-serve join page (#1648). Temporary, removed with #1553. */
+  /** /android-beta: closed testing is over, the app is on Google Play (#1901). */
   androidBeta: {
-    metaTitle: 'Android beta',
-    title: 'Join the Futari Android beta',
-    intro: 'The Android app is still in closed testing on Google Play. Follow the two steps below to install it early.',
-    step1Title: 'Join the test group',
-    step1Body: 'With the Google account you use on Google Play, join the “Futari Android 測試” group.',
-    step1Cta: 'Join the group',
-    step2Title: 'Install the app',
-    step2Body: 'Once you’re in the group, open the Play testing page, tap “Become a tester”, then install from Google Play.',
-    step2Cta: 'Open the Play testing page',
-    askTitle: 'While you test',
-    askBody: 'Use it for your real records, the way you normally would. If something feels off or you have an idea, tell us in the app under Settings › Send us feedback.',
-    privacy: 'Once you join, the group owner (that’s us) can see your Google account email. We use it only to give you access to the test and to send test-related notices. If you’d rather stop, just leave the group.',
-    closed: 'The test isn’t open to new testers right now. You can use the web version in the meantime.',
+    metaTitle: 'Android app',
+    title: 'The Futari Android app is out',
+    body: 'Closed testing is over. Thank you to everyone who helped test. The Android app is now on Google Play.',
     useWebVersion: 'Use the web version',
-    outingLine: 'Futari\'s Android app is in testing. If you\'re on Android, you can join early.',
+    outingLine: 'Futari’s Android app is now on Google Play.',
   },
 
   pastTimes: {
@@ -1580,10 +1577,10 @@ export const en: Translations = {
 
   /** Settings row: share the Android test page with a partner or friend; hidden in the iOS app (#1648). Removed with #1553. */
   androidTesterInvite: {
-    title: 'Invite a partner or friend on Android to test',
-    hint: 'Share the test page link. Once they join the group, they can install the app',
-    shareTitle: 'Futari Android beta',
-    shareText: 'Futari’s Android app is in closed testing. Follow the two steps on this page to install it early.',
+    title: 'Invite a partner or friend on Android',
+    hint: 'Share the Google Play link',
+    shareTitle: 'Futari Android app',
+    shareText: 'Futari’s Android app is now on Google Play, so you can keep the ledger with me on Android too.',
     copied: 'Link copied',
   },
 

@@ -11,10 +11,10 @@ interface Props {
   /** iPhone/iPad browser hint — the default text describes the sign-in flow,
    *  which is wrong once the CTA points at the App Store (#1413). */
   appStoreHint: ReactNode
-  /** Android browser hint — must say what the beta form asks for and why, per
-   *  issue #1413: fill in the Google account used on Play, only used to send
-   *  the test invite, deleted once added to the closed-testing list. */
-  androidBetaHint: ReactNode
+  /** Android browser hint under the Google Play CTA (#1901): "only listed in
+   *  Taiwan", because Play shows visitors elsewhere a "not available in your
+   *  country" page. */
+  playStoreHint: ReactNode
 }
 
 /**
@@ -24,9 +24,9 @@ interface Props {
  * that state; only iPhone/iPad and Android visitors see it swap after
  * hydration.
  */
-export function LandingCtaHint({ className, style, children, appStoreHint, androidBetaHint }: Props) {
+export function LandingCtaHint({ className, style, children, appStoreHint, playStoreHint }: Props) {
   const target = useVisitorPlatformTarget()
-  const label = target === 'app_store' ? appStoreHint : target === 'android_beta' ? androidBetaHint : children
+  const label = target === 'app_store' ? appStoreHint : target === 'play_store' ? playStoreHint : children
 
   return (
     <p

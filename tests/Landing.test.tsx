@@ -32,7 +32,8 @@ const renderLanding = () =>
       t={zhTW.landing}
       signInHref="/zh-TW/sign-in"
       dashboardHref="/dashboard"
-      androidBetaHref="/android-beta"
+      locale="zh-TW"
+      showLaunchBanner
       checkingLabel={zhTW.signIn.signingIn}
       useCaseHrefs={{
         cohabitation: '/zh-TW/use-case/cohabitation',
@@ -141,7 +142,8 @@ describe('Landing — SSR CTAs work without JS (#1521)', () => {
         t={zhTW.landing}
         signInHref="/zh-TW/sign-in"
         dashboardHref="/dashboard"
-        androidBetaHref="/android-beta"
+        locale="zh-TW"
+        showLaunchBanner
         checkingLabel={zhTW.signIn.signingIn}
         useCaseHrefs={{ cohabitation: '/a', newlyweds: '/b', petOwners: '/c', hub: '/d' }}
         migrateHrefs={{ honeydue: '/e', spendee: '/f', cwmoney: '/g', hub: '/h' }}
@@ -169,6 +171,14 @@ describe('Landing — SSR CTAs work without JS (#1521)', () => {
     expect(html).not.toContain('apps.apple.com')
     expect(html).not.toContain('groups.google.com')
     expect(html).not.toContain('android-beta')
+    // #1901: the Play badge and launch banner are server-rendered (no layout
+    // shift) but every Play anchor in the SSR HTML sits inside an element the
+    // pre-paint shell flag hides, so no shell ever paints one.
+    const playAnchors = [...doc.querySelectorAll('a[href*="play.google.com"]')]
+    expect(playAnchors.length).toBe(2)
+    const hiddenInShell = (el: Element | null): boolean =>
+      !!el && (el.className.includes('[html[data-native-shell]_&]:hidden') || hiddenInShell(el.parentElement))
+    for (const a of playAnchors) expect(hiddenInShell(a)).toBe(true)
   })
 })
 
@@ -223,13 +233,18 @@ describe('Landing — example card (#1852)', () => {
     expect(fig.querySelector('img, picture, svg, script, a, button')).toBeNull()
   })
 
-  it('sits right after the mobile sign-in link, before the compact trust row', () => {
+  // #1901: the Google Play badge joins the CTA block (store entries together),
+  // so the card now follows the sign-in link and that badge, still below the
+  // CTA and above the compact trust row.
+  it('sits right after the mobile sign-in link and the Play badge, before the compact trust row', () => {
     renderLanding()
     const fig = screen.getByRole('figure')
     const mobileSignIn = screen
       .getAllByText(zhTW.landing.alreadyHaveAccount)
       .find((el) => el.closest('a')!.className.includes('min-h-11'))!
       .closest('div')!
-    expect(mobileSignIn.nextElementSibling).toBe(fig)
+    const badge = mobileSignIn.nextElementSibling!
+    expect(badge.querySelector(`img[alt="${zhTW.landing.playBadgeAlt}"]`)).not.toBeNull()
+    expect(badge.nextElementSibling).toBe(fig)
   })
 })

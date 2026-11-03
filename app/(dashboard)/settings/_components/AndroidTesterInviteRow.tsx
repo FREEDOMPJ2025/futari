@@ -3,46 +3,38 @@
 import { useEffect, useRef, useState } from 'react'
 import { getCapacitorPlatform } from '@/components/KofiWidget'
 import { track } from '@/lib/analytics/track'
-import { useLocale, useTranslations } from '@/lib/i18n/client'
-import { isLocale } from '@/lib/i18n/locales-meta'
-import { localizedHref } from '@/lib/i18n/path'
-import { APP_URL } from '@/lib/i18n/seo'
+import { useTranslations } from '@/lib/i18n/client'
 import { hasShareSheet, isShareCancel, openShareSheet } from '@/lib/shareSheet'
-import { ANDROID_BETA_PATH, ANDROID_TEST_GROUP_URL } from '@/lib/visitorPlatform'
+import { PLAY_STORE_URL } from '@/lib/visitorPlatform'
 
 /**
- * Settings row that shares the /android-beta join page with a partner or
- * friend who uses Android (#1648). The shared URL is the clean join page in
- * the viewer's locale, with no attribution params.
+ * Settings row that shares the Google Play listing with a partner or friend
+ * who uses Android (#1901; until then it shared the /android-beta join page,
+ * #1648). The shared URL is the plain Play listing, no attribution params.
  *
- * Apple Guideline 2.3.10: the iOS app must not mention other mobile platforms,
- * so the row is hidden inside the iOS shell. Everywhere else it shows (Android
- * shell, any browser, PWA): an iPhone user is the likeliest person to know an
- * Android tester. The gate is runtime (see KofiWidget): one deployment serves
- * all shells. Failure looks like: the row appearing inside the iOS app, with no
- * error, and surfacing only in App Review. Nothing renders before mount so SSR
- * and the first client render agree. Hidden when the group URL is empty, so we
- * never share a page with no action.
+ * Browser only (any browser or installed PWA): hidden inside both Capacitor
+ * shells. iOS: Apple Guideline 2.3.10 bars mentioning other mobile platforms.
+ * Android: the app shows no "download the app" link (#1901). An iPhone user in
+ * a browser is still the likeliest person to know an Android user, so the row
+ * stays for iPhone browsers. The gate is runtime (see KofiWidget): one
+ * deployment serves all shells. Failure looks like: the row appearing inside
+ * either app, with no error, and surfacing only in App Review or on a device.
+ * Nothing renders before mount so SSR and the first client render agree.
  *
- * Share: the system sheet when there is one (`lib/shareSheet.ts`: Web Share, or
- * `@capacitor/share` inside the Android shell, #1749), else (or on a failure that
- * isn't a cancel) the clipboard plus an inline confirmation. A shell built
- * before the plugin was added has no sheet and keeps copying. User cancel does
- * nothing.
- *
- * TEMPORARY: removed with the Android closed-test cleanup (#1553), together
- * with the `androidTesterInvite` i18n namespace and `android_beta_share_clicked`.
+ * Share: the system sheet when there is one (`lib/shareSheet.ts`: Web Share),
+ * else (or on a failure that isn't a cancel) the clipboard plus an inline
+ * confirmation. User cancel does nothing. The event keeps its
+ * `android_beta_share_clicked` name so the series continues.
  */
 export function AndroidTesterInviteRow() {
   const t = useTranslations()
-  const raw = useLocale()
-  const locale = isLocale(raw) ? raw : 'zh-TW'
   const [show, setShow] = useState(false)
   const [copied, setCopied] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    setShow(!!ANDROID_TEST_GROUP_URL && getCapacitorPlatform() !== 'ios')
+    // Capacitor reports 'web' off-shell; either shell ('ios' or 'android') hides the row.
+    setShow(getCapacitorPlatform() === 'web')
     return () => {
       if (timer.current) clearTimeout(timer.current)
     }
@@ -63,7 +55,7 @@ export function AndroidTesterInviteRow() {
   }
 
   const handleClick = async () => {
-    const url = `${APP_URL}${localizedHref(ANDROID_BETA_PATH, locale)}`
+    const url = PLAY_STORE_URL
     if (hasShareSheet()) {
       try {
         await openShareSheet({ title: t.androidTesterInvite.shareTitle, text: t.androidTesterInvite.shareText, url })

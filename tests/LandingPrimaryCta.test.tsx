@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 
 vi.mock('@/lib/analytics/track', () => ({ track: vi.fn() }))
 
@@ -21,8 +21,7 @@ vi.stubGlobal('matchMedia', (query: string) => ({
 }))
 
 import { LandingPrimaryCta } from '@/app/[locale]/_landing/LandingPrimaryCta'
-import { localizedHref } from '@/lib/i18n/path'
-import { ANDROID_BETA_PATH } from '@/lib/visitorPlatform'
+import { track } from '@/lib/analytics/track'
 
 const IPHONE_UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
@@ -35,15 +34,14 @@ function stubUserAgent(ua: string) {
   vi.spyOn(window.navigator, 'userAgent', 'get').mockReturnValue(ua)
 }
 
-const renderCta = (androidBetaHref = '/android-beta') =>
+const renderCta = (ctaLocation: 'hero' | 'desktop_header' = 'hero') =>
   render(
     <LandingPrimaryCta
       signInHref="/zh-TW/sign-in"
       dashboardHref="/dashboard"
-      ctaLocation="hero"
+      ctaLocation={ctaLocation}
       appStoreLabel="在 App Store 下載"
-      androidBetaLabel="加入 Android 測試版"
-      androidBetaHref={androidBetaHref}
+      playStoreLabel="在 Google Play 下載"
     >
       開始
     </LandingPrimaryCta>,
@@ -85,8 +83,7 @@ describe('LandingPrimaryCta (#920 Phase 1 client CTA hydration, extended by #141
         dashboardHref="/dashboard"
         ctaLocation="hero"
         appStoreLabel="在 App Store 下載"
-        androidBetaLabel="加入 Android 測試版"
-        androidBetaHref="/android-beta"
+        playStoreLabel="在 Google Play 下載"
       >
         開始
       </LandingPrimaryCta>,
@@ -100,6 +97,7 @@ describe('LandingPrimaryCta (#920 Phase 1 client CTA hydration, extended by #141
     // SSR must never contain an off-site destination: the App Store link only
     // exists after the client has resolved the platform (Apple 3.1.1).
     expect(html).not.toContain('apps.apple.com')
+    expect(html).not.toContain('play.google.com')
   })
 
   it('keeps the same sign-in href and label after resolving on desktop (no swap)', async () => {
@@ -159,21 +157,51 @@ describe('LandingPrimaryCta (#920 Phase 1 client CTA hydration, extended by #141
     )
   })
 
-  // The href is built by the caller with localizedHref(ANDROID_BETA_PATH, locale):
-  // a bare /android-beta for a non-default locale would flip the visitor to zh-TW (#1648).
-  it.each([
-    ['zh-TW', '/android-beta'],
-    ['en', '/en/android-beta'],
-  ] as const)('links to the locale-pinned join page, same tab, for an Android browser visitor (%s)', async (locale, href) => {
+  it('links to Google Play in a new tab for an Android browser visitor (#1901)', async () => {
     getSession.mockResolvedValue({ data: { session: null } })
     stubUserAgent(ANDROID_UA)
-    renderCta(localizedHref(ANDROID_BETA_PATH, locale))
-    await waitFor(() => {
-      const anchor = screen.getByText('加入 Android 測試版').closest('a')!
-      expect(anchor.getAttribute('href')).toBe(href)
-      expect(anchor).not.toHaveAttribute('target')
-    })
+    renderCta()
+    const anchor = (await screen.findByText('在 Google Play 下載')).closest('a')!
+    expect(anchor).toHaveAttribute('href', 'https://play.google.com/store/apps/details?id=dev.southernlight.futari')
+    expect(anchor).toHaveAttribute('target', '_blank')
+    expect(anchor).toHaveAttribute('rel', 'noopener noreferrer')
     expect(screen.queryByText('開始')).not.toBeInTheDocument()
+  })
+
+  it.each(['hero', 'desktop_header'] as const)(
+    'fires landing_cta_clicked with target=play_store from the %s CTA (#1901)',
+    async (ctaLocation) => {
+      getSession.mockResolvedValue({ data: { session: null } })
+      stubUserAgent(ANDROID_UA)
+      renderCta(ctaLocation)
+      fireEvent.click(await screen.findByText('在 Google Play 下載'))
+      expect(vi.mocked(track).mock.calls).toEqual([
+        ['landing_cta_clicked', { cta_location: ctaLocation, target: 'play_store' }],
+      ])
+    },
+  )
+
+  it('never shows the Google Play link inside the Android native shell (#1901)', async () => {
+    getSession.mockResolvedValue({ data: { session: null } })
+    stubUserAgent(ANDROID_UA)
+    ;(window as unknown as { Capacitor: { getPlatform: () => string } }).Capacitor = {
+      getPlatform: () => 'android',
+    }
+    renderCta()
+    await waitFor(() => expect(getSession).toHaveBeenCalled())
+    await Promise.resolve()
+    expect(screen.queryByText('在 Google Play 下載')).not.toBeInTheDocument()
+    expect(screen.getByText('開始').closest('a')!.getAttribute('href')).toBe('/zh-TW/sign-in?from=landing')
+  })
+
+  it('keeps the App Store CTA (target=app_store) for iPhone, unchanged by #1901', async () => {
+    getSession.mockResolvedValue({ data: { session: null } })
+    stubUserAgent(IPHONE_UA)
+    renderCta()
+    fireEvent.click(await screen.findByText('在 App Store 下載'))
+    expect(vi.mocked(track).mock.calls).toEqual([
+      ['landing_cta_clicked', { cta_location: 'hero', target: 'app_store' }],
+    ])
   })
 })
 

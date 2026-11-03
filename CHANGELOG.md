@@ -41,6 +41,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+### 使用者可見變化
+
+- **Android App 上架 Google Play，網站的測試招募改成「到 Google Play 下載」（#1901）**
+  使用者：Android 瀏覽器的首頁按鈕、儀表板卡片、設定的邀請列、出遊頁那一行都改連 Google Play，並註明目前只在台灣上架；首頁加上 Google Play 徽章和可關閉的上架公告；`/android-beta` 改成「封閉測試已結束」說明頁；App 內（兩個殼）不顯示任何下載連結。
+  技術：`PLAY_STORE_URL` 取代測試群組／opt-in 常數，CTA 目標 `android_beta` → `play_store`（`landing_cta_clicked` 一併改）；徽章與公告由 SSR 輸出、靠 `lib/playLaunch.ts` 的 pre-paint script 在殼內與關閉後先隱藏（不跳版面），公告到 2026-11-17 為止。
+
 ### 技術變更
 
 - **repo 搬到 FREEDOMPJ2025/futari，專案改名為 Futari**

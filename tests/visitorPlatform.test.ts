@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { resolveVisitorPlatform, type ResolveVisitorPlatformInput } from '@/lib/visitorPlatform'
+import { PLAY_STORE_URL, resolveVisitorPlatform, type ResolveVisitorPlatformInput } from '@/lib/visitorPlatform'
 
 const IPHONE_UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
@@ -59,12 +59,17 @@ describe('resolveVisitorPlatform (#1413)', () => {
     expect(resolveVisitorPlatform(input({ userAgent: REAL_MAC_UA, maxTouchPoints: 0 }))).toBe('sign_in')
   })
 
-  it('Android Chrome gets the beta signup (shipped group URL)', () => {
-    expect(resolveVisitorPlatform(input({ userAgent: ANDROID_UA }))).toBe('android_beta')
+  it('Android Chrome gets Google Play (#1901)', () => {
+    expect(resolveVisitorPlatform(input({ userAgent: ANDROID_UA }))).toBe('play_store')
   })
 
-  it('Android falls back to sign-in when the test group URL is empty (never a dead link)', () => {
-    expect(resolveVisitorPlatform(input({ userAgent: ANDROID_UA, testGroupUrl: '' }))).toBe('sign_in')
+  it('never Google Play inside the Android shell or an installed Android PWA (#1901)', () => {
+    expect(resolveVisitorPlatform(input({ isCapacitor: true, userAgent: ANDROID_UA }))).toBe('sign_in')
+    expect(resolveVisitorPlatform(input({ isStandalone: true, userAgent: ANDROID_UA }))).toBe('sign_in')
+  })
+
+  it('the Play URL is the production listing, not the closed-test opt-in page (#1901)', () => {
+    expect(PLAY_STORE_URL).toBe('https://play.google.com/store/apps/details?id=dev.southernlight.futari')
   })
 
   it('sign-in for desktop / everything else', () => {

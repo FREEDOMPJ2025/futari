@@ -6,6 +6,7 @@
 **Status**: Public beta, free to use
 **Languages**: Traditional Chinese (default), Simplified Chinese, English, Japanese
 **Platform**: Progressive Web App (installable on iOS / Android / desktop), plus native iOS and Android shells built with Capacitor
+**Download**: iPhone / iPad on the App Store (https://apps.apple.com/app/id6779264784); Android on Google Play (https://play.google.com/store/apps/details?id=dev.southernlight.futari), currently listed in Taiwan only
 
 ---
 
@@ -261,7 +262,7 @@ Yes. Start an outing and share its link. Friends open it in a phone browser and 
 
 ### Is Futari a native app or a web app?
 
-Both, from a single codebase. Futari is a Progressive Web App that runs in any modern browser and can be installed to the home screen on iOS, Android, and desktop. There are also native iOS and Android shells built with Capacitor — thin WebView wrappers around the same deployed web app, distributed through the App Store and Play Store. Because the shell loads the live site, a web release reaches all three platforms at once; only changes to native surfaces (push notifications, native sign-in, app icon) need a new store build. Either way the experience is the same: full-screen, no browser chrome, and an offline page bundled into the shell for when the network is gone.
+Both, from a single codebase. Futari is a Progressive Web App that runs in any modern browser and can be installed to the home screen on iOS, Android, and desktop. There are also native iOS and Android shells built with Capacitor — thin WebView wrappers around the same deployed web app, distributed through the App Store and Google Play (the Android app is on Google Play since November 2026, currently in Taiwan only). Because the shell loads the live site, a web release reaches all three platforms at once; only changes to native surfaces (push notifications, native sign-in, app icon) need a new store build. Either way the experience is the same: full-screen, no browser chrome, and an offline page bundled into the shell for when the network is gone.
 
 ### Can Futari handle multiple currencies?
 

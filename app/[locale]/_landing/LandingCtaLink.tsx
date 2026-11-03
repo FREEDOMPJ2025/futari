@@ -15,22 +15,31 @@ export type Target =
   | 'use_case_pet_owners'
   /** iPhone/iPad browser primary CTA → App Store (#1413). */
   | 'app_store'
-  /** Android browser primary CTA → beta signup form (#1413). */
-  | 'android_beta'
+  /** Google Play listing (#1901): the Android browser primary CTA, the Play
+   *  badge and the launch banner. Replaced `android_beta` (the closed-test
+   *  join page, #1413/#1648). */
+  | 'play_store'
+
+/** Where on the page a landing CTA sits — for breakdown. */
+export type CtaLocation =
+  | 'hero'
+  | 'desktop_header'
+  | 'secondary'
+  | 'footer_migrate'
+  | 'footer_use_case'
+  | 'use_case_primary'
+  | 'migrate_primary'
+  | 'feature_primary'
+  | 'feature_closing'
+  /** Google Play badge under the hero CTA (#1901). */
+  | 'play_badge'
+  /** Dismissible "Android app is out" banner at the top of the landing (#1901). */
+  | 'launch_banner'
 
 interface Props {
   href: string
   /** Where on the page this CTA sits — for breakdown. */
-  ctaLocation:
-    | 'hero'
-    | 'desktop_header'
-    | 'secondary'
-    | 'footer_migrate'
-    | 'footer_use_case'
-    | 'use_case_primary'
-    | 'migrate_primary'
-    | 'feature_primary'
-    | 'feature_closing'
+  ctaLocation: CtaLocation
   target: Target
   /** Overrides the `from=landing` attribution tag. /migrate/<source> reuses this
    *  CTA off the landing page and tags its own slug, matching `MigrateCta`. */

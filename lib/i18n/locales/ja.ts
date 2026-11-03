@@ -97,12 +97,19 @@ export const ja: Translations = {
     alreadyHaveAccount: 'アカウントをお持ちの方',
     appStoreCta: 'App Store でダウンロード',
     appStoreCtaHint: 'iPhone・iPad どちらでも使えます',
-    androidBetaCta: 'Android ベータ版に参加',
-    androidBetaCtaHint: 'Play ストアで使っている Google アカウントでテストグループに参加すると、アプリをインストールできるようになります。',
+    playStoreCta: 'Google Play でダウンロード',
+    playStoreCtaHint: '現在は台湾でのみ配信中です',
+    playBadgeAlt: 'Google Play で手に入れよう',
+    playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
+    launchBanner: {
+      text: 'Futari の Android アプリが登場しました！',
+      link: 'Google Play でダウンロード',
+      closeAria: '閉じる',
+    },
     useWebVersion: 'まずはウェブ版を使う',
     trustEncrypted: 'ふたりだけに開放',
     trustFree: '無料で使える',
-    trustPwa: 'iPhone App · ウェブ版',
+    trustPwa: 'iPhone App · Android App · ウェブ版',
     trust: {
       narrative: 'あなたたちの記録は、二人だけのもの。広告もデータ販売もありません。',
       encryption: {
@@ -1242,28 +1249,18 @@ export const ja: Translations = {
   },
 
   androidBetaInvite: {
-    heading: 'Android アプリのテストに参加しませんか',
-    body: 'Android で Futari を開いていますね。アプリ版を先に試したい方は、Play ストアで使っている Google アカウントでテストグループに参加してください。そのあとインストールできます。',
-    cta: 'Android版テストに参加する',
+    heading: 'Android アプリが登場しました',
+    body: 'Android で Futari を開いています。アプリで使うなら、Google Play からダウンロードできます。',
+    cta: 'Google Play でダウンロード',
   },
 
-  /** /android-beta self-serve join page (#1648). Temporary, removed with #1553. */
+  /** /android-beta: closed testing is over, the app is on Google Play (#1901). */
   androidBeta: {
-    metaTitle: 'Android版テスト',
-    title: 'Futari の Android テストに参加する',
-    intro: 'Android アプリは、いま Google Play のクローズドテスト中です。次の 2 ステップで、先にインストールして使えます。',
-    step1Title: 'テストグループに参加する',
-    step1Body: 'Play ストアでログインしている Google アカウントで、「Futari Android 測試」グループに参加します。',
-    step1Cta: 'グループに参加する',
-    step2Title: 'アプリをインストールする',
-    step2Body: 'グループに参加したら、Play のテストページを開いて「テスターになる」を押し、Play ストアからインストールします。',
-    step2Cta: 'Play のテストページを開く',
-    askTitle: 'テスト中のお願い',
-    askBody: 'いつもどおり、ふだんの記録に使ってみてください。使いにくいところや気づいたことは、アプリの「設定 › フィードバックを送る」から教えてください。',
-    privacy: 'グループに参加すると、グループのオーナー（私たち）に Google アカウントのメールアドレスが見えます。テストに参加していただくためと、テストに関するお知らせを送るためだけに使います。テストをやめたいときは、グループから退会してください。',
-    closed: '現在、テストの募集は行っていません。まずはウェブ版をお使いください。',
+    metaTitle: 'Android アプリ',
+    title: 'Futari の Android アプリを公開しました',
+    body: 'クローズドテストは終了しました。テストにご協力いただいた皆さん、ありがとうございました。Android アプリは Google Play で公開中です。',
     useWebVersion: 'まずはウェブ版を使う',
-    outingLine: 'Futari の Android アプリはテスト中です。Android をお使いの方は、先に参加できます。',
+    outingLine: 'Futari の Android アプリを Google Play で公開中です。',
   },
 
   pastTimes: {
@@ -1580,10 +1577,10 @@ export const ja: Translations = {
 
   /** Settings row: share the Android test page with a partner or friend; hidden in the iOS app (#1648). Removed with #1553. */
   androidTesterInvite: {
-    title: 'Android のパートナーや友だちをテストに招待',
-    hint: 'テストページのリンクを共有します。相手がグループに参加すれば、インストールできます',
-    shareTitle: 'Futari Android テスト',
-    shareText: 'Futari の Android アプリはクローズドテスト中です。このページの 2 ステップで、先にインストールして使えます。',
+    title: 'Android を使っているパートナーや友だちを招待',
+    hint: 'Google Play のリンクを共有します',
+    shareTitle: 'Futari Android アプリ',
+    shareText: 'Futari の Android アプリが Google Play で公開されました。Android でも一緒に家計簿をつけられます。',
     copied: 'リンクをコピーしました',
   },
 
