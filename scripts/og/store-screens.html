@@ -195,13 +195,23 @@
            scene: '../../docs/store-assets/illustrations/story-5.png', pos: '50% 60%', brief: '旅行的回程。兩人拖著行李走出車站，行李箱上掛著御守，一人手上提著伴手禮。黃昏，路燈剛亮。' },
     }
 
-    // zh-TW is the master (CLAUDE.md i18n rule). The other three locales
-    // follow once their copy is approved (#1904, needs-copy). Until then each
-    // carries `pending: true` and a verbatim copy of the zh-TW text as a
-    // placeholder; render-store-screens.mjs refuses to render a pending locale
-    // unless --allow-pending-copy is passed. When approved copy lands: replace
-    // the frames, delete `pending`, and keep the numbers in line with the
-    // screenshots (frame 4's day count, see docs/store-assets/README.md).
+    // zh-TW is the master (CLAUDE.md i18n rule). Its text is fixed: the
+    // numbers and names in it are the ones in the zh-TW screenshots.
+    //
+    // zh-CN / en / ja: Aria's copy (#1904 comment 6605692812), still a
+    // proposal until Ray approves it. `proposal: true` renders normally and
+    // render-store-screens.mjs prints one line saying so. `pending: true` (a
+    // placeholder, refused unless --allow-pending-copy, written as -DRAFT) is
+    // kept for future copy that has no text yet; no locale uses it today.
+    //
+    // {name} placeholders are demo-ledger facts, filled from
+    // window.__STORE_VARS__, which render-store-screens.mjs builds from
+    // scripts/og/demo-data/<locale>.json (written by seed-demo-ledgers.ts) and
+    // {days} from <locale>.capture.json (written by capture-screens.mjs from
+    // the plant card it captured). A placeholder without a value is rendered
+    // as ⟦name⟧ and listed in __STORE_META__.missingVars; the render script
+    // refuses to write anything while that list is not empty.
+    // ` / ` in Aria's table is the line break; the second line is the lit span.
     const ZH_TW = {
       1: { head: ['誰先付的，', '<span class="lit">不用再算。</span>'], sub: '每一筆都分好了。想結清的時候，點一下就好。' },
       2: { head: ['兩個人，', '<span class="lit">一本帳。</span>'], sub: '一起記，回頭看會很暖。' },
@@ -211,25 +221,63 @@
     }
     const copy = {
       'zh-TW': { frames: ZH_TW },
-      // TODO(#1904): Aria copy pending (needs-copy) — placeholder is the zh-TW text.
-      'zh-CN': { pending: true, frames: ZH_TW },
-      // TODO(#1904): Aria copy pending (needs-copy) — placeholder is the zh-TW text.
-      en: { pending: true, frames: ZH_TW },
-      // TODO(#1904): Aria copy pending (needs-copy) — placeholder is the zh-TW text.
-      ja: { pending: true, frames: ZH_TW },
+      'zh-CN': {
+        proposal: true,
+        frames: {
+          1: { head: ['谁先付的，', '<span class="lit">不用再算。</span>'], sub: '每一笔都分好了。想结清的时候，点一下就好。' },
+          2: { head: ['两个人，', '<span class="lit">一本账。</span>'], sub: '一起记，回头看会很暖。' },
+          3: { head: ['一起记下的，', '<span class="lit">都是日子。</span>'], sub: '{item1}、{item2}、{item3}，两个人的日常都在这里。' },
+          4: { head: ['{plantName}陪了我们', '<span class="lit">{days} 天。</span>'], sub: '孩子、毛孩子、植物，家里的每一个都记得。' },
+          5: { head: ['{tripPlace}七天，', '<span class="lit">回家就结清。</span>'], sub: '{localCurrency}、{homeCurrency}照常记，旅行的账自己分开算。' },
+        },
+      },
+      en: {
+        proposal: true,
+        frames: {
+          1: { head: ['Who paid first?', '<span class="lit">No more math.</span>'], sub: 'Every entry is already split. When you want to settle up, it takes one tap.' },
+          2: { head: ['Two people,', '<span class="lit">one ledger.</span>'], sub: 'Note it down together. Looking back feels warm.' },
+          3: { head: ['What we note down', '<span class="lit">is our days.</span>'], sub: '{item1}, {item2}, {item3}: your everyday life for two, all in one place.' },
+          4: { head: ['{plantName} and us:', '<span class="lit">{days} days together.</span>'], sub: 'Kids, pets, plants: everyone at home, remembered.' },
+          5: { head: ['Seven days in {tripPlace},', '<span class="lit">settled once you\'re home.</span>'], sub: 'Record in {localCurrency} and {homeCurrency} as usual. The trip keeps its own books.' },
+        },
+      },
+      ja: {
+        proposal: true,
+        frames: {
+          1: { head: ['先に払ったのは誰か、', '<span class="lit">もう計算しない。</span>'], sub: '1 件ずつ、もう分けてあります。精算したいときは、タップひとつで。' },
+          2: { head: ['ふたりで、', '<span class="lit">ひとつの家計簿。</span>'], sub: '一緒に記録して、振り返るとあたたかい。' },
+          3: { head: ['一緒に記録したのは、', '<span class="lit">ふたりの毎日。</span>'], sub: '{item1}、{item2}、{item3}。ふたりの日常が、ここにそろっています。' },
+          4: { head: ['{plantName}と一緒に', '<span class="lit">{days} 日。</span>'], sub: '子ども、ペット、植物。家のみんなのことを、ちゃんと残せます。' },
+          5: { head: ['{tripPlace} 7 日間、', '<span class="lit">帰ったら精算。</span>'], sub: '{localCurrency}も{homeCurrency}も、そのまま記録。旅行の家計簿は別に計算します。' },
+        },
+      },
     }
 
+    // Fill {name} from the demo-data values. Values are text, so escape them
+    // before they meet innerHTML.
+    const VARS = window.__STORE_VARS__ || {}
+    const escapeHtml = (v) => String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+    const PLACEHOLDER = /\{([a-zA-Z0-9]+)\}/g
+    const placeholdersOf = (fr) => [...(fr.head.join('') + fr.sub).matchAll(PLACEHOLDER)].map((m) => m[1])
+    const fill = (text) => text.replace(PLACEHOLDER, (_, name) =>
+      VARS[name] === undefined || VARS[name] === null || VARS[name] === '' ? `⟦${name}⟧` : escapeHtml(VARS[name]))
+
     // Read by render-store-screens.mjs before it takes any screenshot.
+    const neededVars = [...new Set(Object.values(copy[locale].frames).flatMap(placeholdersOf))]
     window.__STORE_META__ = {
       locale,
       pending: !!copy[locale].pending,
+      proposal: !!copy[locale].proposal,
+      neededVars,
+      missingVars: neededVars.filter((n) => VARS[n] === undefined || VARS[n] === null || VARS[n] === ''),
       shotsByFrame: Object.fromEntries(
         Object.entries(frames).filter(([, fr]) => fr.shot).map(([id, fr]) => [id, SHOTS + fr.shot]),
       ),
     }
 
     const f = frames[frameId]
-    const t = copy[locale].frames[frameId]
+    const raw = copy[locale].frames[frameId]
+    const t = { head: raw.head.map(fill), sub: fill(raw.sub) }
     const root = document.getElementById('root')
 
     const scene = document.createElement('div')
