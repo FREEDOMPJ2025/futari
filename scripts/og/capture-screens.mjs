@@ -310,9 +310,10 @@ async function capture() {
         await assertDemoLedger(page)
         // 而且要是這個語系的那一本：首頁標頭是帳本名稱。
         if (screen.name === '01-dashboard') {
-          const text = await page.evaluate(() => document.body.innerText)
-          if (!text.includes(DEMO.groupName)) {
-            throw new Error(`首頁沒有看到帳本名稱「${DEMO.groupName}」—— 現在顯示的不是 ${LOCALE} 的示範帳本（切換沒生效？）`)
+          // 只看標頭的 <h1>（BrandHeader 放帳本名稱）：ja 介面別處也有「ふたりの家計簿」這幾個字。
+          const heading = await page.evaluate(() => document.querySelector('h1')?.innerText.trim() ?? '')
+          if (heading !== DEMO.groupName) {
+            throw new Error(`首頁標頭是「${heading}」，不是「${DEMO.groupName}」—— 現在顯示的不是 ${LOCALE} 的示範帳本（切換沒生效？）`)
           }
         }
 

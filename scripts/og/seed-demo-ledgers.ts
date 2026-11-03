@@ -132,6 +132,11 @@ function guard(): string {
   if (process.env.DATABASE_URL && process.env.DATABASE_URL !== dbUrl) {
     throw new GuardError('DATABASE_URL in the environment differs from the env file; unset it')
   }
+  // postgres.js accepts several comma-separated hosts and percent-decodes
+  // them; a hand-built URL could hide a host from the checks below.
+  const authority = dbUrl.replace(/^[a-z]+:\/\//i, '').split('/')[0]
+  if (authority.includes(',')) throw new GuardError('DATABASE_URL lists several hosts')
+  if (decodeURIComponent(dbUrl).toLowerCase().includes(PROD_REF)) throw new GuardError('DATABASE_URL names the prod project')
   assertTargetMatchesUrl('dev', dbUrl)
   // assertTargetMatchesUrl accepts the dev ref in the username alone; also
   // require a Supabase host, so a look-alike username elsewhere is refused.
@@ -158,8 +163,11 @@ try {
   process.exit(2)
 }
 process.env.DATABASE_URL = fileEnv.DATABASE_URL
+// Keys come from the same (guarded) env file as the database, never the shell:
+// dev rows encrypted with another keyring would not decrypt in the dev app.
 for (const k of ['ENCRYPTION_KEY', 'ENCRYPTION_KEYS', 'ENCRYPTION_WRITE_KID']) {
-  if (fileEnv[k] && !process.env[k]) process.env[k] = fileEnv[k]
+  if (fileEnv[k]) process.env[k] = fileEnv[k]
+  else delete process.env[k]
 }
 
 const { db } = await import('@/lib/db/client')
