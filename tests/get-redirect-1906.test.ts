@@ -1,7 +1,10 @@
 // @vitest-environment node
 /**
- * #1906 — `/get`, the desktop QR's UA redirect: iPhone/iPad → App Store
- * (`ct=landing-qr`), Android → Google Play, everything else → the landing;
+ * #1906 — `/get`, the desktop QR's UA redirect: iPhone/iPad and any
+ * Macintosh UA → App Store (`ct=landing-qr`; iPadOS's default Safari UA says
+ * Macintosh and a desktop Mac doesn't scan a QR, so a real Mac reaching the
+ * App Store page is an accepted trade-off), Android → Google Play, everything
+ * else (Windows/Linux desktop, no UA) → the landing;
  * 302, never cached, noindex; one server-side `landing_cta_clicked`
  * (`cta_location=qr`) per scan. The proxy lets it past the auth gate.
  */
@@ -36,11 +39,16 @@ const UA = {
     'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
   // iPadOS default ("desktop website"): indistinguishable from a Mac by UA.
   ipadosDesktop:
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15',
+  // Chrome on a real Mac: also sent to the App Store (accepted trade-off).
+  macChrome:
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
   android:
     'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36',
-  desktop:
+  windows:
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+  linux:
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
 }
 
 const hit = (ua?: string) =>
@@ -56,8 +64,10 @@ describe('/get redirect (#1906)', () => {
     ['iPhone', UA.iphone, appStoreUrl('landing-qr'), 'app_store'],
     ['iPad', UA.ipad, appStoreUrl('landing-qr'), 'app_store'],
     ['Android', UA.android, PLAY_STORE_URL, 'play_store'],
-    ['desktop', UA.desktop, `${ORIGIN}/`, 'landing'],
-    ['iPadOS as Mac (no touch info server-side)', UA.ipadosDesktop, `${ORIGIN}/`, 'landing'],
+    ['iPadOS default Safari (Macintosh UA)', UA.ipadosDesktop, appStoreUrl('landing-qr'), 'app_store'],
+    ['Chrome on a real Mac (accepted trade-off)', UA.macChrome, appStoreUrl('landing-qr'), 'app_store'],
+    ['Windows desktop', UA.windows, `${ORIGIN}/`, 'landing'],
+    ['Linux desktop', UA.linux, `${ORIGIN}/`, 'landing'],
     ['no UA', undefined, `${ORIGIN}/`, 'landing'],
   ])('%s → 302 to the right place, no-cache, noindex, one qr event', (_name, ua, location, target) => {
     const res = hit(ua)

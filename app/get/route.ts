@@ -10,10 +10,13 @@ import {
 
 /**
  * `/get` — where the desktop landing's QR code points (#1906, Daphne's option
- * B). One QR for both phones: iPhone/iPad → App Store (`ct=landing-qr`, kept
- * apart from the desktop badge's `landing-desktop` in ASC), Android → Google
- * Play, anything else → the landing. See `resolveQrRedirect` for why an
- * iPadOS "Macintosh" UA lands on the landing rather than the App Store.
+ * B). One QR for both phones: iPhone/iPad and any Macintosh UA → App Store
+ * (`ct=landing-qr`, kept apart from the desktop badge's `landing-desktop` in
+ * ASC), Android → Google Play, anything else → the landing. Macintosh goes to
+ * the App Store because `/get` is only reached by scanning the desktop QR: a
+ * desktop Mac doesn't scan a QR, and an iPad on iPadOS's default "desktop
+ * website" Safari UA reports Macintosh. A real Mac that lands here just opens
+ * the App Store page, which is not a dead end.
  *
  * Not localized (outside app/[locale]; proxy.ts lets it past the auth gate),
  * `noindex`, not in the sitemap, and never cached: the answer depends on the

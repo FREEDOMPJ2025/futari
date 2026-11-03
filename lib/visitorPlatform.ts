@@ -117,16 +117,18 @@ export const QR_SCAN_BUCKET_ID = 'anon:landing-qr'
  * Where `/get` sends a phone that scanned the desktop QR (#1906). Server-side
  * the User-Agent string is all there is, so unlike `resolveVisitorPlatform`
  * there is no `maxTouchPoints` to tell iPadOS (which reports itself as
- * "Macintosh") from a real Mac. A Mac UA therefore goes to the landing, not
- * the App Store: on an iPad the landing's own CTA then resolves to the App
- * Store client-side (touch points are readable there), and a real Mac that
- * opened the link is not sent to a store page it can't install from.
- * Failure looks like: nothing errors; the QR's ASC/PostHog numbers just count
- * those iPads under `landing` instead of `app_store`.
+ * "Macintosh") from a real Mac. Any Macintosh UA therefore goes to the App
+ * Store like iPhone/iPad: `/get` is only reached by scanning the desktop QR,
+ * a desktop Mac doesn't scan a QR, and an iPad on iPadOS's default "desktop
+ * website" Safari UA reports Macintosh. A real Mac that does land here just
+ * opens the App Store page, which is not a dead end.
+ * Failure looks like (if Macintosh fell back to `landing`): nothing errors;
+ * those iPads count under `landing` instead of `app_store` in PostHog and
+ * miss the `landing-qr` ASC campaign.
  */
 export function resolveQrRedirect(userAgent: string): QrRedirectTarget {
   const ua = userAgent.toLowerCase()
-  if (/iphone|ipad|ipod/.test(ua)) return 'app_store'
+  if (/iphone|ipad|ipod|macintosh/.test(ua)) return 'app_store'
   if (/android/.test(ua)) return 'play_store'
   return 'landing'
 }
