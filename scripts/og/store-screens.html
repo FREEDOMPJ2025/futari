@@ -62,11 +62,14 @@
               mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
     }
     .scene.hero {
-      /* illustration-hero.png carries its own white rounded frame; scale past
-       * it so no white edge shows at the top of the store frame. */
+      /* illustration-hero.png was re-cropped in #1854 (1170×620, no white
+       * frame any more), so it is no longer scaled past a frame: at full
+       * height the 430px window spans about 381 source px, and centred on
+       * x≈590 it holds both heads (≈420–760) whole (#1904, Ray 2026-11-03).
+       * The zh-TW story images on file predate #1854 and were not re-rendered. */
       height: 700px;
-      background-size: auto 112%;
-      background-position: 46% 50%;
+      background-size: auto 100%;
+      background-position: 50.6% 50%;
     }
 
     /* Placeholder until the illustration exists — deliberately not a
