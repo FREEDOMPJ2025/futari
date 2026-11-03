@@ -9,7 +9,17 @@
 //
 //   node asc-screenshots.mjs                      # 看現況與計畫
 //   node asc-screenshots.mjs --apply              # 真的換圖
-//   node asc-screenshots.mjs --locale=zh-Hant     # 只處理一個語系
+//   node asc-screenshots.mjs --locale=zh-Hant     # 只處理一個語系（ASC 代碼或 app 代碼 zh-TW 皆可）
+//   node asc-screenshots.mjs --local              # 離線：只列本機檔案、驗尺寸與 alpha（#1904）
+//
+// 語系對應（store-locales.mjs）：zh-TW→zh-Hant、zh-CN→zh-Hans、en→en-US、ja→ja。
+// 每個 ASC 語系只會拿到同語系的 story/ 檔案；某語系沒有檔案就跳過，不會拿別的
+// 語言頂替。*-DRAFT-*.png（未核准文案的草稿，render --allow-pending-copy）永遠不上傳。
+//
+// 為什麼要 --local：一般的 dry-run 也要讀 ASC（列出版本與「將刪除」的既有截圖），
+// 所以需要 /Volumes/Futari Secrets 裡的 API key 與網路。--local 完全不碰 ASC，
+// 只回答「本機準備好了沒」：每個語系 × display type 會傳哪些檔、尺寸對不對、有沒有
+// alpha。它看不到商店上現在掛什麼，所以不能取代上傳前那次正式 dry-run。
 //
 // 先決條件：ASC 上要有一個「可編輯」的版本（PREPARE_FOR_SUBMISSION）。
 // READY_FOR_SALE 的版本改不動截圖 —— 這是 Apple 的限制，不是這支的問題。
@@ -18,25 +28,61 @@ import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { STORE_LOCALES, STORY_DIR, localeForAsc, storyFilePattern } from './store-locales.mjs'
+import { checkPng } from './check-store-pngs.mjs'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const STORY_DIR = path.resolve(__dirname, '..', '..', 'docs', 'store-assets', 'story')
 const APP_ID = '6779264784'
 const APPLY = process.argv.includes('--apply')
-const ONLY_LOCALE = (process.argv.find((a) => a.startsWith('--locale=')) || '').replace('--locale=', '')
+const LOCAL = process.argv.includes('--local')
+if (APPLY && LOCAL) {
+  console.error('--local 是離線預覽，不能跟 --apply 一起用。')
+  process.exit(1)
+}
+// 接受 ASC 代碼（zh-Hant）或 app 代碼（zh-TW），一律轉成 ASC 代碼比對。
+const rawLocale = (process.argv.find((a) => a.startsWith('--locale=')) || '').replace('--locale=', '')
+const ONLY_LOCALE = rawLocale && (STORE_LOCALES[rawLocale]?.asc || (localeForAsc(rawLocale) ? rawLocale : null))
+if (rawLocale && !ONLY_LOCALE) {
+  console.error(`不認得 --locale=${rawLocale}；可用 ${Object.entries(STORE_LOCALES).map(([l, v]) => `${v.asc}（${l}）`).join('、')}`)
+  process.exit(1)
+}
 
-// 每個 display type 對應一組檔案。story/ 目前只有 zh-TW 一套，所以其他語系
-// 要嘛沿用（混語，不建議），要嘛先準備該語言的示範帳本再產一套。
+// 每個 display type 對應一組檔案，每個語系各一套（store-locales.mjs 的檔名規則）。
 const SETS = {
   APP_IPHONE_67: { suffix: 'ios-6.7', expect: [1290, 2796] },
   APP_IPAD_PRO_3GEN_129: { suffix: 'ipad-13', expect: [2064, 2752] },
 }
-// ASC locale → the language token used in story/ filenames. Adding a locale
-// here without adding its rendered files is caught by the empty-list guard
-// below, not by silently uploading another language's images.
-const LOCALE_FILE_LANG = { 'zh-Hant': 'zh' }
-const LOCALES = Object.keys(LOCALE_FILE_LANG)
+// ASC locale → its story/ files for one display type. A locale whose files are
+// not rendered yet gets an empty list, which the guard below turns into "skip"
+// (never "delete the live screenshots", never "upload another language").
+const LOCALES = Object.values(STORE_LOCALES).map((v) => v.asc)
+function storyFiles(ascLocale, spec) {
+  const re = storyFilePattern(localeForAsc(ascLocale), spec.suffix)
+  return fs.readdirSync(STORY_DIR).filter((f) => re.test(f)).sort().map((f) => path.join(STORY_DIR, f))
+}
+
+if (LOCAL) {
+  // 離線模式：不讀 env、不打 API。
+  let bad = 0
+  for (const asc of LOCALES) {
+    if (ONLY_LOCALE && asc !== ONLY_LOCALE) continue
+    for (const [displayType, spec] of Object.entries(SETS)) {
+      const files = storyFiles(asc, spec)
+      console.log(`\n${asc}（${localeForAsc(asc)}）/ ${displayType}: ${files.length} 張${files.length ? '' : ' —— 沒有檔案，上傳時會跳過、不刪既有截圖'}`)
+      for (const f of files) {
+        const problems = checkPng(f)
+        if (problems.length) bad++
+        console.log(`    ${problems.length ? '✗' : '✓'} ${path.basename(f)}${problems.length ? '  ' + problems.join('; ') : ''}`)
+      }
+      const drafts = fs.readdirSync(STORY_DIR).filter((f) =>
+        f.endsWith(`-${spec.suffix}.png`) && f.includes(`-${STORE_LOCALES[localeForAsc(asc)].storyToken}-DRAFT-`))
+      if (drafts.length) console.log(`    （另有 ${drafts.length} 張 DRAFT，不會上傳）`)
+    }
+  }
+  console.log(bad
+    ? `\n${bad} 張不合規格，--apply 會在動手前擋下。`
+    : '\n本機檔案都合規格。這只看本機；上傳前仍要跑一次不加 --local 的 dry-run，看 ASC 上會刪掉什麼。')
+  process.exit(bad ? 1 : 0)
+}
 
 function env() {
   const raw = fs.readFileSync('/Volumes/Futari Secrets/env/.env', 'utf8')
@@ -117,19 +163,20 @@ for (const loc of locs.data) {
     continue
   }
   for (const [displayType, spec] of Object.entries(SETS)) {
-    const fileLang = LOCALE_FILE_LANG[locale]
-    const files = fs.readdirSync(STORY_DIR)
-      .filter((f) => f.endsWith(`-${fileLang}-${spec.suffix}.png`))
-      .sort()
-      .map((f) => path.join(STORY_DIR, f))
+    const files = storyFiles(locale, spec)
     console.log(`\n${locale} / ${displayType}: ${files.length} 張`)
     files.forEach((f) => console.log('   ', path.basename(f), pngSize(f).join('×')))
 
-    // 尺寸不對的檔案 Apple 會在非同步驗證時才退，而那時舊圖已經刪掉了。先擋。
+    // 尺寸不對或帶 alpha 的檔案 Apple 會在非同步驗證時才退，而那時舊圖已經刪掉了。先擋。
     for (const f of files) {
       const [w, h] = pngSize(f)
       if (w !== spec.expect[0] || h !== spec.expect[1]) {
         console.error(`${path.basename(f)} 是 ${w}×${h}，${displayType} 只收 ${spec.expect.join('×')}`)
+        process.exit(1)
+      }
+      const problems = checkPng(f)
+      if (problems.length) {
+        console.error(`${path.basename(f)}：${problems.join('; ')}`)
         process.exit(1)
       }
     }

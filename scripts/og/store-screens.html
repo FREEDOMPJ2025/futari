@@ -41,7 +41,14 @@
       transform-origin: top left;
       overflow: hidden;
     }
+    /* data-lang is the app locale (zh-TW | zh-CN | en | ja). zh-TW and en use
+     * Noto Sans TC (its Latin is what the zh-TW frames have always shown);
+     * zh-CN and ja need their own CJK face so simplified hanzi and kana get
+     * the regional glyph shapes. The SC stylesheet is added by the script
+     * below only for zh-CN, so the zh-TW render requests exactly what it
+     * always did. */
     body[data-lang="ja"] { font-family: 'Noto Sans JP', 'Noto Sans TC', sans-serif; }
+    body[data-lang="zh-CN"] { font-family: 'Noto Sans SC', 'Noto Sans TC', sans-serif; }
 
     /* The scene. Full-bleed, fading into the ground so the copy reads as
      * part of the same room rather than a caption under a photo. */
@@ -55,11 +62,14 @@
               mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
     }
     .scene.hero {
-      /* illustration-hero.png carries its own white rounded frame; scale past
-       * it so no white edge shows at the top of the store frame. */
+      /* illustration-hero.png was re-cropped in #1854 (1170×620, no white
+       * frame any more), so it is no longer scaled past a frame: at full
+       * height the 430px window spans about 381 source px, and centred on
+       * x≈590 it holds both heads (≈420–760) whole (#1904, Ray 2026-11-03).
+       * The zh-TW story images on file predate #1854 and were not re-rendered. */
       height: 700px;
-      background-size: auto 112%;
-      background-position: 46% 50%;
+      background-size: auto 100%;
+      background-position: 50.6% 50%;
     }
 
     /* Placeholder until the illustration exists — deliberately not a
@@ -142,7 +152,13 @@
   <div id="root"></div>
   <script>
     const params = new URLSearchParams(location.search)
-    const lang = params.get('lang') || 'zh'
+    // App locale codes (lib/i18n/locales-meta.ts). render-store-screens.mjs
+    // passes ?locale=; the old ?lang=zh still means zh-TW.
+    const LOCALES = ['zh-TW', 'zh-CN', 'en', 'ja']
+    const rawLocale = params.get('locale') || params.get('lang') || 'zh-TW'
+    const locale = rawLocale === 'zh' ? 'zh-TW' : rawLocale
+    if (!LOCALES.includes(locale)) throw new Error(`unknown locale ${rawLocale}`)
+    document.documentElement.lang = locale
     const W = Number(params.get('w') || 430)
     const H = Number(params.get('h') || 932)
     document.documentElement.style.setProperty('--w', W + 'px')
@@ -153,9 +169,14 @@
     rootEl.style.left = `${(W - 430 * S) / 2}px`
     rootEl.style.top = `${(H - 932 * S) / 2}px`
     const frameId = params.get('frame') || '1'
-    document.body.dataset.lang = lang
+    document.body.dataset.lang = locale
 
-    const SHOTS = '../../docs/store-assets/screenshots/'
+    // Device screenshots of the same locale: zh-TW keeps the original flat
+    // folder, the others live in screenshots/<locale>/ (capture-screens.mjs
+    // --locale). The image is a CSS background, so a missing file renders as
+    // an empty card without any error; render-store-screens.mjs checks the
+    // files listed in __STORE_META__ exist before it screenshots anything.
+    const SHOTS = '../../docs/store-assets/screenshots/' + (locale === 'zh-TW' ? '' : locale + '/')
     const SHOT_W = 1290 // source screenshots are iPhone 6.7" 1290×2796
 
     /* crop: [x0, y0, x1, y1] in source pixels. Crops stay clear of the bottom
@@ -177,20 +198,98 @@
            scene: '../../docs/store-assets/illustrations/story-5.png', pos: '50% 60%', brief: '旅行的回程。兩人拖著行李走出車站，行李箱上掛著御守，一人手上提著伴手禮。黃昏，路燈剛亮。' },
     }
 
-    // zh-TW is the master (CLAUDE.md i18n rule). Other locales follow once
-    // the zh-TW draft is approved by the designer.
+    // en / zh-CN / ja are captured from today's app (#1904), whose dashboard has
+    // a "monthly review / trips" row and whose assets page lists 家裡的 before
+    // 一起照顧的, so the zh-TW crops (2026-09-20 captures) miss the balance card
+    // and the plant. Same heights as zh-TW, so the layout doesn't move.
+    if (locale !== 'zh-TW') {
+      frames[1].crop = [0, 400, 1290, 910]   // balance card, whole
+      frames[4].crop = [50, 1650, 1240, 2440] // 一起照顧的: child, pet, plant
+    }
+
+    // zh-TW is the master (CLAUDE.md i18n rule). Its text is fixed: the
+    // numbers and names in it are the ones in the zh-TW screenshots.
+    //
+    // zh-CN / en / ja: Aria's copy (#1904 comment 6605692812), still a
+    // proposal until Ray approves it. `proposal: true` renders normally and
+    // render-store-screens.mjs prints one line saying so. `pending: true` (a
+    // placeholder, refused unless --allow-pending-copy, written as -DRAFT) is
+    // kept for future copy that has no text yet; no locale uses it today.
+    //
+    // {name} placeholders are demo-ledger facts, filled from
+    // window.__STORE_VARS__, which render-store-screens.mjs builds from
+    // scripts/og/demo-data/<locale>.json (written by seed-demo-ledgers.ts) and
+    // {days} from <locale>.capture.json (written by capture-screens.mjs from
+    // the plant card it captured). A placeholder without a value is rendered
+    // as ⟦name⟧ and listed in __STORE_META__.missingVars; the render script
+    // refuses to write anything while that list is not empty.
+    // ` / ` in Aria's table is the line break; the second line is the lit span.
+    const ZH_TW = {
+      1: { head: ['誰先付的，', '<span class="lit">不用再算。</span>'], sub: '每一筆都分好了。想結清的時候，點一下就好。' },
+      2: { head: ['兩個人，', '<span class="lit">一本帳。</span>'], sub: '一起記，回頭看會很暖。' },
+      3: { head: ['一起記下的，', '<span class="lit">都是日子。</span>'], sub: '晚餐、看牙、營養液，兩個人的日常都在這裡。' },
+      4: { head: ['小仙子陪了我們', '<span class="lit">285 天。</span>'], sub: '孩子、毛孩、植物，家裡的每一個都記得。' },
+      5: { head: ['大阪七天，', '<span class="lit">回家就結清。</span>'], sub: '日圓、台幣照常記，旅行的帳自己分開算。' },
+    }
     const copy = {
-      zh: {
-        1: { head: ['誰先付的，', '<span class="lit">不用再算。</span>'], sub: '每一筆都分好了。想結清的時候，點一下就好。' },
-        2: { head: ['兩個人，', '<span class="lit">一本帳。</span>'], sub: '一起記，回頭看會很暖。' },
-        3: { head: ['一起記下的，', '<span class="lit">都是日子。</span>'], sub: '晚餐、看牙、營養液，兩個人的日常都在這裡。' },
-        4: { head: ['小仙子陪了我們', '<span class="lit">285 天。</span>'], sub: '孩子、毛孩、植物，家裡的每一個都記得。' },
-        5: { head: ['大阪七天，', '<span class="lit">回家就結清。</span>'], sub: '日圓、台幣照常記，旅行的帳自己分開算。' },
+      'zh-TW': { frames: ZH_TW },
+      'zh-CN': {
+        proposal: true,
+        frames: {
+          1: { head: ['谁先付的，', '<span class="lit">不用再算。</span>'], sub: '每一笔都分好了。想结清的时候，点一下就好。' },
+          2: { head: ['两个人，', '<span class="lit">一本账。</span>'], sub: '一起记，回头看会很暖。' },
+          3: { head: ['一起记下的，', '<span class="lit">都是日子。</span>'], sub: '{item1}、{item2}、{item3}，两个人的日常都在这里。' },
+          4: { head: ['{plantName}陪了我们', '<span class="lit">{days} 天。</span>'], sub: '孩子、毛孩子、植物，家里的每一个都记得。' },
+          5: { head: ['{tripPlace}七天，', '<span class="lit">回家就结清。</span>'], sub: '{localCurrency}、{homeCurrency}照常记，旅行的账自己分开算。' },
+        },
+      },
+      en: {
+        proposal: true,
+        frames: {
+          1: { head: ['Who paid first?', '<span class="lit">No more math.</span>'], sub: 'Every entry is already split. When you want to settle up, it takes one tap.' },
+          2: { head: ['Two people,', '<span class="lit">one ledger.</span>'], sub: 'Note it down together. Looking back feels warm.' },
+          3: { head: ['Each entry,', '<span class="lit">a day we lived.</span>'], sub: '{item1}, {item2}, {item3}: life for two, all in one place.' },
+          4: { head: ['{plantName} and us:', '<span class="lit">{days} days together.</span>'], sub: 'Kids, pets, plants: everyone at home.' },
+          5: { head: ['{tripPlace}, 7 days.', '<span class="lit">Settled at home.</span>'], sub: 'Record in {localCurrency} and {homeCurrency}. The trip keeps its own books.' },
+        },
+      },
+      ja: {
+        proposal: true,
+        frames: {
+          1: { head: ['立て替えも、', '<span class="lit">もう計算しない。</span>'], sub: '1 件ずつ、もう分けてあります。精算したいときは、タップひとつで。' },
+          2: { head: ['ふたりで、', '<span class="lit">ひとつの家計簿。</span>'], sub: '一緒に記録して、振り返るとあたたかい。' },
+          3: { head: ['記録したのは、', '<span class="lit">ふたりの毎日。</span>'], sub: '{item1}、{item2}、{item3}。ふたりの日常が、ここにそろっています。' },
+          4: { head: ['{plantName}と一緒に', '<span class="lit">{days} 日。</span>'], sub: '子ども、ペット、植物も、ひとつの家計簿に。' },
+          5: { head: ['{tripPlace} 7 日間、', '<span class="lit">帰ったら精算。</span>'], sub: '旅行の家計簿は別に計算して、帰ったらまとめて精算します。' },
+        },
       },
     }
 
+    // Fill {name} from the demo-data values. Values are text, so escape them
+    // before they meet innerHTML.
+    const VARS = window.__STORE_VARS__ || {}
+    const escapeHtml = (v) => String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+    const PLACEHOLDER = /\{([a-zA-Z0-9]+)\}/g
+    const placeholdersOf = (fr) => [...(fr.head.join('') + fr.sub).matchAll(PLACEHOLDER)].map((m) => m[1])
+    const fill = (text) => text.replace(PLACEHOLDER, (_, name) =>
+      VARS[name] === undefined || VARS[name] === null || VARS[name] === '' ? `⟦${name}⟧` : escapeHtml(VARS[name]))
+
+    // Read by render-store-screens.mjs before it takes any screenshot.
+    const neededVars = [...new Set(Object.values(copy[locale].frames).flatMap(placeholdersOf))]
+    window.__STORE_META__ = {
+      locale,
+      pending: !!copy[locale].pending,
+      proposal: !!copy[locale].proposal,
+      neededVars,
+      missingVars: neededVars.filter((n) => VARS[n] === undefined || VARS[n] === null || VARS[n] === ''),
+      shotsByFrame: Object.fromEntries(
+        Object.entries(frames).filter(([, fr]) => fr.shot).map(([id, fr]) => [id, SHOTS + fr.shot]),
+      ),
+    }
+
     const f = frames[frameId]
-    const t = (copy[lang] || copy.zh)[frameId]
+    const raw = copy[locale].frames[frameId]
+    const t = { head: raw.head.map(fill), sub: fill(raw.sub) }
     const root = document.getElementById('root')
 
     const scene = document.createElement('div')
@@ -228,7 +327,19 @@
       root.appendChild(wrap)
     }
 
-    document.fonts.ready.then(() => { window.__OG_READY__ = true })
+    // zh-CN needs Noto Sans SC; wait for its stylesheet before fonts.ready,
+    // otherwise fonts.ready can resolve before the face is even declared and
+    // the headline silently falls back to Noto Sans TC's traditional glyphs.
+    const extraFont = locale === 'zh-CN'
+      ? new Promise((resolve) => {
+          const link = document.createElement('link')
+          link.rel = 'stylesheet'
+          link.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap'
+          link.onload = link.onerror = resolve
+          document.head.appendChild(link)
+        })
+      : Promise.resolve()
+    extraFont.then(() => document.fonts.ready).then(() => { window.__OG_READY__ = true })
   </script>
 </body>
 </html>
