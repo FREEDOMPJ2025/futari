@@ -1,0 +1,24 @@
+{
+  "locale": "zh-CN",
+  "groupId": "2d0636a5-092a-8a4c-a247-3f7e9a3c10a3",
+  "groupName": "我们的账本",
+  "tripId": "77c6bc7d-f704-8e01-ae45-fc346896e0c5",
+  "tripName": "大阪7日",
+  "baseCurrency": "CNY",
+  "tripCurrencies": [
+    "JPY",
+    "CNY"
+  ],
+  "plantName": "小仙子",
+  "plantSproutedAt": "2025-12-09",
+  "seededOn": "2026-11-03",
+  "copyVars": {
+    "item1": "晚饭",
+    "item2": "看牙",
+    "item3": "营养液",
+    "plantName": "小仙子",
+    "tripPlace": "大阪",
+    "localCurrency": "日元",
+    "homeCurrency": "人民币"
+  }
+}
