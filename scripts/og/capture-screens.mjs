@@ -9,6 +9,13 @@
 //   node capture-screens.mjs --login       # 首次：開視窗，你手動登入
 //   node capture-screens.mjs               # 之後：headless 截全部尺寸
 //   node capture-screens.mjs --only=ipad-13  # 只補某一組，不動已驗過的圖
+//   node capture-screens.mjs --locale=en     # 英文介面（#1904），輸出到 screenshots/en/
+//
+// --locale=<zh-TW|zh-CN|en|ja>（預設 zh-TW）：截圖前在 BASE 網域設定 app 的語系
+// cookie `lang`（lib/i18n/locales-meta.ts LOCALE_COOKIE；dashboard 由
+// lib/i18n/t.ts getLocale() 讀它，<html lang> 也來自它），截完把 cookie 還原成
+// 原本的值。zh-TW 寫到 screenshots/ 本身（沿用 2026-08 起的路徑），其他語系寫到
+// screenshots/<locale>/，檔名相同。路徑規則集中在 store-locales.mjs。
 //
 // 各組尺寸不能共用：
 //   App Store 6.7" 必須正好 1290×2796（比例 2.167:1）
@@ -20,9 +27,12 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { dirname, resolve, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { localeArg, shotsDirFor } from './store-locales.mjs'
+import { checkPaths } from './check-store-pngs.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const OUT_DIR = resolve(__dirname, '..', '..', 'docs', 'store-assets', 'screenshots')
+const LOCALE = localeArg()
+const OUT_DIR = shotsDirFor(LOCALE)
 const PROFILE = join(homedir(), '.futari-shots-profile')
 const BASE = process.env.BASE_URL || 'http://localhost:3000'
 const LOGIN_MODE = process.argv.includes('--login')
@@ -48,6 +58,90 @@ async function assertDemoLedger(page) {
     )
   }
 }
+// 語系 cookie 的寫法與 lib/i18n/LanguageSwitcher.tsx 相同（path=/、一年、Lax）。
+// 沒設好的樣子不是報錯，是整批截圖還是上一次用過的語言——所以截完還有
+// checkLocale() 對 <html lang> 與底部導覽的文字做核對。
+const LOCALE_COOKIE = 'lang'
+const localeCookie = (value) => ({
+  name: LOCALE_COOKIE,
+  value,
+  url: BASE,
+  path: '/',
+  sameSite: 'Lax',
+  expires: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
+})
+
+// 底部導覽的字串直接從 app 的語系檔讀（Node 26 可直接 import .ts；語系檔只有
+// `import type`，型別剝除後沒有其他依賴）。這樣 app 改了文案，這裡不會跟著過時。
+async function navStrings(locale) {
+  const exportName = { 'zh-TW': 'zhTW', 'zh-CN': 'zhCN', en: 'en', ja: 'ja' }[locale]
+  const listeners = process.listeners('warning')
+  process.removeAllListeners('warning') // 吞掉「Reparsing as ES module」那幾行提示
+  try {
+    const mod = await import(resolve(__dirname, '..', '..', 'lib', 'i18n', 'locales', `${locale}.ts`))
+    return mod[exportName].bottomNav
+  } finally {
+    // 提示是在下一輪 event loop 才送出的，等它過去再把 listener 接回來。
+    await new Promise((r) => setTimeout(r, 0))
+    listeners.forEach((l) => process.on('warning', l))
+  }
+}
+
+// 截完每張圖之後的語系核對。分兩級：
+//   錯誤：<html lang> 不是要的語系 —— 代表 cookie 沒被讀到，整張圖都是錯的語言。
+//   警告：畫面文字「看起來」混了別的語系。這是啟發式，會有誤報：示範帳本的紀錄
+//         名稱是使用者資料，不會跟著介面翻譯（例如 en 介面裡的「貓砂和飼料」），
+//         所以警告是要人去看圖，不是擋下來。
+// 啟發式本身：
+//   - 有底部導覽的頁面：nav 的 aria-label 與四個分頁名稱要等於該語系檔的
+//     bottomNav（介面外框最穩定的一組字串）。
+//   - en：統計漢字與假名數量（介面本身不該有任何 CJK）。
+//   - ja：整頁沒有任何平假名／片假名，多半是截到中文介面。
+//   - zh-CN／zh-TW：用一小組只在其中一邊出現的常用字（們/们、這/这…）找另一邊的字。
+//     日文漢字與繁簡字形交錯，ja 不做這一項。
+const TRAD_ONLY = '們個這筆紀錄帳說時點結為會與過錢還開關設頁傳記讓'
+const SIMP_ONLY = '们个这笔纪录账说时点结为会与过钱还开关设页传记让'
+async function checkLocale(page, locale, nav) {
+  const found = await page.evaluate(() => {
+    const navEl = document.querySelector('nav[aria-label]')
+    return {
+      htmlLang: document.documentElement.lang,
+      text: document.body.innerText,
+      navLabel: navEl ? navEl.getAttribute('aria-label') : null,
+      navText: navEl ? navEl.innerText : null,
+    }
+  })
+  if (found.htmlLang !== locale) {
+    throw new Error(`<html lang="${found.htmlLang}">，預期 ${locale} —— 語系 cookie 沒有生效`)
+  }
+  const warnings = []
+  if (found.navLabel !== null) {
+    if (found.navLabel !== nav.navAriaLabel) warnings.push(`底部導覽 aria-label 是「${found.navLabel}」，預期「${nav.navAriaLabel}」`)
+    const missing = [nav.home, nav.records, nav.assets, nav.settings].filter((l) => !found.navText.includes(l))
+    // 已離開的成員看不到「設定」分頁（BottomNav 留空位），少一個不算錯。
+    if (missing.length > 1 || (missing.length === 1 && missing[0] !== nav.settings)) {
+      warnings.push(`底部導覽缺少：${missing.join('、')}`)
+    }
+  }
+  const sample = (re) => [...new Set(found.text.match(re) || [])].slice(0, 12).join('')
+  if (locale === 'en') {
+    const cjk = (found.text.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/gu) || []).length
+    if (cjk) warnings.push(`畫面有 ${cjk} 個漢字／假名（例：${sample(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/gu)}）—— 可能是帳本資料，也可能是漏翻`)
+  }
+  if (locale === 'ja' && !/[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(found.text)) {
+    warnings.push('整頁沒有任何假名 —— 看起來不是日文介面')
+  }
+  if (locale === 'zh-CN') {
+    const hit = sample(new RegExp(`[${TRAD_ONLY}]`, 'g'))
+    if (hit) warnings.push(`出現繁體字：${hit} —— 可能是帳本資料，也可能是漏翻`)
+  }
+  if (locale === 'zh-TW') {
+    const hit = sample(new RegExp(`[${SIMP_ONLY}]`, 'g'))
+    if (hit) warnings.push(`出現簡體字：${hit} —— 可能是帳本資料，也可能是漏翻`)
+  }
+  return warnings
+}
+
 // 只截某幾組尺寸，例：--only=ipad-13。不給就全部重截。
 // 存在的理由：已上架那幾組是用整理過的 dev 帳本截的，重跑會整批覆寫；
 // 補一個新尺寸時沒有理由連帶重截已驗過的圖。
@@ -131,6 +225,8 @@ async function capture() {
         userDataDir: PROFILE,
       })
   const results = []
+  const warnings = []
+  const nav = await navStrings(LOCALE)
 
   const formats = ONLY.length ? FORMATS.filter((f) => ONLY.includes(f.key)) : FORMATS
   if (!formats.length) {
@@ -138,6 +234,13 @@ async function capture() {
       `--only=${ONLY.join(',')} 沒有對應的 format。可用：${FORMATS.map((f) => f.key).join(', ')}`
     )
   }
+
+  // 先記下原本的語系 cookie，結束時還原：--connect 連的是別人的瀏覽器，
+  // 不還原的話對方之後打開 dashboard 會變成截圖用的語言。
+  const cookiePage = await browser.newPage()
+  const previous = (await cookiePage.cookies(BASE)).find((c) => c.name === LOCALE_COOKIE)
+  await cookiePage.setCookie(localeCookie(LOCALE))
+  await cookiePage.close()
 
   try {
     for (const fmt of formats) {
@@ -183,8 +286,10 @@ async function capture() {
         await page.evaluate(() => document.fonts.ready)
         await new Promise((r) => setTimeout(r, 1200))
 
-        const buf = await page.screenshot({ type: 'png' })
         const file = `${screen.name}-${fmt.key}.png`
+        for (const w of await checkLocale(page, LOCALE, nav)) warnings.push(`${file}: ${w}`)
+
+        const buf = await page.screenshot({ type: 'png' })
         await writeFile(join(OUT_DIR, file), buf)
         const px = `${fmt.width * fmt.dsr}×${fmt.height * fmt.dsr}`
         console.log(`✓ ${file}  (${px})  ${screen.label}`)
@@ -193,12 +298,27 @@ async function capture() {
       }
     }
   } finally {
+    const restore = await browser.newPage()
+    if (previous) {
+      await restore.setCookie({ ...localeCookie(previous.value), expires: previous.expires })
+    } else {
+      await restore.deleteCookie({ name: LOCALE_COOKIE, url: BASE })
+    }
+    await restore.close()
     // 連上別人的 Chrome 時只中斷連線，不要把使用者的視窗關掉。
     if (CONNECT) await browser.disconnect()
     else await browser.close()
   }
 
-  console.log(`\n共 ${results.length} 張 → ${OUT_DIR}`)
+  console.log(`\n共 ${results.length} 張（${LOCALE}）→ ${OUT_DIR}`)
+
+  if (warnings.length) {
+    console.warn(`\n⚠ 語系核對有 ${warnings.length} 則警告（啟發式，請打開圖確認）：`)
+    warnings.forEach((w) => console.warn(`  ${w}`))
+  }
+
+  console.log('\n尺寸／alpha 檢查：')
+  if (checkPaths(results.map((f) => join(OUT_DIR, f)))) process.exitCode = 1
 }
 
 if (LOGIN_MODE) {
