@@ -66,7 +66,7 @@ _Nothing unreleased yet._
 - **商店截圖與故事圖支援 en／zh-CN／ja（#1904）**
   技術：`scripts/og/` 的實機截圖、故事圖、ASC 上傳腳本加 `--locale`，新增商店 PNG 檢查腳本與只對 dev 的三語示範帳本 seed，三語圖檔放進 `docs/store-assets/`（要另外上傳到商店）。
 
-- **repo 搬到 FREEDOMPJ2025/futari，專案改名為 Futari**
+- **repo 搬到 FREEDOMPJ2025/futari，專案改名為 Futari（#1895）**
   使用者：服務條款、隱私權頁的「回報問題」連結改指向新的 GitHub repo（舊網址也會自動轉過去）。
   技術：所有 `redtear1115/oikos` 改成 `FREEDOMPJ2025/futari`，`package.json` 的 name 改成 `futari`，CLAUDE.md／README 換成新名稱並寫明刻意保留 oikos 的地方（資料表 `OikosGroups`、裝置上的 `oikos_*` key、外部 ID），llms.txt 拿掉舊名和「source code is private」的錯誤說法。
 
