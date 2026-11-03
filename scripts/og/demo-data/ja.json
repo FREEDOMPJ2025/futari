@@ -3,10 +3,9 @@
   "groupId": "8f395bb4-0ba3-81ef-8305-64cc3051c70e",
   "groupName": "ふたりの家計簿",
   "tripId": "ae94bba9-b335-838c-9ee5-82d750dad662",
-  "tripName": "台北7日間",
+  "tripName": "大阪7日間",
   "baseCurrency": "JPY",
   "tripCurrencies": [
-    "TWD",
     "JPY"
   ],
   "plantName": "ぷく",
@@ -17,8 +16,8 @@
     "item2": "歯医者",
     "item3": "サプリ",
     "plantName": "ぷく",
-    "tripPlace": "台北",
-    "localCurrency": "台湾ドル",
+    "tripPlace": "大阪",
+    "localCurrency": "円",
     "homeCurrency": "円"
   }
 }
