@@ -3339,11 +3339,11 @@ I will upload the screenshots once you confirm.`,
     },
     terms: {
       title: '利用規約 · Futari',
-      description: 'Futari アルファ版の利用規約とご利用にあたっての注意事項。',
+      description: 'Futari の利用規約。ふたりの共有家計簿を使う前に知っておきたいこと（アカウントの削除、サービスの変更、準拠法など）。',
     },
     privacy: {
       title: 'プライバシーポリシー · Futari',
-      description: 'Futari アルファ版でのデータ収集と取り扱いについて。',
+      description: 'Futari がデータをどう収集・利用・保存するか。収集するデータ、暗号化、保存期間、第三者サービス、利用者の権利について。',
     },
     migrate: {
       honeydue: {

@@ -3341,11 +3341,11 @@ I will upload the screenshots once you confirm.`,
     },
     terms: {
       title: 'Terms of Service · Futari',
-      description: "Terms of service for the Futari alpha test build: what you're agreeing to when you use the couples-first shared ledger PWA during the public beta.",
+      description: "Futari's terms of service: what to know before using the shared ledger for two, including account deletion, service changes and governing law.",
     },
     privacy: {
       title: 'Privacy Policy · Futari',
-      description: 'How the Futari alpha test build collects and handles your data: what we store, where it lives, and the third parties involved in the couples ledger.',
+      description: "How Futari collects, uses and stores your data: what we collect, how it's encrypted, how long we keep it, the third-party services we use, and your rights.",
     },
     migrate: {
       honeydue: {

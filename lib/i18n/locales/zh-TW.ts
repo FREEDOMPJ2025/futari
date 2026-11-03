@@ -6880,11 +6880,11 @@ export const zhTW: Translations = {
     },
     terms: {
       title: '服務條款 · Futari',
-      description: 'Futari alpha 測試版本的服務條款與使用者注意事項。',
+      description: 'Futari 的服務條款：使用雙人共用帳本前需要知道的事，包括帳號刪除、服務調整與適用法律。',
     },
     privacy: {
       title: '隱私權政策 · Futari',
-      description: 'Futari alpha 測試版本的資料蒐集與隱私權處理方式。',
+      description: 'Futari 如何蒐集、使用和保存你的資料：蒐集哪些資料、怎麼加密、保留多久、用到哪些第三方服務，以及你的權利。',
     },
     migrate: {
       honeydue: {

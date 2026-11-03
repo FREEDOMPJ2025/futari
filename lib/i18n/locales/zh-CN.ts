@@ -3287,11 +3287,11 @@ export const zhCN: Translations = {
     },
     terms: {
       title: '服务条款 · Futari',
-      description: 'Futari alpha 测试版本的服务条款与用户注意事项。',
+      description: 'Futari 的服务条款：使用双人共用账本前需要知道的事，包括账号删除、服务调整与适用法律。',
     },
     privacy: {
       title: '隐私权政策 · Futari',
-      description: 'Futari alpha 测试版本的数据收集与隐私权处理方式。',
+      description: 'Futari 如何收集、使用和保存你的数据：收集哪些数据、怎么加密、保留多久、用到哪些第三方服务，以及你的权利。',
     },
     migrate: {
       honeydue: {
