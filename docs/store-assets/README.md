@@ -23,7 +23,7 @@ last_updated: 2026-11-03
 | `screenshots/*-ipad-13.png` | 2064×2752、無 alpha | App Store 13" iPad（必填），4 張 | ✅ |
 | `story/0N-zh-ios-6.7.png` | 1290×2796、無 alpha | **插畫故事圖**（zh-TW），5 張 | ✅ ASC 上是舊順序，新順序待上傳（#1759） |
 | `story/0N-zh-ipad-13.png` | 2064×2752、無 alpha | 同上，13" iPad | ✅ 同上 |
-| `screenshots/<locale>/…`、`story/0N-<locale>-…` | 同上 | zh-CN／en／ja（#1904） | ⏳ 工具已就緒；文案待核准、示範帳本待準備 |
+| `screenshots/<locale>/…`、`story/0N-<locale>-…` | 同上 | zh-CN／en／ja（#1904） | ⏳ 文案是提案（待 Ray）；示範帳本的 seed 腳本已就緒，尚未在 dev 執行 |
 
 檔名規則見下方「語系」。所有截圖可用 `node scripts/og/check-store-pngs.mjs` 一次驗尺寸與 alpha。
 
@@ -140,7 +140,7 @@ cd scripts/og
 node render-store-screens.mjs                      # zh-TW、iPhone 6.7"
 node render-store-screens.mjs --format=ipad-13     # 13" iPad
 node render-store-screens.mjs --frames=2,4         # 只補某幾張
-node render-store-screens.mjs --locale=en --allow-pending-copy --out=/tmp/x   # 文案未核准時的草稿
+node render-store-screens.mjs --locale=en         # 英文；要先 seed 示範帳本、截過實機畫面（見「語系」）
 ```
 
 產完會自動跑 `check-store-pngs.mjs`。`--locale` 的規則見下方「語系」。
@@ -194,10 +194,12 @@ node asc-screenshots.mjs --local --locale=en   # 只看一個語系（ASC 代碼
 
 ### 語系
 
-四語工具 2026-11-03 就緒（#1904）；**目前 repo 裡只有 zh-TW 的圖**。en／zh-CN／ja 要出貨還差兩件事：
+四語工具 2026-11-03 就緒（#1904）；**目前 repo 裡只有 zh-TW 的圖**。en／zh-CN／ja 的進度：
 
-1. **核准的文案**：`store-screens.html` 的 `copy` 物件裡，這三語是 `pending: true`、文字暫用 zh-TW 原文（`TODO(#1904)`，needs-copy）。文案核准後替換 `frames`、刪掉 `pending`。第 4 張的天數要跟該語系截圖當下的值一致。
-2. **該語言的示範帳本**：故事圖裁的是同語系的實機截圖。紀錄名稱（貓砂和飼料、巷口那家晚餐）是帳本資料，不會跟著介面翻譯；直接用中文帳本截英文介面，畫面會是混語。
+1. **文案**：`store-screens.html` 的 `copy` 已換成 Aria 的提案（#1904 留言 6605692812），標 `proposal: true`：照常產出、不加 `-DRAFT`，產圖時印一行 `copy is a proposal (#1904), pending Ray`。Ray 核准後刪掉 `proposal` 即可。
+2. **示範帳本**：故事圖裁的是同語系的實機截圖，紀錄名稱是帳本資料、不會跟著介面翻譯，所以每個語系要有自己的帳本。`scripts/og/seed-demo-ledgers.ts` 會建，**還沒在 dev 跑過**（見下方「示範帳本（en／zh-CN／ja）」）。
+
+文案裡的示範資料是變數：`{item1}`～`{item3}`（第 3 張）、`{plantName}`、`{days}`（第 4 張）、`{tripPlace}`、`{localCurrency}`、`{homeCurrency}`（第 5 張）。前六個與幣別名稱來自 `scripts/og/demo-data/<locale>.json`（seed 腳本 `--apply` 時寫），`{days}` 來自 `demo-data/<locale>.capture.json`（截 `/assets` 時從植物卡讀的數字），兩者在產圖前用 app 的天數算法（`lib/age.ts` 的 `daysSince`）互相核對。缺任何一個值時，`render-store-screens.mjs` 在寫檔之前就拒絕。zh-TW 的文案是固定字（「小仙子陪了我們 285 天」），不用變數，產出與改動前逐像素相同。
 
 三支腳本都用 `--locale=<zh-TW|zh-CN|en|ja>`，預設 zh-TW。不加 `--locale` 時輸出與 #1904 之前完全相同。
 
@@ -205,12 +207,52 @@ node asc-screenshots.mjs --local --locale=en   # 只看一個語系（ASC 代碼
 |---|---|---|
 | 實機截圖（`capture-screens.mjs`） | `screenshots/<name>-<format>.png`（沿用） | `screenshots/<locale>/<name>-<format>.png` |
 | 故事圖（`render-store-screens.mjs`） | `story/<NN>-zh-<format>.png`（沿用，`zh` 是 #1904 之前的寫法） | `story/<NN>-<locale>-<format>.png`，例 `01-zh-CN-ios-6.7.png`、`01-en-ios-6.7.png` |
-| 文案未核准時的草稿 | — | `story/<NN>-<locale>-DRAFT-<format>.png` |
+| `pending` 文案的草稿（目前沒有語系是 pending） | — | `story/<NN>-<locale>-DRAFT-<format>.png` |
 | App Store Connect 語系 | `zh-Hant` | `zh-Hans`／`en-US`／`ja` |
 
 規則集中在 `scripts/og/store-locales.mjs`，三支腳本共用。
 
 - **`capture-screens.mjs --locale`**：截圖前在 `BASE_URL` 的網域設 app 的語系 cookie `lang`（`lib/i18n/locales-meta.ts` 的 `LOCALE_COOKIE`；dashboard 由 `getLocale()` 讀它，`<html lang>` 也跟著它），截完還原成原本的值（`--connect` 連的是別人的瀏覽器，不還原的話對方之後打開的 dashboard 會變成截圖用的語言）。每張圖截完會核對：`<html lang>` 不符就中止（代表 cookie 沒生效）；底部導覽的字串和該語系檔不同、en 畫面出現漢字假名、ja 畫面沒有假名、zh-CN／zh-TW 出現另一邊的常用字，都只印警告。這些是啟發式判斷：帳本資料不會翻譯，所以警告的意思是「打開圖看一下」，不是一定錯了。
-- **`render-store-screens.mjs --locale`**：取該語系的文案與該語系的實機截圖。文案還是 `pending` 時拒絕產出，加 `--allow-pending-copy` 才產，並印出警告、檔名加 `-DRAFT`。該語系的實機截圖缺檔時，在寫任何檔案之前就失敗，並列出缺哪幾張。`<html lang>` 跟著語系；zh-CN 另外載入 Noto Sans SC、ja 用 Noto Sans JP，zh-TW 與 en 用 Noto Sans TC。
+- **`capture-screens.mjs --locale`（zh-CN／en／ja）** 另外會切到該語系的示範帳本、旅行內頁用該語系的 trip id、截完 `/assets` 把植物卡的天數寫進 `demo-data/<locale>.capture.json`。詳見下一節。
+- **`render-store-screens.mjs --locale`**：取該語系的文案與該語系的實機截圖，文案變數從 `demo-data/` 填入。`proposal` 文案照常產出，只印一行提醒；`pending` 文案（目前沒有）拒絕產出，加 `--allow-pending-copy` 才產，並印出警告、檔名加 `-DRAFT`。該語系的實機截圖缺檔時，在寫任何檔案之前就失敗，並列出缺哪幾張。`<html lang>` 跟著語系；zh-CN 另外載入 Noto Sans SC、ja 用 Noto Sans JP，zh-TW 與 en 用 Noto Sans TC。
   - **失效的樣子**（缺檔檢查存在的理由）：實機截圖是 CSS 背景圖，檔案不存在時不會報錯，只會產出一張下半部是空白卡片的故事圖。
 - **`asc-screenshots.mjs`**：每個 ASC 語系只上傳同語系的檔案，`-DRAFT-` 的檔名永遠不會被選到。
+
+### 示範帳本（en／zh-CN／ja）
+
+**只動 dev（oikos-dev，`ufhcprrauwsxdmscbkrf`）。** 腳本先看 `.env.local` 的 `DATABASE_URL`（以及 `DATABASE_URL_DIRECT`、`NEXT_PUBLIC_SUPABASE_URL`），任何一個不是 dev 專案、或主機不是 Supabase，連 dry run 都拒絕，也不會連線。zh-TW 的帳本（`3a896cf2-…`）只讀不寫。
+
+每個語系一本帳，成員是同樣的 Futa／Tari（`avatar_hidden`）。內容照 zh-TW 帳本在四個畫面上看得到的樣子：11 筆近一週的支出（含文案的 `{item1..3}`，金額是當地合理的數字、基礎貨幣 en=USD、zh-CN=CNY、ja=JPY）、愛物（兩台車、房子、孩子、柴犬、植物 `{plantName}`、一個物品）、一趟約六週前已結束的 7 天旅行 `{tripPlace}`（兩種幣別；ja 是台北，因為去大阪的話兩種幣別都是日圓）。植物的萌芽日與 zh-TW 的小仙子相同（2025-12-09），所以天數的算法一樣：2026-09-20 是 285 天。車牌、孩子本名這類加密欄位用 app 的 `encrypt`／`aadFor` 寫，內容是編的（`DEMO 001`）。
+
+```bash
+# 在 repo 根目錄（tsx 要讀 tsconfig 的 @/ 路徑）
+npx tsx scripts/og/seed-demo-ledgers.ts                      # dry run：印出會建什麼，什麼都不寫
+npx tsx scripts/og/seed-demo-ledgers.ts --apply              # 建 en、zh-CN、ja（已存在就刪掉自己的列重建，日期重新對齊今天）
+npx tsx scripts/og/seed-demo-ledgers.ts --apply --locale=ja  # 只建一個語系
+git add scripts/og/demo-data/                                # --apply 寫的 <locale>.json，截圖與產圖都讀它
+
+cd scripts/og
+node capture-screens.mjs --connect=http://127.0.0.1:9222 --locale=en --only=ios-6.7   # 會自己切帳本、截完切回 zh-TW
+node render-store-screens.mjs --locale=en
+```
+
+**最好在截圖當天 seed**：支出的日期是相對 seed 那天排的，隔幾天再截，首頁就不是「今天／昨天」。月初（1～6 號）seed 時，日期會壓在本月內，好讓首頁只有一個月份標題（幾筆會擠在同一天）。
+
+**怎麼切帳本**：app 沒有「目前帳本」的 cookie 或欄位。`getActiveGroupForUser`（`lib/db/queries/group.ts`）在使用者所屬的帳本裡取 `current_epoch_started_at` 最新的那本。所以 `--activate=<locale>` 把該語系帳本的這個時間放到兩位成員其他帳本的最新值之後一分鐘，其他語系帳本放到最舊值之前一天；`--activate=zh-TW` 把所有語系帳本放回 zh-TW 之前。這兩個時間都早於 seed 的資料（餘額與章節都是用 `created_at >=` 這個時間算），所以切換不會讓任何一筆消失。`capture-screens.mjs --locale` 自動做這兩步。
+- **失效的樣子**：不會報錯，只是首頁顯示另一本帳。所以 `capture-screens.mjs` 每次截首頁都核對帳本名稱（zh-TW「我們的帳本」、en「Our ledger」、zh-CN「我们的账本」、ja「ふたりの家計簿」），不符就中止。
+- 截到一半被中斷、沒切回來時，dev 上打開 app 看到的會是語系帳本。手動切回：`npx tsx scripts/og/seed-demo-ledgers.ts --activate=zh-TW`。
+- 語系帳本存在期間，Futa 與 Tari 在 dev 同時是好幾本帳的成員。app 支援這個狀態（離開後重新加入也會這樣），但在 dev 上用這兩個帳號測試離開、刪帳號之前，先把語系帳本移除。
+
+**移除**：
+
+```bash
+npx tsx scripts/og/seed-demo-ledgers.ts --remove --dry-run   # 先看會刪什麼
+npx tsx scripts/og/seed-demo-ledgers.ts --remove             # 只刪腳本自己建的 id，並刪掉 demo-data/<locale>.json 與 .capture.json
+```
+
+每一列的 id 由「語系＋用途」算出來（固定的 UUID），腳本靠它找到自己的列，`--remove` 只刪這些 id。有人在語系帳本上用 app 新增過紀錄時，外鍵會擋下刪除，整個語系回滾，腳本會說是哪個語系；先在 app 裡刪掉那幾筆再跑。
+
+**已知差異**：
+- 旅行結束時寫回主帳的結算列，描述是 `大阪7日 結算` 這種格式——app 的 `foldTripIntoLedger` 把「結算」寫死成中文，腳本照 app 的行為寫，所以 en／ja 帳本的紀錄頁會出現「Osaka, 7 days 結算」。它的日期在六週前，不在首頁那 11 筆裡，但 `02-records` 往下捲會看到。要改是 app 的事，不在這張票。
+- zh-TW 帳本的「客廳的小仙子」在 dev 已於 2026-10-15 被刪除（soft delete），所以現在重截 zh-TW 的 `/assets` 不會有那棵植物。repo 裡 2026-09-20 截的圖不受影響。
+

@@ -64,8 +64,10 @@ index.
 
 | Script | What it does | Locale option |
 |---|---|---|
-| `capture-screens.mjs` | Device screenshots from the local dev server (needs a logged-in demo ledger) | `--locale=<zh-TW\|zh-CN\|en\|ja>` sets the app's `lang` cookie, writes to `screenshots/` (zh-TW) or `screenshots/<locale>/` |
-| `render-store-screens.mjs` + `store-screens.html` | Illustration-first story images | `--locale=…`; refuses locales whose copy is `pending` unless `--allow-pending-copy` (then writes `*-DRAFT-*.png`) |
+| `capture-screens.mjs` | Device screenshots from the local dev server (needs a logged-in demo ledger) | `--locale=<zh-TW\|zh-CN\|en\|ja>` sets the app's `lang` cookie, switches to that locale's demo ledger (zh-CN/en/ja), writes to `screenshots/` (zh-TW) or `screenshots/<locale>/`, and records the plant's day count in `demo-data/<locale>.capture.json` |
+| `render-store-screens.mjs` + `store-screens.html` | Illustration-first story images | `--locale=…`; fills the copy's `{name}` placeholders from `demo-data/`, refuses while one is missing; `proposal: true` copy renders with a one-line note; `pending` copy (none today) needs `--allow-pending-copy` and writes `*-DRAFT-*.png` |
+| `seed-demo-ledgers.ts` | **Dev DB only.** Creates / removes the en, zh-CN, ja demo ledgers and switches which one the app shows; dry-run by default. Run from the repo root with `npx tsx` | `--locale=en,zh-CN,ja`; `--apply`, `--remove`, `--activate=<locale\|zh-TW>` |
+| `demo-data.mjs` | Shared reader/writer for `demo-data/<locale>.json` and `.capture.json`, and the app's day count | — |
 | `asc-screenshots.mjs` | Upload story images to App Store Connect; dry-run by default | Per ASC localization (`zh-Hant`, `zh-Hans`, `en-US`, `ja`); `--local` lists local files offline |
 | `check-store-pngs.mjs` | Exact size per format + no alpha, for any PNG or folder | — |
 | `store-locales.mjs` | Shared table: locale → file names, screenshot folder, ASC code | — |
