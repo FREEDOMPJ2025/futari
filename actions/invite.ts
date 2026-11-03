@@ -20,6 +20,8 @@ import { boundarySql, lockForEpochClose } from '@/lib/db/queries/epoch'
 import { getActiveGroupForUser } from '@/lib/db/queries/group'
 import { hasActiveTrip } from '@/lib/db/queries/trips'
 import { foldTripIntoLedger } from '@/lib/trip/endTripInTx'
+import { buildTripSettlementDescription } from '@/lib/trip/settlementDescription'
+import { getTranslations } from '@/lib/i18n/t'
 import { action } from '@/lib/action-errors'
 
 export type InvitePreview =
@@ -336,6 +338,7 @@ export const acceptInvite = action(async (token: string): Promise<string> => {
     expenseCount: number
   }
 
+  const t = await getTranslations()
   const acceptOnce = () => db.transaction(async (tx): Promise<{ endedTrips: EndedTrip[]; inviterFirstRecord: boolean; inviterSummaryRecords: boolean }> => {
     // Read before the locks; they are locked with the invite's group below,
     // and re-read once the locks are held.
@@ -529,6 +532,7 @@ export const acceptInvite = action(async (token: string): Promise<string> => {
         const folded = await foldTripIntoLedger(tx, {
           trip: { id: trip.id, name: trip.name, groupId: invite.groupId },
           members: { memberA: inviterGroup.memberA, memberB: inviterGroup.memberB },
+          description: buildTripSettlementDescription(t, trip.name),
           transactedAt: endedAt,
           createdAt: endedAt,
         })

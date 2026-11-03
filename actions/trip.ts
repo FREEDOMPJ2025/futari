@@ -6,6 +6,8 @@ import { and, eq, isNull } from 'drizzle-orm'
 import { openEpochClause } from '@/lib/db/queries/_predicates'
 import { lockOpenEpochForWrite } from '@/lib/db/queries/epoch'
 import { foldTripIntoLedger } from '@/lib/trip/endTripInTx'
+import { buildTripSettlementDescription } from '@/lib/trip/settlementDescription'
+import { getTranslations } from '@/lib/i18n/t'
 import { requireViewerGroup } from '@/lib/auth/viewer'
 import { getViewerWriteContext } from '@/lib/actionContext'
 import {
@@ -99,6 +101,7 @@ export const createTrip = action(async (input: CreateTripInput) => {
 export const endTrip = action(async (input: { tripId: string; endDate: string }) => {
   const { user, group } = await getViewerWriteContext()
 
+  const t = await getTranslations()
   const txResult = await db.transaction(async (tx) => {
     // Conditional update on status='active' makes this idempotent: a second
     // endTrip on an already-ended trip yields no rows and no summary writes,
@@ -151,6 +154,7 @@ export const endTrip = action(async (input: { tripId: string; endDate: string })
     const { expenseCount, summaryCount } = await foldTripIntoLedger(tx, {
       trip: { id: row.id, name: row.name, groupId: group.id },
       members,
+      description: buildTripSettlementDescription(t, row.name),
       transactedAt: row.endedAt ?? new Date(),
     })
 

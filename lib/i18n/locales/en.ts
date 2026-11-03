@@ -434,6 +434,8 @@ export const en: Translations = {
     iSettled: 'I settled',
     partnerSettled: '{name} settled',
     outingSettled: 'Outing settlement',
+    tripSettledRecord: '{name} settlement',
+    tripSettledRecordUnnamed: 'Trip settlement',
     youIncome: 'Your income',
     partnerIncome: '{name}\'s income',
     youPaid: 'You paid',

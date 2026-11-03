@@ -43,6 +43,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **結束旅行時的結算紀錄名稱跟著語系（#1912）**
+  使用者：新結算紀錄採用結束旅行者的語系，伴侶即使使用不同語系也會看到結束者的語言，舊紀錄維持不變。
+  技術：兩個結束旅行的入口從 request locale 取得四語文案，旅行名稱去除前後空白，空白名稱使用未命名旅行的結算文案。
+
 - **Android App 上架 Google Play，網站的測試招募改成「到 Google Play 下載」（#1901）**
   使用者：Android 瀏覽器的首頁按鈕、儀表板卡片、設定的邀請列、出遊頁那一行都改連 Google Play，並註明目前只在台灣上架；首頁加上 Google Play 徽章和可關閉的上架公告；`/android-beta` 改成「封閉測試已結束」說明頁；App 內（兩個殼）不顯示任何下載連結。
   技術：`PLAY_STORE_URL` 取代測試群組／opt-in 常數，CTA 目標 `android_beta` → `play_store`（`landing_cta_clicked` 一併改）；徽章與公告由 SSR 輸出、靠 `lib/playLaunch.ts` 的 pre-paint script 在殼內與關閉後先隱藏（不跳版面），公告到 2026-11-17 為止。
