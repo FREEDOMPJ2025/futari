@@ -50,7 +50,10 @@ export function DesktopDownloadBlock({ t, locale, className }: Props) {
         <AppStoreBadge locale={locale} alt={t.appStoreBadgeAlt} />
         <PlayStoreBadge locale={locale} alt={t.playBadgeAlt} />
       </div>
-      <div className="mt-3 inline-flex items-center gap-3 p-2.5 rounded-xl border border-hairline bg-bg">
+      {/* mt-2 / p-2 (not mt-3 / p-2.5): 8 px tighter in every locale so ja's QR card fits a
+          1440×900 first screen once the launch banner is gone (Daphne, #1919
+          issuecomment-6612350572). */}
+      <div className="mt-2 inline-flex items-center gap-3 p-2 rounded-xl border border-hairline bg-bg">
         <div
           role="img"
           aria-label={t.downloadQrAlt}
