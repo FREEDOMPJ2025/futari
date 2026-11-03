@@ -235,8 +235,9 @@ describe('Landing — example card (#1852)', () => {
 
   // #1901: the Google Play badge joins the CTA block (store entries together),
   // so the card now follows the sign-in link and that badge, still below the
-  // CTA and above the compact trust row.
-  it('sits right after the mobile sign-in link and the Play badge, before the compact trust row', () => {
+  // CTA and above the compact trust row. #1910: on zh-TW the launch film sits
+  // between the badge and the card.
+  it('sits right after the mobile sign-in link, the Play badge and the zh-TW launch film, before the compact trust row', () => {
     renderLanding()
     const fig = screen.getByRole('figure')
     const mobileSignIn = screen
@@ -245,6 +246,8 @@ describe('Landing — example card (#1852)', () => {
       .closest('div')!
     const badge = mobileSignIn.nextElementSibling!
     expect(badge.querySelector(`img[alt="${zhTW.landing.playBadgeAlt}"]`)).not.toBeNull()
-    expect(badge.nextElementSibling).toBe(fig)
+    const film = badge.nextElementSibling!
+    expect(film.getAttribute('data-testid')).toBe('launch-film')
+    expect(film.nextElementSibling).toBe(fig)
   })
 })
