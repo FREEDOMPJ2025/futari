@@ -110,7 +110,7 @@ export default async function PrivacyPage({ params }: { params: Params }) {
           <p>
             {t.privacyPage.sectionRightsBody}
             <a
-              href="https://github.com/redtear1115/oikos/issues/new"
+              href="https://github.com/FREEDOMPJ2025/futari/issues/new"
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: 'var(--ink-2)' }}
@@ -127,7 +127,7 @@ export default async function PrivacyPage({ params }: { params: Params }) {
           <p className="pt-2">
             {t.privacyPage.outro}
             <a
-              href="https://github.com/redtear1115/oikos/issues/new"
+              href="https://github.com/FREEDOMPJ2025/futari/issues/new"
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: 'var(--ink-2)' }}

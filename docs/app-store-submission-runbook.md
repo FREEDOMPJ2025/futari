@@ -14,11 +14,11 @@ last_updated: 2026-10-23
 
 > **進度狀態（2026-09-11）**：iOS 重新送審中，native 殼 bump 到 `1.5.5 (3)`。
 > `1.5.5 (2)` 被發現 `App.entitlements` 從建檔起就缺 `com.apple.developer.applesignin`，
-> 原生 Apple 登入在任何 TestFlight/App Store build 上從未可用（[PR #985](https://github.com/redtear1115/oikos/pull/985)，已 merge）。
+> 原生 Apple 登入在任何 TestFlight/App Store build 上從未可用（[PR #985](https://github.com/FREEDOMPJ2025/futari/pull/985)，已 merge）。
 > `(3)` 補回 entitlement，**上傳後務必實機驗證原生 Apple 登入 sheet 真的彈出來，再回覆 Apple 的 Guideline 2.1 要求**（見下方進度）。
 > 2026-06-11 上傳的 `1.5.1 (1)` 已於 **2026-09-09 過期**（TestFlight build 壽命 90 天 — 見 [§F](#f-build-90-天會過期)），必須重傳。
 > 過程中另外發現 **iOS 自 Capacitor 8 升級（2026-07-12）後從未編譯過**，SPM 依賴衝突直接擋住 archive
-> （修法見 [§G](#g-capacitor-8--apple-sign-in-的-spm-衝突)）。追蹤 issue：[#935](https://github.com/redtear1115/oikos/issues/935)。
+> （修法見 [§G](#g-capacitor-8--apple-sign-in-的-spm-衝突)）。追蹤 issue：[#935](https://github.com/FREEDOMPJ2025/futari/issues/935)。
 >
 > 鐵則：審核員打開 app 看到的是「當下的 prod」（native 殼載 `server.url`），純 web/後台的東西都已在 prod，可直接送審。
 
@@ -127,12 +127,12 @@ last_updated: 2026-10-23
 
 ## C. 已完成（code-side blocker — 參考）
 
-> 整段已上 prod（v1.5.1）或進 [PR #936](https://github.com/redtear1115/oikos/pull/936)，無需再動；保留作為「為什麼要做這些」與審核對策的脈絡。
+> 整段已上 prod（v1.5.1）或進 [PR #936](https://github.com/FREEDOMPJ2025/futari/pull/936)，無需再動；保留作為「為什麼要做這些」與審核對策的脈絡。
 
 | # | Gap | 狀態 |
 |---|---|---|
-| **B1** | App 內「刪除帳號」（Apple 5.1.1(v) + Play 強制） | ✅ **已上 v1.5.1 prod** — 設定頁「刪除帳號」（[spec](superpowers/specs/account-deletion-design.md) · [#923](https://github.com/redtear1115/oikos/issues/923)） |
-| **B2** | iOS Push Notifications capability | ✅ **已完成**（[PR #936](https://github.com/redtear1115/oikos/pull/936)）— `ios/App/App/App.entitlements` 含 `aps-environment`，AppDelegate 接 `didRegister/didFailToRegister` forwarding |
+| **B1** | App 內「刪除帳號」（Apple 5.1.1(v) + Play 強制） | ✅ **已上 v1.5.1 prod** — 設定頁「刪除帳號」（[spec](superpowers/specs/account-deletion-design.md) · [#923](https://github.com/FREEDOMPJ2025/futari/issues/923)） |
+| **B2** | iOS Push Notifications capability | ✅ **已完成**（[PR #936](https://github.com/FREEDOMPJ2025/futari/pull/936)）— `ios/App/App/App.entitlements` 含 `aps-environment`，AppDelegate 接 `didRegister/didFailToRegister` forwarding |
 | **B4** | Ko-fi iOS gate（3.1.1 IAP 風險） | ✅ **已上 v1.5.1 prod** — iOS 殼看不到 tip jar |
 | **B5** | 原生版本號對齊 | ✅ Android `105011` / iOS `1.5.1` |
 

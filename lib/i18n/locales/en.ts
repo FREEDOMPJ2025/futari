@@ -96,12 +96,19 @@ export const en: Translations = {
     alreadyHaveAccount: 'I already have an account',
     appStoreCta: 'Get it on the App Store',
     appStoreCtaHint: 'Works on iPhone and iPad',
-    androidBetaCta: 'Join the Android beta',
-    androidBetaCtaHint: 'Join the test group with the Google account you use on Google Play, then install the app.',
+    playStoreCta: 'Get it on Google Play',
+    playStoreCtaHint: 'Currently available in Taiwan only',
+    playBadgeAlt: 'Get it on Google Play',
+    playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
+    launchBanner: {
+      text: 'The Futari Android app is here!',
+      link: 'Get it on Google Play',
+      closeAria: 'Close',
+    },
     useWebVersion: 'Use the web version',
     trustEncrypted: 'Open only to you two',
     trustFree: 'Free to use',
-    trustPwa: 'iPhone app · Web',
+    trustPwa: 'iPhone app · Android app · Web',
     trust: {
       narrative: 'Your records belong only to the two of you. No ads, no data selling.',
       encryption: {
@@ -1242,28 +1249,18 @@ export const en: Translations = {
   },
 
   androidBetaInvite: {
-    heading: 'The Android app is looking for testers',
-    body: 'You’re opening Futari on Android. If you’d like to try the app first, join the test group with the Google account you use on Google Play, then install it.',
-    cta: 'Join the Android beta',
+    heading: 'The Android app is here',
+    body: 'You’re opening Futari on Android. To use the app instead, get it on Google Play.',
+    cta: 'Get it on Google Play',
   },
 
-  /** /android-beta self-serve join page (#1648). Temporary, removed with #1553. */
+  /** /android-beta: closed testing is over, the app is on Google Play (#1901). */
   androidBeta: {
-    metaTitle: 'Android beta',
-    title: 'Join the Futari Android beta',
-    intro: 'The Android app is still in closed testing on Google Play. Follow the two steps below to install it early.',
-    step1Title: 'Join the test group',
-    step1Body: 'With the Google account you use on Google Play, join the “Futari Android 測試” group.',
-    step1Cta: 'Join the group',
-    step2Title: 'Install the app',
-    step2Body: 'Once you’re in the group, open the Play testing page, tap “Become a tester”, then install from Google Play.',
-    step2Cta: 'Open the Play testing page',
-    askTitle: 'While you test',
-    askBody: 'Use it for your real records, the way you normally would. If something feels off or you have an idea, tell us in the app under Settings › Send us feedback.',
-    privacy: 'Once you join, the group owner (that’s us) can see your Google account email. We use it only to give you access to the test and to send test-related notices. If you’d rather stop, just leave the group.',
-    closed: 'The test isn’t open to new testers right now. You can use the web version in the meantime.',
+    metaTitle: 'Android app',
+    title: 'The Futari Android app is out',
+    body: 'Closed testing is over. Thank you to everyone who helped test. The Android app is now on Google Play.',
     useWebVersion: 'Use the web version',
-    outingLine: 'Futari\'s Android app is in testing. If you\'re on Android, you can join early.',
+    outingLine: 'Futari’s Android app is now on Google Play.',
   },
 
   pastTimes: {
@@ -1580,10 +1577,10 @@ export const en: Translations = {
 
   /** Settings row: share the Android test page with a partner or friend; hidden in the iOS app (#1648). Removed with #1553. */
   androidTesterInvite: {
-    title: 'Invite a partner or friend on Android to test',
-    hint: 'Share the test page link. Once they join the group, they can install the app',
-    shareTitle: 'Futari Android beta',
-    shareText: 'Futari’s Android app is in closed testing. Follow the two steps on this page to install it early.',
+    title: 'Invite a partner or friend on Android',
+    hint: 'Share the Google Play link. They can install the app from there',
+    shareTitle: 'Futari’s Android app',
+    shareText: 'Futari’s Android app is now on Google Play, so you can keep the ledger with me on Android too.',
     copied: 'Link copied',
   },
 
@@ -2175,13 +2172,13 @@ export const en: Translations = {
 
   termsPage: {
     heading: 'Terms of Service',
-    lastUpdated: 'Last updated: October 15, 2026',
+    lastUpdated: 'Last updated: November 3, 2026',
     intro: 'By using Futari (the "Service"), you agree to the following terms. Please read them before using the Service.',
     bullets: [
       'The Service provides a shared expense tracker for two people, including transaction records, settlements, and shared asset management. All settlement results are for your own reference; the Service is not responsible for their accuracy.',
       'Your data belongs to you. The Service uses your data solely to display your ledger and calculate balances — it will never be sold or shared with third parties.',
-      'Please do not record highly sensitive personal information (such as national ID numbers or credit card numbers). The Service is designed for budgeting, not confidential document storage.',
-      'By signing in with Google, you agree that Google will share your basic account information (name, avatar, email) with the Service for account identification purposes.',
+      'Please do not enter highly sensitive information, such as national ID numbers or credit card numbers, in general fields like transaction descriptions or notes. Those fields are not separately encrypted. Enter a child\'s national ID or health card number only in the dedicated fields of a Child entry in Aibutsu, which are encrypted before they are written to the database (see "Where data is stored" in the Privacy Policy). The Service is designed for budgeting, not confidential document storage.',
+      'By signing in with Google or Apple, you agree that the provider will share your basic account information with the Service for account identification purposes: Google shares your name, avatar and email; Apple shares the name and email you choose to share.',
       'You may sign out or delete your account at any time from the settings page. A deletion request has a 14-day grace period and can be cancelled during it. After that, the records you wrote on your own are deleted, except what your partner could see. A ledger shared with a partner stays with them, and so does a past shared chapter they have since left — the records the two of you wrote together are not removed. See “Data retention” in the privacy policy for details.',
       'The Service reserves the right to suspend or adjust the Service for maintenance, security, or system requirements, and will provide advance notice where possible.',
       'These Terms are governed by the laws of the Republic of China (Taiwan). Any disputes shall be submitted to the Taipei District Court as the court of first instance.',
@@ -2195,11 +2192,11 @@ export const en: Translations = {
 
   privacyPage: {
     heading: 'Privacy Policy',
-    lastUpdated: 'Last updated: October 23, 2026',
+    lastUpdated: 'Last updated: November 3, 2026',
     intro: 'This page explains how Futari collects, uses, and protects your personal data.',
     sectionCollectTitle: 'Data we collect',
     sectionCollectItems: [
-      'Basic account information from Google or Apple sign-in: name, avatar, and email address.',
+      'Basic account information from Google or Apple sign-in: from Google, your name, avatar and email address; from Apple, the name and email address you choose to share.',
       'Expense data you enter manually, including transactions, settlements, split preferences, and shared asset records.',
       'Invite links and acceptance times (used to link the two accounts).',
       'Usage behavior and error information (used to improve the Service — see Third-party services below).',
@@ -3344,11 +3341,11 @@ I will upload the screenshots once you confirm.`,
     },
     terms: {
       title: 'Terms of Service · Futari',
-      description: "Terms of service for the Futari alpha test build: what you're agreeing to when you use the couples-first shared ledger PWA during the public beta.",
+      description: "Futari's terms of service: what to know before using the shared ledger for two, including account deletion, service changes and governing law.",
     },
     privacy: {
       title: 'Privacy Policy · Futari',
-      description: 'How the Futari alpha test build collects and handles your data: what we store, where it lives, and the third parties involved in the couples ledger.',
+      description: "How Futari collects, uses and stores your data: what we collect, how it's encrypted, how long we keep it, the third-party services we use, and your rights.",
     },
     migrate: {
       honeydue: {
@@ -4003,23 +4000,43 @@ I will upload the screenshots once you confirm.`,
     },
     applePay: {
       heading: 'Apple Pay: open New entry after you tap to pay',
-      intro: 'Before you start: Futari is installed on your iPhone and you are signed in. This uses a Wallet automation, so each Apple Pay payment opens a filled-in New entry.',
+      intro: 'Before you start: your iPhone needs iOS 17 or later and the Futari iOS app 1.9.0 or later, installed and signed in. This Wallet automation brings Futari to the front with New entry filled in after each Apple Pay payment. Nothing is saved until you check it and tap Save.',
       steps: [
         {
           title: 'Create a Wallet automation',
-          body: 'Open the Shortcuts app, go to Automation, tap + and choose Wallet. On the screen that follows, tick the cards you want to log; you can leave all the categories ticked. Tap Next, then New Shortcut. Finally, on the automation\'s settings row, choose Run Immediately, so you do not have to tap a notification first.',
+          body: 'Open the Shortcuts app, tap + to start a new shortcut, then tap Edit. In the action categories, choose Automation → Wallet. A "When Any Card is tapped" card appears at the top of the shortcut. Tap Any Card to pick the cards you want to log; Categories and Merchants can stay at Any Category and Any Merchant. Keep Automation on and Notify off in that card, so it runs right after you pay, without a notification to tap. On iOS 26 and earlier the screens differ: go to Automation, tap + and choose Wallet, choose Run Immediately on the same screen, tap Next, then New Blank Automation.',
+        },
+        {
+          title: 'Add the "Add Entry to Futari" action',
+          body: 'In the search field at the bottom of the same screen, search for Futari and add "Add Entry to Futari".',
+        },
+        {
+          title: 'Set the amount and note, leaving category empty',
+          body: 'Tap Amount and choose Shortcut Input. Tap that Shortcut Input, change Type to Transaction, and choose Amount. Do the same for Note: Shortcut Input, Type set to Transaction, then Merchant. Adding Shortcut Input also puts a "Receive … from …" card at the top; leave it as it is. Leave Category empty: a merchant you have recorded before gets the category you used last time, and a new merchant starts as Dining. You can change it before saving. The action rounds the amount itself, and the note needs no URL Encode. Running it brings Futari to the front with New entry filled in. Check it, make any changes and tap Save; nothing is saved automatically.',
+        },
+      ],
+      platformNote: 'This works only with the Shortcuts app on iPhone.',
+      foreignNote: 'Foreign currency: when you pay in another currency, the Shortcut passes the foreign amount, and Futari fills it in as an amount in your ledger\'s main currency. Change it in New entry to the amount you were actually charged.',
+    },
+    applePayUrl: {
+      heading: 'Fallback: open a link if the action is not available yet',
+      intro: 'The "Add Entry to Futari" action above is simpler when available. If your Futari app isn\'t on 1.9.0 yet (your iPhone still needs iOS 17 or later), use the five-step link fallback below.',
+      steps: [
+        {
+          title: 'Create a Wallet automation',
+          body: 'Open the Shortcuts app, tap + to start a new shortcut, then tap Edit. In the action categories, choose Automation → Wallet. A "When Any Card is tapped" card appears at the top of the shortcut. Tap Any Card to pick the cards you want to log; Categories and Merchants can stay at Any Category and Any Merchant. Keep Automation on and Notify off in that card, so it runs right after you pay, without a notification to tap. On iOS 26 and earlier the screens differ: go to Automation, tap + and choose Wallet, choose Run Immediately on the same screen, tap Next, then New Blank Automation.',
         },
         {
           title: 'Round the amount (recommended)',
-          body: 'Recommended: add a Round Number action and set its input to Shortcut Input, then choose Amount. If the amount carries decimals (for example 120.00), Futari leaves the amount blank, so rounding first is safer. "120", "1,280" and full-width digits work; "120.00", "NT$120.00" and "120 dollars" leave it blank.',
+          body: 'Recommended: add a Round Number action and set its input to Shortcut Input, change its Type to Transaction, then choose Amount. If the amount carries decimals (for example 120.00), Futari leaves the amount blank, so rounding first is safer. "120", "1,280" and full-width digits work; "120.00", "NT$120.00" and "120 dollars" leave it blank.',
         },
         {
           title: 'URL-encode the merchant name',
-          body: 'Add a URL Encode action and set its input to Shortcut Input, then choose Merchant. Without encoding, spaces and non-Latin characters break the link in the middle and the description comes out blank or cut short. The description is optional: to leave it out, skip this step and remove the whole &note=… part of the link.',
+          body: 'Add a URL Encode action and set its input to Shortcut Input with Type set to Transaction, then choose Merchant. Without encoding, spaces and non-Latin characters break the link in the middle and the description comes out blank or cut short. The description is optional: to leave it out, skip this step and remove the whole &note=… part of the link.',
         },
         {
           title: 'Build the link with a Text action',
-          body: 'Add a Text action and paste the link below, replacing [Amount] with the result of step 2 and [Merchant] with the result of step 3 (if you skipped step 2, use Shortcut Input, then Amount). You don\'t need to set a category: a merchant you\'ve recorded before gets the category you used last time, and a new merchant starts as Dining. You can change it before saving.',
+          body: 'Add a Text action and paste the link below, replacing [Amount] with the result of step 2 and [Merchant] with the result of step 3 (if you skipped step 2, use Shortcut Input, change its Type to Transaction, then choose Amount). You don\'t need to set a category: a merchant you\'ve recorded before gets the category you used last time, and a new merchant starts as Dining. You can change it before saving.',
         },
         {
           title: 'Open the URL',
@@ -4027,8 +4044,6 @@ I will upload the screenshots once you confirm.`,
         },
       ],
       urlLabel: 'Link (app)',
-      platformNote: 'This works only with the Shortcuts app on iPhone.',
-      foreignNote: 'Foreign currency: when you pay in another currency, the Shortcut passes the foreign amount, and Futari fills it in as an amount in your ledger\'s main currency. Change it in New entry to the amount you were actually charged.',
     },
     linePay: {
       heading: '',
@@ -4090,15 +4105,19 @@ I will upload the screenshots once you confirm.`,
       },
       rows: [
         {
-          symptom: 'New entry opens but the amount is blank',
+          symptom: 'The "Add Entry to Futari" action is missing',
+          cause: 'Update iOS to 17 or later and the Futari iOS app to 1.9.0 or later, then open Futari once.',
+        },
+        {
+          symptom: 'Link fallback: New entry opens but the amount is blank',
           cause: 'The amount is not a whole number. Usually the Round Number step is missing, or the amount carries a currency symbol or unit.',
         },
         {
-          symptom: 'The description is blank or cut short',
+          symptom: 'Link fallback: the description is blank or cut short',
           cause: 'The merchant name was not passed through URL Encode.',
         },
         {
-          symptom: "The category isn't the one in my link",
+          symptom: "Link fallback: the category isn't the one in my link",
           cause: "You've recorded this merchant before, so it uses the category from last time. For a new merchant, a misspelled or capitalized id falls back to Dining.",
         },
       ],

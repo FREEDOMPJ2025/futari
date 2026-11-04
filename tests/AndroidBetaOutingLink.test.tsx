@@ -2,21 +2,14 @@ import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 
 const track = vi.fn()
-let locale = 'zh-TW'
-let groupUrl = 'https://groups.google.com/g/test'
 vi.mock('@/lib/analytics/track', () => ({ track: (...a: unknown[]) => track(...a) }))
 vi.mock('@/lib/i18n/client', () => ({
   useTranslations: () => ({ androidBeta: { outingLine: 'Android line' } }),
-  useLocale: () => locale,
-}))
-vi.mock('@/lib/visitorPlatform', async (orig) => ({
-  ...(await orig<typeof import('@/lib/visitorPlatform')>()),
-  get ANDROID_TEST_GROUP_URL() {
-    return groupUrl
-  },
+  useLocale: () => 'zh-TW',
 }))
 
 import { AndroidBetaOutingLink } from '@/app/[locale]/outing/_components/AndroidBetaOutingLink'
+import { PLAY_STORE_URL } from '@/lib/visitorPlatform'
 
 const ANDROID_UA = 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/126 Mobile Safari/537.36'
 const IPHONE_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Version/17.0 Mobile/15E148 Safari/604.1'
@@ -31,8 +24,6 @@ function setNative(platform: 'android' | 'ios' | null) {
 }
 
 beforeEach(() => {
-  locale = 'zh-TW'
-  groupUrl = 'https://groups.google.com/g/test'
   setUA(DESKTOP_UA)
   vi.stubGlobal('matchMedia', (q: string) => ({ matches: false, media: q }))
 })
@@ -43,22 +34,17 @@ afterEach(() => {
   track.mockClear()
 })
 
-describe('AndroidBetaOutingLink (#1648)', () => {
-  it('shows a localized, token-free, noreferrer link to Android browsers and tracks without properties', () => {
+describe('AndroidBetaOutingLink (#1648 → #1901 Google Play)', () => {
+  it('shows a token-free, noreferrer Google Play link to Android browsers and tracks without properties', () => {
     setUA(ANDROID_UA)
     render(<AndroidBetaOutingLink />)
     const a = screen.getByText('Android line').closest('a')!
-    expect(a.getAttribute('href')).toBe('/android-beta')
-    expect(a.getAttribute('rel')).toBe('noreferrer')
+    expect(a.getAttribute('href')).toBe(PLAY_STORE_URL)
+    // noreferrer keeps the outing share token (in this page's URL) out of the Referer.
+    expect(a.getAttribute('rel')).toContain('noreferrer')
+    expect(a.getAttribute('target')).toBe('_blank')
     fireEvent.click(a)
     expect(track.mock.calls).toEqual([['android_beta_outing_link_clicked']])
-  })
-
-  it('uses the locale prefix for non-default locales', () => {
-    setUA(ANDROID_UA)
-    locale = 'en'
-    render(<AndroidBetaOutingLink />)
-    expect(screen.getByText('Android line').closest('a')!.getAttribute('href')).toBe('/en/android-beta')
   })
 
   it.each([
@@ -66,7 +52,6 @@ describe('AndroidBetaOutingLink (#1648)', () => {
     ['desktop', () => setUA(DESKTOP_UA)],
     ['Android shell', () => { setUA(ANDROID_UA); setNative('android') }],
     ['iOS shell', () => { setUA(IPHONE_UA); setNative('ios') }],
-    ['empty group URL', () => { setUA(ANDROID_UA); groupUrl = '' }],
   ])('is hidden for %s', (_n, setup) => {
     setup()
     const { container } = render(<AndroidBetaOutingLink />)

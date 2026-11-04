@@ -158,7 +158,8 @@ export type Translations = {
     /** Caption under mobile CTA, e.g. 「免費 · 兩人一本帳 · 用 Google 或 Apple 繼續」 */
     ctaHint: string
     /** Secondary desktop CTA — sign-in link for returning users. Swaps to
-     *  `useWebVersion` when the primary CTA is the Android beta form (#1413). */
+     *  `useWebVersion` when the primary CTA is the Google Play link
+     *  (`playStoreCta`, Android browsers; #1413, #1901). */
     alreadyHaveAccount: string
     /** Primary-CTA label for an iPhone/iPad browser visitor (#1413), replacing
      *  #1333's `appStoreNote`: the CTA itself now links out to the App Store,
@@ -169,25 +170,40 @@ export type Translations = {
     /** Mobile hint under `appStoreCta` — the default `ctaHint` describes the
      *  sign-in flow, which is wrong once the CTA points at the App Store. */
     appStoreCtaHint: string
-    /** Primary-CTA label for an Android browser visitor (#1413): links out to
-     *  the /android-beta join page (#1648; the group flow lives in
-     *  `lib/visitorPlatform.ts#ANDROID_TEST_GROUP_URL`). Falls back to the
-     *  default sign-in CTA if that URL is ever emptied. */
-    androidBetaCta: string
-    /** Mobile hint under `androidBetaCta` — must say which Google account to
-     *  use (the one on Play) and what happens next (#1648): join the test
-     *  group, then install. */
-    androidBetaCtaHint: string
+    /** Primary-CTA label for an Android browser visitor (#1901, replacing the
+     *  #1413/#1648 closed-test `androidBetaCta`): links out to Google Play
+     *  (`lib/visitorPlatform.ts#PLAY_STORE_URL`). Never shown inside either
+     *  native shell. Copy is Aria's proposal, pending Ray's approval. */
+    playStoreCta: string
+    /** Mobile hint under `playStoreCta`, also shown under the Play badge: the
+     *  app is only listed in Taiwan, and Play shows everyone else a "not
+     *  available in your country" page. Remove when more countries open. */
+    playStoreCtaHint: string
+    /** Alt text of the official Google Play badge image (#1901): the words
+     *  printed on that locale's badge, verbatim — not a translation of ours. */
+    playBadgeAlt: string
+    /** Google's trademark attribution, required on any page showing the badge.
+     *  English in every locale on purpose (Google's wording); don't translate. */
+    playTrademark: string
+    /** Dismissible launch banner at the top of the landing (#1901). `text` is
+     *  plain, `link` is the Play link that follows it, `closeAria` labels the ✕.
+     *  Shown until `PLAY_LAUNCH_BANNER_LAST_DAY` (lib/playLaunchBanner.ts). */
+    launchBanner: {
+      text: string
+      link: string
+      closeAria: string
+    }
     /** Secondary link shown instead of `alreadyHaveAccount` when the primary
-     *  CTA is `androidBetaCta` (#1413) — that CTA isn't a returning-user
+     *  CTA is `playStoreCta` (#1413, #1901) — that CTA isn't a returning-user
      *  sign-in, so this offers the web app as the alternative instead. */
     useWebVersion: string
     /** Trust pills next to the desktop CTA (compact variant of `<TrustSection>`). */
     trustEncrypted: string
     trustFree: string
     /** Device-availability trust pill. Kept in sync with reality (#1333):
-     *  iPhone app is live, Android is not on Play Store yet — don't promise a
-     *  listing that doesn't exist. */
+     *  the iPhone app is on the App Store and, since #1901 (2026-11-02), the
+     *  Android app is on Google Play (Taiwan only). Don't list a platform
+     *  whose store listing doesn't exist. */
     trustPwa: string
     /** Full trust section (#538) — shown between Features and footer. The
      *  compact variant above stays available via `<TrustSection variant="compact">`
@@ -1653,11 +1669,10 @@ export type Translations = {
   }
 
   /**
-   * Dashboard invite card for Android web users to join the Play closed test
-   * (#1553). Temporary: remove the card, this namespace and the
-   * `android_beta_invite_*` events once Play production access is granted.
-   * `cta` repeats `landing.androidBetaCta` on purpose: different namespace,
-   * same string, so the two buttons read as one offer.
+   * Dashboard card for Android *browser* users (#1553, #1901): the app is on
+   * Google Play now. Never inside either native shell. `cta` repeats
+   * `landing.playStoreCta` on purpose: different namespace, same string, so
+   * the two buttons read as one offer. Copy pending Ray's approval.
    */
   androidBetaInvite: {
     heading: string
@@ -1666,29 +1681,15 @@ export type Translations = {
   }
 
   /**
-   * /android-beta self-serve join page (#1648): step 1 joins the Google Group
-   * that is on Play's closed-test tester list, step 2 opens Play's opt-in page.
-   * `privacy` must stay true to the group's real settings (member list visible
-   * to managers only) and to how the group is used (test access + test-related
-   * notices only, #1649) — if either changes, this sentence becomes a false
-   * claim without any code failing. `closed` shows only when the group URL constant
-   * is empty (`lib/visitorPlatform.ts`). Temporary: removed with #1553.
+   * /android-beta (#1648 → #1901): no longer a join page. Closed testing is
+   * over, so it thanks the testers and points at Google Play, kept as a page
+   * (not a redirect) so links shared during the test still make sense. The
+   * Play button reuses `landing.playStoreCta` / `playStoreCtaHint`.
    */
   androidBeta: {
     metaTitle: string
     title: string
-    intro: string
-    step1Title: string
-    step1Body: string
-    step1Cta: string
-    step2Title: string
-    step2Body: string
-    step2Cta: string
-    /** Points at Settings › `testerFeedback.title`; keep the two labels identical. */
-    askTitle: string
-    askBody: string
-    privacy: string
-    closed: string
+    body: string
     useWebVersion: string
     /** One quiet line on the public outing page, Android browsers only. */
     outingLine: string
@@ -2068,8 +2069,10 @@ export type Translations = {
     frameTitle: string
   }
 
-  /** Settings row that shares the /android-beta page with an Android tester
-   *  (#1648). Hidden in the iOS shell (Apple 2.3.10). Temporary, removed with #1553. */
+  /** Settings row that shares the Google Play link with a partner or friend
+   *  on Android (#1648 → #1901). Browser only: hidden in both native shells
+   *  (iOS: Apple 2.3.10; Android: no download link inside the app). `hint`
+   *  and `shareTitle` reviewed by Aria (#1905). */
   androidTesterInvite: {
     title: string
     hint: string
@@ -3423,9 +3426,14 @@ export type Translations = {
       heading: string
       intro: string
       steps: readonly { title: string; body: string }[]
-      urlLabel: string
       platformNote: string
       foreignNote: string
+    }
+    applePayUrl: {
+      heading: string
+      intro: string
+      steps: readonly { title: string; body: string }[]
+      urlLabel: string
     }
     linePay: {
       heading: string
@@ -3682,12 +3690,19 @@ export const zhTW: Translations = {
     alreadyHaveAccount: '已經有帳號 · 登入',
     appStoreCta: '在 App Store 下載',
     appStoreCtaHint: 'iPhone 與 iPad 都能用',
-    androidBetaCta: '加入 Android 測試版',
-    androidBetaCtaHint: '用你在 Play 商店的 Google 帳號加入測試群組，接著就能安裝 App。',
+    playStoreCta: '在 Google Play 下載',
+    playStoreCtaHint: '目前只在台灣上架',
+    playBadgeAlt: 'Google Play 立即下載',
+    playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
+    launchBanner: {
+      text: 'Futari 的 Android App 上架了！',
+      link: '到 Google Play 下載',
+      closeAria: '關閉',
+    },
     useWebVersion: '先用網頁版',
     trustEncrypted: '只開放給你們倆',
     trustFree: '免費使用',
-    trustPwa: 'iPhone App · 網頁版',
+    trustPwa: 'iPhone App · Android App · 網頁版',
     trust: {
       narrative: '你的記錄只屬於你們兩個人。我們不靠廣告，不賣資料。',
       encryption: {
@@ -4826,27 +4841,17 @@ export const zhTW: Translations = {
   },
 
   androidBetaInvite: {
-    heading: 'Android App 正在找測試夥伴',
-    body: '你用 Android 開 Futari。想先試試 App 版的話，用 Play 商店的 Google 帳號加入測試群組，接著就能安裝。',
-    cta: '加入 Android 測試版',
+    heading: 'Android App 上架了',
+    body: '你用 Android 開 Futari。想改用 App，到 Google Play 下載。',
+    cta: '在 Google Play 下載',
   },
 
   androidBeta: {
-    metaTitle: 'Android 測試版',
-    title: '加入 Futari 的 Android 測試',
-    intro: 'Android App 還在 Google Play 的封閉測試階段。照下面兩步做，就能先裝起來用。',
-    step1Title: '加入測試群組',
-    step1Body: '用你在 Play 商店登入的 Google 帳號，加入「Futari Android 測試」群組。',
-    step1Cta: '加入群組',
-    step2Title: '安裝 App',
-    step2Body: '加入群組後，打開 Play 的測試頁，按「成為測試人員」，再到 Play 商店安裝。',
-    step2Cta: '打開 Play 測試頁',
-    askTitle: '測試期間',
-    askBody: '像平常一樣用它記帳。遇到不順的地方或有想法，在 App 的「設定 › 給我們回饋」告訴我們。',
-    privacy: '加入群組後，群組擁有者（也就是我們）看得到你的 Google 帳號 email，只用來給你測試資格，和寄測試相關的通知。不想測了，退出群組就好。',
-    closed: '測試名額目前沒有開放，可以先用網頁版。',
+    metaTitle: 'Android App',
+    title: 'Futari 的 Android App 已上架',
+    body: '封閉測試已經結束，謝謝每一位幫忙測試的人。Android App 已在 Google Play 上架。',
     useWebVersion: '先用網頁版',
-    outingLine: 'Futari 的 Android App 正在測試，用 Android 的你可以先加入',
+    outingLine: 'Futari 的 Android App 已在 Google Play 上架',
   },
 
   pastTimes: {
@@ -5160,10 +5165,10 @@ export const zhTW: Translations = {
   },
 
   androidTesterInvite: {
-    title: '邀請用 Android 的伴侶或朋友來測試',
-    hint: '分享測試頁的連結，對方加入群組就能安裝',
-    shareTitle: 'Futari Android 測試',
-    shareText: 'Futari 的 Android App 正在封閉測試，照這頁的兩步就能先裝起來用。',
+    title: '邀請用 Android 的伴侶或朋友下載',
+    hint: '分享 Google Play 的連結，對方點開就能安裝',
+    shareTitle: 'Futari 的 Android App',
+    shareText: 'Futari 的 Android App 已在 Google Play 上架，用 Android 的你也能一起記帳。',
     copied: '連結已複製',
   },
 
@@ -5754,13 +5759,13 @@ export const zhTW: Translations = {
 
   termsPage: {
     heading: '服務條款',
-    lastUpdated: '最後更新：2026 年 10 月 15 日',
+    lastUpdated: '最後更新：2026 年 11 月 3 日',
     intro: '使用 Futari（以下簡稱「本服務」）即表示您同意以下條款。請在使用前詳閱。',
     bullets: [
       '本服務提供雙人共用記帳功能，包含交易紀錄、結算與共同財物管理。所有結算結果僅供使用者自行參考，本服務不對其正確性負責。',
       '您的資料屬於您。本服務僅為顯示與計算目的使用您輸入的資料，不會出售或對外分享您的個人資料。',
-      '請勿記錄高度敏感的身分資訊（例如身分證字號、信用卡號等）。本服務的設計目的是記帳，不是機密文件保存。',
-      '使用 Google 登入即表示您同意 Google 將您的基本帳號資訊（姓名、頭像、Email）提供給本服務，作為帳號識別之用。',
+      '請勿將身分證字號、信用卡號等高度敏感的資訊記錄在交易說明、備註等一般欄位，這些欄位不另外加密。孩子的身分證字號、健保卡號等資料，請填在愛物「孩子」的專用欄位，這些欄位在寫入資料庫前會另外加密（詳見隱私權政策「資料儲存」）。本服務的設計目的是記帳，不是機密文件保存。',
+      '使用 Google 或 Apple 登入，即表示您同意該服務將您的基本帳號資訊提供給本服務，作為帳號識別之用：Google 提供姓名、頭像與 Email；Apple 提供您選擇分享的姓名與 Email。',
       '您可隨時透過設定頁登出或刪除帳號。提出刪除後有 14 天緩衝期，期間可以取消；期滿後，您一個人時記下的紀錄會刪除（對方曾經看得到的部分除外）；與伴侶共用的帳本會留給對方，曾經共用、對方已經離開的那段時光也會留給對方回看，您和對方共同記下的紀錄不會一起移除。詳見隱私權政策的「資料保留期限」。',
       '本服務保留因維護、安全或系統需求暫停或調整服務的權利，並將在可能的情況下提前告知。',
       '本服務條款適用中華民國法律，如有爭議以臺灣臺北地方法院為第一審管轄法院。',
@@ -5774,11 +5779,11 @@ export const zhTW: Translations = {
 
   privacyPage: {
     heading: '隱私權政策',
-    lastUpdated: '最後更新：2026 年 10 月 23 日',
+    lastUpdated: '最後更新：2026 年 11 月 3 日',
     intro: '本頁說明 Futari 如何蒐集、使用與保護您的個人資料。',
     sectionCollectTitle: '蒐集的資料',
     sectionCollectItems: [
-      'Google 或 Apple 登入提供的基本帳號資訊：姓名、頭像、Email 地址。',
+      'Google 或 Apple 登入提供的基本帳號資訊：Google 提供姓名、頭像、Email 地址；Apple 提供您選擇分享的姓名與 Email 地址。',
       '您手動輸入的記帳資料，包含交易紀錄、結算紀錄、分攤偏好、共同財物資訊等。',
       '邀請連結與接受時間（用於連結雙方帳號）。',
       '操作行為與錯誤資訊（用於改善服務品質，詳見第三方服務說明）。',
@@ -6875,11 +6880,11 @@ export const zhTW: Translations = {
     },
     terms: {
       title: '服務條款 · Futari',
-      description: 'Futari alpha 測試版本的服務條款與使用者注意事項。',
+      description: 'Futari 的服務條款：使用雙人共用帳本前需要知道的事，包括帳號刪除、服務調整與適用法律。',
     },
     privacy: {
       title: '隱私權政策 · Futari',
-      description: 'Futari alpha 測試版本的資料蒐集與隱私權處理方式。',
+      description: 'Futari 如何蒐集、使用和保存你的資料：蒐集哪些資料、怎麼加密、保留多久、用到哪些第三方服務，以及你的權利。',
     },
     migrate: {
       honeydue: {
@@ -7532,23 +7537,43 @@ export const zhTW: Translations = {
     },
     applePay: {
       heading: 'Apple Pay：刷完卡就跳出「新增紀錄」',
-      intro: '前提：iPhone 已安裝 Futari 並登入。下面用「錢包」的自動化，每次用 Apple Pay 付款，就打開一次填好的「新增紀錄」。',
+      intro: '前提：iPhone 使用 iOS 17 或以上版本，已安裝 Futari iOS App 1.9.0 或以上版本並登入。下面用「錢包」的自動化，每次用 Apple Pay 付款，就把 Futari 帶到前景，打開填好的「新增紀錄」。你確認後按儲存，紀錄才會寫進帳本。',
       steps: [
         {
           title: '新增「錢包」自動化',
-          body: '打開「捷徑」App，到「自動化」，點 ＋ 選「錢包」（在我感應錢包卡片或票卡時）。在「感應時」畫面勾選要記的卡片；「類別」可以維持全部勾選。點「下一步」→「新增捷徑」。最後在這個自動化的設定列，執行方式選「立即執行」，這樣不必每次先點通知。',
+          body: '打開「捷徑」App，點 ＋ 新增捷徑，再點「編輯」。在動作的分類選「自動化操作」→「錢包」，捷徑最上面會出現「感應〔任何卡片〕時」卡片。點「任何卡片」選要記的卡片；「類別」和「商家」維持「任何類別」「任何商家」即可。卡片裡的「自動化操作」保持開啟、「通知」保持關閉，付款後就會直接執行，不用先點通知。iOS 26 以前的畫面不同：到「自動化」點 ＋ 選「錢包」，同一個畫面選「立即執行」，點「下一步」，再選「新增空白自動化」。',
+        },
+        {
+          title: '加入「Futari 記一筆」動作',
+          body: '在同一個畫面下方的搜尋欄搜尋 Futari，加入「Futari 記一筆」。',
+        },
+        {
+          title: '設定金額與備註，分類留空',
+          body: '點「金額」選「捷徑輸入」，再點這個「捷徑輸入」，把「類型」從「文字」改成「交易」，選「數量」。「備註」也選「捷徑輸入」，「類型」改成「交易」，選「商家」。加入「捷徑輸入」後，最上面會多一張「從…接收」的卡片，不用改。「分類」留空：記過的商家會沿用上次的分類，第一次記的商家先用「飲食」，存之前都可以改。動作會把金額取整數，備註不用 URL 編碼。執行時會把 Futari 帶到前景並打開填好的「新增紀錄」；你看過、需要就改，再按儲存，不會自行存下紀錄。',
+        },
+      ],
+      platformNote: '這個流程只適用於 iPhone 的「捷徑」App。',
+      foreignNote: '外幣提醒：用 Apple Pay 付外幣時，捷徑給的是外幣金額，Futari 會把它當成帳本主幣別的金額帶入。請在「新增紀錄」裡改成實際的金額。',
+    },
+    applePayUrl: {
+      heading: '備用：還不能使用動作時，用網址打開',
+      intro: '上面的「Futari 記一筆」動作能用時，設定比較簡單。如果 Futari App 還沒更新到 1.9.0（iPhone 一樣要 iOS 17 以上），可以先用下面的五步網址做法。',
+      steps: [
+        {
+          title: '新增「錢包」自動化',
+          body: '打開「捷徑」App，點 ＋ 新增捷徑，再點「編輯」。在動作的分類選「自動化操作」→「錢包」，捷徑最上面會出現「感應〔任何卡片〕時」卡片。點「任何卡片」選要記的卡片；「類別」和「商家」維持「任何類別」「任何商家」即可。卡片裡的「自動化操作」保持開啟、「通知」保持關閉，付款後就會直接執行，不用先點通知。iOS 26 以前的畫面不同：到「自動化」點 ＋ 選「錢包」，同一個畫面選「立即執行」，點「下一步」，再選「新增空白自動化」。',
         },
         {
           title: '把金額取整數（建議）',
-          body: '建議加上：加一個「取整數」動作（將〔捷徑輸入〕取整數到〔整數〕），點「捷徑輸入」選「數量」（iOS 把錢包的金額叫「數量」）。如果金額帶小數（例如 120.00），Futari 會讓金額欄空白；先取整數比較保險。「120」「1,280」「１２０」可以，「120.00」「NT$120.00」「120元」會讓金額欄空白。',
+          body: '建議加上：加一個「取整數」動作（將〔捷徑輸入〕取整數到〔整數〕），點「捷徑輸入」，「類型」改成「交易」，選「數量」（iOS 把錢包的金額叫「數量」）。如果金額帶小數（例如 120.00），Futari 會讓金額欄空白；先取整數比較保險。「120」「1,280」「１２０」可以，「120.00」「NT$120.00」「120元」會讓金額欄空白。',
         },
         {
           title: '把商家名稱做 URL 編碼',
-          body: '加一個「URL 編碼」動作，輸入選「捷徑輸入」→「商家」。中文和空白不先編碼，網址會斷在中間，描述會空白或只剩一半。描述可有可無，不想帶就跳過這步，並把網址裡的 &note=… 整段拿掉。',
+          body: '加一個「URL 編碼」動作，輸入選「捷徑輸入」，「類型」改成「交易」，選「商家」。中文和空白不先編碼，網址會斷在中間，描述會空白或只剩一半。描述可有可無，不想帶就跳過這步，並把網址裡的 &note=… 整段拿掉。',
         },
         {
           title: '用「文字」組出網址',
-          body: '加一個「文字」動作，貼上下面的網址，把 [金額] 換成第 2 步的結果、[商家] 換成第 3 步的結果（沒加第 2 步，就換成「捷徑輸入」→「數量」）。分類不用寫：記過的商家會沿用上次的分類，第一次記的商家先用「飲食」，存之前都可以改。',
+          body: '加一個「文字」動作，貼上下面的網址，把 [金額] 換成第 2 步的結果、[商家] 換成第 3 步的結果（沒加第 2 步，就換成「捷徑輸入」，「類型」先改成「交易」，再選「數量」）。分類不用寫：記過的商家會沿用上次的分類，第一次記的商家先用「飲食」，存之前都可以改。',
         },
         {
           title: '打開 URL',
@@ -7556,8 +7581,6 @@ export const zhTW: Translations = {
         },
       ],
       urlLabel: '網址（App）',
-      platformNote: '這個流程只適用於 iPhone 的「捷徑」App。',
-      foreignNote: '外幣提醒：用 Apple Pay 付外幣時，捷徑給的是外幣金額，Futari 會把它當成帳本主幣別的金額帶入。請在「新增紀錄」裡改成實際的金額。',
     },
     linePay: {
       heading: 'LINE Pay：用「付款完成」的通知觸發',
@@ -7636,15 +7659,19 @@ export const zhTW: Translations = {
       },
       rows: [
         {
-          symptom: '跳出來了，但金額是空的',
+          symptom: '找不到「Futari 記一筆」動作',
+          cause: '將 iOS 更新到 17 或以上版本、Futari iOS App 更新到 1.9.0 或以上版本，並先打開 Futari 一次。',
+        },
+        {
+          symptom: '網址備用做法：跳出來了，但金額是空的',
           cause: '金額不是整數。通常是少了「取整數」那一步，或帶了「元」「NT$」。',
         },
         {
-          symptom: '描述空白或只有一半',
+          symptom: '網址備用做法：描述空白或只有一半',
           cause: '商家名稱沒有先經過「URL 編碼」。',
         },
         {
-          symptom: '分類不是我網址裡寫的',
+          symptom: '網址備用做法：分類不是我網址裡寫的',
           cause: '這個商家記過，會沿用上次的分類；第一次記的商家，id 拼錯或用了大寫就會用「飲食」。',
         },
       ],

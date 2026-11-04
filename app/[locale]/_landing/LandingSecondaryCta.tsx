@@ -9,20 +9,20 @@ interface Props {
   signInHref: string
   className?: string
   style?: CSSProperties
-  /** Default label ("已經有帳號 · 登入") for every variant except android_beta. */
+  /** Default label ("已經有帳號 · 登入") for every variant except play_store. */
   children: ReactNode
-  /** Android-beta variant's label ("先用網頁版") — the form is the primary CTA
-   *  there, so this link needs to read as an alternative, not a returning-user
-   *  sign-in (#1413). */
+  /** Android browser label ("先用網頁版") — Google Play is the primary CTA
+   *  there (#1901), so this link needs to read as an alternative, not a
+   *  returning-user sign-in (#1413). */
   androidLabel: ReactNode
 }
 
 /**
  * Secondary sign-in link next to/under the landing's primary CTA. Same
  * platform resolution as `LandingPrimaryCta` (independent instance): every
- * variant keeps the "already have an account" label except `android_beta`,
- * whose primary CTA is the beta signup form, so this reads "use the web
- * version instead" (#1413).
+ * variant keeps the "already have an account" label except `play_store`,
+ * whose primary CTA is the Play listing, so this reads "use the web
+ * version instead" (#1413, #1901).
  *
  * #1521: while the platform is pending it renders the default label as a real,
  * clickable sign-in link (also with JS off). Only the label text can change on
@@ -40,7 +40,7 @@ export function LandingSecondaryCta({ signInHref, className, style, children, an
       className={className}
       style={style}
     >
-      {target === 'android_beta' ? androidLabel : children}
+      {target === 'play_store' ? androidLabel : children}
     </LandingCtaLink>
   )
 }

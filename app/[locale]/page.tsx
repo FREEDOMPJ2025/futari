@@ -6,7 +6,8 @@ import { localizedHref } from '@/lib/i18n/path'
 import { LanguageSwitcher } from '@/lib/i18n/LanguageSwitcher'
 import { KofiWidget } from '@/components/KofiWidget'
 import { Landing } from './_landing/Landing'
-import { ANDROID_BETA_PATH } from '@/lib/visitorPlatform'
+import { isPlayLaunchBannerActive } from '@/lib/playLaunch'
+import { APP_STORE_URL, PLAY_STORE_URL } from '@/lib/visitorPlatform'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://futari.southern-light.dev'
 
@@ -83,7 +84,14 @@ export default async function RootPage({ params }: { params: Params }) {
     name: t.landing.jsonLdAppName,
     alternateName: t.landing.jsonLdAlternateNames,
     applicationCategory: 'FinanceApplication',
-    operatingSystem: 'Web, iOS, Android (PWA)',
+    // #1901 — native apps on both stores (Android on Google Play since
+    // 2026-11-02, Taiwan only) plus the web app; no longer "Android (PWA)".
+    operatingSystem: 'Web, iOS, Android',
+    // #1901 — the same store URLs every landing download link uses (the App
+    // Store one carries the ASC campaign params, see lib/visitorPlatform.ts).
+    // [App Store, Google Play]; asserted in tests/landing-jsonld.test.ts.
+    installUrl: [APP_STORE_URL, PLAY_STORE_URL],
+    downloadUrl: [APP_STORE_URL, PLAY_STORE_URL],
     description: t.landing.jsonLdAppDescription,
     url: APP_URL,
     inLanguage: ['zh-TW', 'zh-CN', 'en', 'ja'],
@@ -111,7 +119,8 @@ export default async function RootPage({ params }: { params: Params }) {
         t={t.landing}
         signInHref={signInHref}
         dashboardHref="/dashboard"
-        androidBetaHref={localizedHref(ANDROID_BETA_PATH, locale)}
+        locale={locale}
+        showLaunchBanner={isPlayLaunchBannerActive()}
         checkingLabel={t.signIn.signingIn}
         useCaseHrefs={{
           cohabitation: localizedHref('/use-case/cohabitation', locale),

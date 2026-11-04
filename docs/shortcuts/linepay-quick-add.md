@@ -1,6 +1,6 @@
 # 用 iOS 捷徑快速記一筆（LINE Pay 付款通知）
 
-> 對應 issue：[#1488](https://github.com/redtear1115/oikos/issues/1488)。程式入口：`lib/quickAdd.ts`（解析）、`app/(dashboard)/_components/QuickAddProvider.tsx`（交付）。
+> 對應 issue：[#1488](https://github.com/FREEDOMPJ2025/futari/issues/1488)。程式入口：`lib/quickAdd.ts`（解析）、`app/(dashboard)/_components/QuickAddProvider.tsx`（交付）。
 
 捷徑做的事只有一件：**打開 Futari，讓「記一筆」帶著金額、分類、描述跳出來**。確認、改分類、按儲存仍然由你自己來——捷徑不會在背景寫入任何紀錄（背景寫入是之後的版本）。
 

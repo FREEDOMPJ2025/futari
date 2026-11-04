@@ -1,0 +1,23 @@
+{
+  "locale": "ja",
+  "groupId": "8f395bb4-0ba3-81ef-8305-64cc3051c70e",
+  "groupName": "ふたりの家計簿",
+  "tripId": "ae94bba9-b335-838c-9ee5-82d750dad662",
+  "tripName": "大阪7日間",
+  "baseCurrency": "JPY",
+  "tripCurrencies": [
+    "JPY"
+  ],
+  "plantName": "ぷく",
+  "plantSproutedAt": "2025-12-09",
+  "seededOn": "2026-11-03",
+  "copyVars": {
+    "item1": "夕食",
+    "item2": "歯医者",
+    "item3": "サプリ",
+    "plantName": "ぷく",
+    "tripPlace": "大阪",
+    "localCurrency": "円",
+    "homeCurrency": "円"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "locale": "en",
+  "groupId": "da364fa6-3f66-80e0-8ee6-86e0aca2927e",
+  "groupName": "Our ledger",
+  "tripId": "2fcd748f-7638-8697-984f-b7449608bd9c",
+  "tripName": "Osaka, 7 days",
+  "baseCurrency": "USD",
+  "tripCurrencies": [
+    "JPY",
+    "USD"
+  ],
+  "plantName": "Sunny",
+  "plantSproutedAt": "2025-12-09",
+  "seededOn": "2026-11-03",
+  "copyVars": {
+    "item1": "Dinner",
+    "item2": "the dentist",
+    "item3": "vitamins",
+    "plantName": "Sunny",
+    "tripPlace": "Osaka",
+    "localCurrency": "yen",
+    "homeCurrency": "US dollars"
+  }
+}

@@ -95,12 +95,19 @@ export const zhCN: Translations = {
     alreadyHaveAccount: '已有账号 · 登录',
     appStoreCta: '在 App Store 下载',
     appStoreCtaHint: 'iPhone 与 iPad 都能用',
-    androidBetaCta: '加入 Android 测试版',
-    androidBetaCtaHint: '用你在 Play 商店的 Google 账号加入测试群组，接着就能安装 App。',
+    playStoreCta: '在 Google Play 下载',
+    playStoreCtaHint: '目前仅在台湾上架',
+    playBadgeAlt: '去商店下载 Google Play',
+    playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
+    launchBanner: {
+      text: 'Futari 的 Android App 上架了！',
+      link: '到 Google Play 下载',
+      closeAria: '关闭',
+    },
     useWebVersion: '先用网页版',
     trustEncrypted: '只开放给你们俩',
     trustFree: '免费使用',
-    trustPwa: 'iPhone App · 网页版',
+    trustPwa: 'iPhone App · Android App · 网页版',
     trust: {
       narrative: '你们的记录只属于你们两个人。我们不靠广告，不卖数据。',
       encryption: {
@@ -1239,28 +1246,18 @@ export const zhCN: Translations = {
   },
 
   androidBetaInvite: {
-    heading: 'Android App 正在找测试伙伴',
-    body: '你用 Android 打开 Futari。想先试试 App 版的话，用 Play 商店的 Google 账号加入测试群组，接着就能安装。',
-    cta: '加入 Android 测试版',
+    heading: 'Android App 上架了',
+    body: '你用 Android 打开 Futari。想改用 App，到 Google Play 下载。',
+    cta: '在 Google Play 下载',
   },
 
-  /** /android-beta self-serve join page (#1648). Temporary, removed with #1553. */
+  /** /android-beta: closed testing is over, the app is on Google Play (#1901). */
   androidBeta: {
-    metaTitle: 'Android 测试版',
-    title: '加入 Futari 的 Android 测试',
-    intro: 'Android App 还在 Google Play 的封闭测试阶段。照下面两步做，就能先装起来用。',
-    step1Title: '加入测试群组',
-    step1Body: '用你在 Play 商店登录的 Google 账号，加入「Futari Android 測試」群组。',
-    step1Cta: '加入群组',
-    step2Title: '安装 App',
-    step2Body: '加入群组后，打开 Play 的测试页，点「成为测试人员」，再到 Play 商店安装。',
-    step2Cta: '打开 Play 测试页',
-    askTitle: '测试期间',
-    askBody: '像平常一样用它记账。遇到不顺的地方或有想法，在 App 的「设置 › 给我们反馈」告诉我们。',
-    privacy: '加入群组后，群组所有者（也就是我们）看得到你的 Google 账号的 Email 地址，只用来给你测试资格，和发送测试相关的通知。不想测了，退出群组就好。',
-    closed: '测试名额目前没有开放，可以先用网页版。',
+    metaTitle: 'Android App',
+    title: 'Futari 的 Android App 已上架',
+    body: '封闭测试已经结束，谢谢每一位帮忙测试的人。Android App 已在 Google Play 上架。',
     useWebVersion: '先用网页版',
-    outingLine: 'Futari 的 Android App 正在测试，用 Android 的你可以先加入',
+    outingLine: 'Futari 的 Android App 已在 Google Play 上架',
   },
 
   pastTimes: {
@@ -1575,10 +1572,10 @@ export const zhCN: Translations = {
 
   /** Settings row: share the Android test page with a partner or friend; hidden in the iOS app (#1648). Removed with #1553. */
   androidTesterInvite: {
-    title: '邀请用 Android 的伴侣或朋友来测试',
-    hint: '分享测试页的链接，对方加入群组就能安装',
-    shareTitle: 'Futari Android 测试',
-    shareText: 'Futari 的 Android App 正在封闭测试，照这页的两步就能先装起来用。',
+    title: '邀请用 Android 的伴侣或朋友下载',
+    hint: '分享 Google Play 的链接，对方点开就能安装',
+    shareTitle: 'Futari 的 Android App',
+    shareText: 'Futari 的 Android App 已在 Google Play 上架，用 Android 的你也能一起记账。',
     copied: '链接已复制',
   },
 
@@ -2170,13 +2167,13 @@ export const zhCN: Translations = {
 
   termsPage: {
     heading: '服务条款',
-    lastUpdated: '最后更新：2026 年 10 月 15 日',
+    lastUpdated: '最后更新：2026 年 11 月 3 日',
     intro: '使用 Futari（以下简称「本服务」）即表示您同意以下条款。请在使用前详阅。',
     bullets: [
       '本服务提供双人共用记账功能，包含交易记录、结算与共同财物管理。所有结算结果仅供用户自行参考，本服务不对其正确性负责。',
       '您的数据属于您。本服务仅为显示与计算目的使用您输入的数据，不会出售或对外分享您的个人数据。',
-      '请勿记录高度敏感的身份信息（例如身份证号、信用卡号等）。本服务的设计目的是记账，不是机密文件保存。',
-      '使用 Google 登录即表示您同意 Google 将您的基本账号信息（姓名、头像、Email）提供给本服务，作为账号识别之用。',
+      '请勿将身份证号、信用卡号等高度敏感的信息记录在交易说明、备注等一般字段，这些字段不另外加密。孩子的身份证号、医保卡号等资料，请填在爱物“孩子”的专用字段，这些字段在写入数据库前会另外加密（详见隐私权政策“数据存储”）。本服务的设计目的是记账，不是机密文件保存。',
+      '使用 Google 或 Apple 登录，即表示您同意该服务将您的基本账号信息提供给本服务，作为账号识别之用：Google 提供姓名、头像与 Email；Apple 提供您选择分享的姓名与 Email。',
       '您可随时通过设置页退出登录或删除账号。提出删除后有 14 天缓冲期，期间可以取消；期满后，您一个人时记下的记录会删除（对方曾经看得到的部分除外）；与伴侣共用的账本会留给对方，曾经共用、对方已经离开的那段时光也会留给对方回看，您和对方共同记下的记录不会一起移除。详见隐私政策的「数据保留期限」。',
       '本服务保留因维护、安全或系统需求暂停或调整服务的权利，并将在可能的情况下提前告知。',
       '本服务条款适用中华民国法律，如有争议以台湾台北地方法院为第一审管辖法院。',
@@ -2190,11 +2187,11 @@ export const zhCN: Translations = {
 
   privacyPage: {
     heading: '隐私权政策',
-    lastUpdated: '最后更新：2026 年 10 月 23 日',
+    lastUpdated: '最后更新：2026 年 11 月 3 日',
     intro: '本页说明 Futari 如何收集、使用与保护您的个人数据。',
     sectionCollectTitle: '收集的数据',
     sectionCollectItems: [
-      'Google 或 Apple 登录提供的基本账号信息：姓名、头像、Email 地址。',
+      'Google 或 Apple 登录提供的基本账号信息：Google 提供姓名、头像、Email 地址；Apple 提供您选择分享的姓名与 Email 地址。',
       '您手动输入的记账数据，包含交易记录、结算记录、分摊偏好、共同财物信息等。',
       '邀请链接与接受时间（用于关联双方账号）。',
       '操作行为与错误信息（用于改善服务质量，详见第三方服务说明）。',
@@ -3290,11 +3287,11 @@ export const zhCN: Translations = {
     },
     terms: {
       title: '服务条款 · Futari',
-      description: 'Futari alpha 测试版本的服务条款与用户注意事项。',
+      description: 'Futari 的服务条款：使用双人共用账本前需要知道的事，包括账号删除、服务调整与适用法律。',
     },
     privacy: {
       title: '隐私权政策 · Futari',
-      description: 'Futari alpha 测试版本的数据收集与隐私权处理方式。',
+      description: 'Futari 如何收集、使用和保存你的数据：收集哪些数据、怎么加密、保留多久、用到哪些第三方服务，以及你的权利。',
     },
     migrate: {
       honeydue: {
@@ -3947,23 +3944,43 @@ export const zhCN: Translations = {
     },
     applePay: {
       heading: 'Apple Pay：刷完卡就跳出「新增记录」',
-      intro: '前提：iPhone 已安装 Futari 并登录。下面用「钱包」的自动化，每次用 Apple Pay 付款，就打开一次填好的「新增记录」。',
+      intro: '前提：iPhone 使用 iOS 17 或以上版本，已安装 Futari iOS App 1.9.0 或以上版本并登录。下面用「钱包」的自动化，每次用 Apple Pay 付款，就把 Futari 带到前台，打开填好的「新增记录」。你确认后按保存，记录才会写进账本。',
       steps: [
         {
           title: '新建「钱包」自动化',
-          body: '打开「快捷指令」App，进入「自动化」，点 ＋ 选「钱包」。在「轻点时」画面勾选要记的卡片；类别可以保持全部勾选。点「下一步」→「新建快捷指令」。最后在这个自动化的设置行，运行方式选「立即运行」，这样不必每次先点通知。',
+          body: '打开「快捷指令」App，点 ＋ 新建快捷指令，再点「编辑」。在动作的分类选「自动化」→「钱包」，快捷指令最上面会出现「轻触〔任一卡片〕时」卡片。点「任一卡片」选要记的卡片；「类别」和「商家」保持「任一类别」「任一商家」即可。卡片里的「自动化」保持打开、「通知」保持关闭，付款后就会直接运行，不用先点通知。iOS 26 及更早版本的画面不同：进入「自动化」，点 ＋ 选「钱包」，在同一画面选「立即运行」，点「下一步」，再选「新建空白自动化」。',
+        },
+        {
+          title: '添加「Futari 记一笔」动作',
+          body: '在同一画面下方的搜索栏搜索 Futari，添加「Futari 记一笔」。',
+        },
+        {
+          title: '设置金额与备注，分类留空',
+          body: '点「金额」选「输入快捷指令的信息」，再点一下它，把「类型」改成「交易」，选「数量」。「备注」也选「输入快捷指令的信息」，「类型」改成「交易」，选「商家」。加入后，最上面会多一张接收输入的卡片，不用改。「分类」留空：记过的商家会沿用上次的分类，第一次记的商家先用「饮食」，保存前都可以改。动作会把金额取整数，备注不用 URL 编码。运行时会把 Futari 带到前台并打开填好的「新增记录」；你看过、需要就改，再按保存，不会自行保存记录。',
+        },
+      ],
+      platformNote: '这个流程只适用于 iPhone 的「快捷指令」App。',
+      foreignNote: '外币提醒：用 Apple Pay 付外币时，快捷指令给的是外币金额，Futari 会把它当成账本主币种的金额带入。请在「新增记录」里改成实际的金额。',
+    },
+    applePayUrl: {
+      heading: '备用：还不能使用动作时，用网址打开',
+      intro: '上面的「Futari 记一笔」动作可用时，设置更简单。如果 Futari App 还没更新到 1.9.0（iPhone 同样要 iOS 17 或以上版本），可以先用下面的五步网址做法。',
+      steps: [
+        {
+          title: '新建「钱包」自动化',
+          body: '打开「快捷指令」App，点 ＋ 新建快捷指令，再点「编辑」。在动作的分类选「自动化」→「钱包」，快捷指令最上面会出现「轻触〔任一卡片〕时」卡片。点「任一卡片」选要记的卡片；「类别」和「商家」保持「任一类别」「任一商家」即可。卡片里的「自动化」保持打开、「通知」保持关闭，付款后就会直接运行，不用先点通知。iOS 26 及更早版本的画面不同：进入「自动化」，点 ＋ 选「钱包」，在同一画面选「立即运行」，点「下一步」，再选「新建空白自动化」。',
         },
         {
           title: '把金额取整数（建议）',
-          body: '建议加上：加一个「取整数」动作，点「快捷指令输入」选「数量」。如果金额带小数（例如 120.00），Futari 会让金额栏留空；先取整数比较保险。「120」「1,280」「１２０」可以，「120.00」「NT$120.00」「120元」会让金额栏留空。',
+          body: '建议加上：加一个「取整数」动作，点「输入快捷指令的信息」，「类型」改成「交易」，选「数量」。如果金额带小数（例如 120.00），Futari 会让金额栏留空；先取整数比较保险。「120」「1,280」「１２０」可以，「120.00」「NT$120.00」「120元」会让金额栏留空。',
         },
         {
           title: '把商家名称做 URL 编码',
-          body: '加一个「URL 编码」动作，输入选「快捷指令输入」→「商家」。中文和空格不先编码，网址会在中间断开，描述会留空或只剩一半。描述可有可无，不想带就跳过这步，并把网址里的 &note=… 整段去掉。',
+          body: '加一个「URL 编码」动作，输入选「输入快捷指令的信息」，「类型」改成「交易」，选「商家」。中文和空格不先编码，网址会在中间断开，描述会留空或只剩一半。描述可有可无，不想带就跳过这步，并把网址里的 &note=… 整段去掉。',
         },
         {
           title: '用「文本」拼出网址',
-          body: '加一个「文本」动作，粘贴下面的网址，把 [金额] 换成第 2 步的结果、[商家] 换成第 3 步的结果（没加第 2 步，就换成「快捷指令输入」→「数量」）。分类不用写：记过的商家会沿用上次的分类，第一次记的商家先用「饮食」，保存前都可以改。',
+          body: '加一个「文本」动作，粘贴下面的网址，把 [金额] 换成第 2 步的结果、[商家] 换成第 3 步的结果（没加第 2 步，就换成「输入快捷指令的信息」，「类型」先改成「交易」，再选「数量」）。分类不用写：记过的商家会沿用上次的分类，第一次记的商家先用「饮食」，保存前都可以改。',
         },
         {
           title: '打开 URL',
@@ -3971,8 +3988,6 @@ export const zhCN: Translations = {
         },
       ],
       urlLabel: '网址（App）',
-      platformNote: '这个流程只适用于 iPhone 的「快捷指令」App。',
-      foreignNote: '外币提醒：用 Apple Pay 付外币时，快捷指令给的是外币金额，Futari 会把它当成账本主币种的金额带入。请在「新增记录」里改成实际的金额。',
     },
     linePay: {
       heading: '',
@@ -4034,15 +4049,19 @@ export const zhCN: Translations = {
       },
       rows: [
         {
-          symptom: '跳出来了，但金额是空的',
+          symptom: '找不到「Futari 记一笔」动作',
+          cause: '将 iOS 更新到 17 或以上版本、Futari iOS App 更新到 1.9.0 或以上版本，并先打开 Futari 一次。',
+        },
+        {
+          symptom: '网址备用做法：跳出来了，但金额是空的',
           cause: '金额不是整数。通常是少了「取整数」那一步，或带了「元」「NT$」。',
         },
         {
-          symptom: '描述留空或只有一半',
+          symptom: '网址备用做法：描述留空或只有一半',
           cause: '商家名称没有先经过「URL 编码」。',
         },
         {
-          symptom: '分类不是我网址里写的',
+          symptom: '网址备用做法：分类不是我网址里写的',
           cause: '这个商家记过，会沿用上次的分类；第一次记的商家，id 拼错或用了大写就会用「饮食」。',
         },
       ],

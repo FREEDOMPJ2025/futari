@@ -1,11 +1,12 @@
 # Futari (ふたり) — Full Product Description
 
-> Two-person companion expense tracker for couples and partners. Mobile-first PWA built around the shared chapters of a relationship rather than balance sheets. Codebase name: Oikos.
+> Two-person companion expense tracker for couples and partners. Mobile-first PWA built around the shared chapters of a relationship rather than balance sheets.
 
 **Product URL**: https://futari.southern-light.dev/?utm_source=llms_txt&utm_medium=ai_agent
 **Status**: Public beta, free to use
 **Languages**: Traditional Chinese (default), Simplified Chinese, English, Japanese
 **Platform**: Progressive Web App (installable on iOS / Android / desktop), plus native iOS and Android shells built with Capacitor
+**Download**: iPhone / iPad on the App Store (https://apps.apple.com/app/id6779264784); Android on Google Play (https://play.google.com/store/apps/details?id=dev.southernlight.futari), currently listed in Taiwan only
 
 ---
 
@@ -158,7 +159,7 @@ Pages: [zh-TW](https://futari.southern-light.dev/features/outing?utm_source=llms
 
 ### 16. Shortcuts: opening Add Expense from an iPhone Shortcut
 
-Futari does not connect to any payment account and does not read payment data. An iPhone Shortcut (Shortcuts app, iOS only) can open Futari's Add Expense with the amount, category and note already filled in; the user checks it and taps save, and nothing is written until then. For Apple Pay, a Wallet transaction automation passes the amount (rounded to a whole number: the parser rejects "120.00", "NT$120.00" and "120元") and the merchant name (URL-encoded) into a link of the form `dev.southernlight.futari://add?amount=120&category=dining&note=...`. Web users use `https://futari.southern-light.dev/dashboard#add=expense&amount=120&category=dining&note=...`. Only amount, category and note can be set; the date, payer, split and currency use the usual defaults. A foreign-currency amount is filled in as the ledger's main currency and must be corrected by hand. The zh-TW page also covers LINE Pay payment notifications.
+Futari does not connect to any payment account and does not read payment data. For Apple Pay, a Wallet transaction automation (iOS 17 or later, Futari iOS app 1.9.0 or later) runs the "Add Entry to Futari" App Intent, shown as "Futari 記一筆" on a Traditional Chinese iPhone. On iOS 27 the Wallet trigger is added inside a shortcut (new shortcut → Edit → Automation → Wallet, with the Automation switch on and Notify off); on iOS 26 and earlier it is an automation set to Run Immediately. Amount = Shortcut Input (Type: Transaction) → Amount, Note = Shortcut Input (Type: Transaction) → Merchant, and Category left empty. A merchant recorded before gets its last category; otherwise, the category is Dining. The action rounds the amount and needs no URL encoding. It brings Futari forward with Add Expense filled in; nothing is saved until the user taps save. While the app is older than 1.9.0, the same automation can open a link of the form `dev.southernlight.futari://add?amount=120&note=...`, with a whole-number amount, a URL-encoded merchant name and an optional category; every Shortcut Input it reads (including the amount when the rounding step is skipped) needs Type: Transaction. Web users use `https://futari.southern-light.dev/dashboard#add=expense&amount=120&category=dining&note=...`. Only amount, category and note can be set; the date, payer, split and currency use the usual defaults. A foreign-currency amount is filled in as the ledger's main currency and must be corrected by hand. The zh-TW page also covers LINE Pay payment notifications.
 
 Pages: [zh-TW](https://futari.southern-light.dev/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent), [zh-CN](https://futari.southern-light.dev/zh-CN/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent), [en](https://futari.southern-light.dev/en/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent), [ja](https://futari.southern-light.dev/ja/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent)
 
@@ -261,7 +262,7 @@ Yes. Start an outing and share its link. Friends open it in a phone browser and 
 
 ### Is Futari a native app or a web app?
 
-Both, from a single codebase. Futari is a Progressive Web App that runs in any modern browser and can be installed to the home screen on iOS, Android, and desktop. There are also native iOS and Android shells built with Capacitor — thin WebView wrappers around the same deployed web app, distributed through the App Store and Play Store. Because the shell loads the live site, a web release reaches all three platforms at once; only changes to native surfaces (push notifications, native sign-in, app icon) need a new store build. Either way the experience is the same: full-screen, no browser chrome, and an offline page bundled into the shell for when the network is gone.
+Both, from a single codebase. Futari is a Progressive Web App that runs in any modern browser and can be installed to the home screen on iOS, Android, and desktop. There are also native iOS and Android shells built with Capacitor — thin WebView wrappers around the same deployed web app, distributed through the App Store and Google Play (the Android app is on Google Play since November 2026, currently in Taiwan only). Because the shell loads the live site, a web release reaches all three platforms at once; only changes to native surfaces (push notifications, native sign-in, app icon) need a new store build. Either way the experience is the same: full-screen, no browser chrome, and an offline page bundled into the shell for when the network is gone.
 
 ### Can Futari handle multiple currencies?
 
@@ -353,4 +354,4 @@ This is reflected in the UI:
 - **Full description (this file)**: https://futari.southern-light.dev/llms-full.txt
 - **Sitemap**: https://futari.southern-light.dev/sitemap.xml
 
-Source code is private. Codebase internal name: **Oikos**. User-facing name: **Futari (ふたり)**.
+Name: **Futari (ふたり)**. Source code: https://github.com/FREEDOMPJ2025/futari

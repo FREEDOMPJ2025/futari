@@ -4,27 +4,20 @@ import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 const track = vi.fn()
 vi.mock('@/lib/analytics/track', () => ({ track: (...a: unknown[]) => track(...a) }))
 
-const locale = vi.hoisted(() => ({ value: 'zh-TW' }))
 vi.mock('@/lib/i18n/client', () => ({
-  useLocale: () => locale.value,
+  useLocale: () => 'zh-TW',
   useTranslations: () => ({
-    androidBetaInvite: { heading: 'H', body: 'B', cta: 'Join' },
+    androidBetaInvite: { heading: 'H', body: 'B', cta: 'Get it' },
+    landing: { playStoreCtaHint: 'Taiwan only' },
     postLeave: { dismissAria: 'Dismiss' },
   }),
 }))
 
-const GROUP = 'https://groups.google.com/g/example'
-const groupUrl = { value: GROUP }
-vi.mock('@/lib/visitorPlatform', () => ({
-  get ANDROID_TEST_GROUP_URL() {
-    return groupUrl.value
-  },
-  ANDROID_BETA_PATH: '/android-beta',
-}))
-
 import { AndroidBetaInviteCard } from '@/app/(dashboard)/dashboard/_components/AndroidBetaInviteCard'
+import { PLAY_STORE_URL } from '@/lib/visitorPlatform'
 
-const KEY = 'futari_android_beta_invite_dismissed'
+const KEY = 'futari_android_play_card_dismissed'
+const OLD_BETA_KEY = 'futari_android_beta_invite_dismissed'
 const ANDROID_UA = 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/126 Mobile Safari/537.36'
 const IOS_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Version/17.0 Mobile Safari/604.1'
 const DESKTOP_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/126 Safari/537.36'
@@ -44,8 +37,6 @@ function setNative(platform: 'android' | 'ios' | null) {
 
 beforeEach(() => {
   track.mockClear()
-  groupUrl.value = GROUP
-  locale.value = 'zh-TW'
   window.localStorage.clear()
   setUA(ANDROID_UA)
   // jsdom has no matchMedia; a plain browser tab is "not standalone".
@@ -58,10 +49,11 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-describe('AndroidBetaInviteCard (#1553)', () => {
+describe('AndroidBetaInviteCard — Google Play card (#1553 → #1901)', () => {
   it('renders for an Android browser and fires shown once', () => {
     render(<AndroidBetaInviteCard />)
     expect(screen.getByRole('status')).toBeTruthy()
+    expect(screen.getByText('Taiwan only')).toBeTruthy()
     expect(track.mock.calls).toEqual([['android_beta_invite_shown']])
   })
 
@@ -81,17 +73,11 @@ describe('AndroidBetaInviteCard (#1553)', () => {
     expect(track).not.toHaveBeenCalled()
   })
 
-  it('does not render inside the Capacitor Android shell', () => {
+  it('does not render inside the Capacitor Android shell (no download link in the app)', () => {
     setNative('android')
     const { container } = render(<AndroidBetaInviteCard />)
     expect(container.innerHTML).toBe('')
     expect(track).not.toHaveBeenCalled()
-  })
-
-  it('does not render when the group URL is empty', () => {
-    groupUrl.value = ''
-    const { container } = render(<AndroidBetaInviteCard />)
-    expect(container.innerHTML).toBe('')
   })
 
   it('does not render once dismissed before', () => {
@@ -99,6 +85,12 @@ describe('AndroidBetaInviteCard (#1553)', () => {
     const { container } = render(<AndroidBetaInviteCard />)
     expect(container.innerHTML).toBe('')
     expect(track).not.toHaveBeenCalled()
+  })
+
+  it('still shows to someone who closed the old closed-test invite', () => {
+    window.localStorage.setItem(OLD_BETA_KEY, '1')
+    render(<AndroidBetaInviteCard />)
+    expect(screen.getByRole('status')).toBeTruthy()
   })
 
   it('dismiss hides the card, persists, and fires dismissed', () => {
@@ -109,22 +101,17 @@ describe('AndroidBetaInviteCard (#1553)', () => {
     expect(track.mock.calls).toEqual([['android_beta_invite_shown'], ['android_beta_invite_dismissed']])
   })
 
-  it.each([
-    ['zh-TW', '/android-beta'],
-    ['en', '/en/android-beta'],
-    ['ja', '/ja/android-beta'],
-  ])('CTA links to the locale-pinned join page in the same tab (%s)', (loc, href) => {
-    locale.value = loc
+  it('CTA opens the Google Play listing in a new tab', () => {
     render(<AndroidBetaInviteCard />)
-    const a = screen.getByText('Join').closest('a')!
-    expect(a.getAttribute('href')).toBe(href)
-    expect(a.hasAttribute('target')).toBe(false)
+    const a = screen.getByText('Get it').closest('a')!
+    expect(a.getAttribute('href')).toBe(PLAY_STORE_URL)
+    expect(a.getAttribute('target')).toBe('_blank')
+    expect(a.getAttribute('rel')).toBe('noopener noreferrer')
   })
 
   it('CTA click retires the card', () => {
     render(<AndroidBetaInviteCard />)
-    const a = screen.getByText('Join').closest('a')!
-    fireEvent.click(a)
+    fireEvent.click(screen.getByText('Get it').closest('a')!)
     expect(screen.queryByRole('status')).toBeNull()
     expect(window.localStorage.getItem(KEY)).toBe('1')
     expect(track.mock.calls).toEqual([['android_beta_invite_shown'], ['android_beta_invite_clicked']])
