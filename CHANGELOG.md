@@ -47,6 +47,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：繁體中文首頁的下載按鈕下方多一支 17 秒的上架短片，點了才播放；其他語言和 App 內不顯示。
   技術：`LaunchFilm` 進到可視範圍附近才掛上 `<video>`（`preload="none"`、手機寬度用 720p），殼內沿用 `data-native-shell` 隱藏；zh-TW 首頁加 VideoObject JSON-LD，規則集中在 `lib/launchFilm.ts`；proxy matcher 放行 `.mp4`／`.vtt`。
 
+- **結束旅行時的結算紀錄名稱跟著語系（#1912）**
+  使用者：新結算紀錄採用結束旅行者的語系，伴侶即使使用不同語系也會看到結束者的語言，舊紀錄維持不變。
+  技術：兩個結束旅行的入口從 request locale 取得四語文案，旅行名稱去除前後空白，空白名稱使用未命名旅行的結算文案。
+
 ## [1.9.2] - 2026-11-04
 
 主題：**Android App 上架 Google Play**——網站的 Android 下載入口改連 Google Play，首頁有上架公告；捷徑教學改教「Futari 記一筆」動作；服務條款與隱私權政策對齊現況；repo 搬家，專案改名 Futari。

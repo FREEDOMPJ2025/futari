@@ -434,6 +434,8 @@ export const ja: Translations = {
     iSettled: '精算した',
     partnerSettled: '{name} が精算',
     outingSettled: 'おでかけの精算',
+    tripSettledRecord: '{name}の精算',
+    tripSettledRecordUnnamed: '旅行の精算',
     youIncome: '収入',
     partnerIncome: '{name} の収入',
     youPaid: 'あなたが支払い',

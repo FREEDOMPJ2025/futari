@@ -615,6 +615,10 @@ export type Translations = {
     partnerSettled: string
     /** Settlement row label when it's an ended outing's fold-back (no direction). */
     outingSettled: string
+    /** Trip summary record description. `{name}` = trimmed trip name. */
+    tripSettledRecord: string
+    /** Trip summary record description when the trip name is empty or whitespace. */
+    tripSettledRecordUnnamed: string
     /** Transaction row payer label — viewer paid (income). */
     youIncome: string
     /** Transaction row payer label — partner paid (income). `{name}` = partner displayName. */
@@ -4027,6 +4031,8 @@ export const zhTW: Translations = {
     iSettled: '我還款',
     partnerSettled: '{name} 還款',
     outingSettled: '出遊結算',
+    tripSettledRecord: '{name} 結算',
+    tripSettledRecordUnnamed: '旅行結算',
     youIncome: '你收入',
     partnerIncome: '{name} 收入',
     youPaid: '你付',

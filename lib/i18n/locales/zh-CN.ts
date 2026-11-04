@@ -432,6 +432,8 @@ export const zhCN: Translations = {
     iSettled: '我还款',
     partnerSettled: '{name} 还款',
     outingSettled: '出游结算',
+    tripSettledRecord: '{name} 结算',
+    tripSettledRecordUnnamed: '旅行结算',
     youIncome: '你收入',
     partnerIncome: '{name} 收入',
     youPaid: '你付',
