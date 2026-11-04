@@ -98,6 +98,9 @@ export const zhCN: Translations = {
     playStoreCta: '在 Google Play 下载',
     playStoreCtaHint: '目前仅在台湾上架',
     playBadgeAlt: '去商店下载 Google Play',
+    appStoreBadgeAlt: 'App Store 下载',
+    downloadQrCaption: '用手机扫码下载',
+    downloadQrAlt: '扫码后打开 Futari 的下载页面',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
     launchBanner: {
       text: 'Futari 的 Android App 上架了！',

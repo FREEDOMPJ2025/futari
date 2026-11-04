@@ -168,17 +168,22 @@ describe('Landing — SSR CTAs work without JS (#1521)', () => {
       expect(a.className).not.toMatch(/pointer-events-none|opacity-0|text-transparent/)
       expect(a.innerHTML).not.toMatch(/text-transparent/)
     }
-    expect(html).not.toContain('apps.apple.com')
     expect(html).not.toContain('groups.google.com')
     expect(html).not.toContain('android-beta')
     // #1901: the Play badge and launch banner are server-rendered (no layout
     // shift) but every Play anchor in the SSR HTML sits inside an element the
-    // pre-paint shell flag hides, so no shell ever paints one.
+    // pre-paint shell flag hides, so no shell ever paints one. #1906 adds the
+    // desktop download block (a second Play badge) and the only App Store
+    // links in the SSR HTML (desktop badge + "iPhone App" in the platform
+    // line), under the same rule; the primary CTA stays sign-in (above).
     const playAnchors = [...doc.querySelectorAll('a[href*="play.google.com"]')]
-    expect(playAnchors.length).toBe(2)
+    expect(playAnchors.length).toBe(3)
+    const appStoreAnchors = [...doc.querySelectorAll('a[href*="apps.apple.com"]')]
+    expect(appStoreAnchors.length).toBe(2)
+    for (const a of appStoreAnchors) expect(a.getAttribute('href')).toContain('ct=landing-desktop')
     const hiddenInShell = (el: Element | null): boolean =>
       !!el && (el.className.includes('[html[data-native-shell]_&]:hidden') || hiddenInShell(el.parentElement))
-    for (const a of playAnchors) expect(hiddenInShell(a)).toBe(true)
+    for (const a of [...playAnchors, ...appStoreAnchors]) expect(hiddenInShell(a)).toBe(true)
   })
 })
 
@@ -235,9 +240,12 @@ describe('Landing — example card (#1852)', () => {
 
   // #1901: the Google Play badge joins the CTA block (store entries together),
   // so the card now follows the sign-in link and that badge, still below the
-  // CTA and above the compact trust row. #1910: on zh-TW the launch film sits
-  // between the badge and the card.
-  it('sits right after the mobile sign-in link, the Play badge and the zh-TW launch film, before the compact trust row', () => {
+  // CTA and above the compact trust row.
+  // #1906: the desktop download block (md+) now sits between the mobile Play
+  // badge (md:hidden) and the card, so at every width the card still follows
+  // the store entries. #1910: on zh-TW the launch film sits between the
+  // download block and the card (Daphne's order: download block → film → card).
+  it('sits right after the mobile sign-in link, the Play badge, the desktop download block and the zh-TW launch film, before the compact trust row', () => {
     renderLanding()
     const fig = screen.getByRole('figure')
     const mobileSignIn = screen
@@ -246,7 +254,10 @@ describe('Landing — example card (#1852)', () => {
       .closest('div')!
     const badge = mobileSignIn.nextElementSibling!
     expect(badge.querySelector(`img[alt="${zhTW.landing.playBadgeAlt}"]`)).not.toBeNull()
-    const film = badge.nextElementSibling!
+    expect(badge.className).toContain('md:hidden')
+    const downloadBlock = badge.nextElementSibling!
+    expect(downloadBlock).toBe(screen.getByTestId('desktop-download-block'))
+    const film = downloadBlock.nextElementSibling!
     expect(film.getAttribute('data-testid')).toBe('launch-film')
     expect(film.nextElementSibling).toBe(fig)
   })

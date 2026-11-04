@@ -43,6 +43,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **桌機首頁加上 App Store 徽章與下載 QR code（#1906）**
+  使用者：桌機首頁可直接點 App Store／Google Play，或用手機掃 QR 下載；「iPhone App」字樣可點。
+  技術：新增 `/get` 依 UA 轉址（`ct=landing-qr`）並由 server 記 `cta_location=qr`；徽章 `ct=landing-desktop`。
 - **中文首頁加上雙平台上架影片（#1910）**
   使用者：繁體中文首頁的下載按鈕下方多一支 17 秒的上架短片，點了才播放；其他語言和 App 內不顯示。
   技術：`LaunchFilm` 進到可視範圍附近才掛上 `<video>`（`preload="none"`、手機寬度用 720p），殼內沿用 `data-native-shell` 隱藏；zh-TW 首頁加 VideoObject JSON-LD，規則集中在 `lib/launchFilm.ts`；proxy matcher 放行 `.mp4`／`.vtt`。

@@ -325,7 +325,8 @@ describe('Landing wiring (#1901)', () => {
     const { container } = renderLanding('ja', true)
     const d = dictionaries.ja.landing
     expect(screen.getByText(d.launchBanner.text)).toBeTruthy()
-    expect(screen.getByAltText(d.playBadgeAlt)).toBeTruthy()
+    // Two Play badges since #1906: mobile (md:hidden) + desktop download block.
+    expect(screen.getAllByAltText(d.playBadgeAlt)).toHaveLength(2)
     expect(container.querySelector('footer')!.textContent).toContain(d.playTrademark)
     const script = container.querySelector('script')!
     const banner = screen.getByText(d.launchBanner.text).closest('aside')!

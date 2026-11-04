@@ -13,6 +13,7 @@ import { IllustrationSlot } from './IllustrationSlot'
 import { LandingCtaHint } from './LandingCtaHint'
 import { LandingCtaLink } from './LandingCtaLink'
 import { FeatureOutingTextLink } from '../_components/FeatureOutingTextLink'
+import { DesktopDownloadBlock } from './DesktopDownloadBlock'
 import { LandingExampleCard } from './LandingExampleCard'
 import { LandingPrimaryCta } from './LandingPrimaryCta'
 import { LandingSecondaryCta } from './LandingSecondaryCta'
@@ -294,16 +295,21 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
             </div>
 
             {/* #1901 — official Google Play badge alongside the store CTA
-                above (which is the App Store button on iPhone/iPad). Every
-                browser sees it, so desktop visitors get a way to Android too;
-                hidden pre-paint in the native shells. The Taiwan-only hint
-                appears only under the main CTA above, not under the badge
-                (#1905). Trademark line: footer. */}
+                above (which is the App Store button on iPhone/iPad). Mobile
+                only since #1906: from md up the desktop download block below
+                carries both store badges. Hidden pre-paint in the native
+                shells. The Taiwan-only hint appears only under the main CTA
+                above, not under the badge (#1905). Trademark line: footer. */}
             <PlayStoreBadge
               locale={locale}
               alt={t.playBadgeAlt}
-              className="mt-4 flex flex-col items-center md:items-start gap-1"
+              className="md:hidden mt-4 flex flex-col items-center gap-1"
             />
+
+            {/* #1906 — desktop download block: App Store + Google Play badges,
+                then a QR card phones scan (→ /get). md and up, never in the
+                native shells. */}
+            <DesktopDownloadBlock t={t} locale={locale} className="mt-5" />
 
             {/* #1910 — launch film under the CTA cluster, zh-TW only (the film
                 is Chinese only). Always shown (not tied to the launch banner);
