@@ -243,8 +243,9 @@ describe('Landing — example card (#1852)', () => {
   // CTA and above the compact trust row.
   // #1906: the desktop download block (md+) now sits between the mobile Play
   // badge (md:hidden) and the card, so at every width the card still follows
-  // the store entries.
-  it('sits right after the mobile sign-in link, the Play badge and the desktop download block, before the compact trust row', () => {
+  // the store entries. #1910: on zh-TW the launch film sits between the
+  // download block and the card (Daphne's order: download block → film → card).
+  it('sits right after the mobile sign-in link, the Play badge, the desktop download block and the zh-TW launch film, before the compact trust row', () => {
     renderLanding()
     const fig = screen.getByRole('figure')
     const mobileSignIn = screen
@@ -256,6 +257,8 @@ describe('Landing — example card (#1852)', () => {
     expect(badge.className).toContain('md:hidden')
     const downloadBlock = badge.nextElementSibling!
     expect(downloadBlock).toBe(screen.getByTestId('desktop-download-block'))
-    expect(downloadBlock.nextElementSibling).toBe(fig)
+    const film = downloadBlock.nextElementSibling!
+    expect(film.getAttribute('data-testid')).toBe('launch-film')
+    expect(film.nextElementSibling).toBe(fig)
   })
 })
