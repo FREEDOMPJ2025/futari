@@ -77,7 +77,11 @@
  * (font-noto-tc on its wrapper) — it does not unload Fraunces. An earlier
  * version of this comment said the opposite ("layouts opt subtrees in by
  * class"); that was false and fed a P1 that stripped serif from intentional
- * emotional moments (#1162). See DESIGN.md §3, The Serif-Speaks Rule. */
+ * emotional moments (#1162). See DESIGN.md §3, The Serif-Speaks Rule.
+ * CJK locales append system fallbacks after Fraunces (#1849); en unchanged. */
 .font-fraunces {
   --font-fraunces: 'Fraunces', 'Fraunces Fallback';
 }
+.font-fraunces:lang(zh-TW){--font-fraunces:'Fraunces','Fraunces Fallback','PingFang TC','Microsoft JhengHei','Noto Sans CJK TC','Noto Sans TC',sans-serif}
+.font-fraunces:lang(zh-CN){--font-fraunces:'Fraunces','Fraunces Fallback','PingFang SC','Microsoft YaHei','Noto Sans CJK SC','Noto Sans SC',sans-serif}
+.font-fraunces:lang(ja){--font-fraunces:'Fraunces','Fraunces Fallback','Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic','Meiryo','Noto Sans CJK JP','Noto Sans JP',sans-serif}
