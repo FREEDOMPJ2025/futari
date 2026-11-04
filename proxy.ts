@@ -246,7 +246,9 @@ export const config = {
   // #1674: the basic worker and its offline page, anchored with `$` so a
   // look-alike (`/sw-basic.jsx`, `/offline-basic.html.bak`) still goes through
   // the auth gate.
+  // #1910: the landing's launch film (`public/videos/…`): its .mp4 and .vtt
+  // were 307'd to /sign-in, so the <video> got an HTML page and never played.
   matcher: [
-    '/((?!_next/static|_next/image|favicon\\.ico|icons/|sw\\.js|sw-basic\\.js$|offline-basic\\.html$|service-worker\\.js|manifest\\.(?:json|webmanifest)|robots\\.txt|sitemap\\.xml|llms\\.txt|llms-full\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|xlsx?)$).*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|icons/|sw\\.js|sw-basic\\.js$|offline-basic\\.html$|service-worker\\.js|manifest\\.(?:json|webmanifest)|robots\\.txt|sitemap\\.xml|llms\\.txt|llms-full\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|xlsx?|mp4|vtt)$).*)',
   ],
 }

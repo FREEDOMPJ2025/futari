@@ -20,6 +20,8 @@ import { LandingStandaloneRedirect } from './LandingStandaloneRedirect'
 import { PhonePreview } from './PhonePreview'
 import { PlayLaunchBanner } from './PlayLaunchBanner'
 import { PlayStoreBadge } from './PlayStoreBadge'
+import { LaunchFilm } from './LaunchFilm'
+import { showsLaunchFilm } from '@/lib/launchFilm'
 import type { Locale } from '@/lib/i18n/locales-meta'
 import { landingPrePaintScript } from '@/lib/playLaunch'
 import { TrustSection } from './TrustSection'
@@ -302,6 +304,15 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
               alt={t.playBadgeAlt}
               className="mt-4 flex flex-col items-center md:items-start gap-1"
             />
+
+            {/* #1910 — launch film under the CTA cluster, zh-TW only (the film
+                is Chinese only). Always shown (not tied to the launch banner);
+                hidden in the native shells like the Play badge. Order (Daphne,
+                #1906 issuecomment-6611277707): CTA row → download block (#1906:
+                store badges + QR card, which replaces the Play badge above) →
+                mt-10 → this film → example card. Keep the film after the
+                download block and before the example card. */}
+            {showsLaunchFilm(locale) && <LaunchFilm className="mt-10" />}
 
             {/* #1852 — example card below the sign-in link: one expense and how it
                 splits. Below the CTA so the button keeps its first-screen spot;
