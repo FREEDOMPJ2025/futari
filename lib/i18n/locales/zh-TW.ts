@@ -45,6 +45,15 @@ export type OnboardingCardCopy = {
   subtitle: string
 }
 
+/** #1921 diagram cards on /features/shortcuts. Every label is a word from the same step's `body`
+ *  (tests/feature-shortcuts-art-1921.test.tsx), so the diagram can't drift from the instructions. */
+export type ShortcutArt =
+  | { kind: 'wallet'; path: string; heading: string; option: string; toggles: readonly string[] }
+  | { kind: 'action'; search: string; action: string }
+  | { kind: 'fields'; amount: string; note: string; category: string }
+  /** `hot`: index of the row to point at. */
+  | { kind: 'notify'; rows: readonly string[]; hot: number }
+
 export type Translations = {
   signIn: {
     tagline: string
@@ -3426,12 +3435,16 @@ export type Translations = {
     answer: string
     /** Names of the Shortcuts variables as the guide calls them; they go into the example URL. */
     vars: { amount: string; merchant: string }
+    /** #1921 opening animation: the visible step list, and the sample merchant in the phone. */
+    flow: { stepsLabel: string; steps: readonly string[]; sampleMerchant: string }
     applePay: {
       heading: string
       intro: string
-      steps: readonly { title: string; body: string }[]
+      steps: readonly { title: string; body: string; art: ShortcutArt }[]
       platformNote: string
       foreignNote: string
+      /** #1921: under the three diagrams. */
+      artNote: string
     }
     applePayUrl: {
       heading: string
@@ -3444,7 +3457,7 @@ export type Translations = {
       intro: string
       /** Variable name of the optional description step. */
       noteVar: string
-      steps: readonly { title: string; body: string }[]
+      steps: readonly { title: string; body: string; art?: ShortcutArt }[]
     }
     web: { heading: string; body: string; urlLabel: string }
     params: {
@@ -7541,6 +7554,11 @@ export const zhTW: Translations = {
       amount: '金額',
       merchant: '商家',
     },
+    flow: {
+      stepsLabel: '三個步驟',
+      steps: ['付款完成', 'iPhone 打開「新增紀錄」，內容已填好', '你看過，再按儲存'],
+      sampleMerchant: '街角咖啡',
+    },
     applePay: {
       heading: 'Apple Pay：刷完卡就跳出「新增紀錄」',
       intro: '前提：iPhone 使用 iOS 17 或以上版本，已安裝 Futari iOS App 1.9.0 或以上版本並登入。下面用「錢包」的自動化，每次用 Apple Pay 付款，就把 Futari 帶到前景，打開填好的「新增紀錄」。你確認後按儲存，紀錄才會寫進帳本。',
@@ -7548,18 +7566,22 @@ export const zhTW: Translations = {
         {
           title: '新增「錢包」自動化',
           body: '打開「捷徑」App，點 ＋ 新增捷徑，再點「編輯」。在動作的分類選「自動化操作」→「錢包」，捷徑最上面會出現「感應〔任何卡片〕時」卡片。點「任何卡片」選要記的卡片；「類別」和「商家」維持「任何類別」「任何商家」即可。卡片裡的「自動化操作」保持開啟、「通知」保持關閉，付款後就會直接執行，不用先點通知。iOS 26 以前的畫面不同：到「自動化」點 ＋ 選「錢包」，同一個畫面選「立即執行」，點「下一步」，再選「新增空白自動化」。',
+          art: { kind: 'wallet', path: '自動化操作 → 錢包', heading: '感應〔任何卡片〕時', option: '任何卡片', toggles: ['自動化操作', '通知'] },
         },
         {
           title: '加入「Futari 記一筆」動作',
           body: '在同一個畫面下方的搜尋欄搜尋 Futari，加入「Futari 記一筆」。',
+          art: { kind: 'action', search: 'Futari', action: 'Futari 記一筆' },
         },
         {
           title: '設定金額與備註，分類留空',
           body: '點「金額」選「捷徑輸入」，再點這個「捷徑輸入」，把「類型」從「文字」改成「交易」，選「數量」。「備註」也選「捷徑輸入」，「類型」改成「交易」，選「商家」。加入「捷徑輸入」後，最上面會多一張「從…接收」的卡片，不用改。「分類」留空：記過的商家會沿用上次的分類，第一次記的商家先用「飲食」，存之前都可以改。動作會把金額取整數，備註不用 URL 編碼。執行時會把 Futari 帶到前景並打開填好的「新增紀錄」；你看過、需要就改，再按儲存，不會自行存下紀錄。',
+          art: { kind: 'fields', amount: '金額 → 捷徑輸入 › 交易 › 數量', note: '備註 → 捷徑輸入 › 交易 › 商家', category: '分類' },
         },
       ],
       platformNote: '這個流程只適用於 iPhone 的「捷徑」App。',
       foreignNote: '外幣提醒：用 Apple Pay 付外幣時，捷徑給的是外幣金額，Futari 會把它當成帳本主幣別的金額帶入。請在「新增紀錄」裡改成實際的金額。',
+      artNote: '示意圖，實際畫面會依 iOS 版本而不同。',
     },
     applePayUrl: {
       heading: '備用：還不能使用動作時，用網址打開',
@@ -7596,6 +7618,7 @@ export const zhTW: Translations = {
         {
           title: '新增通知自動化',
           body: '「捷徑」→「自動化」→ 新增「通知」。App 選 LINE，名稱包含「LINE錢包」，訊息包含「付款完成」，執行方式選「立即執行」。',
+          art: { kind: 'notify', rows: ['App：LINE', '名稱包含：LINE錢包', '訊息包含：付款完成', '立即執行'], hot: 2 },
         },
         {
           title: '只取出數字金額',
