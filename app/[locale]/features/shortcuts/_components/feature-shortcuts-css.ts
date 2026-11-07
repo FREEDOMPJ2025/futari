@@ -43,6 +43,7 @@ export const FS_NAMES = [
   'mono',
   'phone',
   'phoneWrap',
+  'ref',
   'reveal',
   'ring',
   'row',
@@ -63,7 +64,16 @@ export const fs = Object.fromEntries(FS_NAMES.map((n) => [n, `fs-${n}`])) as Rec
 
 const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'
 
-export const FEATURE_SHORTCUTS_CSS = `.fs-layout {
+export const FEATURE_SHORTCUTS_CSS = `.fs-ref {
+  border-bottom: 1px solid var(--hairline);
+}
+.fs-ref > summary {
+  min-height: 44px;
+  padding-block: 10px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.fs-layout {
   display: grid;
   gap: 24px;
 }

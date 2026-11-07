@@ -41,6 +41,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+- **捷徑教學分成 Apple Pay 主線與參考（#1923）**
+  使用者：四語文案精簡，其他做法可展開，錨點連入會自動打開。
+  技術：原生 details 保留完整資訊，新增舊版步驟收合與 hash 展開元件。
+
 ### 使用者可見變化
 
 - **捷徑記帳頁加開頭動畫和示意卡（#1921）**
