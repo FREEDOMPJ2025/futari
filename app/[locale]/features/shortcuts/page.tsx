@@ -1,3 +1,4 @@
+import { ShortcutsHashReveal } from './_components/ShortcutsHashReveal'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { SUPPORTED_LOCALES, isLocale, type Locale } from '@/lib/i18n/locales-meta'
@@ -74,7 +75,7 @@ function Steps({
   code,
 }: {
   idPrefix: string
-  steps: readonly { title: string; body: string; art?: ShortcutArt }[]
+  steps: readonly { title: string; body: string; art?: ShortcutArt; legacy?: { summary: string; body: string } }[]
   code?: { label: string; value: string }
 }) {
   return (
@@ -89,8 +90,14 @@ function Steps({
             <span className="text-sm tabular-nums text-ink-3">{i + 1}</span>
             {step.title}
           </h3>
-          <p className="m-0 text-sm leading-[1.7] text-ink-2">{step.body}</p>
+          <p className="m-0 text-sm leading-[1.7] text-ink-2">{idPrefix === 'apple-pay-url-step-' && i === 0 ? <a href="#step-1" className="underline underline-offset-4">{step.body}</a> : step.body}</p>
           {step.art && <ShortcutArtCard art={step.art} />}
+          {step.legacy && (
+            <details className={fs.ref}>
+              <summary className="text-base text-ink">{step.legacy.summary}</summary>
+              <p className="m-0 pb-4 text-sm leading-[1.7] text-ink-2">{step.legacy.body}</p>
+            </details>
+          )}
           {code && i === URL_STEP && <CodeBlock label={code.label} code={code.value} />}
         </li>
       ))}
@@ -111,6 +118,7 @@ export default async function FeatureShortcutsPage({ params }: { params: Params 
   return (
     <div className={s.flow}>
       <style dangerouslySetInnerHTML={{ __html: FEATURE_SHORTCUTS_CSS }} />
+      <ShortcutsHashReveal />
       <FeatureShortcutsJsonLd locale={locale} t={t} homeName="Futari" />
 
       <div className={s.hero}>
@@ -158,131 +166,130 @@ export default async function FeatureShortcutsPage({ params }: { params: Params 
             idPrefix="step-"
             steps={applePay.steps}
           />
-          <p className="m-0 text-xs text-ink-3">{applePay.artNote}</p>
           <p className="m-0 text-sm leading-[1.7] text-ink-2">{applePay.foreignNote}</p>
-          <p className="m-0 text-sm leading-[1.7] text-ink-2">{applePay.platformNote}</p>
+          <p className="m-0 text-xs text-ink-2">{applePay.artNote}</p>
         </div>
       </section>
 
-      <section id="apple-pay-url" className={s.band}>
-        <h2 className={h2}>
-          <Phrase text={applePayUrl.heading} />
-        </h2>
-        <div className="flex flex-col gap-6">
-          <p className="m-0 text-base leading-[1.7] text-ink-2">{applePayUrl.intro}</p>
-          <Steps
-            idPrefix="apple-pay-url-step-"
-            steps={applePayUrl.steps}
-            code={{ label: applePayUrl.urlLabel, value: appUrl(t.vars.amount, t.vars.merchant) }}
-          />
-        </div>
-      </section>
-
-      {linePay.heading && (
-        <section id="line-pay" className={s.band}>
-          <h2 className={h2}>
-            <Phrase text={linePay.heading} />
-          </h2>
-          <div className="flex flex-col gap-6">
-            <p className="m-0 text-base leading-[1.7] text-ink-2">{linePay.intro}</p>
-            <Steps
-              idPrefix="line-pay-step-"
-              steps={linePay.steps}
-              code={{ label: applePayUrl.urlLabel, value: appUrl(t.vars.amount, linePay.noteVar) }}
-            />
-          </div>
-        </section>
-      )}
-
-      <section id="web" className={s.band}>
-        <h2 className={h2}>
-          <Phrase text={web.heading} />
-        </h2>
-        <div className="flex flex-col gap-4">
-          <p className="m-0 text-base leading-[1.7] text-ink-2">{web.body}</p>
-          <CodeBlock label={web.urlLabel} code={webUrl(t.vars.amount, t.vars.merchant)} />
-        </div>
-      </section>
-
-      <section id="params" className={s.band}>
-        <h2 className={h2}>
-          <Phrase text={p.heading} />
-        </h2>
-        <div className="flex flex-col gap-6 text-base leading-[1.7] text-ink-2">
-          <p className="m-0">{p.intro}</p>
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-hairline text-ink-3">
-                <th scope="col" className={TH}>{p.cols.param}</th>
-                <th scope="col" className={TH}>{p.cols.rule}</th>
-                <th scope="col" className={TH}>{p.cols.fallback}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {p.rows.map((row) => (
-                <tr key={row.param} className="border-b border-hairline">
-                  <th scope="row" className={`${TD} text-left font-mono font-normal text-ink`}>{row.param}</th>
-                  <td className={TD}>{row.rule}</td>
-                  <td className={TD}>{row.fallback}</td>
+      <section className={s.band} aria-labelledby="reference-heading">
+        <h2 id="reference-heading" className={h2}>{t.referenceHeading}</h2>
+        <div>
+          <details id="trouble" className={fs.ref}>
+            <summary className="text-base text-ink"><h3 className="m-0 inline text-base font-medium text-ink">
+              <Phrase text={trouble.heading} />
+            </h3></summary>
+            <table className="w-full border-collapse text-sm text-ink-2">
+              <thead>
+                <tr className="border-b border-hairline text-ink-3">
+                  <th scope="col" className={TH}>{trouble.cols.symptom}</th>
+                  <th scope="col" className={TH}>{trouble.cols.cause}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          <h3 className="m-0 text-base font-medium text-ink">{p.categoriesHeading}</h3>
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-hairline text-ink-3">
-                <th scope="col" className={TH}>{p.catCols.id}</th>
-                <th scope="col" className={TH}>{p.catCols.name}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {CATEGORY_IDS.map((id) => (
-                <tr key={id} className="border-b border-hairline">
-                  <th scope="row" className={`${TD} text-left font-mono font-normal text-ink`}>{id}</th>
-                  <td className={TD}>{dict.category[id]}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="m-0 text-sm">{p.fixedNote}</p>
+              </thead>
+              <tbody>
+                {trouble.rows.map((row) => (
+                  <tr key={row.symptom} className="border-b border-hairline">
+                    <th scope="row" className={`${TD} text-left font-normal text-ink`}>{row.symptom}</th>
+                    <td className={TD}>{row.cause}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </details>
+          <details id="when-not" className={fs.ref}>
+            <summary className="text-base text-ink"><h3 className="m-0 inline text-base font-medium text-ink">
+              <Phrase text={whenNot.heading} />
+            </h3></summary>
+            <div className="flex flex-col gap-4 text-base leading-[1.7] text-ink-2">
+              <p className="m-0">{whenNot.intro}</p>
+              <ul className="m-0 pl-5 flex flex-col gap-2 text-sm">
+                {whenNot.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </details>
+          {linePay.heading && (
+            <details id="line-pay" className={fs.ref}>
+              <summary className="text-base text-ink"><h3 className="m-0 inline text-base font-medium text-ink">
+                <Phrase text={linePay.heading} />
+              </h3></summary>
+              <div className="flex flex-col gap-6">
+                <p className="m-0 text-base leading-[1.7] text-ink-2">{linePay.intro}</p>
+                <Steps
+                  idPrefix="line-pay-step-"
+                  steps={linePay.steps}
+                  code={{ label: applePayUrl.urlLabel, value: appUrl(t.vars.amount, linePay.noteVar) }}
+                />
+              </div>
+            </details>
+          )}
+          <details id="apple-pay-url" className={fs.ref}>
+            <summary className="text-base text-ink"><h3 className="m-0 inline text-base font-medium text-ink">
+              <Phrase text={applePayUrl.heading} />
+            </h3></summary>
+            <div className="flex flex-col gap-6">
+              <p className="m-0 text-base leading-[1.7] text-ink-2">{applePayUrl.intro}</p>
+              <Steps
+                idPrefix="apple-pay-url-step-"
+                steps={applePayUrl.steps}
+                code={{ label: applePayUrl.urlLabel, value: appUrl(t.vars.amount, t.vars.merchant) }}
+              />
+            </div>
+          </details>
+          <details id="web" className={fs.ref}>
+            <summary className="text-base text-ink"><h3 className="m-0 inline text-base font-medium text-ink">
+              <Phrase text={web.heading} />
+            </h3></summary>
+            <div className="flex flex-col gap-4">
+              <p className="m-0 text-base leading-[1.7] text-ink-2">{web.body}</p>
+              <CodeBlock label={web.urlLabel} code={webUrl(t.vars.amount, t.vars.merchant)} />
+            </div>
+          </details>
+          <details id="params" className={fs.ref}>
+            <summary className="text-base text-ink"><h3 className="m-0 inline text-base font-medium text-ink">
+              <Phrase text={p.heading} />
+            </h3></summary>
+            <div className="flex flex-col gap-6 text-base leading-[1.7] text-ink-2">
+              <p className="m-0">{p.intro}</p>
+              <table className="w-full border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-hairline text-ink-3">
+                    <th scope="col" className={TH}>{p.cols.param}</th>
+                    <th scope="col" className={TH}>{p.cols.rule}</th>
+                    <th scope="col" className={TH}>{p.cols.fallback}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {p.rows.map((row) => (
+                    <tr key={row.param} className="border-b border-hairline">
+                      <th scope="row" className={`${TD} text-left font-mono font-normal text-ink`}>{row.param}</th>
+                      <td className={TD}>{row.rule}</td>
+                      <td className={TD}>{row.fallback}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <h3 className="m-0 text-base font-medium text-ink">{p.categoriesHeading}</h3>
+              <table className="w-full border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-hairline text-ink-3">
+                    <th scope="col" className={TH}>{p.catCols.id}</th>
+                    <th scope="col" className={TH}>{p.catCols.name}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {CATEGORY_IDS.map((id) => (
+                    <tr key={id} className="border-b border-hairline">
+                      <th scope="row" className={`${TD} text-left font-mono font-normal text-ink`}>{id}</th>
+                      <td className={TD}>{dict.category[id]}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="m-0 text-sm">{p.fixedNote}</p>
+            </div>
+          </details>
         </div>
-      </section>
-
-      <section id="when-not" className={s.band}>
-        <h2 className={h2}>
-          <Phrase text={whenNot.heading} />
-        </h2>
-        <div className="flex flex-col gap-4 text-base leading-[1.7] text-ink-2">
-          <p className="m-0">{whenNot.intro}</p>
-          <ul className="m-0 pl-5 flex flex-col gap-2 text-sm">
-            {whenNot.items.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <section id="trouble" className={s.band}>
-        <h2 className={h2}>
-          <Phrase text={trouble.heading} />
-        </h2>
-        <table className="w-full border-collapse text-sm text-ink-2">
-          <thead>
-            <tr className="border-b border-hairline text-ink-3">
-              <th scope="col" className={TH}>{trouble.cols.symptom}</th>
-              <th scope="col" className={TH}>{trouble.cols.cause}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {trouble.rows.map((row) => (
-              <tr key={row.symptom} className="border-b border-hairline">
-                <th scope="row" className={`${TD} text-left font-normal text-ink`}>{row.symptom}</th>
-                <td className={TD}>{row.cause}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </section>
     </div>
   )
