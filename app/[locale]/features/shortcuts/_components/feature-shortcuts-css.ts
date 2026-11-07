@@ -74,6 +74,14 @@ const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'
 export const FEATURE_SHORTCUTS_CSS = `.fs-ref {
   border-bottom: 1px solid var(--hairline);
 }
+.fs-ref[open] {
+  padding-bottom: 20px;
+}
+li .fs-ref,
+li .fs-ref[open] {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
 .fs-ref > summary {
   min-height: 44px;
   padding-block: 10px;
@@ -134,7 +142,7 @@ export const FEATURE_SHORTCUTS_CSS = `.fs-ref {
   border-radius: var(--radius-tile);
   background: var(--surface);
   color: var(--ink);
-  opacity: 0.4;
+  opacity: 0.65;
 }
 .fs-action {
   position: absolute;
@@ -322,7 +330,7 @@ export const FEATURE_SHORTCUTS_CSS = `.fs-ref {
 }
 @keyframes fs-dim {
   from { opacity: 1; }
-  to { opacity: 0.4; }
+  to { opacity: 0.65; }
 }
 @keyframes fs-rise {
   from { opacity: 0; transform: translate(-50%, 16px); }
@@ -455,7 +463,7 @@ export const FEATURE_SHORTCUTS_CSS = `.fs-ref {
     opacity: 1;
   }
   .fs-flow[data-phase] .fs-row {
-    opacity: 0.4;
+    opacity: 0.65;
   }
 }
 `

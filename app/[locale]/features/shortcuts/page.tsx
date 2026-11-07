@@ -167,7 +167,7 @@ export default async function FeatureShortcutsPage({ params }: { params: Params 
             steps={applePay.steps}
           />
           <p className="m-0 text-sm leading-[1.7] text-ink-2">{applePay.foreignNote}</p>
-          <p className="m-0 text-xs text-ink-3">{applePay.artNote}</p>
+          <p className="m-0 text-xs text-ink-2">{applePay.artNote}</p>
         </div>
       </section>
 
