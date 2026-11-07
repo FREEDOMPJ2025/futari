@@ -161,7 +161,20 @@ describe('the example and the styles', () => {
 
   it('has no infinite loop, and the timeline ends inside 5 s', () => {
     expect(FEATURE_SHORTCUTS_CSS).not.toContain('infinite')
-    expect(FEATURE_SHORTCUTS_CSS).toContain('300ms cubic-bezier(0.22, 1, 0.36, 1) 4400ms')
+    expect(FEATURE_SHORTCUTS_CSS).toContain('300ms cubic-bezier(0.22, 1, 0.36, 1) 4100ms')
+    expect(FEATURE_SHORTCUTS_CSS.match(/fs-mark\d 4600ms/g)).toHaveLength(3)
+  })
+
+  it('pauses over the animation shorthands, which reset play-state and outrank a plain rule', () => {
+    expect(FEATURE_SHORTCUTS_CSS).toContain('animation-play-state: paused !important')
+  })
+
+  it('keeps the action a label, not a button: sized to its words, on a light ground', () => {
+    const rule = FEATURE_SHORTCUTS_CSS.match(/\.fs-action \{[^}]*\}/)![0]
+    expect(rule).toContain('background: var(--surface)')
+    expect(rule).toContain('width: max-content')
+    const rise = FEATURE_SHORTCUTS_CSS.match(/@keyframes fs-rise \{[\s\S]*?\n\}/)![0]
+    expect(rise.match(/-50%/g)).toHaveLength(2)
   })
 
   it('ends with the reduced-motion block, which undoes every phase', () => {

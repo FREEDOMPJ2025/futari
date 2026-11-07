@@ -68,10 +68,11 @@ export function ShortcutFlow({ phone, steps, playLabel }: { phone: ReactNode; st
       data-phase={dataPhase}
       data-paused={phase === 'live' && offScreen ? '' : undefined}
     >
-      <div className={fs.phoneWrap}>
+      {/* The observer stays on this one: `key` swaps the phone below on every replay, and an observed
+          element that leaves the page reports off-screen for good. */}
+      <div ref={ref} className={fs.phoneWrap}>
         <div
           key={run}
-          ref={ref}
           className={fs.phone}
           aria-hidden="true"
           onAnimationEnd={(e) => {
