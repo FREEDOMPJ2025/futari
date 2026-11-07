@@ -48,7 +48,7 @@ export type OnboardingCardCopy = {
 /** #1921 diagram cards on /features/shortcuts. Every label is a word from the same step's `body`
  *  (tests/feature-shortcuts-art-1921.test.tsx), so the diagram can't drift from the instructions. */
 export type ShortcutArt =
-  | { kind: 'wallet'; path: string; heading: string; option: string; rows: readonly string[]; toggles: readonly string[] }
+  | { kind: 'wallet'; path: string; heading: string; option: string; toggles: readonly string[] }
   | { kind: 'action'; search: string; action: string }
   | { kind: 'fields'; amount: string; note: string; category: string }
   /** `hot`: index of the row to point at. */
@@ -7566,7 +7566,7 @@ export const zhTW: Translations = {
         {
           title: '新增「錢包」自動化',
           body: '打開「捷徑」App，點 ＋ 新增捷徑，再點「編輯」。在動作的分類選「自動化操作」→「錢包」，捷徑最上面會出現「感應〔任何卡片〕時」卡片。點「任何卡片」選要記的卡片；「類別」和「商家」維持「任何類別」「任何商家」即可。卡片裡的「自動化操作」保持開啟、「通知」保持關閉，付款後就會直接執行，不用先點通知。iOS 26 以前的畫面不同：到「自動化」點 ＋ 選「錢包」，同一個畫面選「立即執行」，點「下一步」，再選「新增空白自動化」。',
-          art: { kind: 'wallet', path: '自動化操作 → 錢包', heading: '感應〔任何卡片〕時', option: '任何卡片', rows: ['類別：任何類別', '商家：任何商家'], toggles: ['自動化操作', '通知'] },
+          art: { kind: 'wallet', path: '自動化操作 → 錢包', heading: '感應〔任何卡片〕時', option: '任何卡片', toggles: ['自動化操作', '通知'] },
         },
         {
           title: '加入「Futari 記一筆」動作',

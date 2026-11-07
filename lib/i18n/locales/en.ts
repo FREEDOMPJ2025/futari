@@ -4012,7 +4012,7 @@ I will upload the screenshots once you confirm.`,
         {
           title: 'Create a Wallet automation',
           body: 'Open the Shortcuts app, tap + to start a new shortcut, then tap Edit. In the action categories, choose Automation → Wallet. A "When Any Card is tapped" card appears at the top of the shortcut. Tap Any Card to pick the cards you want to log; Categories and Merchants can stay at Any Category and Any Merchant. Keep Automation on and Notify off in that card, so it runs right after you pay, without a notification to tap. On iOS 26 and earlier the screens differ: go to Automation, tap + and choose Wallet, choose Run Immediately on the same screen, tap Next, then New Blank Automation.',
-          art: { kind: 'wallet', path: 'Automation → Wallet', heading: 'When Any Card is tapped', option: 'Any Card', rows: ['Categories: Any Category', 'Merchants: Any Merchant'], toggles: ['Automation', 'Notify'] },
+          art: { kind: 'wallet', path: 'Automation → Wallet', heading: 'When Any Card is tapped', option: 'Any Card', toggles: ['Automation', 'Notify'] },
         },
         {
           title: 'Add the "Add Entry to Futari" action',

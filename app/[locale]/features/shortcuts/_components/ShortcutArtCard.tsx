@@ -26,9 +26,6 @@ export function ShortcutArtCard({ art }: { art: ShortcutArt }) {
             <p className={`${fs.cardPath} text-xs`}>{art.path}</p>
             <p className={fs.cardTitle}>{art.heading}</p>
             <Row hot>{art.option}</Row>
-            {art.rows.map((row) => (
-              <Row key={row}>{row}</Row>
-            ))}
             {art.toggles.map((label, i) => (
               <Row key={label} hot>
                 {label}

@@ -32,7 +32,7 @@ function words(label: string) {
 function labels(art: ShortcutArt): string[] {
   switch (art.kind) {
     case 'wallet':
-      return [art.path, art.heading, art.option, ...art.rows, ...art.toggles]
+      return [art.path, art.heading, art.option, ...art.toggles]
     case 'action':
       return [art.search, art.action]
     case 'fields':
@@ -127,11 +127,17 @@ describe('copy that looks like a mistake and isn’t', () => {
     expect(new Set(names).size).toBe(SUPPORTED_LOCALES.length)
   })
 
-  it('keeps ja’s two spellings: カテゴリ from iOS Shortcuts, カテゴリー from the Futari action', () => {
-    const [wallet, , fields] = dictionaries.ja.featureShortcuts.applePay.steps
-    if (wallet.art.kind !== 'wallet' || fields.art.kind !== 'fields') throw new Error('step kinds')
-    expect(wallet.art.rows[0].startsWith('カテゴリ：')).toBe(true)
-    expect(fields.art.category).toBe('カテゴリー')
+  it('keeps ja’s Futari spelling: カテゴリー on the action, not the カテゴリ of iOS Shortcuts', () => {
+    const fields = dictionaries.ja.featureShortcuts.applePay.steps[2].art
+    if (fields.kind !== 'fields') throw new Error('step 3 is the fields')
+    expect(fields.category).toBe('カテゴリー')
+  })
+
+  it('leaves Categories and Merchants off the wallet card: there is nothing to change there (#1923)', async () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      const card = (await render(locale)).querySelector('#step-1 .fs-card')!
+      expect(card.querySelectorAll('.fs-cardRow'), locale).toHaveLength(3)
+    }
   })
 })
 
