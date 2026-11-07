@@ -107,6 +107,12 @@ describe.each(SUPPORTED_LOCALES)('%s', (locale) => {
     expect(doc.querySelectorAll('#apple-pay-url .fs-card')).toHaveLength(0)
   })
 
+  it('draws step 2 as a search field: a magnifier before the word, no extra text', async () => {
+    const search = (await render(locale)).querySelector('#step-2 .fs-search')!
+    expect(search.querySelector('svg')!.getAttribute('aria-hidden')).toBe('true')
+    expect(search.textContent).toBe('Futari')
+  })
+
   it('shows LINE Pay only where the section exists', async () => {
     const doc = await render(locale)
     if (locale === 'zh-TW') {

@@ -53,6 +53,8 @@ export const FS_NAMES = [
   'row',
   'rule',
   'save',
+  'search',
+  'searchIcon',
   'sheet',
   'sheetBar',
   'sheetBody',
@@ -359,6 +361,18 @@ export const FEATURE_SHORTCUTS_CSS = `.fs-layout {
 }
 .fs-cardTitle {
   color: var(--ink);
+}
+.fs-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 400;
+}
+.fs-searchIcon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--ink-3);
 }
 .fs-cardRow {
   position: relative;

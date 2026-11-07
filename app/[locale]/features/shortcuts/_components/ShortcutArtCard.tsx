@@ -37,7 +37,13 @@ export function ShortcutArtCard({ art }: { art: ShortcutArt }) {
         )}
         {art.kind === 'action' && (
           <>
-            <p className={fs.cardTitle}>{art.search}</p>
+            <p className={`${fs.cardTitle} ${fs.search}`}>
+              <svg className={fs.searchIcon} viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <circle cx="6" cy="6" r="4.25" />
+                <path d="M9.25 9.25 12.5 12.5" strokeLinecap="round" />
+              </svg>
+              {art.search}
+            </p>
             <Row hot>{art.action}</Row>
           </>
         )}
