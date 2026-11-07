@@ -17,6 +17,9 @@
  *   only applies when a script has set data-phase (flow) or
  *   data-reveal="armed" (cards). No script, or reduced motion, shows the
  *   finished picture; the reverse would leave blank boxes.
+ * - The first frame is already on screen when the run starts, so only a replay,
+ *   whose phone is new, fades it in. Fading it on the first run would drop what
+ *   the reader is looking at to nothing for a moment.
  * - The @media (prefers-reduced-motion: reduce) block at the end strips every
  *   animation and undoes data-phase. A new rule added without a line there
  *   still moves for people who asked it not to.
@@ -265,7 +268,7 @@ export const FEATURE_SHORTCUTS_CSS = `.fs-layout {
   opacity: 0;
   transition: opacity 300ms ${EASE};
 }
-.fs-flow[data-phase='live'] .fs-base {
+.fs-flow[data-phase='live'][data-replay] .fs-base {
   animation: fs-in 300ms ${EASE} both;
 }
 .fs-flow[data-phase='live'] .fs-row {

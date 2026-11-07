@@ -89,10 +89,11 @@ describe.each(SUPPORTED_LOCALES)('%s', (locale) => {
     const strings = JSON.parse(readFileSync('ios/App/App/Localizable.xcstrings', 'utf8')).strings
     const art = t.applePay.steps[1].art
     if (art.kind !== 'action') throw new Error('step 2 is the action')
-    const found = Object.values<{ localizations?: Record<string, { stringUnit?: { value?: string } }> }>(strings)
-      .some((entry) => Object.values(entry.localizations ?? {}).some((l) => l.stringUnit?.value === art.action))
-    const isSource = Object.keys(strings).includes(art.action)
-    expect(found || isSource, art.action).toBe(true)
+    const ios = { 'zh-TW': 'zh-Hant', 'zh-CN': 'zh-Hans', en: 'en', ja: 'ja' }[locale]
+    const names = Object.entries<{ localizations?: Record<string, { stringUnit?: { value?: string } }> }>(strings).map(
+      ([key, entry]) => entry.localizations?.[ios]?.stringUnit?.value ?? (ios === 'en' ? key : undefined),
+    )
+    expect(names, art.action).toContain(art.action)
     const doc = await render(locale)
     expect(doc.querySelector('.fs-action')!.textContent).toBe(art.action)
   })
@@ -167,6 +168,11 @@ describe('the example and the styles', () => {
 
   it('pauses over the animation shorthands, which reset play-state and outrank a plain rule', () => {
     expect(FEATURE_SHORTCUTS_CSS).toContain('animation-play-state: paused !important')
+  })
+
+  it('fades frame 1 in only on a replay: on the first run it is already showing', () => {
+    expect(FEATURE_SHORTCUTS_CSS).not.toContain(".fs-flow[data-phase='live'] .fs-base")
+    expect(FEATURE_SHORTCUTS_CSS).toContain(".fs-flow[data-phase='live'][data-replay] .fs-base")
   })
 
   it('keeps the action a label, not a button: sized to its words, on a light ground', () => {
