@@ -43,6 +43,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **捷徑記帳頁加開頭動畫和示意卡（#1921）**
+  使用者：`/features/shortcuts` 開頭用 5 秒內的動畫講完付款、打開填好的新增紀錄、自己按儲存，Apple Pay 三步和 LINE Pay 第一步各有示意卡。
+  技術：全部程式畫，樣式在新的 `feature-shortcuts-css.ts`，無 JS 和 reduced motion 看到靜止終幀；卡片標籤由測試綁住步驟內文。
+
 - **中文首頁加上雙平台上架影片（#1910）**
   使用者：繁體中文首頁的下載按鈕下方多一支 17 秒的上架短片，點了才播放；其他語言和 App 內不顯示。
   技術：`LaunchFilm` 進到可視範圍附近才掛上 `<video>`（`preload="none"`、手機寬度用 720p），殼內沿用 `data-native-shell` 隱藏；zh-TW 首頁加 VideoObject JSON-LD，規則集中在 `lib/launchFilm.ts`；proxy matcher 放行 `.mp4`／`.vtt`。

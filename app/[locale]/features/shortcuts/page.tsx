@@ -7,8 +7,13 @@ import { localizedHref } from '@/lib/i18n/path'
 import { BrandBreadcrumb } from '../../_components/BrandBreadcrumb'
 import { Phrase } from '../../_components/Phrase'
 import { s } from '../../_components/brand-inner'
+import type { ShortcutArt } from '@/lib/i18n/locales/zh-TW'
 import { UseCaseHero } from '../../use-case/_components/UseCaseHero'
+import { FEATURE_SHORTCUTS_CSS, fs } from './_components/feature-shortcuts-css'
 import { FeatureShortcutsJsonLd } from './_components/FeatureShortcutsJsonLd'
+import { ShortcutArtCard } from './_components/ShortcutArtCard'
+import { ShortcutFlow } from './_components/ShortcutFlow'
+import { ShortcutPhone } from './_components/ShortcutPhone'
 import { CATEGORY_IDS, appUrl, webUrl } from './_components/urls'
 
 type Params = Promise<{ locale: string }>
@@ -69,7 +74,7 @@ function Steps({
   code,
 }: {
   idPrefix: string
-  steps: readonly { title: string; body: string }[]
+  steps: readonly { title: string; body: string; art?: ShortcutArt }[]
   code?: { label: string; value: string }
 }) {
   return (
@@ -85,6 +90,7 @@ function Steps({
             {step.title}
           </h3>
           <p className="m-0 text-sm leading-[1.7] text-ink-2">{step.body}</p>
+          {step.art && <ShortcutArtCard art={step.art} />}
           {code && i === URL_STEP && <CodeBlock label={code.label} code={code.value} />}
         </li>
       ))}
@@ -99,10 +105,12 @@ export default async function FeatureShortcutsPage({ params }: { params: Params 
   const dict = dictionaries[locale]
   const t = dict.featureShortcuts
   const h2 = `${s.h2} m-0 text-xl md:text-title font-medium`
-  const { applePay, applePayUrl, linePay, web, params: p, whenNot, trouble } = t
+  const { applePay, applePayUrl, flow, linePay, web, params: p, whenNot, trouble } = t
+  const action = applePay.steps.flatMap((step) => (step.art.kind === 'action' ? [step.art.action] : []))[0]
 
   return (
     <div className={s.flow}>
+      <style dangerouslySetInnerHTML={{ __html: FEATURE_SHORTCUTS_CSS }} />
       <FeatureShortcutsJsonLd locale={locale} t={t} homeName="Futari" />
 
       <div className={s.hero}>
@@ -115,6 +123,23 @@ export default async function FeatureShortcutsPage({ params }: { params: Params 
         />
         <UseCaseHero kicker={t.heroKicker} title={t.heroTitle} subtitle={t.heroSubtitle} />
       </div>
+
+      <section id="flow" aria-label={flow.stepsLabel}>
+        <ShortcutFlow
+          phone={<ShortcutPhone locale={locale} action={action} />}
+          playLabel={dict.featureOuting.walkthrough.play}
+          steps={
+            <ol className={fs.steps}>
+              {flow.steps.map((step) => (
+                <li key={step} className={`${fs.step} text-base leading-[1.6] text-ink`}>
+                  <span className={fs.mark} />
+                  {step}
+                </li>
+              ))}
+            </ol>
+          }
+        />
+      </section>
 
       <section id="answer" className={s.band}>
         <h2 className={h2}>
@@ -133,6 +158,7 @@ export default async function FeatureShortcutsPage({ params }: { params: Params 
             idPrefix="step-"
             steps={applePay.steps}
           />
+          <p className="m-0 text-xs text-ink-3">{applePay.artNote}</p>
           <p className="m-0 text-sm leading-[1.7] text-ink-2">{applePay.foreignNote}</p>
           <p className="m-0 text-sm leading-[1.7] text-ink-2">{applePay.platformNote}</p>
         </div>
