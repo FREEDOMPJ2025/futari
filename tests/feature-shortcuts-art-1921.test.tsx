@@ -89,10 +89,11 @@ describe.each(SUPPORTED_LOCALES)('%s', (locale) => {
     const strings = JSON.parse(readFileSync('ios/App/App/Localizable.xcstrings', 'utf8')).strings
     const art = t.applePay.steps[1].art
     if (art.kind !== 'action') throw new Error('step 2 is the action')
-    const found = Object.values<{ localizations?: Record<string, { stringUnit?: { value?: string } }> }>(strings)
-      .some((entry) => Object.values(entry.localizations ?? {}).some((l) => l.stringUnit?.value === art.action))
-    const isSource = Object.keys(strings).includes(art.action)
-    expect(found || isSource, art.action).toBe(true)
+    const ios = { 'zh-TW': 'zh-Hant', 'zh-CN': 'zh-Hans', en: 'en', ja: 'ja' }[locale]
+    const names = Object.entries<{ localizations?: Record<string, { stringUnit?: { value?: string } }> }>(strings).map(
+      ([key, entry]) => entry.localizations?.[ios]?.stringUnit?.value ?? (ios === 'en' ? key : undefined),
+    )
+    expect(names, art.action).toContain(art.action)
     const doc = await render(locale)
     expect(doc.querySelector('.fs-action')!.textContent).toBe(art.action)
   })
@@ -104,6 +105,12 @@ describe.each(SUPPORTED_LOCALES)('%s', (locale) => {
     for (const card of cards) expect(card.getAttribute('aria-hidden')).toBe('true')
     expect(doc.getElementById('apple-pay')!.textContent).toContain(t.applePay.artNote)
     expect(doc.querySelectorAll('#apple-pay-url .fs-card')).toHaveLength(0)
+  })
+
+  it('draws step 2 as a search field: a magnifier before the word, no extra text', async () => {
+    const search = (await render(locale)).querySelector('#step-2 .fs-search')!
+    expect(search.querySelector('svg')!.getAttribute('aria-hidden')).toBe('true')
+    expect(search.textContent).toBe('Futari')
   })
 
   it('shows LINE Pay only where the section exists', async () => {
@@ -161,7 +168,25 @@ describe('the example and the styles', () => {
 
   it('has no infinite loop, and the timeline ends inside 5 s', () => {
     expect(FEATURE_SHORTCUTS_CSS).not.toContain('infinite')
-    expect(FEATURE_SHORTCUTS_CSS).toContain('300ms cubic-bezier(0.22, 1, 0.36, 1) 4400ms')
+    expect(FEATURE_SHORTCUTS_CSS).toContain('300ms cubic-bezier(0.22, 1, 0.36, 1) 4100ms')
+    expect(FEATURE_SHORTCUTS_CSS.match(/fs-mark\d 4600ms/g)).toHaveLength(3)
+  })
+
+  it('pauses over the animation shorthands, which reset play-state and outrank a plain rule', () => {
+    expect(FEATURE_SHORTCUTS_CSS).toContain('animation-play-state: paused !important')
+  })
+
+  it('fades frame 1 in only on a replay: on the first run it is already showing', () => {
+    expect(FEATURE_SHORTCUTS_CSS).not.toContain(".fs-flow[data-phase='live'] .fs-base")
+    expect(FEATURE_SHORTCUTS_CSS).toContain(".fs-flow[data-phase='live'][data-replay] .fs-base")
+  })
+
+  it('keeps the action a label, not a button: sized to its words, on a light ground', () => {
+    const rule = FEATURE_SHORTCUTS_CSS.match(/\.fs-action \{[^}]*\}/)![0]
+    expect(rule).toContain('background: var(--surface)')
+    expect(rule).toContain('width: max-content')
+    const rise = FEATURE_SHORTCUTS_CSS.match(/@keyframes fs-rise \{[\s\S]*?\n\}/)![0]
+    expect(rise.match(/-50%/g)).toHaveLength(2)
   })
 
   it('ends with the reduced-motion block, which undoes every phase', () => {

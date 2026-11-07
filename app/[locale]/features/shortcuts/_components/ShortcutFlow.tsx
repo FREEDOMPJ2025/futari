@@ -33,7 +33,8 @@ export function ShortcutFlow({ phone, steps, playLabel }: { phone: ReactNode; st
   useEffect(() => {
     const el = ref.current
     if (!el || typeof IntersectionObserver === 'undefined') return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (reduced.matches) return
     const timers: ReturnType<typeof setTimeout>[] = []
     let first = true
     const io = new IntersectionObserver(
@@ -53,8 +54,19 @@ export function ShortcutFlow({ phone, steps, playLabel }: { phone: ReactNode; st
       },
       { threshold: 0.5 },
     )
+    // Turned on part-way: the CSS already shows the last frame, and a run that never ends would
+    // leave the phase and the play button out of step with it.
+    const stop = () => {
+      if (!reduced.matches) return
+      io.disconnect()
+      timers.forEach(clearTimeout)
+      setOffScreen(false)
+      setPhase('rest')
+    }
+    reduced.addEventListener('change', stop)
     io.observe(el)
     return () => {
+      reduced.removeEventListener('change', stop)
       io.disconnect()
       timers.forEach(clearTimeout)
     }
@@ -67,16 +79,19 @@ export function ShortcutFlow({ phone, steps, playLabel }: { phone: ReactNode; st
       className={`${fs.flow} ${fs.layout}`}
       data-phase={dataPhase}
       data-paused={phase === 'live' && offScreen ? '' : undefined}
+      data-replay={run > 0 ? '' : undefined}
+      onAnimationEnd={(e) => {
+        // The last thing on the timeline, so the button comes when the whole of it is over.
+        if (e.animationName === 'fs-mark3') setPhase('done')
+      }}
     >
-      <div className={fs.phoneWrap}>
+      {/* The observer stays on this one: `key` swaps the phone below on every replay, and an observed
+          element that leaves the page reports off-screen for good. */}
+      <div ref={ref} className={fs.phoneWrap}>
         <div
           key={run}
-          ref={ref}
           className={fs.phone}
           aria-hidden="true"
-          onAnimationEnd={(e) => {
-            if (e.target instanceof HTMLElement && e.target.classList.contains(fs.ring)) setPhase('done')
-          }}
         >
           {phone}
         </div>

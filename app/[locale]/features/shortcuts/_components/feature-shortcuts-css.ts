@@ -8,13 +8,18 @@
  *
  * Motion rules (PRODUCT.md / DESIGN.md): transform and opacity only,
  * cubic-bezier(0.22, 1, 0.36, 1), at most 600 ms for any one move, nothing
- * bounces, nothing loops. The timeline is 4.9 s in all and runs once.
+ * bounces, nothing loops. The timeline is 4.6 s and runs once; with the 300 ms
+ * fade in front of it a page that opens with this in view moves for 4.9 s, under
+ * the 5 s that would call for a pause control (WCAG 2.2.2).
  *
  * Two failure modes this file is built around, both silent:
  * - The resting state of every animated element is its FINAL frame. Motion
  *   only applies when a script has set data-phase (flow) or
  *   data-reveal="armed" (cards). No script, or reduced motion, shows the
  *   finished picture; the reverse would leave blank boxes.
+ * - The first frame is already on screen when the run starts, so only a replay,
+ *   whose phone is new, fades it in. Fading it on the first run would drop what
+ *   the reader is looking at to nothing for a moment.
  * - The @media (prefers-reduced-motion: reduce) block at the end strips every
  *   animation and undoes data-phase. A new rule added without a line there
  *   still moves for people who asked it not to.
@@ -49,6 +54,8 @@ export const FS_NAMES = [
   'row',
   'rule',
   'save',
+  'search',
+  'searchIcon',
   'sheet',
   'sheetBar',
   'sheetBody',
@@ -131,14 +138,17 @@ export const FEATURE_SHORTCUTS_CSS = `.fs-ref {
 }
 .fs-action {
   position: absolute;
-  left: 20px;
-  right: 20px;
+  left: 50%;
   bottom: 40px;
-  padding: 10px 12px;
+  width: max-content;
+  max-width: calc(100% - 40px);
+  padding: 10px 14px;
+  border: 1px solid var(--hairline);
   border-radius: 999px;
-  background: var(--ink);
-  color: var(--on-fill);
+  background: var(--surface);
+  color: var(--ink);
   text-align: center;
+  transform: translateX(-50%);
 }
 .fs-sheet {
   position: absolute;
@@ -270,42 +280,41 @@ export const FEATURE_SHORTCUTS_CSS = `.fs-ref {
   opacity: 0;
   transition: opacity 300ms ${EASE};
 }
-.fs-flow[data-phase='live'] .fs-base {
+.fs-flow[data-phase='live'][data-replay] .fs-base {
   animation: fs-in 300ms ${EASE} both;
 }
 .fs-flow[data-phase='live'] .fs-row {
-  animation: fs-dim 400ms ${EASE} 1500ms both;
+  animation: fs-dim 400ms ${EASE} 1200ms both;
 }
 .fs-flow[data-phase='live'] .fs-action {
-  animation: fs-rise 400ms ${EASE} 1500ms both;
+  animation: fs-rise 400ms ${EASE} 1200ms both;
 }
 .fs-flow[data-phase='live'] .fs-sheet {
-  animation: fs-sheet 500ms ${EASE} 2900ms both;
+  animation: fs-sheet 500ms ${EASE} 2600ms both;
 }
 .fs-flow[data-phase='live'] .fs-amount > * {
-  animation: fs-in 300ms ${EASE} 3400ms both;
+  animation: fs-in 300ms ${EASE} 3100ms both;
 }
 .fs-flow[data-phase='live'] .fs-desc > * {
-  animation: fs-in 300ms ${EASE} 3600ms both;
+  animation: fs-in 300ms ${EASE} 3300ms both;
 }
 .fs-flow[data-phase='live'] .fs-field {
-  animation: fs-in 300ms ${EASE} 3800ms both;
+  animation: fs-in 300ms ${EASE} 3500ms both;
 }
 .fs-flow[data-phase='live'] .fs-ring {
-  animation: fs-in 300ms ${EASE} 4400ms both;
+  animation: fs-in 300ms ${EASE} 4100ms both;
 }
 .fs-flow[data-phase='live'] .fs-step:nth-child(1) .fs-mark {
-  animation: fs-mark1 4900ms linear both;
+  animation: fs-mark1 4600ms linear both;
 }
 .fs-flow[data-phase='live'] .fs-step:nth-child(2) .fs-mark {
-  animation: fs-mark2 4900ms linear both;
+  animation: fs-mark2 4600ms linear both;
 }
 .fs-flow[data-phase='live'] .fs-step:nth-child(3) .fs-mark {
-  animation: fs-mark3 4900ms linear both;
+  animation: fs-mark3 4600ms linear both;
 }
-.fs-flow[data-paused] *,
-.fs-flow[data-paused] *::after {
-  animation-play-state: paused;
+.fs-flow[data-paused] * {
+  animation-play-state: paused !important;
 }
 @keyframes fs-in {
   from { opacity: 0; }
@@ -316,8 +325,8 @@ export const FEATURE_SHORTCUTS_CSS = `.fs-ref {
   to { opacity: 0.4; }
 }
 @keyframes fs-rise {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; transform: translate(-50%, 16px); }
+  to { opacity: 1; transform: translateX(-50%); }
 }
 @keyframes fs-sheet {
   from { opacity: 0; transform: translateY(40px); }
@@ -325,21 +334,21 @@ export const FEATURE_SHORTCUTS_CSS = `.fs-ref {
 }
 @keyframes fs-mark1 {
   0% { opacity: 0; }
-  6% { opacity: 1; }
-  59% { opacity: 1; }
-  65% { opacity: 0; }
+  6.5% { opacity: 1; }
+  56.5% { opacity: 1; }
+  63% { opacity: 0; }
   100% { opacity: 0; }
 }
 @keyframes fs-mark2 {
-  0%, 59% { opacity: 0; }
-  65% { opacity: 1; }
-  90% { opacity: 1; }
-  96% { opacity: 0; }
+  0%, 56.5% { opacity: 0; }
+  63% { opacity: 1; }
+  89.1% { opacity: 1; }
+  95.7% { opacity: 0; }
   100% { opacity: 0; }
 }
 @keyframes fs-mark3 {
-  0%, 90% { opacity: 0; }
-  96% { opacity: 1; }
+  0%, 89.1% { opacity: 0; }
+  95.7% { opacity: 1; }
   100% { opacity: 1; }
 }
 .fs-card {
@@ -362,6 +371,18 @@ export const FEATURE_SHORTCUTS_CSS = `.fs-ref {
 }
 .fs-cardTitle {
   color: var(--ink);
+}
+.fs-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 400;
+}
+.fs-searchIcon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--ink-3);
 }
 .fs-cardRow {
   position: relative;

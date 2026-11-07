@@ -14,8 +14,9 @@ const SAMPLE_CATEGORY = 'dining'
  * in that order so the last frame is the resting one. The sheet mirrors
  * AddSheet.tsx from the top: cancel, title, save as a text button in the header
  * bar, then amount, description, category. Its words are the app's own
- * (`addSheet`, `common`, `category`). Payer, split and date are left out: solo
- * ledgers have no payer toggle, and the other two sit below the frame.
+ * (`addSheet`, `common`, `category`). The date's label shows there is more below
+ * the frame. Payer and split are left out: solo ledgers have no payer toggle, and
+ * split sits below the frame.
  */
 export function ShortcutPhone({ locale, action }: { locale: Locale; action: string }) {
   const dict = dictionaries[locale]
@@ -68,6 +69,7 @@ export function ShortcutPhone({ locale, action }: { locale: Locale; action: stri
                 </span>
               ))}
             </div>
+            <p className={`${fs.label} px-5 pt-4 text-xs`}>{dict.addSheet.date}</p>
           </div>
         </div>
       </div>
