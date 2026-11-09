@@ -51,6 +51,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：新結算紀錄採用結束旅行者的語系，伴侶即使使用不同語系也會看到結束者的語言，舊紀錄維持不變。
   技術：兩個結束旅行的入口從 request locale 取得四語文案，旅行名稱去除前後空白，空白名稱使用未命名旅行的結算文案。
 
+- **簡單記帳搬遷頁第一屏直接回答「永久 VIP 怎麼辦」（#1926）**
+  使用者：繁體中文的簡單記帳搬遷頁換了標題和副標，建立帳號的區塊移到第一屏後面；其他搬遷頁和語言不變。
+  技術：`howToName`／`howToDescription` 讓 HowTo JSON-LD 維持原標題與說明，順序調整只對 zh-TW 的 `simple-daily-money`；`contentUpdatedAt` 與內容 hash snapshot 一併更新。
+
 ## [1.9.2] - 2026-11-04
 
 主題：**Android App 上架 Google Play**——網站的 Android 下載入口改連 Google Play，首頁有上架公告；捷徑教學改教「Futari 記一筆」動作；服務條款與隱私權政策對齊現況；repo 搬家，專案改名 Futari。
