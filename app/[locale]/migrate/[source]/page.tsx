@@ -74,6 +74,19 @@ export default async function MigrateSourcePage({ params }: { params: Params }) 
   const page = t.pages[slug]
   const signInHref = localizedHref('/sign-in', locale)
 
+  // #1926: only the zh-TW simple-daily-money page answers "what about my
+  // lifetime VIP" in the hero, so its CTA follows straight after the hero.
+  const ctaFirst = slug === 'simple-daily-money' && locale === 'zh-TW'
+  const primaryCta = (
+    <MigratePrimaryCta
+      title={t.primaryCta.title}
+      body={t.primaryCta.body}
+      button={t.primaryCta.button}
+      signInHref={signInHref}
+      source={slug}
+    />
+  )
+
   // spendee: CSV format hint injected inside step 1
   const step1Content =
     page.formatHintLabel ? (
@@ -138,8 +151,8 @@ export default async function MigrateSourcePage({ params }: { params: Params }) 
       <MigrateHowToJsonLd
         locale={locale}
         source={slug}
-        name={page.heroTitle}
-        description={page.heroSubtitle}
+        name={page.howToName ?? page.heroTitle}
+        description={page.howToDescription ?? page.heroSubtitle}
         steps={[page.step1, page.step2, page.step3]}
         stepName={t.howToStepName}
       />
@@ -156,6 +169,8 @@ export default async function MigrateSourcePage({ params }: { params: Params }) 
         <LightRibbon />
       </div>
 
+      {ctaFirst && primaryCta}
+
       {page.intro && <MigrateIntroCallout text={page.intro} />}
 
       <MigrateDifferentiators heading={t.differentiatorsHeading} items={page.differentiators} />
@@ -163,13 +178,7 @@ export default async function MigrateSourcePage({ params }: { params: Params }) 
       {/* The ask sits right after the reason to believe and ahead of every
        *  migration mechanic (#1011) — /migrate/* is a search landing page, and
        *  the walkthrough below is a bonus route, not the reason to be here. */}
-      <MigratePrimaryCta
-        title={t.primaryCta.title}
-        body={t.primaryCta.body}
-        button={t.primaryCta.button}
-        signInHref={signInHref}
-        source={slug}
-      />
+      {!ctaFirst && primaryCta}
 
       <MigrateSteps
         heading={page.stepsHeading}

@@ -7,6 +7,10 @@ export type MigrateBasePageCopy = {
   heroKicker: string
   heroTitle: string
   heroSubtitle: string
+  /** HowTo JSON-LD name/description when they must differ from the visible
+   *  hero (#1926). Absent → HowTo uses heroTitle/heroSubtitle. */
+  howToName?: string
+  howToDescription?: string
   /** Objective background paragraph rendered above differentiators. */
   intro?: string
   differentiators: readonly [
@@ -6567,8 +6571,11 @@ export const zhTW: Translations = {
       },
       'simple-daily-money': {
         heroKicker: 'SIMPLE DAILY MONEY → FUTARI',
-        heroTitle: '你的簡單記帳資料，可以帶走',
-        heroSubtitle: '簡單記帳的 CSV 匯出是 VIP 功能；不想為了搬家先付費，用截圖請 ChatGPT 整理成 CSV，一樣能把記錄搬到 Futari。',
+        heroTitle: '簡單記帳的永久 VIP 帶不走，記錄帶得走',
+        heroSubtitle: '那筆 VIP 是在簡單記帳裡買的，只能在簡單記帳用，換到哪個 App 都一樣。Futari 目前完全免費，記帳、雙人分攤、雲端同步和 CSV 匯出匯入都不用解鎖；舊記錄不必先買 VIP 匯出，用截圖就能搬過來。',
+        // JSON-LD HowTo keeps the pre-#1926 title/description (decision on #1926).
+        howToName: '你的簡單記帳資料，可以帶走',
+        howToDescription: '簡單記帳的 CSV 匯出是 VIP 功能；不想為了搬家先付費，用截圖請 ChatGPT 整理成 CSV，一樣能把記錄搬到 Futari。',
         intro: '簡單記帳（SMoney）是 CMoney 集團旗下的人氣記帳 App，更新活躍、評價也好。不過它的共享帳本一次只能邀請一位，而且共享頁面只能查看、不能一起編輯；CSV 匯出則屬於 VIP 訂閱功能。想要兩個人都能動手記的同一本帳，下面是搬家的路。',
         differentiators: [
           {

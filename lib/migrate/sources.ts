@@ -242,7 +242,7 @@ export const MIGRATE_SOURCES = {
   'simple-daily-money': {
     slug: 'simple-daily-money',
     name: '簡單記帳',
-    contentUpdatedAt: '2026-10-26',
+    contentUpdatedAt: '2026-11-09',
     screenshotWorkflow: true,
     comparison: {
       rows: [
