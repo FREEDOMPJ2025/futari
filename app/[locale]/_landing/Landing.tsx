@@ -24,7 +24,7 @@ import { AppStoreBadge } from './AppStoreBadge'
 import { LaunchFilm } from './LaunchFilm'
 import { showsLaunchFilm } from '@/lib/launchFilm'
 import type { Locale } from '@/lib/i18n/locales-meta'
-import { landingPrePaintScript } from '@/lib/playLaunch'
+import { HIDDEN_IN_APP, landingPrePaintScript } from '@/lib/playLaunch'
 import { TrustSection } from './TrustSection'
 import { Phrase } from '../_components/Phrase'
 import { phraseHtml } from '@/lib/i18n/phrase'
@@ -299,10 +299,10 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
                 left, Google Play right. iPhone/iPad: App Store only. Android:
                 Google Play only. Chosen pre-paint from `data-visitor-platform`
                 (lib/playLaunch.ts); the whole row, gap included, is hidden in
-                the native shells. The Taiwan-only hint appears only under the
+                the native shells and installed PWAs (`HIDDEN_IN_APP`). The Taiwan-only hint appears only under the
                 main CTA above, not under the badges (#1905). Trademark lines:
                 footer. */}
-            <div className="mt-4 flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 [html[data-native-shell]_&]:hidden">
+            <div className={`mt-4 flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 ${HIDDEN_IN_APP}`}>
               <AppStoreBadge locale={locale} alt={t.appStoreBadgeAlt} />
               <PlayStoreBadge locale={locale} alt={t.playBadgeAlt} />
             </div>
@@ -490,9 +490,9 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
           </div>
           {/* #1901 / #1930 — Google's and Apple's attribution for the store
               badges in the hero; English in every locale. Hidden with the
-              badges in the native shells (no store mention inside the apps,
+              badges in the native shells and installed PWAs (no store mention inside the apps,
               Apple 2.3.10 / 3.1.1). */}
-          <div className="flex flex-col gap-1 [html[data-native-shell]_&]:hidden">
+          <div className={`flex flex-col gap-1 ${HIDDEN_IN_APP}`}>
             <p lang="en" className="m-0 text-xs text-ink-3 text-center md:text-right">
               {t.playTrademark}
             </p>

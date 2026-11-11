@@ -4,7 +4,9 @@ import Image from 'next/image'
 import type { Locale } from '@/lib/i18n/locales-meta'
 import { track } from '@/lib/analytics/track'
 import { APP_STORE_BADGE_URL } from '@/lib/visitorPlatform'
+import { HIDDEN_IN_APP } from '@/lib/playLaunch'
 import { useMarkNativeShell } from '@/lib/useMarkNativeShell'
+import { useMarkStandalone } from '@/lib/useMarkStandalone'
 import { useMarkVisitorPlatform } from '@/lib/useMarkVisitorPlatform'
 
 /** Apple's official black "Download on the App Store" badge, one per locale,
@@ -40,11 +42,12 @@ interface Props {
  */
 export function AppStoreBadge({ locale, alt, className }: Props) {
   useMarkNativeShell()
+  useMarkStandalone()
   useMarkVisitorPlatform()
 
   return (
     <div
-      className={`[html[data-native-shell]_&]:hidden [html[data-visitor-platform=android]_&]:hidden ${className ?? ''}`.trim()}
+      className={`${HIDDEN_IN_APP} [html[data-visitor-platform=android]_&]:hidden ${className ?? ''}`.trim()}
     >
       <a
         href={APP_STORE_BADGE_URL}

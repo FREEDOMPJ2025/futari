@@ -4,7 +4,9 @@ import Image from 'next/image'
 import type { Locale } from '@/lib/i18n/locales-meta'
 import { track } from '@/lib/analytics/track'
 import { PLAY_STORE_URL } from '@/lib/visitorPlatform'
+import { HIDDEN_IN_APP } from '@/lib/playLaunch'
 import { useMarkNativeShell } from '@/lib/useMarkNativeShell'
+import { useMarkStandalone } from '@/lib/useMarkStandalone'
 import { useMarkVisitorPlatform } from '@/lib/useMarkVisitorPlatform'
 
 /** en file only (ja / zh files have no side padding): cancel Google's
@@ -51,11 +53,12 @@ interface Props {
  */
 export function PlayStoreBadge({ locale, alt, className }: Props) {
   useMarkNativeShell()
+  useMarkStandalone()
   useMarkVisitorPlatform()
 
   return (
     <div
-      className={`[html[data-native-shell]_&]:hidden [html[data-visitor-platform=ios]_&]:hidden ${locale === 'en' ? NEXT_TO_APP_STORE_EN : ''} ${className ?? ''}`.trim()}
+      className={`${HIDDEN_IN_APP} [html[data-visitor-platform=ios]_&]:hidden ${locale === 'en' ? NEXT_TO_APP_STORE_EN : ''} ${className ?? ''}`.trim()}
     >
       <a
         href={PLAY_STORE_URL}

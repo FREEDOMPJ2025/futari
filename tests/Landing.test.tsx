@@ -184,6 +184,10 @@ describe('Landing — SSR CTAs work without JS (#1521)', () => {
     expect(appAnchors.length).toBe(1)
     expect(appAnchors[0].getAttribute('href')).toContain('ct=landing-badge')
     for (const a of appAnchors) expect(hiddenInShell(a)).toBe(true)
+    // Raw count over the whole server HTML (attributes, JSON-LD, meta, preload,
+    // plain text), so a stray App Store mention outside the badge turns red.
+    // Measured 2026-11-11: only the badge href.
+    expect(html.split('apps.apple.com').length - 1).toBe(1)
   })
 })
 

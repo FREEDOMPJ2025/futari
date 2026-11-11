@@ -44,6 +44,24 @@ export const PLAY_LAUNCH_BANNER_DISMISS_KEY = 'futari_play_launch_banner_dismiss
 
 /** `<html>` attribute set when running inside either Capacitor shell. */
 export const NATIVE_SHELL_ATTR = 'data-native-shell'
+/**
+ * `<html>` attribute set when the page runs as an installed PWA
+ * (`display-mode: standalone`, or iOS's legacy `navigator.standalone`), #1930.
+ * Separate from `data-native-shell` on purpose: that one also drives the Play
+ * banner and /android-beta, which must not change for PWA users.
+ */
+export const STANDALONE_ATTR = 'data-standalone'
+
+/**
+ * Hides an element inside either native shell AND inside an installed PWA
+ * (#1930 spec: no store badge or store trademark line inside any app). Used on
+ * the hero badge row, each badge wrapper and the footer trademark lines; one
+ * place to change. Kept as one literal string so Tailwind sees both variants.
+ * Failure looks like: the App Store badge and Apple's trademark line showing
+ * on a home-screen PWA on iPhone, with no error anywhere.
+ */
+export const HIDDEN_IN_APP = '[html[data-native-shell]_&]:hidden [html[data-standalone]_&]:hidden'
+
 /** `<html>` attribute set when the banner should not show (dismissed or expired). */
 export const PLAY_BANNER_OFF_ATTR = 'data-play-banner-off'
 
@@ -100,6 +118,9 @@ export function isInNativeShell(): boolean {
  *   first script on the page, before `Capacitor` itself may be.
  * - `webkit.messageHandlers.bridge` — Capacitor iOS's message handler, likewise
  *   registered natively before any page script runs.
+ * Installed PWA (`data-standalone`): same check as `isStandalone`
+ * (lib/install-guide.ts), in its own try/catch so a throwing `matchMedia`
+ * can't skip the rest. Never sets `data-native-shell`.
  * Visitor platform: same rule as `classifyBrowserPlatform`
  * (lib/visitorPlatform.ts), written out in ES5 here; keep the two in step.
  * Wrapped in try/catch: a throwing script must never break the page.
@@ -110,6 +131,8 @@ export function landingPrePaintScript(endsAt: number = playLaunchBannerEndsAt())
     'if((c&&c.isNativePlatform&&c.isNativePlatform())||w.androidBridge||' +
     '(w.webkit&&w.webkit.messageHandlers&&w.webkit.messageHandlers.bridge))' +
     `d.setAttribute('${NATIVE_SHELL_ATTR}','');` +
+    "try{if((w.matchMedia&&w.matchMedia('(display-mode: standalone)').matches)||w.navigator.standalone===true)" +
+    `d.setAttribute('${STANDALONE_ATTR}','')}catch(e){}` +
     `var off=Date.now()>=${endsAt};` +
     `try{if(localStorage.getItem('${PLAY_LAUNCH_BANNER_DISMISS_KEY}'))off=true}catch(e){}` +
     `if(off)d.setAttribute('${PLAY_BANNER_OFF_ATTR}','');` +
