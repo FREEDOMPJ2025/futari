@@ -189,6 +189,12 @@ export type Translations = {
     /** Google's trademark attribution, required on any page showing the badge.
      *  English in every locale on purpose (Google's wording); don't translate. */
     playTrademark: string
+    /** Alt text of the official App Store badge image (#1930): the words
+     *  printed on that locale's badge, verbatim — not a translation of ours. */
+    appStoreBadgeAlt: string
+    /** Apple's trademark attribution for the App Store badge (#1930).
+     *  English in every locale on purpose, like `playTrademark`; don't translate. */
+    appStoreTrademark: string
     /** Dismissible launch banner at the top of the landing (#1901). `text` is
      *  plain, `link` is the Play link that follows it, `closeAria` labels the ✕.
      *  Shown until `PLAY_LAUNCH_BANNER_LAST_DAY` (lib/playLaunchBanner.ts). */
@@ -3702,6 +3708,8 @@ export const zhTW: Translations = {
     playStoreCtaHint: '目前只在台灣上架',
     playBadgeAlt: 'Google Play 立即下載',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
+    appStoreBadgeAlt: 'App Store 下載',
+    appStoreTrademark: 'App Store is a service mark of Apple Inc., registered in the U.S. and other countries.',
     launchBanner: {
       text: 'Futari 的 Android App 上架了！',
       link: '到 Google Play 下載',

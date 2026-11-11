@@ -168,7 +168,6 @@ describe('Landing — SSR CTAs work without JS (#1521)', () => {
       expect(a.className).not.toMatch(/pointer-events-none|opacity-0|text-transparent/)
       expect(a.innerHTML).not.toMatch(/text-transparent/)
     }
-    expect(html).not.toContain('apps.apple.com')
     expect(html).not.toContain('groups.google.com')
     expect(html).not.toContain('android-beta')
     // #1901: the Play badge and launch banner are server-rendered (no layout
@@ -179,6 +178,16 @@ describe('Landing — SSR CTAs work without JS (#1521)', () => {
     const hiddenInShell = (el: Element | null): boolean =>
       !!el && (el.className.includes('[html[data-native-shell]_&]:hidden') || hiddenInShell(el.parentElement))
     for (const a of playAnchors) expect(hiddenInShell(a)).toBe(true)
+    // #1930: same for the App Store badge, the only apps.apple.com link in the
+    // SSR HTML (the main CTA is the sign-in link until the platform resolves).
+    const appAnchors = [...doc.querySelectorAll('a[href*="apps.apple.com"]')]
+    expect(appAnchors.length).toBe(1)
+    expect(appAnchors[0].getAttribute('href')).toContain('ct=landing-badge')
+    for (const a of appAnchors) expect(hiddenInShell(a)).toBe(true)
+    // Raw count over the whole server HTML (attributes, JSON-LD, meta, preload,
+    // plain text), so a stray App Store mention outside the badge turns red.
+    // Measured 2026-11-11: only the badge href.
+    expect(html.split('apps.apple.com').length - 1).toBe(1)
   })
 })
 
