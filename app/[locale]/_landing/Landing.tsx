@@ -20,6 +20,7 @@ import { LandingStandaloneRedirect } from './LandingStandaloneRedirect'
 import { PhonePreview } from './PhonePreview'
 import { PlayLaunchBanner } from './PlayLaunchBanner'
 import { PlayStoreBadge } from './PlayStoreBadge'
+import { AppStoreBadge } from './AppStoreBadge'
 import { LaunchFilm } from './LaunchFilm'
 import { showsLaunchFilm } from '@/lib/launchFilm'
 import type { Locale } from '@/lib/i18n/locales-meta'
@@ -293,17 +294,18 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
               </LandingSecondaryCta>
             </div>
 
-            {/* #1901 — official Google Play badge alongside the store CTA
-                above (which is the App Store button on iPhone/iPad). Every
-                browser sees it, so desktop visitors get a way to Android too;
-                hidden pre-paint in the native shells. The Taiwan-only hint
-                appears only under the main CTA above, not under the badge
-                (#1905). Trademark line: footer. */}
-            <PlayStoreBadge
-              locale={locale}
-              alt={t.playBadgeAlt}
-              className="mt-4 flex flex-col items-center md:items-start gap-1"
-            />
+            {/* #1930 — official store badges under the CTA cluster (#1901
+                added the Play badge). Desktop and other browsers: App Store
+                left, Google Play right. iPhone/iPad: App Store only. Android:
+                Google Play only. Chosen pre-paint from `data-visitor-platform`
+                (lib/playLaunch.ts); the whole row, gap included, is hidden in
+                the native shells. The Taiwan-only hint appears only under the
+                main CTA above, not under the badges (#1905). Trademark lines:
+                footer. */}
+            <div className="mt-4 flex flex-wrap items-center justify-center md:justify-start gap-3 [html[data-native-shell]_&]:hidden">
+              <AppStoreBadge locale={locale} alt={t.appStoreBadgeAlt} />
+              <PlayStoreBadge locale={locale} alt={t.playBadgeAlt} />
+            </div>
 
             {/* #1910 — launch film under the CTA cluster, zh-TW only (the film
                 is Chinese only). Always shown (not tied to the launch banner);
@@ -486,12 +488,18 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
               © 2026 · MADE IN TAIWAN
             </span>
           </div>
-          {/* #1901 — Google's required attribution for the Play badge in the
-              hero; English in every locale. Hidden with the badge in the
-              native shells (no Play mention inside the iOS app, Apple 2.3.10). */}
-          <p lang="en" className="[html[data-native-shell]_&]:hidden m-0 text-xs text-ink-3 text-center md:text-right">
-            {t.playTrademark}
-          </p>
+          {/* #1901 / #1930 — Google's and Apple's attribution for the store
+              badges in the hero; English in every locale. Hidden with the
+              badges in the native shells (no store mention inside the apps,
+              Apple 2.3.10 / 3.1.1). */}
+          <div className="flex flex-col gap-1 [html[data-native-shell]_&]:hidden">
+            <p lang="en" className="m-0 text-xs text-ink-3 text-center md:text-right">
+              {t.playTrademark}
+            </p>
+            <p lang="en" className="m-0 text-xs text-ink-3 text-center md:text-right">
+              {t.appStoreTrademark}
+            </p>
+          </div>
         </div>
       </footer>
     </main>

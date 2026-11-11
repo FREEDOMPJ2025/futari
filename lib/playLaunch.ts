@@ -18,11 +18,19 @@
  * effect (`isPlayLaunchBannerOff`, `isInNativeShell`) for client-side
  * navigation back to the landing.
  *
+ * Since #1930 the script also writes `data-visitor-platform` (ios / android /
+ * other, `classifyBrowserPlatform` in lib/visitorPlatform.ts) so the hero
+ * shows only the App Store badge on iOS, only the Play badge on Android, and
+ * both elsewhere, again before first paint (`useMarkVisitorPlatform` repeats
+ * it on client-side navigation).
+ *
  * Failure looks like: the banner appearing for a split second and the page
  * jumping up when it vanishes (script not running before the banner), or the
  * Play badge showing inside the iOS app (shell signal not detected) — no error
  * anywhere; the second one surfaces only in App Review.
  */
+
+import { VISITOR_PLATFORM_ATTR } from '@/lib/visitorPlatform'
 
 /**
  * Last day (Asia/Taipei) the launch banner is shown: two weeks after the
@@ -92,6 +100,8 @@ export function isInNativeShell(): boolean {
  *   first script on the page, before `Capacitor` itself may be.
  * - `webkit.messageHandlers.bridge` — Capacitor iOS's message handler, likewise
  *   registered natively before any page script runs.
+ * Visitor platform: same rule as `classifyBrowserPlatform`
+ * (lib/visitorPlatform.ts), written out in ES5 here; keep the two in step.
  * Wrapped in try/catch: a throwing script must never break the page.
  */
 export function landingPrePaintScript(endsAt: number = playLaunchBannerEndsAt()): string {
@@ -102,6 +112,9 @@ export function landingPrePaintScript(endsAt: number = playLaunchBannerEndsAt())
     `d.setAttribute('${NATIVE_SHELL_ATTR}','');` +
     `var off=Date.now()>=${endsAt};` +
     `try{if(localStorage.getItem('${PLAY_LAUNCH_BANNER_DISMISS_KEY}'))off=true}catch(e){}` +
-    `if(off)d.setAttribute('${PLAY_BANNER_OFF_ATTR}','')}catch(e){}})()`
+    `if(off)d.setAttribute('${PLAY_BANNER_OFF_ATTR}','');` +
+    'var n=w.navigator,ua=(n.userAgent||"").toLowerCase(),' +
+    "p=/iphone|ipad|ipod/.test(ua)||(/macintosh/.test(ua)&&n.maxTouchPoints>1)?'ios':/android/.test(ua)?'android':'other';" +
+    `d.setAttribute('${VISITOR_PLATFORM_ATTR}',p)}catch(e){}})()`
   )
 }

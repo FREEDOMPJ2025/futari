@@ -12,6 +12,13 @@
 
 export type VisitorPlatformTarget = 'dashboard' | 'sign_in' | 'app_store' | 'play_store'
 
+/** Browser platform for the hero store-badge row (#1930). */
+export type BadgePlatform = 'ios' | 'android' | 'other'
+
+/** `<html>` attribute holding the `BadgePlatform`, set pre-paint by the
+ *  landing script (`lib/playLaunch.ts`) and by `useMarkVisitorPlatform`. */
+export const VISITOR_PLATFORM_ATTR = 'data-visitor-platform'
+
 export interface ResolveVisitorPlatformInput {
   /** `navigator.userAgent`. */
   userAgent: string
@@ -37,6 +44,10 @@ export interface ResolveVisitorPlatformInput {
 // campaign once ≥5 distinct Apple accounts installed through it.
 export const APP_STORE_URL = 'https://apps.apple.com/app/id6779264784?pt=128976951&ct=landing&mt=8'
 
+/** #1930 — same link for the App Store badge in the hero, under its own ASC
+ *  campaign (`ct=landing-badge`) so the badge and the main CTA count apart. */
+export const APP_STORE_BADGE_URL = APP_STORE_URL.replace('ct=landing&', 'ct=landing-badge&')
+
 // #1901 — Android 1.9.0 is live on Google Play (production track, Taiwan only,
 // since 2026-11-02). It replaces the #1648 closed-test join flow (Google Group
 // + Play opt-in page). This is the one URL every Android "download" link uses:
@@ -53,6 +64,20 @@ export const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=dev
  *  Since #1901 it is the "closed testing is over, the app is on Play" page,
  *  kept (not redirected) so links shared during the test still make sense. */
 export const ANDROID_BETA_PATH = '/android-beta'
+
+/**
+ * iPhone / iPad / iPod → ios, Android → android, everything else → other.
+ * iPadOS 13+ reports as Macintosh in the UA string; touch points disambiguate
+ * it from a real Mac (same heuristic as `lib/install-guide.ts#getPlatform`).
+ * The landing's pre-paint script (`lib/playLaunch.ts`) inlines the same rule;
+ * keep the two in step.
+ */
+export function classifyBrowserPlatform(userAgent: string, maxTouchPoints: number): BadgePlatform {
+  const ua = userAgent.toLowerCase()
+  if (/iphone|ipad|ipod/.test(ua) || (/macintosh/.test(ua) && maxTouchPoints > 1)) return 'ios'
+  if (/android/.test(ua)) return 'android'
+  return 'other'
+}
 
 /**
  * Which primary-CTA variant a visitor should see. Precedence:
@@ -75,13 +100,8 @@ export function resolveVisitorPlatform({
   if (hasSession) return 'dashboard'
   if (isCapacitor || isStandalone) return 'sign_in'
 
-  const ua = userAgent.toLowerCase()
-  // iPadOS 13+ reports as Macintosh in the UA string; touch points disambiguate
-  // it from a real Mac (same heuristic as `lib/install-guide.ts#getPlatform`).
-  const isIos = /iphone|ipad|ipod/.test(ua) || (/macintosh/.test(ua) && maxTouchPoints > 1)
-  if (isIos) return 'app_store'
-
-  if (/android/.test(ua)) return 'play_store'
-
+  const platform = classifyBrowserPlatform(userAgent, maxTouchPoints)
+  if (platform === 'ios') return 'app_store'
+  if (platform === 'android') return 'play_store'
   return 'sign_in'
 }

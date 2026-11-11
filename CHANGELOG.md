@@ -55,6 +55,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：繁體中文的簡單記帳搬遷頁換了標題和副標，建立帳號的區塊移到第一屏後面；其他搬遷頁和語言不變。
   技術：`howToName`／`howToDescription` 讓 HowTo JSON-LD 維持原標題與說明，順序調整只對 zh-TW 的 `simple-daily-money`；`contentUpdatedAt` 與內容 hash snapshot 一併更新。
 
+- **首頁加上 App Store 徽章，和 Google Play 徽章並排（#1930）**
+  使用者：電腦瀏覽器的首頁下載按鈕下方並排 App Store 與 Google Play 徽章；iPhone／iPad 只看到 App Store、Android 只看到 Google Play；App 內不顯示；頁尾多一行 Apple 商標說明。
+  技術：pre-paint script 在 `<html>` 標 `data-visitor-platform`（`classifyBrowserPlatform`），徽章靠 Tailwind variant 在首次繪製前隱藏；徽章連結用獨立 ASC campaign `ct=landing-badge`，點擊送 `landing_cta_clicked`（`cta_location: 'app_store_badge'`）。
+
 ## [1.9.2] - 2026-11-04
 
 主題：**Android App 上架 Google Play**——網站的 Android 下載入口改連 Google Play，首頁有上架公告；捷徑教學改教「Futari 記一筆」動作；服務條款與隱私權政策對齊現況；repo 搬家，專案改名 Futari。
