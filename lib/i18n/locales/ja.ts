@@ -102,7 +102,7 @@ export const ja: Translations = {
     playBadgeAlt: 'Google Play で手に入れよう',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
     appStoreBadgeAlt: 'App Store からダウンロード',
-    appStoreTrademark: 'App Store is a service mark of Apple Inc.',
+    appStoreTrademark: 'App Store is a service mark of Apple Inc., registered in the U.S. and other countries.',
     launchBanner: {
       text: 'Futari の Android アプリが登場しました！',
       link: 'Google Play でダウンロード',

@@ -302,7 +302,7 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
                 the native shells. The Taiwan-only hint appears only under the
                 main CTA above, not under the badges (#1905). Trademark lines:
                 footer. */}
-            <div className="mt-4 flex flex-wrap items-center justify-center md:justify-start gap-3 [html[data-native-shell]_&]:hidden">
+            <div className="mt-4 flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 [html[data-native-shell]_&]:hidden">
               <AppStoreBadge locale={locale} alt={t.appStoreBadgeAlt} />
               <PlayStoreBadge locale={locale} alt={t.playBadgeAlt} />
             </div>

@@ -7,9 +7,11 @@ import { PLAY_STORE_URL } from '@/lib/visitorPlatform'
 import { useMarkNativeShell } from '@/lib/useMarkNativeShell'
 import { useMarkVisitorPlatform } from '@/lib/useMarkVisitorPlatform'
 
-/** en file only (ja / zh files have no side padding): cancel Google's ~13px
- *  transparent side padding wherever the App Store badge also shows. */
-const NEXT_TO_APP_STORE_EN = '[html:not([data-visitor-platform=android])_&]:-ml-[13px]'
+/** en file only (ja / zh files have no side padding): cancel Google's
+ *  transparent left padding wherever the App Store badge also shows. The en
+ *  PNG's first opaque column is x=41 of 250px height, shown at 80px tall:
+ *  41 * 80 / 250 = 13.12px. */
+const NEXT_TO_APP_STORE_EN = '[html:not([data-visitor-platform=android])_&]:-ml-[13.1px]'
 
 /** Google's official badge files, one per locale, untouched (646×250 incl.
  *  Google's own clear-space padding). Don't crop, recolour or re-export them:
@@ -43,9 +45,9 @@ interface Props {
  * main CTA (`LandingCtaHint`), per the PM decision on #1905.
  *
  * Wherever the App Store badge also shows (not on Android), the en badge gets
- * a -13px left margin that cancels Google's transparent padding on that side,
- * so the visible gap between the two badge bodies is the row's 12px (the ja /
- * zh files have no side padding, so no margin there).
+ * a -13.1px left margin that cancels Google's transparent padding on that side,
+ * so the visible gap between the two badge bodies is the row's 16px column gap
+ * (the ja / zh files have no side padding, so no margin there).
  */
 export function PlayStoreBadge({ locale, alt, className }: Props) {
   useMarkNativeShell()
@@ -59,7 +61,7 @@ export function PlayStoreBadge({ locale, alt, className }: Props) {
         href={PLAY_STORE_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-block rounded-xl outline-none focus-visible:oik-focus-ring"
+        className="block w-fit rounded-xl outline-none focus-visible:oik-focus-ring"
         onClick={() => track('landing_cta_clicked', { cta_location: 'play_badge', target: 'play_store' })}
       >
         {/* `unoptimized`: serve Google's file byte-for-byte rather than a

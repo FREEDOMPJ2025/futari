@@ -101,7 +101,7 @@ export const en: Translations = {
     playBadgeAlt: 'Get it on Google Play',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
     appStoreBadgeAlt: 'Download on the App Store',
-    appStoreTrademark: 'App Store is a service mark of Apple Inc.',
+    appStoreTrademark: 'App Store is a service mark of Apple Inc., registered in the U.S. and other countries.',
     launchBanner: {
       text: 'The Futari Android app is here!',
       link: 'Get it on Google Play',

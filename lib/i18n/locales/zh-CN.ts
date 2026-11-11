@@ -100,7 +100,7 @@ export const zhCN: Translations = {
     playBadgeAlt: '去商店下载 Google Play',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
     appStoreBadgeAlt: 'App Store 下载',
-    appStoreTrademark: 'App Store is a service mark of Apple Inc.',
+    appStoreTrademark: 'App Store is a service mark of Apple Inc., registered in the U.S. and other countries.',
     launchBanner: {
       text: 'Futari 的 Android App 上架了！',
       link: '到 Google Play 下载',

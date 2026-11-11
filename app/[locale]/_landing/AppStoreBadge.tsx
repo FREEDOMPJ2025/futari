@@ -34,8 +34,9 @@ interface Props {
  * its ja / zh files are cropped tighter (body 190 of 250px, no side padding),
  * so at 80px the body is ~61px. Apple's badge is therefore 54px (en) / 61px
  * (other locales) tall. Apple's minimum on screen is 40px. Apple's clear space (a quarter of the badge
- * height, ~14px) is met by the row's 12px gap plus the Play badge's own
- * transparent padding. The trademark line is in the landing footer.
+ * height, 13.5 to 15.25px) is met by the row's 16px column gap, measured
+ * between the two visible badge edges (Play's transparent padding is cancelled
+ * in PlayStoreBadge). The trademark line is in the landing footer.
  */
 export function AppStoreBadge({ locale, alt, className }: Props) {
   useMarkNativeShell()
@@ -49,7 +50,7 @@ export function AppStoreBadge({ locale, alt, className }: Props) {
         href={APP_STORE_BADGE_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-block rounded-xl outline-none focus-visible:oik-focus-ring"
+        className="block w-fit rounded-xl outline-none focus-visible:oik-focus-ring"
         onClick={() => track('landing_cta_clicked', { cta_location: 'app_store_badge', target: 'app_store' })}
       >
         {/* `unoptimized`: serve Apple's file byte-for-byte. width/height only

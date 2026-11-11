@@ -123,9 +123,19 @@ describe('App Store badge', () => {
     expect(html().getAttribute(VISITOR_PLATFORM_ATTR)).toBe('android')
   })
 
-  it('trademark line is English in every locale', () => {
+  it("trademark line is Apple's full sentence, in English in every locale", () => {
     for (const locale of SUPPORTED_LOCALES) {
-      expect(dictionaries[locale].landing.appStoreTrademark).toBe('App Store is a service mark of Apple Inc.')
+      expect(dictionaries[locale].landing.appStoreTrademark).toBe(
+        'App Store is a service mark of Apple Inc., registered in the U.S. and other countries.',
+      )
+    }
+  })
+
+  it('Play en badge cancels its 13.12px transparent left padding (41/250 of 80px); ja / zh need no margin', () => {
+    const en = render(<PlayStoreBadge locale="en" alt="x" />).container.firstElementChild!.className
+    expect(en).toContain('-ml-[13.1px]')
+    for (const locale of ['ja', 'zh-CN', 'zh-TW'] as const) {
+      expect(render(<PlayStoreBadge locale={locale} alt="x" />).container.firstElementChild!.className).not.toContain('-ml-')
     }
   })
 })
@@ -153,6 +163,9 @@ describe('Landing wiring (#1930)', () => {
     const row = app.closest('div')!.parentElement!
     expect(row.contains(play)).toBe(true)
     expect(row.className).toContain('[html[data-native-shell]_&]:hidden')
+    // 16px visible gap between the badges (#1930, Daphne): column gap 16px.
+    expect(row.className).toContain('gap-x-4')
+    expect(row.className).not.toMatch(/(^|\s)gap-3(\s|$)/)
     const footer = container.querySelector('footer')!
     expect(footer.textContent).toContain(d.landing.playTrademark)
     expect(footer.textContent).toContain(d.landing.appStoreTrademark)
