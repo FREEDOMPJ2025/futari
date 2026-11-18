@@ -3683,7 +3683,7 @@ export const zhTW: Translations = {
       heading: '開發日誌',
       more: '更多日誌',
     },
-    srTagline: ' · 兩個人的家計簿｜伴侶／夫妻共享記帳 PWA',
+    srTagline: ' · 兩個人的家計簿｜伴侶／夫妻共享記帳 App',
     srDescription:
       '專為伴侶、夫妻設計的雙人共享帳本。一起記錄日常開銷、自動分攤費用與 AA 制結算，掌握家庭預算、資產盤點、保險與愛車油耗紀錄。',
     aboutLabel: '關於 Futari',
@@ -3783,18 +3783,18 @@ export const zhTW: Translations = {
       '保險方案（保護型／儲蓄型）',
       '汽車與油耗紀錄',
       '定期收入',
-      '離線瀏覽 PWA',
+      '離線瀏覽最近看過的頁面',
     ],
     jsonLdFaq: [
       {
         question: 'Futari 是什麼？',
         answer:
-          'Futari 是專為夫妻、伴侶設計的雙人共享記帳 PWA，支援自動分攤、AA 結算、家庭資產盤點與愛車油耗紀錄。',
+          'Futari 是專為夫妻、伴侶設計的雙人共享記帳 App，iPhone、Android 和網頁版都能用，支援自動分攤、AA 結算、家庭資產盤點與愛車油耗紀錄。',
       },
       {
         question: '如何開始使用？',
         answer:
-          '用 Google 帳號登入後建立兩人帳本，邀請伴侶加入即可一起記帳。可加到手機主畫面當 PWA 使用，完全免費。',
+          '用 Google 或 Apple 登入後建立兩人帳本，邀請伴侶加入就能一起記帳。iPhone、Android 和網頁版都能用，完全免費。',
       },
       {
         question: '資料安全嗎？',
@@ -6787,7 +6787,7 @@ export const zhTW: Translations = {
           },
           {
             question: '另一半用 Android，也能一起用嗎？',
-            answer: '可以。Futari 是跨平台的 PWA，iOS、Android、瀏覽器都能開，兩個人用不同手機也能共用同一本帳。',
+            answer: '可以。Futari 有 iPhone App、Android App 和網頁版，兩個人用不同手機也能共用同一本帳。',
           },
         ],
       },
@@ -6884,14 +6884,14 @@ export const zhTW: Translations = {
 
   seo: {
     landing: {
-      title: 'Futari · 兩個人，一本帳｜伴侶共享記帳 PWA',
-      description: 'Futari 是為夫妻、情侶設計的共同記帳 PWA，兩個人一起記帳、自動分攤花費、AA 結算，從日常開銷到旅行、愛車與資產，輕鬆看見兩個人的生活全貌。',
+      title: '伴侶共享記帳 App｜Futari · 兩個人，一本帳',
+      description: 'Futari 是為夫妻、情侶設計的共同記帳 App，iPhone、Android 和網頁版都能用。兩個人一起記帳、自動分攤花費、AA 結算，從日常開銷到旅行、愛車與資產，看見兩個人的生活全貌。',
       ogDescription: 'Futari 是為夫妻、伴侶設計的共同帳本——一起記帳、自動分攤、AA 結算，看見兩個人的生活全貌。',
     },
     signIn: {
       title: '登入 Futari · 兩個人的雙人記帳',
-      description: '用 Google 帳號登入後，會進到你們共用的帳本——伴侶一起記下日常開銷與愛車油耗，也照看保險與愛物的雙人記帳 PWA。',
-      ogDescription: '用 Google 一鍵登入，進到兩個人的家計簿。',
+      description: '用 Google 或 Apple 登入後，會進到你們共用的帳本——伴侶一起記下日常開銷與愛車油耗，也照看保險與愛物。',
+      ogDescription: '用 Google 或 Apple 登入，進到兩個人的家計簿。',
       /** Keep in sync with `invite.meta` — see the note there. (#1016) */
       invite: {
         title: '有人邀請你一起記帳 · Futari',

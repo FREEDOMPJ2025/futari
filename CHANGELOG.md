@@ -43,6 +43,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **對外文字拿掉「PWA」，改寫成「iPhone、Android 和網頁版」（#1909）**
+  使用者：四語的首頁與登入頁標題、描述、og、結構化資料、搬遷頁 FAQ、`llms.txt`／`llms-full.txt` 不再把 Futari 叫做 PWA；中文標題把「伴侶共享記帳 App」放最前面；登入頁描述改寫成 Google 或 Apple 都能登入。
+  技術：只換字串，文案逐字取自 #1909 的 Aria 留言；`tests/no-pwa-copy-1909.test.ts` 走遍四語字典的字串值，不得出現 PWA；程式註解、識別名稱、manifest 不動。
+
 - **中文首頁加上雙平台上架影片（#1910）**
   使用者：繁體中文首頁的下載按鈕下方多一支 17 秒的上架短片，點了才播放；其他語言和 App 內不顯示。
   技術：`LaunchFilm` 進到可視範圍附近才掛上 `<video>`（`preload="none"`、手機寬度用 720p），殼內沿用 `data-native-shell` 隱藏；zh-TW 首頁加 VideoObject JSON-LD，規則集中在 `lib/launchFilm.ts`；proxy matcher 放行 `.mp4`／`.vtt`。

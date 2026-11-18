@@ -302,7 +302,7 @@ export const MIGRATE_SOURCES = {
   icost: {
     slug: 'icost',
     name: 'iCost',
-    contentUpdatedAt: '2026-10-18',
+    contentUpdatedAt: '2026-11-18',
     screenshotWorkflow: true,
     comparison: {
       rows: [

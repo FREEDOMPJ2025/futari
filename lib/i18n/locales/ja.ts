@@ -76,7 +76,7 @@ export const ja: Translations = {
       heading: '開発ログ',
       more: 'ほかの記事',
     },
-    srTagline: ' · ふたりの家計簿｜カップル・夫婦のための共有家計 PWA',
+    srTagline: ' · ふたりの家計簿｜カップル・夫婦のための共有家計簿アプリ',
     srDescription:
       'カップル・夫婦のためにつくられた共有家計簿。日々の支出を一緒に記録、自動で割り勘・月次精算、家計予算・資産・保険・愛車の給油まで一画面で見渡せます。',
     aboutLabel: 'Futari について',
@@ -176,18 +176,18 @@ export const ja: Translations = {
       '保険プラン（保障型／貯蓄型）',
       '愛車と給油の記録',
       '定期収入',
-      'オフライン対応 PWA',
+      '最近見たページのオフライン閲覧',
     ],
     jsonLdFaq: [
       {
         question: 'Futariとは？',
         answer:
-          'Futariは夫婦・カップル向けに設計された共有家計簿PWAです。自動割り勘、月次精算、資産の記録、愛車の給油記録までひとつにまとめられます。',
+          'Futariは夫婦・カップル向けに設計された共有家計簿アプリです。iPhone・Android・Web で使え、自動割り勘、月次精算、資産の記録、愛車の給油記録までひとつにまとめられます。',
       },
       {
         question: '始め方は？',
         answer:
-          'Googleアカウントでサインインしてふたりの家計簿を作成し、パートナーを招待すれば一緒に記録できます。ホーム画面に追加してPWAとして使え、完全無料です。',
+          'Google または Apple でサインインしてふたりの家計簿を作成し、パートナーを招待すれば一緒に記録できます。iPhone・Android・Web で使え、完全無料です。',
       },
       {
         question: 'データは安全ですか？',
@@ -3222,7 +3222,7 @@ I will upload the screenshots once you confirm.`,
           {
             question: '相手が Android でも一緒に使えますか？',
             answer:
-              'はい。Futari は iOS・Android・ブラウザで使えるクロスプラットフォームの PWA なので、別々の端末でも一つの家計簿を共有できます。',
+              'はい。Futari には iPhone アプリ、Android アプリ、Web 版があるので、別々の端末でも一つの家計簿を共有できます。',
           },
         ],
       },
@@ -3328,13 +3328,13 @@ I will upload the screenshots once you confirm.`,
   seo: {
     landing: {
       title: 'Futari · ふたりの家計簿｜カップルの共有アプリ',
-      description: 'Futari（ふたり）は、カップル・夫婦のための共同家計簿アプリ。一緒に記録、自動按分、精算、愛車の燃費まで、ふたりの暮らしをまるごと見える化。',
+      description: 'Futari（ふたり）は、カップル・夫婦のための共同家計簿アプリ。iPhone・Android・Web で使えます。一緒に記録、自動按分、精算、愛車の燃費まで、ふたりの暮らしをまるごと見える化。',
       ogDescription: 'Futari（ふたり）は、カップル・夫婦のための共同家計簿アプリ。一緒に記録して、ふたりの暮らしを見える化。',
     },
     signIn: {
       title: 'Futari にサインイン · ふたりの家計簿へ',
-      description: 'Google アカウントでサインインすると、ふたりで共有する家計簿に入ります。日常の支出や燃費、保険、資産までパートナーと一緒に整える PWA。',
-      ogDescription: 'Google でワンタップサインインして、ふたりの家計簿を開きます。',
+      description: 'Google または Apple でサインインすると、ふたりで共有する家計簿に入ります。日常の支出や燃費、保険、資産までパートナーと一緒に整えられます。',
+      ogDescription: 'Google または Apple でサインインして、ふたりの家計簿を開きます。',
       invite: {
         title: '家計簿に招待されました · Futari',
         description: 'ふたりの家計簿に招待されました。サインインすると参加できます。',
