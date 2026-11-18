@@ -167,6 +167,9 @@ export const ja: Translations = {
     footerTrust: 'ふたりだけに開放 · データはふたりだけのもの',
     featuresOutingLink: '旅行の割り勘も：リンクひとつで、友だちはアプリ不要',
     footerOutingLink: '旅行の割り勘',
+    featuresShortcutsLink: 'ショートカットで記録：Apple Pay で払うと、金額と店名が入力済み',
+    footerUseCaseLink: '利用シーン',
+    footerShortcutsLink: 'ショートカットで記録',
     jsonLdAppName: 'Futari · ふたり',
     jsonLdAlternateNames: ['ふたり 家計簿', 'Futari 家計簿', '二人の家計簿', "Futari · couple's ledger"],
     jsonLdAppDescription:
