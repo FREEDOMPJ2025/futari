@@ -3328,7 +3328,7 @@ I will upload the screenshots once you confirm.`,
   seo: {
     landing: {
       title: 'Futari · ふたりの家計簿｜カップルの共有アプリ',
-      description: 'Futari（ふたり）は、カップル・夫婦のための共同家計簿アプリ。一緒に記録、自動按分、精算、愛車の燃費まで、ふたりの暮らしをまるごと見える化。',
+      description: 'Futari（ふたり）は、カップル・夫婦のための共同家計簿アプリ。iPhone・Android・Web で使えます。一緒に記録、自動按分、精算、愛車の燃費まで、ふたりの暮らしをまるごと見える化。',
       ogDescription: 'Futari（ふたり）は、カップル・夫婦のための共同家計簿アプリ。一緒に記録して、ふたりの暮らしを見える化。',
     },
     signIn: {

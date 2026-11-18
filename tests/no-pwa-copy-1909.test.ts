@@ -35,6 +35,12 @@ describe('no "PWA" in user-facing copy (#1909)', () => {
     expect(dictionaries['zh-CN'].seo.landing.title).toBe('情侣共享记账 App｜Futari · 两个人，一本账')
   })
 
+  // Aria's approved sentences (#1909 comment 6975044371, section 3; Ray: "#1909 desc ok"), verbatim.
+  it('zh-CN and ja landing descriptions are Aria\'s approved sentences (verbatim)', () => {
+    expect(dictionaries['zh-CN'].seo.landing.description).toBe('Futari 是为夫妻、情侣设计的共同记账 App，iPhone、Android 和网页版都能用。两个人一起记账、自动分摊花费、AA 结算，从日常开销到旅行、爱车与资产，看见两个人的生活全貌。')
+    expect(dictionaries.ja.seo.landing.description).toBe('Futari（ふたり）は、カップル・夫婦のための共同家計簿アプリ。iPhone・Android・Web で使えます。一緒に記録、自動按分、精算、愛車の燃費まで、ふたりの暮らしをまるごと見える化。')
+  })
+
   it('llms.txt has no PWA wording', () => {
     const body = readFileSync(path.join(process.cwd(), 'public', 'llms.txt'), 'utf8')
     expect(body).not.toMatch(/PWA|Progressive Web App/i)

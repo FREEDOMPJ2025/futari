@@ -3276,7 +3276,7 @@ export const zhCN: Translations = {
   seo: {
     landing: {
       title: '情侣共享记账 App｜Futari · 两个人，一本账',
-      description: 'Futari 是为夫妻、情侣设计的共同账本，两个人一起记账、自动分摊花费、AA 结算，从日常开销到旅行、爱车与资产，轻松看见两个人的生活全貌。',
+      description: 'Futari 是为夫妻、情侣设计的共同记账 App，iPhone、Android 和网页版都能用。两个人一起记账、自动分摊花费、AA 结算，从日常开销到旅行、爱车与资产，看见两个人的生活全貌。',
       ogDescription: 'Futari 是为夫妻、情侣设计的共同账本——一起记账、自动分摊、AA 结算，看见两个人的生活全貌。',
     },
     signIn: {
