@@ -75,7 +75,7 @@ export const en: Translations = {
       heading: 'Dev log',
       more: 'More entries',
     },
-    srTagline: " · A shared ledger for couples · Two-person finance PWA",
+    srTagline: " · A shared ledger for couples · Two-person finance app",
     srDescription:
       'A shared finance app built for couples. Log daily spending together, auto-split costs and settle monthly, and keep household budget, assets, insurance, and fuel logs side by side.',
     aboutLabel: 'About Futari',
@@ -99,11 +99,12 @@ export const en: Translations = {
     playStoreCta: 'Get it on Google Play',
     playStoreCtaHint: 'Currently available in Taiwan only',
     playBadgeAlt: 'Get it on Google Play',
-    appStoreBadgeAlt: 'Download on the App Store',
     // TODO(i18n): 待確認 — #1906 copy awaits Ray's approval
     downloadQrCaption: 'Scan with your phone to download',
     downloadQrAlt: 'QR code that opens the Futari download page',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
+    appStoreBadgeAlt: 'Download on the App Store',
+    appStoreTrademark: 'App Store is a service mark of Apple Inc., registered in the U.S. and other countries.',
     launchBanner: {
       text: 'The Futari Android app is here!',
       link: 'Get it on Google Play',
@@ -177,18 +178,18 @@ export const en: Translations = {
       'Insurance plans (protection / savings)',
       'Vehicle and fuel logs',
       'Recurring income',
-      'Offline-capable PWA',
+      'Offline viewing of recently opened pages',
     ],
     jsonLdFaq: [
       {
         question: 'What is Futari?',
         answer:
-          "Futari is a shared-ledger PWA for couples and partners. It handles auto-split expenses, monthly settlement, household assets, and fuel logs in one place.",
+          "Futari is a shared-ledger app for couples and partners, on iPhone, Android and the web. It handles auto-split expenses, monthly settlement, household assets, and fuel logs in one place.",
       },
       {
         question: 'How do I get started?',
         answer:
-          'Sign in with Google, create a two-person ledger, and invite your partner. Add it to your home screen as a PWA and start recording together, completely free.',
+          'Sign in with Google or Apple, create a two-person ledger, and invite your partner to start recording together. Works on iPhone, Android and the web, completely free.',
       },
       {
         question: 'Is my data safe?',
@@ -438,6 +439,8 @@ export const en: Translations = {
     iSettled: 'I settled',
     partnerSettled: '{name} settled',
     outingSettled: 'Outing settlement',
+    tripSettledRecord: '{name} settlement',
+    tripSettledRecordUnnamed: 'Trip settlement',
     youIncome: 'Your income',
     partnerIncome: '{name}\'s income',
     youPaid: 'You paid',
@@ -3224,7 +3227,7 @@ I will upload the screenshots once you confirm.`,
           {
             question: 'My partner is on Android — can we still share it?',
             answer:
-              'Yes. Futari is a cross-platform PWA — iOS, Android and the browser — so two people on different phones share one ledger.',
+              'Yes. Futari has an iPhone app, an Android app and a web version, so two people on different phones share one ledger.',
           },
         ],
       },
@@ -3329,14 +3332,14 @@ I will upload the screenshots once you confirm.`,
 
   seo: {
     landing: {
-      title: "Futari · A shared ledger for two · Couples' budgeting PWA",
-      description: 'Futari is a shared budgeting app built for couples: a partner-first ledger to log expenses together, auto-split, settle up, and see your life as a pair.',
+      title: "Futari · A shared ledger for two · Couples' budgeting app",
+      description: 'Futari is a shared budgeting app for couples, on iPhone, Android and the web: log expenses together, auto-split, settle up, and see your life as a pair.',
       ogDescription: 'Futari is a couple-first shared budgeting app: log together, auto-split, settle, and see your life as a pair.',
     },
     signIn: {
       title: 'Sign in to Futari · A shared ledger for two',
-      description: 'Sign in with Google and you land in your shared ledger, where partners log spending and fuel costs together and look after insurance and shared things.',
-      ogDescription: 'One tap to sign in with Google and open your shared household ledger.',
+      description: 'Sign in with Google or Apple to open your shared ledger, where partners log spending and fuel costs together and look after insurance and shared things.',
+      ogDescription: 'Sign in with Google or Apple to open your shared household ledger.',
       invite: {
         title: 'Someone invited you to a shared ledger · Futari',
         description: 'Someone invited you to a shared ledger for two. Sign in to join.',

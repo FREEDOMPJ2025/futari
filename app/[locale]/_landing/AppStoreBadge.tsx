@@ -3,60 +3,73 @@
 import Image from 'next/image'
 import type { Locale } from '@/lib/i18n/locales-meta'
 import { track } from '@/lib/analytics/track'
-import { appStoreUrl } from '@/lib/visitorPlatform'
+import { APP_STORE_BADGE_URL } from '@/lib/visitorPlatform'
+import { HIDDEN_IN_APP } from '@/lib/playLaunch'
 import { useMarkNativeShell } from '@/lib/useMarkNativeShell'
+import { useMarkStandalone } from '@/lib/useMarkStandalone'
+import { useMarkVisitorPlatform } from '@/lib/useMarkVisitorPlatform'
 
-/** Apple's official black badge files, one per locale, untouched. Don't
- *  recolour, crop or re-export them: Apple's badge guidelines forbid altering
- *  the artwork. */
+/** Apple's official black "Download on the App Store" badge, one per locale,
+ *  untouched (40px tall, no padding). Don't recolour, crop or re-export it:
+ *  Apple's marketing guidelines forbid altering the artwork. */
 export function appStoreBadgeSrc(locale: Locale): string {
   return `/badges/app-store-${locale}.svg`
-}
-
-/** Intrinsic width at 54px tall, from each SVG's viewBox (40px tall). */
-const WIDTH_AT_54: Record<Locale, number> = {
-  en: 162, // 119.66 × 54/40
-  'zh-TW': 147, // 108.85 × 54/40
-  'zh-CN': 147,
-  ja: 147,
 }
 
 interface Props {
   locale: Locale
   /** The words printed on that locale's badge (`landing.appStoreBadgeAlt`). */
   alt: string
+  className?: string
+  /** Defaults to the hero badge's campaign URL; /migrate/* and
+   *  /features/shortcuts pass their own `ct=web-…` link (#1933). */
+  href?: string
 }
 
 /**
- * Official App Store badge in the desktop download block (#1906), linking to
- * the App Store with `ct=landing-desktop` so ASC separates desktop visitors
- * from the phone CTA (`ct=landing`). 54px tall, matching the visible height
- * of the Google Play badge next to it (whose file carries its own padding).
+ * Official App Store badge in the hero badge row (#1930), left of the Google
+ * Play badge, linking to the App Store listing under its own ASC campaign
+ * (`APP_STORE_BADGE_URL`). Rendered in the server HTML and hidden before first
+ * paint by the landing's pre-paint script (`lib/playLaunch.ts`): inside either
+ * native shell (Apple 3.1.1; the Android app shows no download links), and in
+ * Android browsers (only the Play badge there).
  *
- * Hidden in both native shells by the block's `[html[data-native-shell]_&]`
- * class (Apple 3.1.1: no download links inside the app); this hook marks
- * `<html>` on client navigation where the pre-paint script didn't run.
+ * Size: same VISIBLE height as the Google Play badge next to it. Google's en
+ * file has ~13px padding all round, so at 80px tall the badge body is ~54px;
+ * its ja / zh files are cropped tighter (body 190 of 250px, no side padding),
+ * so at 80px the body is ~61px. Apple's badge is therefore 54px (en) / 61px
+ * (other locales) tall. Apple's minimum on screen is 40px. Apple's clear space (a quarter of the badge
+ * height, 13.5 to 15.25px) is met by the row's 16px column gap, measured
+ * between the two visible badge edges (Play's transparent padding is cancelled
+ * in PlayStoreBadge). The trademark line is in the landing footer.
  */
-export function AppStoreBadge({ locale, alt }: Props) {
+export function AppStoreBadge({ locale, alt, className, href = APP_STORE_BADGE_URL }: Props) {
   useMarkNativeShell()
+  useMarkStandalone()
+  useMarkVisitorPlatform()
 
   return (
-    <a
-      href={appStoreUrl('landing-desktop')}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-block rounded-lg outline-none focus-visible:oik-focus-ring"
-      onClick={() => track('landing_cta_clicked', { cta_location: 'app_store_badge', target: 'app_store' })}
+    <div
+      className={`${HIDDEN_IN_APP} [html[data-visitor-platform=android]_&]:hidden ${className ?? ''}`.trim()}
     >
-      {/* `unoptimized`: serve Apple's file byte-for-byte. */}
-      <Image
-        src={appStoreBadgeSrc(locale)}
-        alt={alt}
-        width={WIDTH_AT_54[locale]}
-        height={54}
-        unoptimized
-        className="block h-[54px] w-auto"
-      />
-    </a>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block w-fit rounded-xl outline-none focus-visible:oik-focus-ring"
+        onClick={() => track('landing_cta_clicked', { cta_location: 'app_store_badge', target: 'app_store' })}
+      >
+        {/* `unoptimized`: serve Apple's file byte-for-byte. width/height only
+            give the intrinsic aspect (en badge 120×40, CJK badges 109×40). */}
+        <Image
+          src={appStoreBadgeSrc(locale)}
+          alt={alt}
+          width={locale === 'en' ? 120 : 109}
+          height={40}
+          unoptimized
+          className={locale === 'en' ? 'block h-[54px] w-auto' : 'block h-[61px] w-auto'}
+        />
+      </a>
+    </div>
   )
 }

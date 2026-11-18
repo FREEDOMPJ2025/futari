@@ -2,6 +2,7 @@ import type { Translations } from '@/lib/i18n/locales/zh-TW'
 import { ShieldOutlineGlyph } from './FutariMark'
 import { Phrase } from '../_components/Phrase'
 import { appStoreUrl } from '@/lib/visitorPlatform'
+import { HIDDEN_IN_APP } from '@/lib/playLaunch'
 
 type LandingStrings = Translations['landing']
 
@@ -52,10 +53,11 @@ function CompactTrustRow({ t }: { t: LandingStrings }) {
  * still starts with "iPhone".
  *
  * Inside the native shells (the iPad shell is wider than `md`, so it renders
- * this row) the link is swapped for the same words as plain text before first
- * paint, via the `data-native-shell` attribute (`lib/playLaunch.ts`): no store
- * links inside the app (Apple 3.1.1). Failure looks like: a tappable App Store
- * link in the iPad app, noticed only in App Review.
+ * this row) and in an installed PWA (#1930: no store link anywhere in an app)
+ * the link is swapped for the same words as plain text before first paint, via
+ * `data-native-shell` / `data-standalone` (`HIDDEN_IN_APP`, lib/playLaunch.ts;
+ * Apple 3.1.1). Failure looks like: a tappable App Store link in the iPad app,
+ * noticed only in App Review.
  */
 export function PlatformLine({ text }: { text: string }) {
   const sep = ' · '
@@ -68,11 +70,11 @@ export function PlatformLine({ text }: { text: string }) {
         href={appStoreUrl('landing-desktop')}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-inherit no-underline hover:underline outline-none focus-visible:oik-focus-ring rounded-sm [html[data-native-shell]_&]:hidden"
+        className={`text-inherit no-underline hover:underline outline-none focus-visible:oik-focus-ring rounded-sm ${HIDDEN_IN_APP}`}
       >
         {iphone}
       </a>
-      <span className="hidden [html[data-native-shell]_&]:inline">{iphone}</span>
+      <span className="hidden [html[data-native-shell]_&]:inline [html[data-standalone]_&]:inline">{iphone}</span>
       {rest}
     </>
   )

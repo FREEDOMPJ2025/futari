@@ -7,6 +7,7 @@ import { localizedHref } from '@/lib/i18n/path'
 import { BrandBreadcrumb } from '../../_components/BrandBreadcrumb'
 import { Phrase } from '../../_components/Phrase'
 import { s } from '../../_components/brand-inner'
+import { StoreBadgeRow } from '../../_landing/StoreBadgeRow'
 import { UseCaseHero } from '../../use-case/_components/UseCaseHero'
 import { FeatureShortcutsJsonLd } from './_components/FeatureShortcutsJsonLd'
 import { CATEGORY_IDS, appUrl, webUrl } from './_components/urls'
@@ -114,6 +115,7 @@ export default async function FeatureShortcutsPage({ params }: { params: Params 
           ]}
         />
         <UseCaseHero kicker={t.heroKicker} title={t.heroTitle} subtitle={t.heroSubtitle} />
+        <StoreBadgeRow locale={locale} campaign="web-shortcuts" />
       </div>
 
       <section id="answer" className={s.band}>

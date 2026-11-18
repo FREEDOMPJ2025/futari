@@ -3,7 +3,7 @@
 > 家庭記帳工具，固定兩人（夫妻／伴侶）使用。
 > 舊名 Oikos：資料表、裝置上的 key 等少數地方刻意保留 oikos，原因見 [CLAUDE.md](CLAUDE.md) 開頭。
 
-Futari 是私密記帳 PWA：兩人分攤支出、愛物（車 / 房 / 子女 / 寵物 / 植物 / 保險 / 物品）、月度回顧。私人家庭工具，不是 SaaS——所有功能圍繞「這筆錢怎麼分、誰欠誰多少」。Mobile-first，Web + iOS + Android 三平台共用同一份 Next.js 部署（見下方 Tech Stack）。
+Futari 是私密記帳 App，有 iPhone、Android 和網頁版（網頁版在任何現代瀏覽器可用）：兩人分攤支出、愛物（車 / 房 / 子女 / 寵物 / 植物 / 保險 / 物品）、月度回顧。私人家庭工具，不是 SaaS——所有功能圍繞「這筆錢怎麼分、誰欠誰多少」。Mobile-first，Web + iOS + Android 三平台共用同一份 Next.js 部署（見下方 Tech Stack）。
 
 > 線上服務：<https://futari.southern-light.dev/>（登入怎麼用見該頁；不是本檔重點）
 > 完整變更紀錄見 [CHANGELOG.md](CHANGELOG.md)。

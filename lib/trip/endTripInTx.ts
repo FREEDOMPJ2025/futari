@@ -14,6 +14,8 @@ export interface FoldTripArgs {
    * transaction after its locks. They decide how the summary rows split.
    */
   members: { memberA: string; memberB: string | null }
+  /** Summary record description in the ending request's locale. */
+  description: string
   /** `transacted_at` of the summary rows (the moment the trip ended). */
   transactedAt: Date | SQL
   /**
@@ -76,7 +78,7 @@ export async function foldTripIntoLedger(
       amount: s.amount,
       splitType: s.splitType,
       splitRatioA: s.splitRatioA,
-      description: `${trip.name} 結算`,
+      description: args.description,
       category: 'entertainment',
       status: 'settled' as const,
       transactedAt: args.transactedAt,

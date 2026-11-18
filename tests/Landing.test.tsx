@@ -172,18 +172,26 @@ describe('Landing — SSR CTAs work without JS (#1521)', () => {
     expect(html).not.toContain('android-beta')
     // #1901: the Play badge and launch banner are server-rendered (no layout
     // shift) but every Play anchor in the SSR HTML sits inside an element the
-    // pre-paint shell flag hides, so no shell ever paints one. #1906 adds the
-    // desktop download block (a second Play badge) and the only App Store
-    // links in the SSR HTML (desktop badge + "iPhone App" in the platform
-    // line), under the same rule; the primary CTA stays sign-in (above).
+    // pre-paint shell flag hides, so no shell ever paints one.
     const playAnchors = [...doc.querySelectorAll('a[href*="play.google.com"]')]
-    expect(playAnchors.length).toBe(3)
-    const appStoreAnchors = [...doc.querySelectorAll('a[href*="apps.apple.com"]')]
-    expect(appStoreAnchors.length).toBe(2)
-    for (const a of appStoreAnchors) expect(a.getAttribute('href')).toContain('ct=landing-desktop')
+    expect(playAnchors.length).toBe(2)
     const hiddenInShell = (el: Element | null): boolean =>
       !!el && (el.className.includes('[html[data-native-shell]_&]:hidden') || hiddenInShell(el.parentElement))
-    for (const a of [...playAnchors, ...appStoreAnchors]) expect(hiddenInShell(a)).toBe(true)
+    for (const a of playAnchors) expect(hiddenInShell(a)).toBe(true)
+    // #1930: same for the App Store badge. #1906 adds one more apps.apple.com
+    // link, "iPhone App" in the compact trust row (ct=landing-desktop); the main
+    // CTA is the sign-in link until the platform resolves, so these two are the
+    // only ones, and both are swapped out inside the native shells.
+    const appAnchors = [...doc.querySelectorAll('a[href*="apps.apple.com"]')]
+    expect(appAnchors.length).toBe(2)
+    expect(appAnchors.map((a) => /ct=([\w-]+)/.exec(a.getAttribute('href')!)![1]).sort()).toEqual([
+      'landing-badge',
+      'landing-desktop',
+    ])
+    for (const a of appAnchors) expect(hiddenInShell(a)).toBe(true)
+    // Raw count over the whole server HTML (attributes, JSON-LD, meta, preload,
+    // plain text), so a stray App Store mention outside those two turns red.
+    expect(html.split('apps.apple.com').length - 1).toBe(2)
   })
 })
 
@@ -240,12 +248,10 @@ describe('Landing — example card (#1852)', () => {
 
   // #1901: the Google Play badge joins the CTA block (store entries together),
   // so the card now follows the sign-in link and that badge, still below the
-  // CTA and above the compact trust row.
-  // #1906: the desktop download block (md+) now sits between the mobile Play
-  // badge (md:hidden) and the card, so at every width the card still follows
-  // the store entries. #1910: on zh-TW the launch film sits between the
-  // download block and the card (Daphne's order: download block → film → card).
-  it('sits right after the mobile sign-in link, the Play badge, the desktop download block and the zh-TW launch film, before the compact trust row', () => {
+  // CTA and above the compact trust row. #1906: the desktop QR card (md+) sits
+  // right under the badge row. #1910: on zh-TW the launch film sits between the
+  // QR card and the card (Daphne's order: badges → QR card → film → card).
+  it('sits right after the mobile sign-in link, the badge row, the desktop QR card and the zh-TW launch film, before the compact trust row', () => {
     renderLanding()
     const fig = screen.getByRole('figure')
     const mobileSignIn = screen
@@ -254,10 +260,9 @@ describe('Landing — example card (#1852)', () => {
       .closest('div')!
     const badge = mobileSignIn.nextElementSibling!
     expect(badge.querySelector(`img[alt="${zhTW.landing.playBadgeAlt}"]`)).not.toBeNull()
-    expect(badge.className).toContain('md:hidden')
-    const downloadBlock = badge.nextElementSibling!
-    expect(downloadBlock).toBe(screen.getByTestId('desktop-download-block'))
-    const film = downloadBlock.nextElementSibling!
+    const qrCard = badge.nextElementSibling!
+    expect(qrCard).toBe(screen.getByTestId('desktop-download-block'))
+    const film = qrCard.nextElementSibling!
     expect(film.getAttribute('data-testid')).toBe('launch-film')
     expect(film.nextElementSibling).toBe(fig)
   })
