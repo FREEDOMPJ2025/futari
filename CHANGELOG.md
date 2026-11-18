@@ -67,6 +67,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：`/migrate/*` 各頁在建立帳號按鈕下方、`/features/shortcuts` 在頁首下方多一排商店徽章；iPhone／iPad 只看到 App Store、Android 只看到 Google Play；App 內與已安裝的 PWA 不顯示；搬遷頁的網頁版入口不變。
   技術：新增 `StoreBadgeRow`（沿用首頁徽章與 pre-paint script）；App Store 連結帶 `ct=web-migrate-<頁名>`／`ct=web-shortcuts`；點擊沿用 `landing_cta_clicked`，頁名由 `$pathname` 區分，事件不變。
 
+- **`llms.txt`／`llms-full.txt` 補上 `/migrate/*` 14 個搬遷頁（#1933）**
+  使用者：兩份給 AI 爬蟲讀的索引各多 14 行搬遷頁連結（網址不帶語系、只列繁體中文），原有句子不動。
+  技術：連結文字取自頁面 `seo.migrate.<slug>.title`、說明取自 `ogDescription`（zh-TW）；不列 `/migrate` 總覽頁。
+
 ## [1.9.2] - 2026-11-04
 
 主題：**Android App 上架 Google Play**——網站的 Android 下載入口改連 Google Play，首頁有上架公告；捷徑教學改教「Futari 記一筆」動作；服務條款與隱私權政策對齊現況；repo 搬家，專案改名 Futari。
