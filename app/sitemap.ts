@@ -21,7 +21,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://futari.southern-ligh
 // static pages below still carry their date manually in this file. (#669, #1004)
 const PATHS = [
   // Landing copy / hero / migrate cross-link section
-  { path: '/', changeFrequency: 'weekly' as const, priority: 1.0, lastModified: '2026-10-15' },
+  { path: '/', changeFrequency: 'weekly' as const, priority: 1.0, lastModified: '2026-11-18' },
   // migrate hub/index — lists every source, 1 click from each guide (#939)
   { path: '/migrate', changeFrequency: 'monthly' as const, priority: 0.8, lastModified: '2026-09-15' },
   // migrate pages — auto-derived from MIGRATE_SOURCES (#852)
