@@ -13,6 +13,7 @@ import { IllustrationSlot } from './IllustrationSlot'
 import { LandingCtaHint } from './LandingCtaHint'
 import { LandingCtaLink } from './LandingCtaLink'
 import { FeatureOutingTextLink } from '../_components/FeatureOutingTextLink'
+import { DesktopDownloadBlock } from './DesktopDownloadBlock'
 import { LandingExampleCard } from './LandingExampleCard'
 import { LandingPrimaryCta } from './LandingPrimaryCta'
 import { LandingSecondaryCta } from './LandingSecondaryCta'
@@ -305,13 +306,17 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
               <PlayStoreBadge locale={locale} alt={t.playBadgeAlt} />
             </div>
 
+            {/* #1906 — QR card under the badge row above (the badges are
+                #1930's; there is no second pair): phones scan it (→ /get).
+                md and up, desktop browsers only. */}
+            <DesktopDownloadBlock t={t} />
+
             {/* #1910 — launch film under the CTA cluster, zh-TW only (the film
                 is Chinese only). Always shown (not tied to the launch banner);
                 hidden in the native shells like the Play badge. Order (Daphne,
-                #1906 issuecomment-6611277707): CTA row → download block (#1906:
-                store badges + QR card, which replaces the Play badge above) →
-                mt-10 → this film → example card. Keep the film after the
-                download block and before the example card. */}
+                #1906 issuecomment-6611277707): CTA row → store badges (#1930)
+                → QR card (#1906) → mt-10 → this film → example card. Keep the
+                film after the QR card and before the example card. */}
             {showsLaunchFilm(locale) && <LaunchFilm className="mt-10" />}
 
             {/* #1852 — example card below the sign-in link: one expense and how it

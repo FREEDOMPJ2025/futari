@@ -100,6 +100,9 @@ export const ja: Translations = {
     playStoreCta: 'Google Play でダウンロード',
     playStoreCtaHint: '現在は台湾でのみ配信中です',
     playBadgeAlt: 'Google Play で手に入れよう',
+    // TODO(i18n): 待確認 — #1906 copy awaits Ray's approval
+    downloadQrCaption: 'スマートフォンでスキャンしてダウンロード',
+    downloadQrAlt: 'Futari のダウンロードページを開く QR コード',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
     appStoreBadgeAlt: 'App Store からダウンロード',
     appStoreTrademark: 'App Store is a service mark of Apple Inc., registered in the U.S. and other countries.',

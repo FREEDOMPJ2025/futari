@@ -98,6 +98,8 @@ export const zhCN: Translations = {
     playStoreCta: '在 Google Play 下载',
     playStoreCtaHint: '目前仅在台湾上架',
     playBadgeAlt: '去商店下载 Google Play',
+    downloadQrCaption: '用手机扫码下载',
+    downloadQrAlt: '扫码后打开 Futari 的下载页面',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
     appStoreBadgeAlt: 'App Store 下载',
     appStoreTrademark: 'App Store is a service mark of Apple Inc., registered in the U.S. and other countries.',
