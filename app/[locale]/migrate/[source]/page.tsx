@@ -12,6 +12,7 @@ import { MigrateDifferentiators } from '../_components/MigrateDifferentiators'
 import { MigrateChatgptWorkflow } from '../_components/MigrateChatgptWorkflow'
 import { MigratePrimaryCta } from '../_components/MigratePrimaryCta'
 import { MigrateTrustBlock, MigrateFooter } from '../_components/MigrateTrustFooter'
+import { StoreBadgeRow } from '../../_landing/StoreBadgeRow'
 import { BrandBreadcrumb } from '../../_components/BrandBreadcrumb'
 import { MigrateBreadcrumbJsonLd } from '../_components/MigrateBreadcrumbJsonLd'
 import { MigrateHowToJsonLd } from '../_components/MigrateHowToJsonLd'
@@ -84,6 +85,7 @@ export default async function MigrateSourcePage({ params }: { params: Params }) 
       button={t.primaryCta.button}
       signInHref={signInHref}
       source={slug}
+      storeBadges={<StoreBadgeRow locale={locale} campaign={`web-migrate-${slug}`} />}
     />
   )
 

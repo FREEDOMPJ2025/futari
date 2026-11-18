@@ -48,6 +48,14 @@ export const APP_STORE_URL = 'https://apps.apple.com/app/id6779264784?pt=1289769
  *  campaign (`ct=landing-badge`) so the badge and the main CTA count apart. */
 export const APP_STORE_BADGE_URL = APP_STORE_URL.replace('ct=landing&', 'ct=landing-badge&')
 
+/** #1933 — same link under a page's own ASC campaign, MarsDawn-style
+ *  `ct=web-<page>` (`web-migrate-<source>`, `web-shortcuts`), so ASC's
+ *  宣傳活動 report shows which page sent the install. Same `replace` as the
+ *  badge URL above, so `pt` and `mt` stay the one set of constants. */
+export function appStoreUrlForCampaign(ct: string): string {
+  return APP_STORE_URL.replace('ct=landing&', `ct=${ct}&`)
+}
+
 // #1901 — Android 1.9.0 is live on Google Play (production track, Taiwan only,
 // since 2026-11-02). It replaces the #1648 closed-test join flow (Google Group
 // + Play opt-in page). This is the one URL every Android "download" link uses:

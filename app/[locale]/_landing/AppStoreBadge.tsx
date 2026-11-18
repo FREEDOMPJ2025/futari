@@ -21,6 +21,9 @@ interface Props {
   /** The words printed on that locale's badge (`landing.appStoreBadgeAlt`). */
   alt: string
   className?: string
+  /** Defaults to the hero badge's campaign URL; /migrate/* and
+   *  /features/shortcuts pass their own `ct=web-…` link (#1933). */
+  href?: string
 }
 
 /**
@@ -40,7 +43,7 @@ interface Props {
  * between the two visible badge edges (Play's transparent padding is cancelled
  * in PlayStoreBadge). The trademark line is in the landing footer.
  */
-export function AppStoreBadge({ locale, alt, className }: Props) {
+export function AppStoreBadge({ locale, alt, className, href = APP_STORE_BADGE_URL }: Props) {
   useMarkNativeShell()
   useMarkStandalone()
   useMarkVisitorPlatform()
@@ -50,7 +53,7 @@ export function AppStoreBadge({ locale, alt, className }: Props) {
       className={`${HIDDEN_IN_APP} [html[data-visitor-platform=android]_&]:hidden ${className ?? ''}`.trim()}
     >
       <a
-        href={APP_STORE_BADGE_URL}
+        href={href}
         target="_blank"
         rel="noopener noreferrer"
         className="block w-fit rounded-xl outline-none focus-visible:oik-focus-ring"
