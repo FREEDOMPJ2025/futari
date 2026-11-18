@@ -383,7 +383,11 @@ body {
  * Keep this block minimal. This file is the render-blocking stylesheet of
  * every route, and ~230 extra bytes here (13.06 -> 13.30 KB) pushed /zh-TW's
  * simulated mobile LCP from 2.47 s to 2.62 s: one extra round trip, no error,
- * no visual change. The same goes for the landing HTML (gzip ~29.1 KB). */
+ * no visual change. The same goes for the landing HTML (gzip ~29.1 KB).
+ * Budget for this file's transfer size: 13.55 KiB (13,875 B, Lighthouse's
+ * transferSize), raised from 13.30 KiB (13,619 B) in #1859 after an A/B
+ * Lighthouse run (main vs the CJK heading PR, 13,617 B vs 13,836 B) showed the
+ * LCP gap inside run-to-run noise. Nothing enforces it: measure after a build. */
 @layer base{:is(h1,h2,h3).font-serif:is(:lang(zh),:lang(ja)){font-weight:500;line-height:1.35}}
 /* .cjk-h: serif titles whose font is set inline (landing, dashboard cards), so
  * no .font-serif. Unlayered so it beats leading-* and font-* utilities.
