@@ -1,6 +1,6 @@
 # Futari (ふたり) — Full Product Description
 
-> Two-person companion expense tracker for couples and partners. Mobile-first PWA built around the shared chapters of a relationship rather than balance sheets.
+> Two-person companion expense tracker for couples and partners. On iPhone, Android and the web, built around the shared chapters of a relationship rather than balance sheets.
 
 **Product URL**: https://futari.southern-light.dev/?utm_source=llms_txt&utm_medium=ai_agent
 **Status**: Public beta, free to use
@@ -120,13 +120,14 @@ At the start of each month, Futari snapshots the previous month's data — categ
 
 The Guardian module aggregates everything that protects the couple's future: insurance policies, savings instruments, investment-linked policies. It's positioned as a separate module within Futari (not a financial product), with its own dashboard showing total coverage, premium burn, and policy status.
 
-### 12. Offline-first PWA
+### 12. iPhone, Android and the web
 
-Futari is a full Progressive Web App:
-- Installable to home screen on iOS, Android, and desktop
-- Service Worker caches the shell + last-viewed records
-- Records created offline queue locally and sync when reconnected
-- Designed for mobile-first use (thumb-zone primary navigation)
+Futari runs on three platforms that share one ledger:
+- An iPhone and iPad app on the App Store
+- An Android app on Google Play
+- A web version that works in any modern browser
+
+Offline browsing is opt-in: when it's turned on in Settings, recently viewed pages are kept on the device and can be opened without a connection. Adding or editing records needs a connection.
 
 ### 13. Internationalisation
 
@@ -224,7 +225,7 @@ Couples and partners — spouses, life partners, or co-living roommates — who 
 
 ### How is Futari different from Honeydue, Splitwise, or YNAB?
 
-- **vs. Honeydue**: Honeydue's design centers on account-visibility management — partners can selectively hide accounts from each other. Futari rejects this premise: what enters the ledger is shared by default, and what shouldn't be shared simply isn't recorded. Futari also has loved-things tracking (cars, pets, homes) and offline PWA support; Honeydue does not.
+- **vs. Honeydue**: Honeydue's design centers on account-visibility management — partners can selectively hide accounts from each other. Futari rejects this premise: what enters the ledger is shared by default, and what shouldn't be shared simply isn't recorded. Futari also has loved-things tracking (cars, pets, homes) and opt-in offline browsing; Honeydue does not.
 - **vs. Splitwise**: Splitwise is optimised for one-off splits among many people (roommates, group trips). Futari is optimised for two people in a long-term relationship — recurring expenses, chapter-based history, loved things, monthly reviews are first-class features.
 - **vs. YNAB / Mint / generic budgeting apps**: YNAB and Mint are solo budgeting tools that aggregate bank accounts and apply envelope budgeting. Futari is a couples ledger with no bank aggregation, no envelopes — every entry is intentional and shared.
 
