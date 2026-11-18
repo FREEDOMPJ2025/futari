@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { LandingCtaLink } from '../../_landing/LandingCtaLink'
 import { Phrase } from '../../_components/Phrase'
 import { Ember } from '../../_components/Ember'
@@ -21,6 +22,7 @@ export function MigratePrimaryCta({
   button,
   signInHref,
   source,
+  storeBadges,
 }: {
   title: string
   body: string
@@ -28,6 +30,8 @@ export function MigratePrimaryCta({
   /** Locale-aware /sign-in href; `LandingCtaLink` appends `?from=<source>`. */
   signInHref: string
   source: string
+  /** Store badge row under the sign-in button (#1933); the web entry stays. */
+  storeBadges?: ReactNode
 }) {
   return (
     <section className={s.band}>
@@ -35,18 +39,21 @@ export function MigratePrimaryCta({
       <div className={s.rows}>
         <div className={`${s.row} border-b border-hairline`}>
           <Ember />
-          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between md:gap-8">
-            <p className="m-0 text-sm md:text-base leading-[1.7] text-ink-2"><Phrase body text={body} /></p>
-            <LandingCtaLink
-              href={signInHref}
-              fromParam={source}
-              ctaLocation="migrate_primary"
-              target="sign_in"
-              className="fc-edge shrink-0 self-start md:self-auto inline-flex items-center justify-center h-12 px-6 rounded-xl text-[var(--on-fill)] text-base font-medium"
-              style={{ background: 'var(--btn-primary-bg)', letterSpacing: '1.2px', textDecoration: 'none' }}
-            >
-              {button}
-            </LandingCtaLink>
+          <div>
+            <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between md:gap-8">
+              <p className="m-0 text-sm md:text-base leading-[1.7] text-ink-2"><Phrase body text={body} /></p>
+              <LandingCtaLink
+                href={signInHref}
+                fromParam={source}
+                ctaLocation="migrate_primary"
+                target="sign_in"
+                className="fc-edge shrink-0 self-start md:self-auto inline-flex items-center justify-center h-12 px-6 rounded-xl text-[var(--on-fill)] text-base font-medium"
+                style={{ background: 'var(--btn-primary-bg)', letterSpacing: '1.2px', textDecoration: 'none' }}
+              >
+                {button}
+              </LandingCtaLink>
+            </div>
+            {storeBadges && <div className="mt-5">{storeBadges}</div>}
           </div>
         </div>
       </div>
