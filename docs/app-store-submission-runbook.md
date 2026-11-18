@@ -117,7 +117,7 @@ last_updated: 2026-11-19
    |---|---|---|
    | Android 1.9.0（`versionCode 105016`）正式版 | ✅ 2026-11-02 上架 Google Play，只開放台灣 | [#1553 結論](https://github.com/FREEDOMPJ2025/futari/issues/1553#issuecomment-6605149353)；`android/app/build.gradle` |
    | 封閉測試「至少 12 名、連續 14 天」門檻 | 已不適用（正式版已上架） | 同上 |
-   | 開放台灣以外的國家 | **未確認**（repo 與 #1553／#1901／#1902 查不到送審或審核結果） | [#1901](https://github.com/FREEDOMPJ2025/futari/issues/1901) 文案小字「目前只在台灣上架」，開放後要拿掉 |
+   | 開放台灣以外的國家 | 11/03 已送審（#1902），審核結果**未確認**（[送審紀錄](https://github.com/FREEDOMPJ2025/futari/issues/1902#issuecomment-6607099407)、[國家設定](https://github.com/FREEDOMPJ2025/futari/issues/1902#issuecomment-6606845778)） | [#1901](https://github.com/FREEDOMPJ2025/futari/issues/1901) 和 [#1905](https://github.com/FREEDOMPJ2025/futari/issues/1905) 文案小字「目前只在台灣上架」，開放後要從兩個都拿掉 |
    | 關閉 Google Form 和 Google Group | **未確認**（#1553 列為 Ray 在後台要做的事，查不到完成紀錄） | #1553 結論 |
    | 請測試人員留 Play 評分 | **未確認**（同上） | #1553 結論 |
 
