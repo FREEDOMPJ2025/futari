@@ -47,6 +47,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：四語的首頁與登入頁標題、描述、og、結構化資料、搬遷頁 FAQ、`llms.txt`／`llms-full.txt` 不再把 Futari 叫做 PWA；中文標題把「伴侶共享記帳 App」放最前面；登入頁描述改寫成 Google 或 Apple 都能登入。
   技術：只換字串，文案逐字取自 #1909 的 Aria 留言；`tests/no-pwa-copy-1909.test.ts` 走遍四語字典的字串值，不得出現 PWA；程式註解、識別名稱、manifest 不動。
 
+- **桌機首頁加上下載 QR code，「iPhone App」字樣可點（#1906）**
+  使用者：桌機首頁的商店徽章下方多一張 QR 卡，手機掃了會依 iPhone／Android 直達商店；「iPhone App」字樣連到 App Store。
+  技術：新增 `/get` 依 UA 轉址（`ct=landing-qr`）並由 server 記 `cta_location=qr`；「iPhone App」連結 `ct=landing-desktop`；徽章沿用 #1930 的元件。
+
 - **中文首頁加上雙平台上架影片（#1910）**
   使用者：繁體中文首頁的下載按鈕下方多一支 17 秒的上架短片，點了才播放；其他語言和 App 內不顯示。
   技術：`LaunchFilm` 進到可視範圍附近才掛上 `<video>`（`preload="none"`、手機寬度用 720p），殼內沿用 `data-native-shell` 隱藏；zh-TW 首頁加 VideoObject JSON-LD，規則集中在 `lib/launchFilm.ts`；proxy matcher 放行 `.mp4`／`.vtt`。
@@ -74,6 +78,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - **首頁加上「三步，兩個人一起記」和常見問題（#1907）**
   使用者：四語首頁在四大功能後多一段三步（建立帳本、把邀請傳給對方、對方加入），頁尾前多 5 題常見問題（對方要不要下載、看得到哪些紀錄、要不要付費、資料安全、帶不帶得走）。
   技術：頁面與 FAQPage 結構化資料改讀同一份 `landing.faq`，取代舊 `jsonLdFaq` 3 題；文案逐字取自 #1907 的 Aria 留言；`tests/landing-faq.test.tsx` 比對頁面字串與 JSON-LD；沿用既有 class，主 stylesheet 沒有新增位元組。
+
+- **中文、日文的襯線標題改用系統的中日文字型，字重和行高跟著調（#1849）**
+  使用者：zh-TW／zh-CN／ja 的標題，中日文字不再落到瀏覽器隨機挑的字型，改用 PingFang／微軟正黑體／Hiragino 等系統字，字重 500、行高 1.35（首頁大標維持 1.15），斷行更自然；英文不變。
+  技術：`fraunces.css`（含產生器）依 `<html lang>` 在 Fraunces 後面接系統 CJK 字型，不載入網頁字型；`globals.css` 新增 `.cjk-h`／`.cjk-d`，首頁與記帳首頁的 inline 襯線標題加上 class；擋渲染 CSS 傳輸量增加約 220 B，預算上限從 13.30 KiB 調到 13.55 KiB（#1859，量過 Lighthouse 行動版 LCP，差距在雜訊內）。
 
 ## [1.9.2] - 2026-11-04
 
