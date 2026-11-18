@@ -75,6 +75,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：兩份給 AI 爬蟲讀的索引各多 14 行搬遷頁連結（網址不帶語系、只列繁體中文），原有句子不動。
   技術：連結文字取自頁面 `seo.migrate.<slug>.title`、說明取自 `ogDescription`（zh-TW）；不列 `/migrate` 總覽頁。
 
+- **首頁加上「三步，兩個人一起記」和常見問題（#1907）**
+  使用者：四語首頁在四大功能後多一段三步（建立帳本、把邀請傳給對方、對方加入），頁尾前多 5 題常見問題（對方要不要下載、看得到哪些紀錄、要不要付費、資料安全、帶不帶得走）。
+  技術：頁面與 FAQPage 結構化資料改讀同一份 `landing.faq`，取代舊 `jsonLdFaq` 3 題；文案逐字取自 #1907 的 Aria 留言；`tests/landing-faq.test.tsx` 比對頁面字串與 JSON-LD；沿用既有 class，主 stylesheet 沒有新增位元組。
+
 - **中文、日文的襯線標題改用系統的中日文字型，字重和行高跟著調（#1849）**
   使用者：zh-TW／zh-CN／ja 的標題，中日文字不再落到瀏覽器隨機挑的字型，改用 PingFang／微軟正黑體／Hiragino 等系統字，字重 500、行高 1.35（首頁大標維持 1.15），斷行更自然；英文不變。
   技術：`fraunces.css`（含產生器）依 `<html lang>` 在 Fraunces 後面接系統 CJK 字型，不載入網頁字型；`globals.css` 新增 `.cjk-h`／`.cjk-d`，首頁與記帳首頁的 inline 襯線標題加上 class；擋渲染 CSS 傳輸量增加約 220 B，預算上限從 13.30 KiB 調到 13.55 KiB（#1859，量過 Lighthouse 行動版 LCP，差距在雜訊內）。
