@@ -71,6 +71,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：兩份給 AI 爬蟲讀的索引各多 14 行搬遷頁連結（網址不帶語系、只列繁體中文），原有句子不動。
   技術：連結文字取自頁面 `seo.migrate.<slug>.title`、說明取自 `ogDescription`（zh-TW）；不列 `/migrate` 總覽頁。
 
+- **登入頁「連不上登入伺服器」提示的英文定稿（#1891）**
+  使用者：英文提示改為「The connection may be unstable」；日文確認定稿，四語都不再標待審。
+  技術：只改 `signIn.unreachableHint` 的 en 字串（unsteady 改 unstable），移除 en／ja 的 `TODO(i18n)`。
+
 ## [1.9.2] - 2026-11-04
 
 主題：**Android App 上架 Google Play**——網站的 Android 下載入口改連 Google Play，首頁有上架公告；捷徑教學改教「Futari 記一筆」動作；服務條款與隱私權政策對齊現況；repo 搬家，專案改名 Futari。
