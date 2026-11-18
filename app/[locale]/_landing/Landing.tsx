@@ -435,6 +435,10 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
         </div>
       </section>
 
+      {/* STEPS — how the other half joins (#1907): create ledger, send invite,
+          partner joins, the order of setup.name → setup.invite → /invite. */}
+      <StepsSection t={t} />
+
       {/* TRUST — public-facing trust statement (#538). Sits between Features
           and Footer so it lands in the user's decision moment. */}
       <TrustSection t={t} variant="full" />
@@ -447,6 +451,10 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
           internal link graph for SEO and gives visitors arriving from another
           tool a direct next step. */}
       <MigrateLinksSection t={t} migrateHrefs={migrateHrefs} />
+
+      {/* FAQ — #1907. The same t.faq feeds the FAQPage JSON-LD in
+          app/[locale]/page.tsx; tests/landing-faq.test.tsx keeps both equal. */}
+      <FaqSection t={t} />
 
       {/* FOOTER */}
       <footer
@@ -758,6 +766,84 @@ function UseCaseLinksSection({
             <span aria-hidden>→</span>
           </Link>
         </div>
+      </div>
+    </section>
+  )
+}
+
+// Classes below are ones the global stylesheet already carries (copied from
+// FeatureEntry / UseCaseLinksSection): the render-blocking stylesheet has no
+// room for new utilities (see the budget note in app/globals.css), so this
+// section adds no CSS. Not UseCaseFaq / MigrateFaq: those need the .bi-* rules
+// that only the inner brand layouts inline.
+function StepsSection({ t }: { t: LandingStrings }) {
+  return (
+    <section className="relative z-10 px-5 md:px-16 py-12 md:py-16" style={{ background: 'var(--bg)' }}>
+      <div className="max-w-md md:max-w-[1080px] mx-auto">
+        <h2
+          className="m-0 mb-7 md:mb-9 text-xl md:text-page"
+          style={{ fontFamily: 'var(--font-fraunces)', fontWeight: 500, letterSpacing: '-0.3px' }}
+        >
+          <Phrase text={t.stepsTitle} />
+        </h2>
+        <ol className="m-0 p-0 list-none grid grid-cols-1 md:grid-cols-3 md:gap-x-10">
+          {t.steps.map((step, i) => (
+            <li key={step.title} className="flex gap-5 border-t border-hairline py-5 md:pt-6 md:pb-2">
+              <span
+                aria-hidden="true"
+                className="shrink-0 text-page leading-none pt-1"
+                style={{
+                  fontFamily: 'var(--font-fraunces)',
+                  fontStyle: 'italic',
+                  fontWeight: 400,
+                  color: 'var(--ink-3)',
+                  letterSpacing: '-0.5px',
+                  minWidth: 44,
+                }}
+              >
+                {i + 1}
+              </span>
+              <div className="flex-1 min-w-0">
+                <h3 className="m-0 mb-2 text-lg md:text-xl font-medium" style={{ color: 'var(--ink)', letterSpacing: '-0.2px' }}>
+                  <Phrase text={step.title} />
+                </h3>
+                <p className="m-0 text-sm md:text-base leading-[1.65] md:leading-[1.7]" style={{ color: 'var(--ink-2)' }}>
+                  <Phrase body text={step.body} />
+                </p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <p className="m-0 mt-6 md:mt-8 px-1 text-sm text-ink-2">
+          <Phrase body text={t.stepsNote} />
+        </p>
+      </div>
+    </section>
+  )
+}
+
+function FaqSection({ t }: { t: LandingStrings }) {
+  return (
+    <section className="relative z-10 px-5 md:px-16 py-12 md:py-16" style={{ background: 'var(--surface-alt)' }}>
+      <div className="max-w-md md:max-w-[1080px] mx-auto">
+        <h2
+          className="m-0 mb-7 md:mb-9 text-xl md:text-page"
+          style={{ fontFamily: 'var(--font-fraunces)', fontWeight: 500, letterSpacing: '-0.3px' }}
+        >
+          <Phrase text={t.faqTitle} />
+        </h2>
+        <dl className="m-0 border-b border-hairline">
+          {t.faq.map(({ question, answer }) => (
+            <div key={question} className="border-t border-hairline py-5 text-left">
+              <dt className="text-base font-medium" style={{ color: 'var(--ink)', letterSpacing: '-0.2px' }}>
+                <Phrase body text={question} />
+              </dt>
+              <dd className="mt-2 text-sm leading-[1.6] text-ink-2">
+                <Phrase body text={answer} />
+              </dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   )

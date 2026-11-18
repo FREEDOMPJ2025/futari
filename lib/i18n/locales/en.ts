@@ -177,21 +177,39 @@ export const en: Translations = {
       'Recurring income',
       'Offline viewing of recently opened pages',
     ],
-    jsonLdFaq: [
+    stepsTitle: 'Three steps to a shared ledger',
+    steps: [
+      { title: 'Create your ledger', body: 'Sign in with Google or Apple and give your ledger a name.' },
+      { title: 'Send the invite', body: "Send your partner the invite link, or have them scan the QR code if they're right next to you." },
+      { title: 'Your partner joins', body: "They open the link and sign in, and you're both on the same ledger. iPhone, Android or the web all work." },
+    ],
+    stepsNote: 'You can also start on your own and invite them later.',
+    faqTitle: 'Frequently asked questions',
+    faq: [
       {
-        question: 'What is Futari?',
+        question: 'Does my partner need to download the app? What if they use Android?',
         answer:
-          "Futari is a shared-ledger app for couples and partners, on iPhone, Android and the web. It handles auto-split expenses, monthly settlement, household assets, and fuel logs in one place.",
+          'Not necessarily. They open the invite link and sign in with Google or Apple to join, then use the iPhone app, the Android app or the web version. You can share one ledger even on different phones.',
       },
       {
-        question: 'How do I get started?',
+        question: "Which of each other's entries can we see?",
         answer:
-          'Sign in with Google or Apple, create a two-person ledger, and invite your partner to start recording together. Works on iPhone, Android and the web, completely free.',
+          'You both see every entry in your shared ledger. A purchase you send to be confirmed with an iPhone shortcut stays visible only to you until you confirm it.',
+      },
+      {
+        question: 'Does it cost anything?',
+        answer:
+          'No. Recording, splitting, settling up and inviting your partner are all free, with no ads.',
       },
       {
         question: 'Is my data safe?',
         answer:
-          "Your ledger is open only to you and your partner, over HTTPS. Sensitive fields like ID numbers, licence plates and addresses are encrypted at rest. We don't share or sell your ledger content.",
+          "Only your two accounts can open the ledger, and connections are encrypted with HTTPS. Sensitive fields, such as a child's legal name or ID number, are encrypted again before they're stored. You can also delete your account anytime in Settings.",
+      },
+      {
+        question: 'If we stop using it, can we take our data with us?',
+        answer:
+          'Yes. You can export your expenses, income and settlements as CSV from Settings, even after you leave the ledger.',
       },
     ],
     phoneMockBalanceCaption: 'YOU OWE T',

@@ -291,10 +291,15 @@ export type Translations = {
     jsonLdAppDescription: string
     /** schema.org SoftwareApplication `featureList` (#467). */
     jsonLdFeatureList: readonly string[]
-    /** schema.org FAQPage entries — answers held to ~40–60 字 to fit AI
-     *  Overview's Answer Capsule extraction window (#611). Per-locale so each
-     *  rendered page emits FAQ schema matching its visible audience language. */
-    jsonLdFaq: readonly { question: string; answer: string }[]
+    /** 「兩個人一起記」三步區塊（#1907）：標題、三步、底下一行小字。文案出自 Aria 的留言（issuecomment-6611192196）。 */
+    stepsTitle: string
+    steps: readonly { title: string; body: string }[]
+    stepsNote: string
+    /** 首頁常見問題區塊標題（#1907）；沿用 use-case／migrate 頁既有的 faqHeading。 */
+    faqTitle: string
+    /** 首頁常見問題：頁面上的問答與 FAQPage JSON-LD 共用這一份（#1907），
+     *  題目與答案逐字相同，tests/landing-faq.test.tsx 護著。 */
+    faq: readonly { question: string; answer: string }[]
     /** Decorative PhonePreview mock (desktop hero) — not real data (#467). */
     phoneMockBalanceCaption: string
     phoneMockBalancePeriod: string
@@ -3785,21 +3790,39 @@ export const zhTW: Translations = {
       '定期收入',
       '離線瀏覽最近看過的頁面',
     ],
-    jsonLdFaq: [
+    stepsTitle: '三步，兩個人一起記',
+    steps: [
+      { title: '建立帳本', body: '用 Google 或 Apple 登入，幫你們的帳本取個名字。' },
+      { title: '把邀請傳給對方', body: '把邀請連結傳過去；對方就在旁邊的話，讓他掃 QR Code。' },
+      { title: '對方加入', body: '對方點開連結、登入，就和你記同一本帳。iPhone、Android 或網頁版都可以。' },
+    ],
+    stepsNote: '也可以先自己記，之後再邀請。',
+    faqTitle: '常見問題',
+    faq: [
       {
-        question: 'Futari 是什麼？',
+        question: '另一半也要下載嗎？用 Android 可以嗎？',
         answer:
-          'Futari 是專為夫妻、伴侶設計的雙人共享記帳 App，iPhone、Android 和網頁版都能用，支援自動分攤、AA 結算、家庭資產盤點與愛車油耗紀錄。',
+          '不一定要下載。對方點開邀請連結、用 Google 或 Apple 登入就能加入，之後用 iPhone App、Android App 或網頁版都可以。兩個人用不同的手機，也能共用同一本帳。',
       },
       {
-        question: '如何開始使用？',
+        question: '我們看得到彼此的哪些紀錄？',
         answer:
-          '用 Google 或 Apple 登入後建立兩人帳本，邀請伴侶加入就能一起記帳。iPhone、Android 和網頁版都能用，完全免費。',
+          '記在共用帳本裡的每一筆，你們兩個人都看得到。用 iPhone 捷徑送進「待確認」的花費，在你確認之前只有你自己看得到。',
+      },
+      {
+        question: '要付費嗎？',
+        answer:
+          '不用。記帳、分攤、結算和邀請另一半都免費，也沒有廣告。',
       },
       {
         question: '資料安全嗎？',
         answer:
-          '帳本只開放給你和伴侶兩人，連線以 HTTPS 加密。身分證字號、車牌、住址等機敏欄位會加密儲存，記帳內容不分享、不販售。',
+          '帳本只開放給你們兩人的帳號，連線以 HTTPS 加密；孩子的本名、身分證字號這類機敏欄位，會另外加密才存進資料庫。也可以隨時在設定裡刪除帳號。',
+      },
+      {
+        question: '不想用了，資料帶得走嗎？',
+        answer:
+          '可以。在設定裡就能把支出、進帳和結算匯出成 CSV，離開帳本之後也能匯出。',
       },
     ],
     phoneMockBalanceCaption: 'YOU OWE T',
