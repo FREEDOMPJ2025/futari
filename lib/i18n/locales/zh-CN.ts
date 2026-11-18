@@ -98,6 +98,8 @@ export const zhCN: Translations = {
     playStoreCta: '在 Google Play 下载',
     playStoreCtaHint: '目前仅在台湾上架',
     playBadgeAlt: '去商店下载 Google Play',
+    downloadQrCaption: '用手机扫码下载',
+    downloadQrAlt: '扫码后打开 Futari 的下载页面',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
     appStoreBadgeAlt: 'App Store 下载',
     appStoreTrademark: 'App Store is a service mark of Apple Inc., registered in the U.S. and other countries.',
@@ -176,21 +178,39 @@ export const zhCN: Translations = {
       '定期收入',
       '离线浏览最近看过的页面',
     ],
-    jsonLdFaq: [
+    stepsTitle: '三步，两个人一起记',
+    steps: [
+      { title: '建立账本', body: '用 Google 或 Apple 登录，给你们的账本取个名字。' },
+      { title: '把邀请发给对方', body: '把邀请链接发过去；对方就在旁边的话，让 TA 扫 QR 码。' },
+      { title: '对方加入', body: '对方打开链接、登录，就和你记同一本账。iPhone、Android 或网页版都可以。' },
+    ],
+    stepsNote: '也可以先自己记，之后再邀请。',
+    faqTitle: '常见问题',
+    faq: [
       {
-        question: 'Futari 是什么？',
+        question: '另一半也要下载吗？用 Android 可以吗？',
         answer:
-          'Futari 是专为夫妻、伴侣设计的双人共享记账 App，iPhone、Android 和网页版都能用，支持自动分摊、AA 结算、家庭资产盘点与爱车油耗记录。',
+          '不一定要下载。对方打开邀请链接、用 Google 或 Apple 登录就能加入，之后用 iPhone App、Android App 或网页版都可以。两个人用不同的手机，也能共用同一本账。',
       },
       {
-        question: '如何开始使用？',
+        question: '我们看得到彼此的哪些记录？',
         answer:
-          '用 Google 或 Apple 登录后建立两人账本，邀请伴侣加入就能一起记账。iPhone、Android 和网页版都能用，完全免费。',
+          '记在共用账本里的每一笔，你们两个人都看得到。用 iPhone 快捷指令送进“待确认”的花费，在你确认之前只有你自己看得到。',
+      },
+      {
+        question: '要付费吗？',
+        answer:
+          '不用。记账、分摊、结算和邀请另一半都免费，也没有广告。',
       },
       {
         question: '数据安全吗？',
         answer:
-          '账本只开放给你和伴侣两人，连接以 HTTPS 加密。身份证号、车牌、住址等敏感字段会加密存储，记账内容不分享、不出售。',
+          '账本只对你们两人的账号开放，连接以 HTTPS 加密；孩子的本名、身份证号这类敏感字段，会另外加密才存进数据库。也可以随时在设置里删除账号。',
+      },
+      {
+        question: '不想用了，数据带得走吗？',
+        answer:
+          '可以。在设置里就能把支出、进账和结算导出成 CSV，离开账本之后也能导出。',
       },
     ],
     phoneMockBalanceCaption: 'YOU OWE T',

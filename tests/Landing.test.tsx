@@ -178,16 +178,20 @@ describe('Landing — SSR CTAs work without JS (#1521)', () => {
     const hiddenInShell = (el: Element | null): boolean =>
       !!el && (el.className.includes('[html[data-native-shell]_&]:hidden') || hiddenInShell(el.parentElement))
     for (const a of playAnchors) expect(hiddenInShell(a)).toBe(true)
-    // #1930: same for the App Store badge, the only apps.apple.com link in the
-    // SSR HTML (the main CTA is the sign-in link until the platform resolves).
+    // #1930: same for the App Store badge. #1906 adds one more apps.apple.com
+    // link, "iPhone App" in the compact trust row (ct=landing-desktop); the main
+    // CTA is the sign-in link until the platform resolves, so these two are the
+    // only ones, and both are swapped out inside the native shells.
     const appAnchors = [...doc.querySelectorAll('a[href*="apps.apple.com"]')]
-    expect(appAnchors.length).toBe(1)
-    expect(appAnchors[0].getAttribute('href')).toContain('ct=landing-badge')
+    expect(appAnchors.length).toBe(2)
+    expect(appAnchors.map((a) => /ct=([\w-]+)/.exec(a.getAttribute('href')!)![1]).sort()).toEqual([
+      'landing-badge',
+      'landing-desktop',
+    ])
     for (const a of appAnchors) expect(hiddenInShell(a)).toBe(true)
     // Raw count over the whole server HTML (attributes, JSON-LD, meta, preload,
-    // plain text), so a stray App Store mention outside the badge turns red.
-    // Measured 2026-11-11: only the badge href.
-    expect(html.split('apps.apple.com').length - 1).toBe(1)
+    // plain text), so a stray App Store mention outside those two turns red.
+    expect(html.split('apps.apple.com').length - 1).toBe(2)
   })
 })
 
@@ -244,9 +248,10 @@ describe('Landing — example card (#1852)', () => {
 
   // #1901: the Google Play badge joins the CTA block (store entries together),
   // so the card now follows the sign-in link and that badge, still below the
-  // CTA and above the compact trust row. #1910: on zh-TW the launch film sits
-  // between the badge and the card.
-  it('sits right after the mobile sign-in link, the Play badge and the zh-TW launch film, before the compact trust row', () => {
+  // CTA and above the compact trust row. #1906: the desktop QR card (md+) sits
+  // right under the badge row. #1910: on zh-TW the launch film sits between the
+  // QR card and the card (Daphne's order: badges → QR card → film → card).
+  it('sits right after the mobile sign-in link, the badge row, the desktop QR card and the zh-TW launch film, before the compact trust row', () => {
     renderLanding()
     const fig = screen.getByRole('figure')
     const mobileSignIn = screen
@@ -255,7 +260,9 @@ describe('Landing — example card (#1852)', () => {
       .closest('div')!
     const badge = mobileSignIn.nextElementSibling!
     expect(badge.querySelector(`img[alt="${zhTW.landing.playBadgeAlt}"]`)).not.toBeNull()
-    const film = badge.nextElementSibling!
+    const qrCard = badge.nextElementSibling!
+    expect(qrCard).toBe(screen.getByTestId('desktop-download-block'))
+    const film = qrCard.nextElementSibling!
     expect(film.getAttribute('data-testid')).toBe('launch-film')
     expect(film.nextElementSibling).toBe(fig)
   })

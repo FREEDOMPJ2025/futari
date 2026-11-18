@@ -76,7 +76,7 @@ export function PartnerLeftCard({ partnerName, currentEpochId }: Props) {
       >
         <div className="flex-1">
           <div
-            className="text-base leading-tight"
+            className="cjk-h text-base leading-tight"
             style={{ fontFamily: 'var(--font-fraunces)', color: 'var(--ink)', fontWeight: 500 }}
           >
             {heading}

@@ -13,6 +13,7 @@ import { IllustrationSlot } from './IllustrationSlot'
 import { LandingCtaHint } from './LandingCtaHint'
 import { LandingCtaLink } from './LandingCtaLink'
 import { FeatureOutingTextLink } from '../_components/FeatureOutingTextLink'
+import { DesktopDownloadBlock } from './DesktopDownloadBlock'
 import { LandingExampleCard } from './LandingExampleCard'
 import { LandingPrimaryCta } from './LandingPrimaryCta'
 import { LandingSecondaryCta } from './LandingSecondaryCta'
@@ -194,7 +195,7 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
             </p>
 
             <h1
-              className="m-0 leading-none md:leading-[1]"
+              className="cjk-h cjk-d m-0 leading-none md:leading-[1]"
               style={{
                 fontFamily: 'var(--font-fraunces)',
                 fontWeight: 500,
@@ -207,17 +208,15 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
                   even though per-character it's smaller; lh 1.15 keeps
                   the block tight, letter-spacing -1px tightens CJK rhythm. */}
               <span
-                className="ph md:hidden block text-display-tagline"
+                className="cjk-h cjk-d ph md:hidden block text-display-tagline font-normal leading-[1.15]"
                 style={{
-                  fontWeight: 400,
-                  lineHeight: 1.15,
                   letterSpacing: '-1px',
                 }}
                 dangerouslySetInnerHTML={{ __html: phraseHtml(t.taglineHtml) }}
               />
               {/* desktop: tagline as the giant headline */}
               <span
-                className="ph hidden md:inline text-display-tagline-lg"
+                className="cjk-h cjk-d ph hidden md:inline text-display-tagline-lg"
                 style={{
                   letterSpacing: '-3.5px',
                 }}
@@ -307,13 +306,17 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
               <PlayStoreBadge locale={locale} alt={t.playBadgeAlt} />
             </div>
 
+            {/* #1906 — QR card under the badge row above (the badges are
+                #1930's; there is no second pair): phones scan it (→ /get).
+                md and up, desktop browsers only. */}
+            <DesktopDownloadBlock t={t} />
+
             {/* #1910 — launch film under the CTA cluster, zh-TW only (the film
                 is Chinese only). Always shown (not tied to the launch banner);
                 hidden in the native shells like the Play badge. Order (Daphne,
-                #1906 issuecomment-6611277707): CTA row → download block (#1906:
-                store badges + QR card, which replaces the Play badge above) →
-                mt-10 → this film → example card. Keep the film after the
-                download block and before the example card. */}
+                #1906 issuecomment-6611277707): CTA row → store badges (#1930)
+                → QR card (#1906) → mt-10 → this film → example card. Keep the
+                film after the QR card and before the example card. */}
             {showsLaunchFilm(locale) && <LaunchFilm className="mt-10" />}
 
             {/* #1852 — example card below the sign-in link: one expense and how it
@@ -368,7 +371,7 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
                 {t.featuresKicker}
               </p>
               <h2
-                className="m-0 mt-1.5 text-xl md:text-page"
+                className="cjk-h m-0 mt-1.5 text-xl md:text-page"
                 style={{
                   fontFamily: 'var(--font-fraunces)',
                   fontWeight: 500,
@@ -435,6 +438,10 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
         </div>
       </section>
 
+      {/* STEPS — how the other half joins (#1907): create ledger, send invite,
+          partner joins, the order of setup.name → setup.invite → /invite. */}
+      <StepsSection t={t} />
+
       {/* TRUST — public-facing trust statement (#538). Sits between Features
           and Footer so it lands in the user's decision moment. */}
       <TrustSection t={t} variant="full" />
@@ -447,6 +454,10 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
           internal link graph for SEO and gives visitors arriving from another
           tool a direct next step. */}
       <MigrateLinksSection t={t} migrateHrefs={migrateHrefs} />
+
+      {/* FAQ — #1907. The same t.faq feeds the FAQPage JSON-LD in
+          app/[locale]/page.tsx; tests/landing-faq.test.tsx keeps both equal. */}
+      <FaqSection t={t} />
 
       {/* FOOTER */}
       <footer
@@ -556,7 +567,7 @@ function MigrateLinksSection({
               {t.migrateSection.kicker}
             </p>
             <h2
-              className="m-0 mt-1.5 text-xl md:text-page"
+              className="cjk-h m-0 mt-1.5 text-xl md:text-page"
               style={{
                 fontFamily: 'var(--font-fraunces)',
                 fontWeight: 500,
@@ -682,7 +693,7 @@ function UseCaseLinksSection({
               {t.useCaseSection.kicker}
             </p>
             <h2
-              className="m-0 mt-1.5 text-xl md:text-page"
+              className="cjk-h m-0 mt-1.5 text-xl md:text-page"
               style={{
                 fontFamily: 'var(--font-fraunces)',
                 fontWeight: 500,
@@ -758,6 +769,84 @@ function UseCaseLinksSection({
             <span aria-hidden>→</span>
           </Link>
         </div>
+      </div>
+    </section>
+  )
+}
+
+// Classes below are ones the global stylesheet already carries (copied from
+// FeatureEntry / UseCaseLinksSection): the render-blocking stylesheet has no
+// room for new utilities (see the budget note in app/globals.css), so this
+// section adds no CSS. Not UseCaseFaq / MigrateFaq: those need the .bi-* rules
+// that only the inner brand layouts inline.
+function StepsSection({ t }: { t: LandingStrings }) {
+  return (
+    <section className="relative z-10 px-5 md:px-16 py-12 md:py-16" style={{ background: 'var(--bg)' }}>
+      <div className="max-w-md md:max-w-[1080px] mx-auto">
+        <h2
+          className="m-0 mb-7 md:mb-9 text-xl md:text-page"
+          style={{ fontFamily: 'var(--font-fraunces)', fontWeight: 500, letterSpacing: '-0.3px' }}
+        >
+          <Phrase text={t.stepsTitle} />
+        </h2>
+        <ol className="m-0 p-0 list-none grid grid-cols-1 md:grid-cols-3 md:gap-x-10">
+          {t.steps.map((step, i) => (
+            <li key={step.title} className="flex gap-5 border-t border-hairline py-5 md:pt-6 md:pb-2">
+              <span
+                aria-hidden="true"
+                className="shrink-0 text-page leading-none pt-1"
+                style={{
+                  fontFamily: 'var(--font-fraunces)',
+                  fontStyle: 'italic',
+                  fontWeight: 400,
+                  color: 'var(--ink-3)',
+                  letterSpacing: '-0.5px',
+                  minWidth: 44,
+                }}
+              >
+                {i + 1}
+              </span>
+              <div className="flex-1 min-w-0">
+                <h3 className="m-0 mb-2 text-lg md:text-xl font-medium" style={{ color: 'var(--ink)', letterSpacing: '-0.2px' }}>
+                  <Phrase text={step.title} />
+                </h3>
+                <p className="m-0 text-sm md:text-base leading-[1.65] md:leading-[1.7]" style={{ color: 'var(--ink-2)' }}>
+                  <Phrase body text={step.body} />
+                </p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <p className="m-0 mt-6 md:mt-8 px-1 text-sm text-ink-2">
+          <Phrase body text={t.stepsNote} />
+        </p>
+      </div>
+    </section>
+  )
+}
+
+function FaqSection({ t }: { t: LandingStrings }) {
+  return (
+    <section className="relative z-10 px-5 md:px-16 py-12 md:py-16" style={{ background: 'var(--surface-alt)' }}>
+      <div className="max-w-md md:max-w-[1080px] mx-auto">
+        <h2
+          className="m-0 mb-7 md:mb-9 text-xl md:text-page"
+          style={{ fontFamily: 'var(--font-fraunces)', fontWeight: 500, letterSpacing: '-0.3px' }}
+        >
+          <Phrase text={t.faqTitle} />
+        </h2>
+        <dl className="m-0 border-b border-hairline">
+          {t.faq.map(({ question, answer }) => (
+            <div key={question} className="border-t border-hairline py-5 text-left">
+              <dt className="text-base font-medium" style={{ color: 'var(--ink)', letterSpacing: '-0.2px' }}>
+                <Phrase body text={question} />
+              </dt>
+              <dd className="mt-2 text-sm leading-[1.6] text-ink-2">
+                <Phrase body text={answer} />
+              </dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   )
