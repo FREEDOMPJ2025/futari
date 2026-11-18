@@ -22,8 +22,9 @@ updates:
   - v1.9.0: 推播的呼叫者驗證改成具名 secret key，補 `[auth] reject reason=` 的讀法；不記的 header 加上 `apikey`（#1834）
   - Unreleased: `landing_cta_clicked` 的 `target` 新增 `play_store`（取代 `android_beta`），新增 `cta_location` `play_badge`／`launch_banner`；Android 招募事件改成 Google Play 下載的語意（#1901）
   - Unreleased: `landing_cta_clicked` 新增 `cta_location` `qr`（server，`/get`），`target` 新增 `landing`（只出現在 `qr`）；桌機的 App Store 徽章沿用 #1930 的 `app_store_badge`（#1906）
+  - Unreleased: `landing_cta_clicked` 新增 `cta_location` `shortcuts_link`、`target` 新增 `shortcuts`；首頁功能區下一行與頁尾各一個發送點（#1908）
 related_specs: [conversion-analytics, product]
-related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", "#1415", "#1453", "#1552", "#1546", "#1553", "#1648", "#1723", "#1742", "#1764", "#968", "#1769", "#1834", "#1901", "#1906"]
+related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", "#1415", "#1453", "#1552", "#1546", "#1553", "#1648", "#1723", "#1742", "#1764", "#968", "#1769", "#1834", "#1901", "#1906", "#1908"]
 ---
 
 # 觀測的邊界與讀數據的紀律
@@ -140,6 +141,9 @@ related_issues: ["#1018", "#1086", "#1127", "#1267", "#1274", "#1300", "#1314", 
 
 - **桌機下載 QR（#1906）是新測量點，基準從部署日起算。** 只在 `md` 以上、殼外、且不是 iPhone／iPad／Android 瀏覽器時出現（桌機的 App Store、Google Play 徽章是 #1930 的那一列，沒有另一組）。QR 本身不能點，掃描後打到 `/get`（`app/get/route.ts`），由 **server** 用 `captureServer` 發 `landing_cta_clicked`，`cta_location: 'qr'`，`target` 是實際轉去的地方：`app_store`（iPhone／iPad，以及任何自稱 Macintosh 的 UA）、`play_store`（Android）、`landing`（其他）。Macintosh 算 `app_store`：`/get` 只有掃桌機 QR 才會到，桌機 Mac 不會掃 QR，而 iPadOS 預設「桌面版網站」的 Safari UA 自稱 Macintosh；真的 Mac 打到這裡也只是開 App Store 頁面，不是死路。
   - **失效的樣子**：`qr` 事件全部掛在同一個 distinct_id `anon:landing-qr` 底下（掃描的手機在這一刻沒有 PostHog 身分），只能看筆數與 `target` 分布，不能算人數、不能跟桌機那次瀏覽串成同一個人。偶爾有真的 Mac 打開 `/get`，也會記成 `target: 'app_store'`，所以 `qr` 的 `app_store` 可能略偏高。App Store 這側的安裝數看 ASC 宣傳活動：徽章是 `landing-badge`（#1930），「iPhone App」字樣是 `landing-desktop`，QR 是 `landing-qr`（「iPhone App」字樣的點擊不發 PostHog 事件）。
+
+- **首頁到捷徑記帳頁的入口（#1908）是新測量點，基準從部署日起算。** 兩個發送點都在 client，點擊發 `landing_cta_clicked`，`cta_location: 'shortcuts_link'`、`target: 'shortcuts'`：首頁功能區下的一行（Android 瀏覽器與 Android App 內以 CSS 隱藏，iPhone、桌機、iPhone App 與已安裝的 PWA 看得到），以及頁尾的「捷徑記帳」連結（不分平台都在）。
+  - **失效的樣子**：兩個發送點共用同一個 `cta_location`，只看 `shortcuts_link` 分不出是首頁那行還是頁尾；Android 訪客只可能從頁尾點到，所以 `shortcuts_link` 的來源平台不是只有 iOS。頁尾同時拿掉「看全部搬遷指南」，頁尾對 `/migrate` 總覽頁的連結從部署日起消失（首頁搬遷區自己那個還在），`/migrate` 的瀏覽量若在部署日後下滑，先排除這個變動。
 
 - **`outing_created` 與 `outing_link_shared`（#1723）是出遊漏斗的新測量點，基準從部署日起算。** `outing_created` 由 server 在 `createOuting` 成功後發（`captureServer`，distinct_id 是使用者 id），沒有屬性；放 server 是為了跟同樣在 server、以使用者 id 為 key 的 `signed_up`、`setup_completed` 串成同一個人的漏斗。`outing_link_shared` 由 client 發，屬性只有 `method`：`copy`（剪貼簿真的寫入：「複製連結」，或沒有分享面板時「分享給朋友」改複製訊息＋連結）、`share`（系統分享面板，使用者沒取消）、`qr`（顯示 QR 給人掃）。`share`／`qr` 從 #1727 上線起才有。兩者都不帶出遊 id、名稱、分享 token 或任何 URL 內容；重設連結不算分享，剪貼簿失敗也不發。
   - **出遊分享頁的事件 0 筆，是沒有訪客，不是沒送出（2026-10-15 查證）。** v1.7.0（10-08）上線到 10-15，PostHog 在 `/<locale>/outing/*` 上連無條件發送的 `$pageview` 都是 0，但同期 `/outings` 儀表板頁有 18 筆 pageview（iOS 殼），代表 PostHog 本身正常。以 production build（`VERCEL_ENV=production`）接 DEV 資料庫、在 headless 瀏覽器開分享頁，`outing_link_opened` 與 `$pageview` 都有送出，token 在 `$current_url`／`$pathname`／`$session_entry_url` 都被換成 `:token`（請求在瀏覽器端攔下，沒有進 PostHog）。分享連結也沒有 universal link，一定是在瀏覽器開。所以 prod 那 2 次出遊的參與者沒有人是開分享頁進來的（推論自分享頁 0 個 pageview；沒有查 prod 資料庫）。

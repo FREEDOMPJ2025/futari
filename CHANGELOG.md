@@ -55,6 +55,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：桌機首頁的商店徽章下方多一張 QR 卡，手機掃了會依 iPhone／Android 直達商店；「iPhone App」字樣連到 App Store。
   技術：新增 `/get` 依 UA 轉址（`ct=landing-qr`）並由 server 記 `cta_location=qr`；「iPhone App」連結 `ct=landing-desktop`；徽章沿用 #1930 的元件。
 
+- **首頁加上「捷徑記帳」入口，頁尾補「使用情境」「捷徑記帳」（#1908）**
+  使用者：四語首頁功能區下多一行連到 `/features/shortcuts`，iPhone 與桌機看得到、Android 瀏覽器與 Android App 內不顯示；頁尾加上「使用情境」「捷徑記帳」兩個連結，並拿掉與搬遷區重複的「看全部搬遷指南」。
+  技術：點擊發 `landing_cta_clicked`，`cta_location=shortcuts_link`、`target=shortcuts`；首頁那行靠 `data-visitor-platform=android` 的 Tailwind variant 隱藏。
+
 - **捷徑記帳頁加開頭動畫和示意卡（#1921）**
   使用者：`/features/shortcuts` 開頭用 5 秒內的動畫講完付款、打開填好的新增紀錄、自己按儲存，Apple Pay 三步和 LINE Pay 第一步各有示意卡。
   技術：全部程式畫，樣式在新的 `feature-shortcuts-css.ts`，無 JS 和 reduced motion 看到靜止終幀；卡片標籤由測試綁住步驟內文。
