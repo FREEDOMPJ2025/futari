@@ -83,6 +83,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：zh-TW／zh-CN／ja 的標題，中日文字不再落到瀏覽器隨機挑的字型，改用 PingFang／微軟正黑體／Hiragino 等系統字，字重 500、行高 1.35（首頁大標維持 1.15），斷行更自然；英文不變。
   技術：`fraunces.css`（含產生器）依 `<html lang>` 在 Fraunces 後面接系統 CJK 字型，不載入網頁字型；`globals.css` 新增 `.cjk-h`／`.cjk-d`，首頁與記帳首頁的 inline 襯線標題加上 class；擋渲染 CSS 傳輸量增加約 220 B，預算上限從 13.30 KiB 調到 13.55 KiB（#1859，量過 Lighthouse 行動版 LCP，差距在雜訊內）。
 
+- **登入頁「連不上登入伺服器」提示的英文定稿（#1891）**
+  使用者：英文提示改為「The connection may be unstable」；日文確認定稿，四語都不再標待審。
+  技術：只改 `signIn.unreachableHint` 的 en 字串（unsteady 改 unstable），移除 en／ja 的 `TODO(i18n)`。
+
 ## [1.9.2] - 2026-11-04
 
 主題：**Android App 上架 Google Play**——網站的 Android 下載入口改連 Google Play，首頁有上架公告；捷徑教學改教「Futari 記一筆」動作；服務條款與隱私權政策對齊現況；repo 搬家，專案改名 Futari。
