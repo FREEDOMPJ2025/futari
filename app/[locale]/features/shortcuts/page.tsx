@@ -9,6 +9,7 @@ import { BrandBreadcrumb } from '../../_components/BrandBreadcrumb'
 import { Phrase } from '../../_components/Phrase'
 import { s } from '../../_components/brand-inner'
 import type { ShortcutArt } from '@/lib/i18n/locales/zh-TW'
+import { StoreBadgeRow } from '../../_landing/StoreBadgeRow'
 import { UseCaseHero } from '../../use-case/_components/UseCaseHero'
 import { FEATURE_SHORTCUTS_CSS, fs } from './_components/feature-shortcuts-css'
 import { FeatureShortcutsJsonLd } from './_components/FeatureShortcutsJsonLd'
@@ -130,6 +131,7 @@ export default async function FeatureShortcutsPage({ params }: { params: Params 
           ]}
         />
         <UseCaseHero kicker={t.heroKicker} title={t.heroTitle} subtitle={t.heroSubtitle} />
+        <StoreBadgeRow locale={locale} campaign="web-shortcuts" />
       </div>
 
       <section id="flow" aria-label={flow.stepsLabel}>

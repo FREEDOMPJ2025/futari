@@ -1,6 +1,6 @@
 # Futari (ふたり)
 
-> 兩個人的記帳框架。Two-person companion expense tracker for couples and partners — mobile-first PWA built around shared chapters of life rather than balance sheets.
+> 兩個人的記帳框架。Two-person companion expense tracker for couples and partners — on iPhone, Android and the web, built around shared chapters of life rather than balance sheets.
 
 Futari is a Traditional-Chinese-first expense tracker designed for exactly two users in a long-term relationship (spouses, partners, or co-living roommates). It is not a generic budgeting app: it assumes one shared ledger, one shared life, and zero account-visibility gating. Everything entered belongs to both people by default.
 
@@ -52,6 +52,20 @@ Futari belongs to the "Freedom Project" family — a brand built on the metaphor
 - [Shortcuts: open Add Expense after an Apple Pay payment (zh-CN)](https://futari.southern-light.dev/zh-CN/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent)
 - [Shortcuts: open Add Expense after an Apple Pay payment (en)](https://futari.southern-light.dev/en/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent)
 - [Shortcuts: open Add Expense after an Apple Pay payment (ja)](https://futari.southern-light.dev/ja/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent)
+- [從 Honeydue 搬家到 Futari｜資料匯入](https://futari.southern-light.dev/migrate/honeydue?utm_source=llms_txt&utm_medium=ai_agent): Honeydue 用戶的下一站：3 分鐘搬遷到 Futari，雙人記帳繼續。
+- [從 Spendee 搬家到 Futari｜CSV 匯入](https://futari.southern-light.dev/migrate/spendee?utm_source=llms_txt&utm_medium=ai_agent): Spendee 用戶的雙人記帳新選擇：上傳 CSV，3 分鐘搬完。
+- [從 CWMoney 搬家到 Futari｜免費雙人分帳](https://futari.southern-light.dev/migrate/cwmoney?utm_source=llms_txt&utm_medium=ai_agent): CWMoney 用戶的下一站：免費分帳，Excel 轉 CSV 搬進 Futari。
+- [從麻布記帳搬家到 Futari｜截圖匯入](https://futari.southern-light.dev/migrate/moneybook?utm_source=llms_txt&utm_medium=ai_agent): 麻布記帳用戶的雙人記帳新選擇：截圖整理成 CSV，搬進 Futari。
+- [從 AndroMoney 搬家到 Futari｜CSV 匯入](https://futari.southern-light.dev/migrate/andromoney?utm_source=llms_txt&utm_medium=ai_agent): AndroMoney 用戶的雙人記帳新選擇：匯出 CSV，搬進 Futari。
+- [從 Mobills 搬家到 Futari｜截圖匯入](https://futari.southern-light.dev/migrate/mobills?utm_source=llms_txt&utm_medium=ai_agent): Mobills 用戶的雙人記帳新選擇：截圖整理成 CSV，搬進 Futari。
+- [從 Manebo 搬家到 Futari｜情侶共同記帳](https://futari.southern-light.dev/migrate/manebo?utm_source=llms_txt&utm_medium=ai_agent): Manebo 用戶的下一站：匯出 CSV，搬進 Futari 情侶共同記帳。
+- [簡單記帳買了永久 VIP，搬家會浪費嗎？｜Futari 免費雙人記帳](https://futari.southern-light.dev/migrate/simple-daily-money?utm_source=llms_txt&utm_medium=ai_agent): 簡單記帳用戶搬家指南：截圖→ChatGPT→CSV，搬進 Futari 雙人記帳。
+- [從記帳城市搬家到 Futari｜不用訂閱也能把記錄搬出來](https://futari.southern-light.dev/migrate/fortune-city?utm_source=llms_txt&utm_medium=ai_agent): 記帳城市要訂閱才能匯出？截圖→ChatGPT→CSV，免費搬進 Futari 雙人記帳。
+- [從 CashMan 搬家到 Futari｜截圖轉 CSV](https://futari.southern-light.dev/migrate/cashman?utm_source=llms_txt&utm_medium=ai_agent): CashMan 用戶搬家指南：截圖→ChatGPT→CSV，搬進 Futari 雙人記帳。
+- [從 1Money 搬家到 Futari｜截圖轉 CSV](https://futari.southern-light.dev/migrate/1money?utm_source=llms_txt&utm_medium=ai_agent): 1Money 用戶搬家指南：截圖→ChatGPT→CSV，搬進 Futari 雙人記帳。
+- [從 iCost 搬家到 Futari｜截圖轉 CSV](https://futari.southern-light.dev/migrate/icost?utm_source=llms_txt&utm_medium=ai_agent): iCost 用戶搬家指南：截圖→ChatGPT→CSV，搬進 Futari 雙人記帳。
+- [從 Splitwise 搬家到 Futari｜匯出試算表、CSV 匯入](https://futari.southern-light.dev/migrate/splitwise?utm_source=llms_txt&utm_medium=ai_agent): Splitwise 用戶搬家指南：匯出試算表 → 上傳 CSV → 搬進 Futari 雙人記帳。
+- [從隨手記搬家到 Futari｜截圖轉 CSV](https://futari.southern-light.dev/migrate/suishouji?utm_source=llms_txt&utm_medium=ai_agent): 隨手記用戶搬家指南：截圖→ChatGPT→CSV，搬進 Futari 雙人記帳。
 - [Privacy policy](https://futari.southern-light.dev/zh-TW/privacy?utm_source=llms_txt&utm_medium=ai_agent)
 - [Terms of service](https://futari.southern-light.dev/zh-TW/terms?utm_source=llms_txt&utm_medium=ai_agent)
 - [Full LLM context](https://futari.southern-light.dev/llms-full.txt)

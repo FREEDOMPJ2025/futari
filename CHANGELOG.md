@@ -47,6 +47,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **對外文字拿掉「PWA」，改寫成「iPhone、Android 和網頁版」（#1909）**
+  使用者：四語的首頁與登入頁標題、描述、og、結構化資料、搬遷頁 FAQ、`llms.txt`／`llms-full.txt` 不再把 Futari 叫做 PWA；中文標題把「伴侶共享記帳 App」放最前面；登入頁描述改寫成 Google 或 Apple 都能登入。
+  技術：只換字串，文案逐字取自 #1909 的 Aria 留言；`tests/no-pwa-copy-1909.test.ts` 走遍四語字典的字串值，不得出現 PWA；程式註解、識別名稱、manifest 不動。
+
+- **桌機首頁加上下載 QR code，「iPhone App」字樣可點（#1906）**
+  使用者：桌機首頁的商店徽章下方多一張 QR 卡，手機掃了會依 iPhone／Android 直達商店；「iPhone App」字樣連到 App Store。
+  技術：新增 `/get` 依 UA 轉址（`ct=landing-qr`）並由 server 記 `cta_location=qr`；「iPhone App」連結 `ct=landing-desktop`；徽章沿用 #1930 的元件。
+
 - **捷徑記帳頁加開頭動畫和示意卡（#1921）**
   使用者：`/features/shortcuts` 開頭用 5 秒內的動畫講完付款、打開填好的新增紀錄、自己按儲存，Apple Pay 三步和 LINE Pay 第一步各有示意卡。
   技術：全部程式畫，樣式在新的 `feature-shortcuts-css.ts`，無 JS 和 reduced motion 看到靜止終幀；卡片標籤由測試綁住步驟內文。
@@ -58,6 +66,26 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - **結束旅行時的結算紀錄名稱跟著語系（#1912）**
   使用者：新結算紀錄採用結束旅行者的語系，伴侶即使使用不同語系也會看到結束者的語言，舊紀錄維持不變。
   技術：兩個結束旅行的入口從 request locale 取得四語文案，旅行名稱去除前後空白，空白名稱使用未命名旅行的結算文案。
+
+- **簡單記帳搬遷頁第一屏直接回答「永久 VIP 怎麼辦」（#1926）**
+  使用者：繁體中文的簡單記帳搬遷頁換了標題和副標，建立帳號的區塊移到第一屏後面；其他搬遷頁和語言不變。
+  技術：`howToName`／`howToDescription` 讓 HowTo JSON-LD 維持原標題與說明，順序調整只對 zh-TW 的 `simple-daily-money`；`contentUpdatedAt` 與內容 hash snapshot 一併更新。
+
+- **首頁加上 App Store 徽章，和 Google Play 徽章並排（#1930）**
+  使用者：電腦瀏覽器的首頁下載按鈕下方並排 App Store 與 Google Play 徽章；iPhone／iPad 只看到 App Store、Android 只看到 Google Play；App 內與已安裝的 PWA 都不顯示徽章和商標說明；頁尾多一行 Apple 商標說明（完整句：registered in the U.S. and other countries）；兩徽章可見間距 16px。
+  技術：pre-paint script 在 `<html>` 標 `data-visitor-platform`（`classifyBrowserPlatform`）與 PWA 用的 `data-standalone`（與 `data-native-shell` 分開），徽章靠 Tailwind variant 在首次繪製前隱藏；徽章連結用獨立 ASC campaign `ct=landing-badge`，點擊送 `landing_cta_clicked`（`cta_location: 'app_store_badge'`）。
+
+- **搬遷頁與捷徑頁加上 App Store／Google Play 徽章（#1933）**
+  使用者：`/migrate/*` 各頁在建立帳號按鈕下方、`/features/shortcuts` 在頁首下方多一排商店徽章；iPhone／iPad 只看到 App Store、Android 只看到 Google Play；App 內與已安裝的 PWA 不顯示；搬遷頁的網頁版入口不變。
+  技術：新增 `StoreBadgeRow`（沿用首頁徽章與 pre-paint script）；App Store 連結帶 `ct=web-migrate-<頁名>`／`ct=web-shortcuts`；點擊沿用 `landing_cta_clicked`，頁名由 `$pathname` 區分，事件不變。
+
+- **`llms.txt`／`llms-full.txt` 補上 `/migrate/*` 14 個搬遷頁（#1933）**
+  使用者：兩份給 AI 爬蟲讀的索引各多 14 行搬遷頁連結（網址不帶語系、只列繁體中文），原有句子不動。
+  技術：連結文字取自頁面 `seo.migrate.<slug>.title`、說明取自 `ogDescription`（zh-TW）；不列 `/migrate` 總覽頁。
+
+- **中文、日文的襯線標題改用系統的中日文字型，字重和行高跟著調（#1849）**
+  使用者：zh-TW／zh-CN／ja 的標題，中日文字不再落到瀏覽器隨機挑的字型，改用 PingFang／微軟正黑體／Hiragino 等系統字，字重 500、行高 1.35（首頁大標維持 1.15），斷行更自然；英文不變。
+  技術：`fraunces.css`（含產生器）依 `<html lang>` 在 Fraunces 後面接系統 CJK 字型，不載入網頁字型；`globals.css` 新增 `.cjk-h`／`.cjk-d`，首頁與記帳首頁的 inline 襯線標題加上 class；擋渲染 CSS 傳輸量增加約 220 B，預算上限從 13.30 KiB 調到 13.55 KiB（#1859，量過 Lighthouse 行動版 LCP，差距在雜訊內）。
 
 ## [1.9.2] - 2026-11-04
 

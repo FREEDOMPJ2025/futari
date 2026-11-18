@@ -33,8 +33,14 @@ export type CtaLocation =
   | 'feature_closing'
   /** Google Play badge under the hero CTA (#1901). */
   | 'play_badge'
+  /** App Store badge left of the Play badge (#1930). Sent by `AppStoreBadge`,
+   *  which tracks directly rather than through this component. */
+  | 'app_store_badge'
   /** Dismissible "Android app is out" banner at the top of the landing (#1901). */
   | 'launch_banner'
+  /** Desktop QR code, recorded server-side by the `/get` redirect (#1906);
+   *  its `target` can also be `'landing'` (a non-phone UA). */
+  | 'qr'
 
 interface Props {
   href: string
