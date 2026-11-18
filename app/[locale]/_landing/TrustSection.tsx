@@ -70,7 +70,7 @@ export function PlatformLine({ text }: { text: string }) {
         href={appStoreUrl('landing-desktop')}
         target="_blank"
         rel="noopener noreferrer"
-        className={`text-inherit no-underline hover:underline outline-none focus-visible:oik-focus-ring rounded-sm ${HIDDEN_IN_APP}`}
+        className={`no-underline hover:underline outline-none focus-visible:oik-focus-ring rounded-sm ${HIDDEN_IN_APP}`}
       >
         {iphone}
       </a>

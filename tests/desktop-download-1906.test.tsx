@@ -137,10 +137,9 @@ describe('"iPhone App" link in the platform line (#1906)', () => {
     const link = container.querySelector('a')!
     expect(link.textContent).toMatch(/^iPhone [Aa]pp$/)
     expect(link.getAttribute('href')).toBe(appStoreUrl('landing-desktop'))
-    // Looks like the surrounding text; underline on hover only.
+    // Looks like the surrounding text (a inherits colour in preflight); underline on hover only.
     expect(link.className).toContain('no-underline')
     expect(link.className).toContain('hover:underline')
-    expect(link.className).toContain('text-inherit')
     // Inside the shells and installed PWAs: link hidden, same words as plain text instead.
     expect(link.className).toContain(SHELL_HIDDEN)
     expect(link.className).toContain('[html[data-standalone]_&]:hidden')
