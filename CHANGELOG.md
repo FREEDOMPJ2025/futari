@@ -43,9 +43,51 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **對外文字拿掉「PWA」，改寫成「iPhone、Android 和網頁版」（#1909）**
+  使用者：四語的首頁與登入頁標題、描述、og、結構化資料、搬遷頁 FAQ、`llms.txt`／`llms-full.txt` 不再把 Futari 叫做 PWA；中文標題把「伴侶共享記帳 App」放最前面；登入頁描述改寫成 Google 或 Apple 都能登入。
+  技術：只換字串，文案逐字取自 #1909 的 Aria 留言；`tests/no-pwa-copy-1909.test.ts` 走遍四語字典的字串值，不得出現 PWA；程式註解、識別名稱、manifest 不動。
+
+- **中文首頁加上雙平台上架影片（#1910）**
+  使用者：繁體中文首頁的下載按鈕下方多一支 17 秒的上架短片，點了才播放；其他語言和 App 內不顯示。
+  技術：`LaunchFilm` 進到可視範圍附近才掛上 `<video>`（`preload="none"`、手機寬度用 720p），殼內沿用 `data-native-shell` 隱藏；zh-TW 首頁加 VideoObject JSON-LD，規則集中在 `lib/launchFilm.ts`；proxy matcher 放行 `.mp4`／`.vtt`。
+
+- **結束旅行時的結算紀錄名稱跟著語系（#1912）**
+  使用者：新結算紀錄採用結束旅行者的語系，伴侶即使使用不同語系也會看到結束者的語言，舊紀錄維持不變。
+  技術：兩個結束旅行的入口從 request locale 取得四語文案，旅行名稱去除前後空白，空白名稱使用未命名旅行的結算文案。
+
+- **簡單記帳搬遷頁第一屏直接回答「永久 VIP 怎麼辦」（#1926）**
+  使用者：繁體中文的簡單記帳搬遷頁換了標題和副標，建立帳號的區塊移到第一屏後面；其他搬遷頁和語言不變。
+  技術：`howToName`／`howToDescription` 讓 HowTo JSON-LD 維持原標題與說明，順序調整只對 zh-TW 的 `simple-daily-money`；`contentUpdatedAt` 與內容 hash snapshot 一併更新。
+
+- **首頁加上 App Store 徽章，和 Google Play 徽章並排（#1930）**
+  使用者：電腦瀏覽器的首頁下載按鈕下方並排 App Store 與 Google Play 徽章；iPhone／iPad 只看到 App Store、Android 只看到 Google Play；App 內與已安裝的 PWA 都不顯示徽章和商標說明；頁尾多一行 Apple 商標說明（完整句：registered in the U.S. and other countries）；兩徽章可見間距 16px。
+  技術：pre-paint script 在 `<html>` 標 `data-visitor-platform`（`classifyBrowserPlatform`）與 PWA 用的 `data-standalone`（與 `data-native-shell` 分開），徽章靠 Tailwind variant 在首次繪製前隱藏；徽章連結用獨立 ASC campaign `ct=landing-badge`，點擊送 `landing_cta_clicked`（`cta_location: 'app_store_badge'`）。
+
+- **搬遷頁與捷徑頁加上 App Store／Google Play 徽章（#1933）**
+  使用者：`/migrate/*` 各頁在建立帳號按鈕下方、`/features/shortcuts` 在頁首下方多一排商店徽章；iPhone／iPad 只看到 App Store、Android 只看到 Google Play；App 內與已安裝的 PWA 不顯示；搬遷頁的網頁版入口不變。
+  技術：新增 `StoreBadgeRow`（沿用首頁徽章與 pre-paint script）；App Store 連結帶 `ct=web-migrate-<頁名>`／`ct=web-shortcuts`；點擊沿用 `landing_cta_clicked`，頁名由 `$pathname` 區分，事件不變。
+
+- **`llms.txt`／`llms-full.txt` 補上 `/migrate/*` 14 個搬遷頁（#1933）**
+  使用者：兩份給 AI 爬蟲讀的索引各多 14 行搬遷頁連結（網址不帶語系、只列繁體中文），原有句子不動。
+  技術：連結文字取自頁面 `seo.migrate.<slug>.title`、說明取自 `ogDescription`（zh-TW）；不列 `/migrate` 總覽頁。
+
+## [1.9.2] - 2026-11-04
+
+主題：**Android App 上架 Google Play**——網站的 Android 下載入口改連 Google Play，首頁有上架公告；捷徑教學改教「Futari 記一筆」動作；服務條款與隱私權政策對齊現況；repo 搬家，專案改名 Futari。
+完整 diff：[v1.9.1...v1.9.2](https://github.com/FREEDOMPJ2025/futari/compare/v1.9.1...v1.9.2)
+
+### 使用者可見變化
+
 - **Android App 上架 Google Play，網站的測試招募改成「到 Google Play 下載」（#1901）**
   使用者：Android 瀏覽器的首頁按鈕、儀表板卡片、設定的邀請列、出遊頁那一行都改連 Google Play，並註明目前只在台灣上架；首頁加上 Google Play 徽章和可關閉的上架公告；`/android-beta` 改成「封閉測試已結束」說明頁；App 內（兩個殼）不顯示任何下載連結。
-  技術：`PLAY_STORE_URL` 取代測試群組／opt-in 常數，CTA 目標 `android_beta` → `play_store`（`landing_cta_clicked` 一併改）；徽章與公告由 SSR 輸出、靠 `lib/playLaunch.ts` 的 pre-paint script 在殼內與關閉後先隱藏（不跳版面），公告到 2026-11-17 為止。
+  技術：`PLAY_STORE_URL` 取代測試群組／opt-in 常數，CTA 目標 `android_beta` → `play_store`（`landing_cta_clicked` 一併改）；徽章與公告由 SSR 輸出、靠 `lib/playLaunch.ts` 的 pre-paint script 在殼內與關閉後先隱藏（不跳版面），站內導回首頁時由元件掛載時的 layout effect 再檢查一次；公告到 2026-11-17 為止。
+
+- **捷徑教學改教「Futari 記一筆」動作，網址做法留作備用（#1871）**
+  使用者：`/features/shortcuts` 的 Apple Pay 段改成在「錢包」自動化加入「Futari 記一筆」（iOS 17 以上、iOS App 1.9.0 以上），原本的網址做法移到新的「備用」段，疑難排解多一列「找不到動作」；四語同步。
+  技術：新增 `featureShortcuts.applePayUrl` 段（`urlLabel` 從 `applePay` 移過去），`Steps` 的 `code` 改成選填；`llms-full.txt` 同步改寫。
+
+- **服務條款與隱私權政策對齊現況（#1913）**
+  使用者：條款第 3 條改成別把身分證字號等寫在交易說明、備註（不另外加密），孩子的證號請填愛物「孩子」的加密欄位；第 4 條補上 Apple 登入；隱私權政策「蒐集的資料」第 1 項分開寫 Google 與 Apple 各提供什麼；最後更新日改為 11 月 3 日，四語同步。
 
 - **中文、日文的襯線標題改用系統的中日文字型，字重和行高跟著調（#1849）**
   使用者：zh-TW／zh-CN／ja 的標題，中日文字不再落到瀏覽器隨機挑的字型，改用 PingFang／微軟正黑體／Hiragino 等系統字，字重 500、行高 1.35（首頁大標維持 1.15），斷行更自然；英文不變。
@@ -53,7 +95,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 技術變更
 
-- **repo 搬到 FREEDOMPJ2025/futari，專案改名為 Futari**
+- **商店截圖與故事圖支援 en／zh-CN／ja（#1904）**
+  技術：`scripts/og/` 的實機截圖、故事圖、ASC 上傳腳本加 `--locale`，新增商店 PNG 檢查腳本與只對 dev 的三語示範帳本 seed，三語圖檔放進 `docs/store-assets/`（要另外上傳到商店）。
+
+- **repo 搬到 FREEDOMPJ2025/futari，專案改名為 Futari（#1895）**
   使用者：服務條款、隱私權頁的「回報問題」連結改指向新的 GitHub repo（舊網址也會自動轉過去）。
   技術：所有 `redtear1115/oikos` 改成 `FREEDOMPJ2025/futari`，`package.json` 的 name 改成 `futari`，CLAUDE.md／README 換成新名稱並寫明刻意保留 oikos 的地方（資料表 `OikosGroups`、裝置上的 `oikos_*` key、外部 ID），llms.txt 拿掉舊名和「source code is private」的錯誤說法。
 
@@ -2126,7 +2171,8 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 - **每頁 `generateMetadata` 接 OG image（#487）**：`public/og-image.png` 從 #282 ship 但未 wire 進 metadata，造成 prod HTML 缺 `og:image` / `twitter:image`；本版 4 個 public page 各加 `openGraph.images` + `twitter.images`，`alt` 用 `t.title` locale-aware，無需新增 i18n key。
 - **`settings.local.json` 列入 gitignore（#478）**：避免本地 hook / 權限設定外洩。
 
-[Unreleased]: https://github.com/FREEDOMPJ2025/futari/compare/v1.9.1...HEAD
+[Unreleased]: https://github.com/FREEDOMPJ2025/futari/compare/v1.9.2...HEAD
+[1.9.2]: https://github.com/FREEDOMPJ2025/futari/compare/v1.9.1...v1.9.2
 [1.9.1]: https://github.com/FREEDOMPJ2025/futari/compare/v1.9.0...v1.9.1
 [1.9.0]: https://github.com/FREEDOMPJ2025/futari/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/FREEDOMPJ2025/futari/compare/v1.7.4...v1.8.0

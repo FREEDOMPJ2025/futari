@@ -33,6 +33,9 @@ export type CtaLocation =
   | 'feature_closing'
   /** Google Play badge under the hero CTA (#1901). */
   | 'play_badge'
+  /** App Store badge left of the Play badge (#1930). Sent by `AppStoreBadge`,
+   *  which tracks directly rather than through this component. */
+  | 'app_store_badge'
   /** Dismissible "Android app is out" banner at the top of the landing (#1901). */
   | 'launch_banner'
 

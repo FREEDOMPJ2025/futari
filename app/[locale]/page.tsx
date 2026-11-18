@@ -8,6 +8,7 @@ import { KofiWidget } from '@/components/KofiWidget'
 import { Landing } from './_landing/Landing'
 import { isPlayLaunchBannerActive } from '@/lib/playLaunch'
 import { APP_STORE_URL, PLAY_STORE_URL } from '@/lib/visitorPlatform'
+import { launchFilmJsonLd, showsLaunchFilm } from '@/lib/launchFilm'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://futari.southern-light.dev'
 
@@ -115,6 +116,13 @@ export default async function RootPage({ params }: { params: Params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
+      {/* #1910 — VideoObject for the launch film, only where the film renders. */}
+      {showsLaunchFilm(locale) && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(launchFilmJsonLd(APP_URL)) }}
+        />
+      )}
       <Landing
         t={t.landing}
         signInHref={signInHref}

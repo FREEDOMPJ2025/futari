@@ -74,7 +74,7 @@ export const zhCN: Translations = {
       heading: '开发日志',
       more: '更多日志',
     },
-    srTagline: ' · 两个人的家计簿｜伴侣／夫妻共享记账 PWA',
+    srTagline: ' · 两个人的家计簿｜伴侣／夫妻共享记账 App',
     srDescription:
       '专为伴侣、夫妻设计的双人共享账本。一起记录日常开销、自动分摊费用与 AA 制结算，掌握家庭预算、资产盘点、保险与爱车油耗记录。',
     aboutLabel: '关于 Futari',
@@ -99,6 +99,8 @@ export const zhCN: Translations = {
     playStoreCtaHint: '目前仅在台湾上架',
     playBadgeAlt: '去商店下载 Google Play',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
+    appStoreBadgeAlt: 'App Store 下载',
+    appStoreTrademark: 'App Store is a service mark of Apple Inc., registered in the U.S. and other countries.',
     launchBanner: {
       text: 'Futari 的 Android App 上架了！',
       link: '到 Google Play 下载',
@@ -172,18 +174,18 @@ export const zhCN: Translations = {
       '保险方案（保护型／储蓄型）',
       '汽车与油耗记录',
       '定期收入',
-      '离线浏览 PWA',
+      '离线浏览最近看过的页面',
     ],
     jsonLdFaq: [
       {
         question: 'Futari 是什么？',
         answer:
-          'Futari 是专为夫妻、伴侣设计的双人共享记账 PWA，支持自动分摊、AA 结算、家庭资产盘点与爱车油耗记录。',
+          'Futari 是专为夫妻、伴侣设计的双人共享记账 App，iPhone、Android 和网页版都能用，支持自动分摊、AA 结算、家庭资产盘点与爱车油耗记录。',
       },
       {
         question: '如何开始使用？',
         answer:
-          '用 Google 账号登录后建立两人账本，邀请伴侣加入即可一起记账。可加到手机主屏幕当 PWA 使用，完全免费。',
+          '用 Google 或 Apple 登录后建立两人账本，邀请伴侣加入就能一起记账。iPhone、Android 和网页版都能用，完全免费。',
       },
       {
         question: '数据安全吗？',
@@ -432,6 +434,8 @@ export const zhCN: Translations = {
     iSettled: '我还款',
     partnerSettled: '{name} 还款',
     outingSettled: '出游结算',
+    tripSettledRecord: '{name} 结算',
+    tripSettledRecordUnnamed: '旅行结算',
     youIncome: '你收入',
     partnerIncome: '{name} 收入',
     youPaid: '你付',
@@ -3174,7 +3178,7 @@ export const zhCN: Translations = {
           },
           {
             question: '另一半用 Android，也能一起用吗？',
-            answer: '可以。Futari 是跨平台的 PWA，iOS、Android、浏览器都能开，两个人用不同手机也能共用同一本账。',
+            answer: '可以。Futari 有 iPhone App、Android App 和网页版，两个人用不同手机也能共用同一本账。',
           },
         ],
       },
@@ -3271,14 +3275,14 @@ export const zhCN: Translations = {
 
   seo: {
     landing: {
-      title: 'Futari · 两个人，一本账｜情侣共享记账 PWA',
-      description: 'Futari 是为夫妻、情侣设计的共同账本，两个人一起记账、自动分摊花费、AA 结算，从日常开销到旅行、爱车与资产，轻松看见两个人的生活全貌。',
+      title: '情侣共享记账 App｜Futari · 两个人，一本账',
+      description: 'Futari 是为夫妻、情侣设计的共同记账 App，iPhone、Android 和网页版都能用。两个人一起记账、自动分摊花费、AA 结算，从日常开销到旅行、爱车与资产，看见两个人的生活全貌。',
       ogDescription: 'Futari 是为夫妻、情侣设计的共同账本——一起记账、自动分摊、AA 结算，看见两个人的生活全貌。',
     },
     signIn: {
       title: '登录 Futari · 两个人的双人记账',
-      description: '用 Google 账号登录后，会进入你们共用的账本——伴侣一起记下日常开销与爱车油耗，也照看保险与爱物的双人记账 PWA。',
-      ogDescription: '用 Google 一键登录，进入两个人的家计簿。',
+      description: '用 Google 或 Apple 登录后，会进入你们共用的账本——伴侣一起记下日常开销与爱车油耗，也照看保险与爱物。',
+      ogDescription: '用 Google 或 Apple 登录，进入两个人的家计簿。',
       invite: {
         title: '有人邀请你一起记账 · Futari',
         description: '有人邀请你加入一本两个人共用的账本。登录后就能加入。',
