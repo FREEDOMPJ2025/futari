@@ -1,11 +1,11 @@
 # Futari (ふたり) — Full Product Description
 
-> Two-person companion expense tracker for couples and partners. Mobile-first PWA built around the shared chapters of a relationship rather than balance sheets.
+> Two-person companion expense tracker for couples and partners. On iPhone, Android and the web, built around the shared chapters of a relationship rather than balance sheets.
 
 **Product URL**: https://futari.southern-light.dev/?utm_source=llms_txt&utm_medium=ai_agent
 **Status**: Public beta, free to use
 **Languages**: Traditional Chinese (default), Simplified Chinese, English, Japanese
-**Platform**: Progressive Web App (installable on iOS / Android / desktop), plus native iOS and Android shells built with Capacitor
+**Platform**: iPhone / iPad, Android and the web. The web version runs in any modern browser and can be added to the home screen on iOS and Android; the iPhone and Android apps are native shells built with Capacitor
 **Download**: iPhone / iPad on the App Store (https://apps.apple.com/app/id6779264784); Android on Google Play (https://play.google.com/store/apps/details?id=dev.southernlight.futari), currently listed in Taiwan only
 
 ---
@@ -120,13 +120,14 @@ At the start of each month, Futari snapshots the previous month's data — categ
 
 The Guardian module aggregates everything that protects the couple's future: insurance policies, savings instruments, investment-linked policies. It's positioned as a separate module within Futari (not a financial product), with its own dashboard showing total coverage, premium burn, and policy status.
 
-### 12. Offline-first PWA
+### 12. iPhone, Android and the web
 
-Futari is a full Progressive Web App:
-- Installable to home screen on iOS, Android, and desktop
-- Service Worker caches the shell + last-viewed records
-- Records created offline queue locally and sync when reconnected
-- Designed for mobile-first use (thumb-zone primary navigation)
+Futari runs on three platforms that share one ledger:
+- An iPhone and iPad app on the App Store
+- An Android app on Google Play
+- A web version that works in any modern browser
+
+Offline browsing is opt-in: when it's turned on in Settings, recently viewed pages are kept on the device and can be opened without a connection. Adding or editing records needs a connection.
 
 ### 13. Internationalisation
 
@@ -224,7 +225,7 @@ Couples and partners — spouses, life partners, or co-living roommates — who 
 
 ### How is Futari different from Honeydue, Splitwise, or YNAB?
 
-- **vs. Honeydue**: Honeydue's design centers on account-visibility management — partners can selectively hide accounts from each other. Futari rejects this premise: what enters the ledger is shared by default, and what shouldn't be shared simply isn't recorded. Futari also has loved-things tracking (cars, pets, homes) and offline PWA support; Honeydue does not.
+- **vs. Honeydue**: Honeydue's design centers on account-visibility management — partners can selectively hide accounts from each other. Futari rejects this premise: what enters the ledger is shared by default, and what shouldn't be shared simply isn't recorded. Futari also has loved-things tracking (cars, pets, homes) and opt-in offline browsing; Honeydue does not.
 - **vs. Splitwise**: Splitwise is optimised for one-off splits among many people (roommates, group trips). Futari is optimised for two people in a long-term relationship — recurring expenses, chapter-based history, loved things, monthly reviews are first-class features.
 - **vs. YNAB / Mint / generic budgeting apps**: YNAB and Mint are solo budgeting tools that aggregate bank accounts and apply envelope budgeting. Futari is a couples ledger with no bank aggregation, no envelopes — every entry is intentional and shared.
 
@@ -262,7 +263,7 @@ Yes. Start an outing and share its link. Friends open it in a phone browser and 
 
 ### Is Futari a native app or a web app?
 
-Both, from a single codebase. Futari is a Progressive Web App that runs in any modern browser and can be installed to the home screen on iOS, Android, and desktop. There are also native iOS and Android shells built with Capacitor — thin WebView wrappers around the same deployed web app, distributed through the App Store and Google Play (the Android app is on Google Play since November 2026, currently in Taiwan only). Because the shell loads the live site, a web release reaches all three platforms at once; only changes to native surfaces (push notifications, native sign-in, app icon) need a new store build. Either way the experience is the same: full-screen, no browser chrome, and an offline page bundled into the shell for when the network is gone.
+Both, from a single codebase. Futari has a web version that runs in any modern browser and can be added to the home screen on iOS and Android. There are also native iOS and Android shells built with Capacitor — thin WebView wrappers around the same deployed web app, distributed through the App Store and Google Play (the Android app is on Google Play since November 2026, currently in Taiwan only). Because the shell loads the live site, a web release reaches all three platforms at once; only changes to native surfaces (push notifications, native sign-in, app icon) need a new store build. Either way the experience is the same: full-screen, no browser chrome, and an offline page bundled into the shell for when the network is gone.
 
 ### Can Futari handle multiple currencies?
 
@@ -350,6 +351,20 @@ This is reflected in the UI:
 - **Shortcuts guide (zh-CN)**: https://futari.southern-light.dev/zh-CN/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent
 - **Shortcuts guide (en)**: https://futari.southern-light.dev/en/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent
 - **Shortcuts guide (ja)**: https://futari.southern-light.dev/ja/features/shortcuts?utm_source=llms_txt&utm_medium=ai_agent
+- **從 Honeydue 搬家到 Futari｜資料匯入**: https://futari.southern-light.dev/migrate/honeydue?utm_source=llms_txt&utm_medium=ai_agent — Honeydue 用戶的下一站：3 分鐘搬遷到 Futari，雙人記帳繼續。
+- **從 Spendee 搬家到 Futari｜CSV 匯入**: https://futari.southern-light.dev/migrate/spendee?utm_source=llms_txt&utm_medium=ai_agent — Spendee 用戶的雙人記帳新選擇：上傳 CSV，3 分鐘搬完。
+- **從 CWMoney 搬家到 Futari｜免費雙人分帳**: https://futari.southern-light.dev/migrate/cwmoney?utm_source=llms_txt&utm_medium=ai_agent — CWMoney 用戶的下一站：免費分帳，Excel 轉 CSV 搬進 Futari。
+- **從麻布記帳搬家到 Futari｜截圖匯入**: https://futari.southern-light.dev/migrate/moneybook?utm_source=llms_txt&utm_medium=ai_agent — 麻布記帳用戶的雙人記帳新選擇：截圖整理成 CSV，搬進 Futari。
+- **從 AndroMoney 搬家到 Futari｜CSV 匯入**: https://futari.southern-light.dev/migrate/andromoney?utm_source=llms_txt&utm_medium=ai_agent — AndroMoney 用戶的雙人記帳新選擇：匯出 CSV，搬進 Futari。
+- **從 Mobills 搬家到 Futari｜截圖匯入**: https://futari.southern-light.dev/migrate/mobills?utm_source=llms_txt&utm_medium=ai_agent — Mobills 用戶的雙人記帳新選擇：截圖整理成 CSV，搬進 Futari。
+- **從 Manebo 搬家到 Futari｜情侶共同記帳**: https://futari.southern-light.dev/migrate/manebo?utm_source=llms_txt&utm_medium=ai_agent — Manebo 用戶的下一站：匯出 CSV，搬進 Futari 情侶共同記帳。
+- **簡單記帳買了永久 VIP，搬家會浪費嗎？｜Futari 免費雙人記帳**: https://futari.southern-light.dev/migrate/simple-daily-money?utm_source=llms_txt&utm_medium=ai_agent — 簡單記帳用戶搬家指南：截圖→ChatGPT→CSV，搬進 Futari 雙人記帳。
+- **從記帳城市搬家到 Futari｜不用訂閱也能把記錄搬出來**: https://futari.southern-light.dev/migrate/fortune-city?utm_source=llms_txt&utm_medium=ai_agent — 記帳城市要訂閱才能匯出？截圖→ChatGPT→CSV，免費搬進 Futari 雙人記帳。
+- **從 CashMan 搬家到 Futari｜截圖轉 CSV**: https://futari.southern-light.dev/migrate/cashman?utm_source=llms_txt&utm_medium=ai_agent — CashMan 用戶搬家指南：截圖→ChatGPT→CSV，搬進 Futari 雙人記帳。
+- **從 1Money 搬家到 Futari｜截圖轉 CSV**: https://futari.southern-light.dev/migrate/1money?utm_source=llms_txt&utm_medium=ai_agent — 1Money 用戶搬家指南：截圖→ChatGPT→CSV，搬進 Futari 雙人記帳。
+- **從 iCost 搬家到 Futari｜截圖轉 CSV**: https://futari.southern-light.dev/migrate/icost?utm_source=llms_txt&utm_medium=ai_agent — iCost 用戶搬家指南：截圖→ChatGPT→CSV，搬進 Futari 雙人記帳。
+- **從 Splitwise 搬家到 Futari｜匯出試算表、CSV 匯入**: https://futari.southern-light.dev/migrate/splitwise?utm_source=llms_txt&utm_medium=ai_agent — Splitwise 用戶搬家指南：匯出試算表 → 上傳 CSV → 搬進 Futari 雙人記帳。
+- **從隨手記搬家到 Futari｜截圖轉 CSV**: https://futari.southern-light.dev/migrate/suishouji?utm_source=llms_txt&utm_medium=ai_agent — 隨手記用戶搬家指南：截圖→ChatGPT→CSV，搬進 Futari 雙人記帳。
 - **Index (short version)**: https://futari.southern-light.dev/llms.txt
 - **Full description (this file)**: https://futari.southern-light.dev/llms-full.txt
 - **Sitemap**: https://futari.southern-light.dev/sitemap.xml

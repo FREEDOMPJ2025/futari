@@ -1,6 +1,8 @@
 import type { Translations } from '@/lib/i18n/locales/zh-TW'
 import { ShieldOutlineGlyph } from './FutariMark'
 import { Phrase } from '../_components/Phrase'
+import { appStoreUrl } from '@/lib/visitorPlatform'
+import { HIDDEN_IN_APP } from '@/lib/playLaunch'
 
 type LandingStrings = Translations['landing']
 
@@ -29,7 +31,7 @@ function CompactTrustRow({ t }: { t: LandingStrings }) {
       </span>
       <span style={{ color: 'var(--hairline)' }}>·</span>
       <span className="text-xs" style={{ letterSpacing: '0.3px' }}>
-        {t.trustPwa}
+        <PlatformLine text={t.trustPwa} />
       </span>
       <span style={{ color: 'var(--hairline)' }}>·</span>
       <div className="flex items-center gap-1.5">
@@ -39,6 +41,42 @@ function CompactTrustRow({ t }: { t: LandingStrings }) {
         </span>
       </div>
     </div>
+  )
+}
+
+/**
+ * `landing.trustPwa` ("iPhone App · Android App · 網頁版") with its first
+ * segment, the iPhone one, linked to the App Store (#1906, `ct=landing-desktop`:
+ * this row is desktop-only). Looks like plain text until hovered (underline on
+ * hover only, per Daphne). The copy stays one string so translators see the
+ * whole line; the split is at the first " · ", and a test checks every locale
+ * still starts with "iPhone".
+ *
+ * Inside the native shells (the iPad shell is wider than `md`, so it renders
+ * this row) and in an installed PWA (#1930: no store link anywhere in an app)
+ * the link is swapped for the same words as plain text before first paint, via
+ * `data-native-shell` / `data-standalone` (`HIDDEN_IN_APP`, lib/playLaunch.ts;
+ * Apple 3.1.1). Failure looks like: a tappable App Store link in the iPad app,
+ * noticed only in App Review.
+ */
+export function PlatformLine({ text }: { text: string }) {
+  const sep = ' · '
+  const at = text.indexOf(sep)
+  const iphone = at === -1 ? text : text.slice(0, at)
+  const rest = at === -1 ? '' : text.slice(at)
+  return (
+    <>
+      <a
+        href={appStoreUrl('landing-desktop')}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`no-underline hover:underline outline-none focus-visible:oik-focus-ring rounded-sm ${HIDDEN_IN_APP}`}
+      >
+        {iphone}
+      </a>
+      <span className="hidden [html[data-native-shell]_&]:inline [html[data-standalone]_&]:inline">{iphone}</span>
+      {rest}
+    </>
   )
 }
 

@@ -86,6 +86,13 @@ describe('i18n glyph safety', () => {
   }
 })
 
+// zh-TW-only keys: the other locales fall back to heroTitle/heroSubtitle for
+// the HowTo JSON-LD, so they intentionally do not carry these (#1926).
+const REFERENCE_ONLY_KEYS = new Set([
+  'migrate.pages.simple-daily-money.howToName',
+  'migrate.pages.simple-daily-money.howToDescription',
+])
+
 describe('i18n locale key coverage', () => {
   it(`${REFERENCE_LOCALE} (reference) has a non-empty key set`, () => {
     expect(referenceKeys.size).toBeGreaterThan(0)
@@ -98,7 +105,7 @@ describe('i18n locale key coverage', () => {
 
     it(`${name} contains every key from ${REFERENCE_LOCALE}`, () => {
       const missing = [...referenceKeys]
-        .filter((k) => !localeKeys.has(k))
+        .filter((k) => !localeKeys.has(k) && !REFERENCE_ONLY_KEYS.has(k))
         .sort()
       expect(missing).toEqual([])
     })

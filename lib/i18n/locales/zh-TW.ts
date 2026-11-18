@@ -7,6 +7,10 @@ export type MigrateBasePageCopy = {
   heroKicker: string
   heroTitle: string
   heroSubtitle: string
+  /** HowTo JSON-LD name/description when they must differ from the visible
+   *  hero (#1926). Absent → HowTo uses heroTitle/heroSubtitle. */
+  howToName?: string
+  howToDescription?: string
   /** Objective background paragraph rendered above differentiators. */
   intro?: string
   differentiators: readonly [
@@ -191,9 +195,21 @@ export type Translations = {
     /** Alt text of the official Google Play badge image (#1901): the words
      *  printed on that locale's badge, verbatim — not a translation of ours. */
     playBadgeAlt: string
+    /** One line next to the desktop QR code (#1906). The QR goes to `/get`,
+     *  which sends iPhone and Android alike to their store, so it says
+     *  "phone", not "iPhone". Awaiting Ray's copy approval. */
+    downloadQrCaption: string
+    /** Accessible name of the desktop QR code image (#1906). */
+    downloadQrAlt: string
     /** Google's trademark attribution, required on any page showing the badge.
      *  English in every locale on purpose (Google's wording); don't translate. */
     playTrademark: string
+    /** Alt text of the official App Store badge image (#1930): the words
+     *  printed on that locale's badge, verbatim — not a translation of ours. */
+    appStoreBadgeAlt: string
+    /** Apple's trademark attribution for the App Store badge (#1930).
+     *  English in every locale on purpose, like `playTrademark`; don't translate. */
+    appStoreTrademark: string
     /** Dismissible launch banner at the top of the landing (#1901). `text` is
      *  plain, `link` is the Play link that follows it, `closeAria` labels the ✕.
      *  Shown until `PLAY_LAUNCH_BANNER_LAST_DAY` (lib/playLaunchBanner.ts). */
@@ -3686,7 +3702,7 @@ export const zhTW: Translations = {
       heading: '開發日誌',
       more: '更多日誌',
     },
-    srTagline: ' · 兩個人的家計簿｜伴侶／夫妻共享記帳 PWA',
+    srTagline: ' · 兩個人的家計簿｜伴侶／夫妻共享記帳 App',
     srDescription:
       '專為伴侶、夫妻設計的雙人共享帳本。一起記錄日常開銷、自動分攤費用與 AA 制結算，掌握家庭預算、資產盤點、保險與愛車油耗紀錄。',
     aboutLabel: '關於 Futari',
@@ -3710,7 +3726,11 @@ export const zhTW: Translations = {
     playStoreCta: '在 Google Play 下載',
     playStoreCtaHint: '目前只在台灣上架',
     playBadgeAlt: 'Google Play 立即下載',
+    downloadQrCaption: '用手機掃描下載',
+    downloadQrAlt: '掃描後開啟 Futari 的下載頁面',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
+    appStoreBadgeAlt: 'App Store 下載',
+    appStoreTrademark: 'App Store is a service mark of Apple Inc., registered in the U.S. and other countries.',
     launchBanner: {
       text: 'Futari 的 Android App 上架了！',
       link: '到 Google Play 下載',
@@ -3784,18 +3804,18 @@ export const zhTW: Translations = {
       '保險方案（保護型／儲蓄型）',
       '汽車與油耗紀錄',
       '定期收入',
-      '離線瀏覽 PWA',
+      '離線瀏覽最近看過的頁面',
     ],
     jsonLdFaq: [
       {
         question: 'Futari 是什麼？',
         answer:
-          'Futari 是專為夫妻、伴侶設計的雙人共享記帳 PWA，支援自動分攤、AA 結算、家庭資產盤點與愛車油耗紀錄。',
+          'Futari 是專為夫妻、伴侶設計的雙人共享記帳 App，iPhone、Android 和網頁版都能用，支援自動分攤、AA 結算、家庭資產盤點與愛車油耗紀錄。',
       },
       {
         question: '如何開始使用？',
         answer:
-          '用 Google 帳號登入後建立兩人帳本，邀請伴侶加入即可一起記帳。可加到手機主畫面當 PWA 使用，完全免費。',
+          '用 Google 或 Apple 登入後建立兩人帳本，邀請伴侶加入就能一起記帳。iPhone、Android 和網頁版都能用，完全免費。',
       },
       {
         question: '資料安全嗎？',
@@ -6580,8 +6600,11 @@ export const zhTW: Translations = {
       },
       'simple-daily-money': {
         heroKicker: 'SIMPLE DAILY MONEY → FUTARI',
-        heroTitle: '你的簡單記帳資料，可以帶走',
-        heroSubtitle: '簡單記帳的 CSV 匯出是 VIP 功能；不想為了搬家先付費，用截圖請 ChatGPT 整理成 CSV，一樣能把記錄搬到 Futari。',
+        heroTitle: '簡單記帳的永久 VIP 帶不走，記錄帶得走',
+        heroSubtitle: '那筆 VIP 是在簡單記帳裡買的，只能在簡單記帳用，換到哪個 App 都一樣。Futari 目前完全免費，記帳、雙人分攤、雲端同步和 CSV 匯出匯入都不用解鎖；舊記錄不必先買 VIP 匯出，用截圖就能搬過來。',
+        // JSON-LD HowTo keeps the pre-#1926 title/description (decision on #1926).
+        howToName: '你的簡單記帳資料，可以帶走',
+        howToDescription: '簡單記帳的 CSV 匯出是 VIP 功能；不想為了搬家先付費，用截圖請 ChatGPT 整理成 CSV，一樣能把記錄搬到 Futari。',
         intro: '簡單記帳（SMoney）是 CMoney 集團旗下的人氣記帳 App，更新活躍、評價也好。不過它的共享帳本一次只能邀請一位，而且共享頁面只能查看、不能一起編輯；CSV 匯出則屬於 VIP 訂閱功能。想要兩個人都能動手記的同一本帳，下面是搬家的路。',
         differentiators: [
           {
@@ -6785,7 +6808,7 @@ export const zhTW: Translations = {
           },
           {
             question: '另一半用 Android，也能一起用嗎？',
-            answer: '可以。Futari 是跨平台的 PWA，iOS、Android、瀏覽器都能開，兩個人用不同手機也能共用同一本帳。',
+            answer: '可以。Futari 有 iPhone App、Android App 和網頁版，兩個人用不同手機也能共用同一本帳。',
           },
         ],
       },
@@ -6882,14 +6905,14 @@ export const zhTW: Translations = {
 
   seo: {
     landing: {
-      title: 'Futari · 兩個人，一本帳｜伴侶共享記帳 PWA',
-      description: 'Futari 是為夫妻、情侶設計的共同記帳 PWA，兩個人一起記帳、自動分攤花費、AA 結算，從日常開銷到旅行、愛車與資產，輕鬆看見兩個人的生活全貌。',
+      title: '伴侶共享記帳 App｜Futari · 兩個人，一本帳',
+      description: 'Futari 是為夫妻、情侶設計的共同記帳 App，iPhone、Android 和網頁版都能用。兩個人一起記帳、自動分攤花費、AA 結算，從日常開銷到旅行、愛車與資產，看見兩個人的生活全貌。',
       ogDescription: 'Futari 是為夫妻、伴侶設計的共同帳本——一起記帳、自動分攤、AA 結算，看見兩個人的生活全貌。',
     },
     signIn: {
       title: '登入 Futari · 兩個人的雙人記帳',
-      description: '用 Google 帳號登入後，會進到你們共用的帳本——伴侶一起記下日常開銷與愛車油耗，也照看保險與愛物的雙人記帳 PWA。',
-      ogDescription: '用 Google 一鍵登入，進到兩個人的家計簿。',
+      description: '用 Google 或 Apple 登入後，會進到你們共用的帳本——伴侶一起記下日常開銷與愛車油耗，也照看保險與愛物。',
+      ogDescription: '用 Google 或 Apple 登入，進到兩個人的家計簿。',
       /** Keep in sync with `invite.meta` — see the note there. (#1016) */
       invite: {
         title: '有人邀請你一起記帳 · Futari',
