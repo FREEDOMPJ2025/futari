@@ -40,6 +40,11 @@ describe('no "PWA" in user-facing copy (#1909)', () => {
     expect(body).not.toMatch(/PWA|Progressive Web App/i)
   })
 
+  it('llms-full.txt has no PWA wording anywhere', () => {
+    const body = readFileSync(path.join(process.cwd(), 'public', 'llms-full.txt'), 'utf8')
+    expect(body).not.toMatch(/PWA|Progressive Web App/i)
+  })
+
   it('llms-full.txt: intro, section 12 and the Honeydue line have no PWA wording', () => {
     const body = readFileSync(path.join(process.cwd(), 'public', 'llms-full.txt'), 'utf8')
     const lines = body.split('\n')
