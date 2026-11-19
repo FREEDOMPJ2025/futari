@@ -7,6 +7,10 @@ export type MigrateBasePageCopy = {
   heroKicker: string
   heroTitle: string
   heroSubtitle: string
+  /** HowTo JSON-LD name/description when they must differ from the visible
+   *  hero (#1926). Absent → HowTo uses heroTitle/heroSubtitle. */
+  howToName?: string
+  howToDescription?: string
   /** Objective background paragraph rendered above differentiators. */
   intro?: string
   differentiators: readonly [
@@ -44,6 +48,15 @@ export type OnboardingCardCopy = {
   quote: readonly string[]
   subtitle: string
 }
+
+/** #1921 diagram cards on /features/shortcuts. Every label is a word from the same step's `body`
+ *  (tests/feature-shortcuts-art-1921.test.tsx), so the diagram can't drift from the instructions. */
+export type ShortcutArt =
+  | { kind: 'wallet'; path: string; heading: string; option: string; toggles: readonly string[] }
+  | { kind: 'action'; search: string; action: string }
+  | { kind: 'fields'; amount: string; note: string; category: string }
+  /** `hot`: index of the row to point at. */
+  | { kind: 'notify'; rows: readonly string[]; hot: number }
 
 export type Translations = {
   signIn: {
@@ -182,9 +195,21 @@ export type Translations = {
     /** Alt text of the official Google Play badge image (#1901): the words
      *  printed on that locale's badge, verbatim — not a translation of ours. */
     playBadgeAlt: string
+    /** One line next to the desktop QR code (#1906). The QR goes to `/get`,
+     *  which sends iPhone and Android alike to their store, so it says
+     *  "phone", not "iPhone". Awaiting Ray's copy approval. */
+    downloadQrCaption: string
+    /** Accessible name of the desktop QR code image (#1906). */
+    downloadQrAlt: string
     /** Google's trademark attribution, required on any page showing the badge.
      *  English in every locale on purpose (Google's wording); don't translate. */
     playTrademark: string
+    /** Alt text of the official App Store badge image (#1930): the words
+     *  printed on that locale's badge, verbatim — not a translation of ours. */
+    appStoreBadgeAlt: string
+    /** Apple's trademark attribution for the App Store badge (#1930).
+     *  English in every locale on purpose, like `playTrademark`; don't translate. */
+    appStoreTrademark: string
     /** Dismissible launch banner at the top of the landing (#1901). `text` is
      *  plain, `link` is the Play link that follows it, `closeAria` labels the ✕.
      *  Shown until `PLAY_LAUNCH_BANNER_LAST_DAY` (lib/playLaunchBanner.ts). */
@@ -273,6 +298,12 @@ export type Translations = {
     featuresOutingLink: string
     /** #1724 — footer link to /features/outing. */
     footerOutingLink: string
+    /** #1908 — home-page line under the feature list to /features/shortcuts (iPhone browser and desktop only). */
+    featuresShortcutsLink: string
+    /** #1908 — footer link to /use-case; same label as the use-case hub's breadcrumbLabel. */
+    footerUseCaseLink: string
+    /** #1908 — footer link to /features/shortcuts; same label as featureShortcuts.breadcrumbLabel. */
+    footerShortcutsLink: string
     /** schema.org `name` for WebSite + SoftwareApplication JSON-LD (#467). */
     jsonLdAppName: string
     /** schema.org `alternateName` array for WebSite + SoftwareApplication (#467). */
@@ -281,10 +312,15 @@ export type Translations = {
     jsonLdAppDescription: string
     /** schema.org SoftwareApplication `featureList` (#467). */
     jsonLdFeatureList: readonly string[]
-    /** schema.org FAQPage entries — answers held to ~40–60 字 to fit AI
-     *  Overview's Answer Capsule extraction window (#611). Per-locale so each
-     *  rendered page emits FAQ schema matching its visible audience language. */
-    jsonLdFaq: readonly { question: string; answer: string }[]
+    /** 「兩個人一起記」三步區塊（#1907）：標題、三步、底下一行小字。文案出自 Aria 的留言（issuecomment-6611192196）。 */
+    stepsTitle: string
+    steps: readonly { title: string; body: string }[]
+    stepsNote: string
+    /** 首頁常見問題區塊標題（#1907）；沿用 use-case／migrate 頁既有的 faqHeading。 */
+    faqTitle: string
+    /** 首頁常見問題：頁面上的問答與 FAQPage JSON-LD 共用這一份（#1907），
+     *  題目與答案逐字相同，tests/landing-faq.test.tsx 護著。 */
+    faq: readonly { question: string; answer: string }[]
     /** Decorative PhonePreview mock (desktop hero) — not real data (#467). */
     phoneMockBalanceCaption: string
     phoneMockBalancePeriod: string
@@ -615,6 +651,10 @@ export type Translations = {
     partnerSettled: string
     /** Settlement row label when it's an ended outing's fold-back (no direction). */
     outingSettled: string
+    /** Trip summary record description. `{name}` = trimmed trip name. */
+    tripSettledRecord: string
+    /** Trip summary record description when the trip name is empty or whitespace. */
+    tripSettledRecordUnnamed: string
     /** Transaction row payer label — viewer paid (income). */
     youIncome: string
     /** Transaction row payer label — partner paid (income). `{name}` = partner displayName. */
@@ -3407,7 +3447,7 @@ export type Translations = {
   /** #1750 - public shortcuts guide /features/shortcuts. Copy facts are limited to
    *  docs/shortcuts/linepay-quick-add.md and lib/quickAdd.ts. Never write 自動記帳 / 綁定 /
    *  串接 or claim encryption: Futari reads no payment data, the Shortcut only opens
-   *  Add Expense. `applePay.platformNote` must not name another mobile platform
+   *  Add Expense. The guide must not name another mobile platform
    *  (Apple Guideline 2.3.10: the iOS shell opens this page). `linePay` is zh-TW only:
    *  the other locales keep the same keys with empty values (the key-parity test needs
    *  them) and the page omits the section when `heading` is empty. */
@@ -3416,18 +3456,22 @@ export type Translations = {
     heroTitle: string
     heroSubtitle: string
     breadcrumbLabel: string
+    referenceHeading: string
     /** HowToStep name template, contains `{n}`. */
     howToStepName: string
     answerQuestion: string
     answer: string
     /** Names of the Shortcuts variables as the guide calls them; they go into the example URL. */
     vars: { amount: string; merchant: string }
+    /** #1921 opening animation: the visible step list, and the sample merchant in the phone. */
+    flow: { stepsLabel: string; steps: readonly string[]; sampleMerchant: string }
     applePay: {
       heading: string
       intro: string
-      steps: readonly { title: string; body: string }[]
-      platformNote: string
+      steps: readonly { title: string; body: string; art: ShortcutArt; legacy?: { summary: string; body: string } }[]
       foreignNote: string
+      /** #1921: under the three diagrams. */
+      artNote: string
     }
     applePayUrl: {
       heading: string
@@ -3440,7 +3484,7 @@ export type Translations = {
       intro: string
       /** Variable name of the optional description step. */
       noteVar: string
-      steps: readonly { title: string; body: string }[]
+      steps: readonly { title: string; body: string; art?: ShortcutArt }[]
     }
     web: { heading: string; body: string; urlLabel: string }
     params: {
@@ -3669,7 +3713,7 @@ export const zhTW: Translations = {
       heading: '開發日誌',
       more: '更多日誌',
     },
-    srTagline: ' · 兩個人的家計簿｜伴侶／夫妻共享記帳 PWA',
+    srTagline: ' · 兩個人的家計簿｜伴侶／夫妻共享記帳 App',
     srDescription:
       '專為伴侶、夫妻設計的雙人共享帳本。一起記錄日常開銷、自動分攤費用與 AA 制結算，掌握家庭預算、資產盤點、保險與愛車油耗紀錄。',
     aboutLabel: '關於 Futari',
@@ -3693,7 +3737,11 @@ export const zhTW: Translations = {
     playStoreCta: '在 Google Play 下載',
     playStoreCtaHint: '目前只在台灣上架',
     playBadgeAlt: 'Google Play 立即下載',
+    downloadQrCaption: '用手機掃描下載',
+    downloadQrAlt: '掃描後開啟 Futari 的下載頁面',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
+    appStoreBadgeAlt: 'App Store 下載',
+    appStoreTrademark: 'App Store is a service mark of Apple Inc., registered in the U.S. and other countries.',
     launchBanner: {
       text: 'Futari 的 Android App 上架了！',
       link: '到 Google Play 下載',
@@ -3756,6 +3804,9 @@ export const zhTW: Translations = {
     footerTrust: '只開放給你們倆 · 資料只屬於你們兩個',
     featuresOutingLink: '出遊分帳：丟一個連結，朋友不用下載 App',
     footerOutingLink: '出遊分帳',
+    featuresShortcutsLink: '捷徑記帳：Apple Pay 付完款，金額和商家先幫你填好',
+    footerUseCaseLink: '使用情境',
+    footerShortcutsLink: '捷徑記帳',
     jsonLdAppName: 'Futari · 雙人記帳',
     jsonLdAlternateNames: ['Futari 家計簿', '情侶記帳 app', '夫妻記帳', '兩個人的家計簿', 'ふたり 家計簿', "Futari · couple's ledger"],
     jsonLdAppDescription:
@@ -3767,23 +3818,41 @@ export const zhTW: Translations = {
       '保險方案（保護型／儲蓄型）',
       '汽車與油耗紀錄',
       '定期收入',
-      '離線瀏覽 PWA',
+      '離線瀏覽最近看過的頁面',
     ],
-    jsonLdFaq: [
+    stepsTitle: '三步，兩個人一起記',
+    steps: [
+      { title: '建立帳本', body: '用 Google 或 Apple 登入，幫你們的帳本取個名字。' },
+      { title: '把邀請傳給對方', body: '把邀請連結傳過去；對方就在旁邊的話，讓他掃 QR Code。' },
+      { title: '對方加入', body: '對方點開連結、登入，就和你記同一本帳。iPhone、Android 或網頁版都可以。' },
+    ],
+    stepsNote: '也可以先自己記，之後再邀請。',
+    faqTitle: '常見問題',
+    faq: [
       {
-        question: 'Futari 是什麼？',
+        question: '另一半也要下載嗎？用 Android 可以嗎？',
         answer:
-          'Futari 是專為夫妻、伴侶設計的雙人共享記帳 PWA，支援自動分攤、AA 結算、家庭資產盤點與愛車油耗紀錄。',
+          '不一定要下載。對方點開邀請連結、用 Google 或 Apple 登入就能加入，之後用 iPhone App、Android App 或網頁版都可以。兩個人用不同的手機，也能共用同一本帳。',
       },
       {
-        question: '如何開始使用？',
+        question: '我們看得到彼此的哪些紀錄？',
         answer:
-          '用 Google 帳號登入後建立兩人帳本，邀請伴侶加入即可一起記帳。可加到手機主畫面當 PWA 使用，完全免費。',
+          '記在共用帳本裡的每一筆，你們兩個人都看得到。用 iPhone 捷徑送進「待確認」的花費，在你確認之前只有你自己看得到。',
+      },
+      {
+        question: '要付費嗎？',
+        answer:
+          '不用。記帳、分攤、結算和邀請另一半都免費，也沒有廣告。',
       },
       {
         question: '資料安全嗎？',
         answer:
-          '帳本只開放給你和伴侶兩人，連線以 HTTPS 加密。身分證字號、車牌、住址等機敏欄位會加密儲存，記帳內容不分享、不販售。',
+          '帳本只開放給你們兩人的帳號，連線以 HTTPS 加密；孩子的本名、身分證字號這類機敏欄位，會另外加密才存進資料庫。也可以隨時在設定裡刪除帳號。',
+      },
+      {
+        question: '不想用了，資料帶得走嗎？',
+        answer:
+          '可以。在設定裡就能把支出、進帳和結算匯出成 CSV，離開帳本之後也能匯出。',
       },
     ],
     phoneMockBalanceCaption: 'YOU OWE T',
@@ -4027,6 +4096,8 @@ export const zhTW: Translations = {
     iSettled: '我還款',
     partnerSettled: '{name} 還款',
     outingSettled: '出遊結算',
+    tripSettledRecord: '{name} 結算',
+    tripSettledRecordUnnamed: '旅行結算',
     youIncome: '你收入',
     partnerIncome: '{name} 收入',
     youPaid: '你付',
@@ -6561,8 +6632,11 @@ export const zhTW: Translations = {
       },
       'simple-daily-money': {
         heroKicker: 'SIMPLE DAILY MONEY → FUTARI',
-        heroTitle: '你的簡單記帳資料，可以帶走',
-        heroSubtitle: '簡單記帳的 CSV 匯出是 VIP 功能；不想為了搬家先付費，用截圖請 ChatGPT 整理成 CSV，一樣能把記錄搬到 Futari。',
+        heroTitle: '簡單記帳的永久 VIP 帶不走，記錄帶得走',
+        heroSubtitle: '那筆 VIP 是在簡單記帳裡買的，只能在簡單記帳用，換到哪個 App 都一樣。Futari 目前完全免費，記帳、雙人分攤、雲端同步和 CSV 匯出匯入都不用解鎖；舊記錄不必先買 VIP 匯出，用截圖就能搬過來。',
+        // JSON-LD HowTo keeps the pre-#1926 title/description (decision on #1926).
+        howToName: '你的簡單記帳資料，可以帶走',
+        howToDescription: '簡單記帳的 CSV 匯出是 VIP 功能；不想為了搬家先付費，用截圖請 ChatGPT 整理成 CSV，一樣能把記錄搬到 Futari。',
         intro: '簡單記帳（SMoney）是 CMoney 集團旗下的人氣記帳 App，更新活躍、評價也好。不過它的共享帳本一次只能邀請一位，而且共享頁面只能查看、不能一起編輯；CSV 匯出則屬於 VIP 訂閱功能。想要兩個人都能動手記的同一本帳，下面是搬家的路。',
         differentiators: [
           {
@@ -6766,7 +6840,7 @@ export const zhTW: Translations = {
           },
           {
             question: '另一半用 Android，也能一起用嗎？',
-            answer: '可以。Futari 是跨平台的 PWA，iOS、Android、瀏覽器都能開，兩個人用不同手機也能共用同一本帳。',
+            answer: '可以。Futari 有 iPhone App、Android App 和網頁版，兩個人用不同手機也能共用同一本帳。',
           },
         ],
       },
@@ -6863,14 +6937,14 @@ export const zhTW: Translations = {
 
   seo: {
     landing: {
-      title: 'Futari · 兩個人，一本帳｜伴侶共享記帳 PWA',
-      description: 'Futari 是為夫妻、情侶設計的共同記帳 PWA，兩個人一起記帳、自動分攤花費、AA 結算，從日常開銷到旅行、愛車與資產，輕鬆看見兩個人的生活全貌。',
+      title: '伴侶共享記帳 App｜Futari · 兩個人，一本帳',
+      description: 'Futari 是為夫妻、情侶設計的共同記帳 App，iPhone、Android 和網頁版都能用。兩個人一起記帳、自動分攤花費、AA 結算，從日常開銷到旅行、愛車與資產，看見兩個人的生活全貌。',
       ogDescription: 'Futari 是為夫妻、伴侶設計的共同帳本——一起記帳、自動分攤、AA 結算，看見兩個人的生活全貌。',
     },
     signIn: {
       title: '登入 Futari · 兩個人的雙人記帳',
-      description: '用 Google 帳號登入後，會進到你們共用的帳本——伴侶一起記下日常開銷與愛車油耗，也照看保險與愛物的雙人記帳 PWA。',
-      ogDescription: '用 Google 一鍵登入，進到兩個人的家計簿。',
+      description: '用 Google 或 Apple 登入後，會進到你們共用的帳本——伴侶一起記下日常開銷與愛車油耗，也照看保險與愛物。',
+      ogDescription: '用 Google 或 Apple 登入，進到兩個人的家計簿。',
       /** Keep in sync with `invite.meta` — see the note there. (#1016) */
       invite: {
         title: '有人邀請你一起記帳 · Futari',
@@ -7524,95 +7598,109 @@ export const zhTW: Translations = {
   },
 
   featureShortcuts: {
+    referenceHeading: "其他做法與參考",
     heroKicker: '捷徑記帳',
     heroTitle: '付完款，讓 iPhone 把「新增紀錄」打開',
-    heroSubtitle: '用 iPhone 的「捷徑」，在付款後打開 Futari 的「新增紀錄」。金額、分類和描述先填好，你看過、需要就改，再按儲存。',
+    heroSubtitle: "金額、分類和描述先填好，你看過再按儲存。",
     breadcrumbLabel: '捷徑記帳',
     howToStepName: '步驟 {n}',
     answerQuestion: 'Apple Pay 或 LINE Pay 付款後，怎麼快速記到 Futari？',
-    answer: 'Futari 不連結任何付款帳戶，也不讀你的付款資料。做事的是 iPhone 的「捷徑」：付款後它打開 Futari 的「新增紀錄」，把金額、分類和描述先填好，你確認後自己按儲存，紀錄才會寫進帳本。這個做法只適用於 iPhone 的「捷徑」App。',
+    answer: "用 iPhone 的「捷徑」App，其他裝置不適用。付款後它打開填好的「新增紀錄」，你按儲存才會記下。Futari 不連結付款帳戶，也不讀付款資料。",
     vars: {
       amount: '金額',
       merchant: '商家',
     },
+    flow: {
+      stepsLabel: '三個步驟',
+      steps: ['付款完成', 'iPhone 打開「新增紀錄」，內容已填好', '你看過，再按儲存'],
+      sampleMerchant: '街角咖啡',
+    },
     applePay: {
       heading: 'Apple Pay：刷完卡就跳出「新增紀錄」',
-      intro: '前提：iPhone 使用 iOS 17 或以上版本，已安裝 Futari iOS App 1.9.0 或以上版本並登入。下面用「錢包」的自動化，每次用 Apple Pay 付款，就把 Futari 帶到前景，打開填好的「新增紀錄」。你確認後按儲存，紀錄才會寫進帳本。',
+      intro: "前提：iPhone 要 iOS 17 以上，Futari iOS App 1.9.0 以上並已登入。",
       steps: [
         {
+          legacy: {
+            summary: "iOS 26 或更早的做法",
+            body: "畫面不同：到「自動化」點 ＋ 選「錢包」，同一個畫面選「立即執行」，點「下一步」，再選「新增空白自動化」。新版的兩個開關維持原樣，付款後才會直接執行，不用先點通知。",
+          },
           title: '新增「錢包」自動化',
-          body: '打開「捷徑」App，點 ＋ 新增捷徑，再點「編輯」。在動作的分類選「自動化操作」→「錢包」，捷徑最上面會出現「感應〔任何卡片〕時」卡片。點「任何卡片」選要記的卡片；「類別」和「商家」維持「任何類別」「任何商家」即可。卡片裡的「自動化操作」保持開啟、「通知」保持關閉，付款後就會直接執行，不用先點通知。iOS 26 以前的畫面不同：到「自動化」點 ＋ 選「錢包」，同一個畫面選「立即執行」，點「下一步」，再選「新增空白自動化」。',
+          body: "打開「捷徑」App，點 ＋ 新增捷徑，再點「編輯」。在動作的分類選「自動化操作」→「錢包」。在「感應〔任何卡片〕時」卡片點「任何卡片」選要記的卡片，其他不用改。「自動化操作」保持開啟、「通知」保持關閉。",
+          art: { kind: 'wallet', path: '自動化操作 → 錢包', heading: '感應〔任何卡片〕時', option: '任何卡片', toggles: ['自動化操作', '通知'] },
         },
         {
           title: '加入「Futari 記一筆」動作',
-          body: '在同一個畫面下方的搜尋欄搜尋 Futari，加入「Futari 記一筆」。',
+          body: "在同一個畫面下方的搜尋欄搜尋 Futari，加入「Futari 記一筆」。",
+          art: { kind: 'action', search: 'Futari', action: 'Futari 記一筆' },
         },
         {
           title: '設定金額與備註，分類留空',
-          body: '點「金額」選「捷徑輸入」，再點這個「捷徑輸入」，把「類型」從「文字」改成「交易」，選「數量」。「備註」也選「捷徑輸入」，「類型」改成「交易」，選「商家」。加入「捷徑輸入」後，最上面會多一張「從…接收」的卡片，不用改。「分類」留空：記過的商家會沿用上次的分類，第一次記的商家先用「飲食」，存之前都可以改。動作會把金額取整數，備註不用 URL 編碼。執行時會把 Futari 帶到前景並打開填好的「新增紀錄」；你看過、需要就改，再按儲存，不會自行存下紀錄。',
+          body: "點「金額」選「捷徑輸入」，再點它，把「類型」從「文字」改成「交易」，選「數量」。「備註」也選「捷徑輸入」，「類型」改成「交易」，選「商家」。「分類」留空，存之前都能改。最上面多出的「從…接收」卡片不用改。",
+          art: { kind: 'fields', amount: '金額 → 捷徑輸入 › 交易 › 數量', note: '備註 → 捷徑輸入 › 交易 › 商家', category: '分類' },
         },
       ],
-      platformNote: '這個流程只適用於 iPhone 的「捷徑」App。',
-      foreignNote: '外幣提醒：用 Apple Pay 付外幣時，捷徑給的是外幣金額，Futari 會把它當成帳本主幣別的金額帶入。請在「新增紀錄」裡改成實際的金額。',
+      foreignNote: "外幣提醒：付外幣時帶入的是外幣金額，Futari 會當成帳本主幣別。請在「新增紀錄」改成實際金額。",
+      artNote: '示意圖，實際畫面會依 iOS 版本而不同。',
     },
     applePayUrl: {
       heading: '備用：還不能使用動作時，用網址打開',
-      intro: '上面的「Futari 記一筆」動作能用時，設定比較簡單。如果 Futari App 還沒更新到 1.9.0（iPhone 一樣要 iOS 17 以上），可以先用下面的五步網址做法。',
+      intro: "Futari App 還沒到 1.9.0 時（iPhone 一樣要 iOS 17 以上），用這五步。上面的動作會自己取整數，備註也不用 URL 編碼；用網址時要自己做。",
       steps: [
         {
           title: '新增「錢包」自動化',
-          body: '打開「捷徑」App，點 ＋ 新增捷徑，再點「編輯」。在動作的分類選「自動化操作」→「錢包」，捷徑最上面會出現「感應〔任何卡片〕時」卡片。點「任何卡片」選要記的卡片；「類別」和「商家」維持「任何類別」「任何商家」即可。卡片裡的「自動化操作」保持開啟、「通知」保持關閉，付款後就會直接執行，不用先點通知。iOS 26 以前的畫面不同：到「自動化」點 ＋ 選「錢包」，同一個畫面選「立即執行」，點「下一步」，再選「新增空白自動化」。',
+          body: "同上方第 1 步。",
         },
         {
           title: '把金額取整數（建議）',
-          body: '建議加上：加一個「取整數」動作（將〔捷徑輸入〕取整數到〔整數〕），點「捷徑輸入」，「類型」改成「交易」，選「數量」（iOS 把錢包的金額叫「數量」）。如果金額帶小數（例如 120.00），Futari 會讓金額欄空白；先取整數比較保險。「120」「1,280」「１２０」可以，「120.00」「NT$120.00」「120元」會讓金額欄空白。',
+          body: "建議加上：加「取整數」動作（將〔捷徑輸入〕取整數到〔整數〕），點「捷徑輸入」，「類型」改成「交易」，選「數量」（iOS 把錢包的金額叫「數量」）。金額帶小數（例如 120.00）時，Futari 會讓金額欄空白。",
         },
         {
           title: '把商家名稱做 URL 編碼',
-          body: '加一個「URL 編碼」動作，輸入選「捷徑輸入」，「類型」改成「交易」，選「商家」。中文和空白不先編碼，網址會斷在中間，描述會空白或只剩一半。描述可有可無，不想帶就跳過這步，並把網址裡的 &note=… 整段拿掉。',
+          body: "加「URL 編碼」動作，輸入選「捷徑輸入」，「類型」改成「交易」，選「商家」。不編碼時，中文和空白會讓網址斷掉，描述空白或只剩一半。不想帶描述就跳過，並拿掉網址裡的 &note=…。",
         },
         {
           title: '用「文字」組出網址',
-          body: '加一個「文字」動作，貼上下面的網址，把 [金額] 換成第 2 步的結果、[商家] 換成第 3 步的結果（沒加第 2 步，就換成「捷徑輸入」，「類型」先改成「交易」，再選「數量」）。分類不用寫：記過的商家會沿用上次的分類，第一次記的商家先用「飲食」，存之前都可以改。',
+          body: "加「文字」動作，貼上下面的網址，把 [金額] 換成第 2 步的結果、[商家] 換成第 3 步的結果（沒做第 2 步，就換成「捷徑輸入」，「類型」改成「交易」，選「數量」）。分類不用寫。",
         },
         {
           title: '打開 URL',
-          body: '加一個「打開 URL」動作，輸入選上一步的文字。之後每次用 Apple Pay 付款，Futari 會打開並跳出「新增紀錄」，確認後按儲存。',
+          body: "加「打開 URL」動作，輸入選上一步的文字。之後每次用 Apple Pay 付款都會跳出「新增紀錄」，確認後按儲存。",
         },
       ],
       urlLabel: '網址（App）',
     },
     linePay: {
       heading: 'LINE Pay：用「付款完成」的通知觸發',
-      intro: 'LINE Pay 沒有交易自動化，但付款完成時 LINE 會送出通知，捷徑可以拿它當觸發條件。',
+      intro: "LINE Pay 沒有交易自動化，但付款完成時 LINE 會送通知，捷徑可以拿它當觸發條件。",
       noteVar: '描述',
       steps: [
         {
           title: '新增通知自動化',
           body: '「捷徑」→「自動化」→ 新增「通知」。App 選 LINE，名稱包含「LINE錢包」，訊息包含「付款完成」，執行方式選「立即執行」。',
+          art: { kind: 'notify', rows: ['App：LINE', '名稱包含：LINE錢包', '訊息包含：付款完成', '立即執行'], hot: 2 },
         },
         {
           title: '只取出數字金額',
-          body: '用裝置端模型從通知內文取出付款金額，並要求只輸出數字（例如 120，不要帶「元」或「NT$」），把結果命名為「金額」。這一步要用到裝置端模型，需要支援 Apple Intelligence 的 iPhone。',
+          body: "用裝置端模型從通知內文取出付款金額，只輸出數字（例如 120，不帶「元」或「NT$」），結果命名為「金額」。這一步需要支援 Apple Intelligence 的 iPhone。",
         },
         {
           title: '準備描述（可選）',
-          body: '加一個「文字」動作，內容例如 LINE Pay，再接一個「URL 編碼」動作，把結果命名為「描述」。不想帶描述就跳過，並把網址裡的 &note=… 整段拿掉。',
+          body: "加「文字」動作，內容例如 LINE Pay，再接「URL 編碼」動作，結果命名為「描述」。不想帶就跳過，並拿掉網址裡的 &note=…。",
         },
         {
           title: '組出網址並打開',
-          body: '加一個「文字」動作，貼上下面的網址，把 [金額]、[描述] 換成上面的結果，再加一個「打開 URL」動作，輸入選這段文字。',
+          body: "加「文字」動作，貼上下面的網址，把 [金額]、[描述] 換成上面的結果，再加「打開 URL」動作，輸入選這段文字。",
         },
       ],
     },
     web: {
       heading: '沒有裝 App：用網頁網址',
-      body: '沒有裝 App、用瀏覽器或「加到主畫面」的人，把網址換成下面這條，「打開 URL」會在 Safari 打開。要先在 Safari 登入過 Futari。# 後面的內容只留在你的瀏覽器，不會送到伺服器。',
+      body: "沒裝 App、用瀏覽器或「加到主畫面」時，把網址換成下面這條，「打開 URL」會在 Safari 打開。要先在 Safari 登入。# 後面的內容只留在瀏覽器，不會送到伺服器。",
       urlLabel: '網址（網頁）',
     },
     params: {
       heading: '網址可以帶哪些值',
-      intro: '三個參數都可以省略；某個值不合格時，只有那一格不帶入，其他照樣帶入。',
+      intro: "三個參數都可以省略。某個值不合格時，只有那一格不帶入。",
       cols: {
         param: '參數',
         rule: '規則',
@@ -7621,18 +7709,18 @@ export const zhTW: Translations = {
       rows: [
         {
           param: 'amount',
-          rule: '正整數，1 到 9,999,999。可以有千分位逗號（1,200），全形數字也可以。小數、負數、1e5 這類寫法都不收。',
-          fallback: '金額空白，自己輸入',
+          rule: "1 到 9,999,999 的正整數。可以有千分位逗號（1,200）或全形數字；小數、負數、1e5 這類寫法都不收。",
+          fallback: "金額空白，自己輸入",
         },
         {
           param: 'category',
-          rule: '下表其中一個 id，要全小寫、完全一樣。只有第一次記這個商家時會採用，記過的商家沿用上次的分類。',
-          fallback: '這個商家記過就沿用上次的分類，沒記過用「飲食」',
+          rule: "下表的 id，全小寫、完全一樣。只在第一次記這個商家時採用。",
+          fallback: "記過的商家用上次的分類，沒記過用「飲食」",
         },
         {
           param: 'note',
-          rule: '會變成「描述」，最多 100 個字。',
-          fallback: '描述空白，儲存前要自己填',
+          rule: "變成「描述」，最多 100 個字。",
+          fallback: "描述空白，儲存前自己填",
         },
       ],
       categoriesHeading: '分類 id',
@@ -7640,15 +7728,15 @@ export const zhTW: Translations = {
         id: 'id',
         name: '顯示',
       },
-      fixedNote: '網址只能帶這三個值。日期（今天）、誰付的（你）、分攤方式與幣別，都照「新增紀錄」平常的預設，寫在網址裡也不會採用；也不會自動歸到進行中的旅行，要歸到旅行請在畫面上自己選。',
+      fixedNote: "網址只能帶這三個值。日期（今天）、誰付的（你）、分攤方式與幣別照「新增紀錄」的預設，寫了也不採用。也不會自動歸到進行中的旅行，要歸到旅行請在畫面上選。",
     },
     whenNot: {
       heading: '什麼時候不會跳出來',
-      intro: '捷徑只負責打開。下面三種情況 Futari 會安靜地略過，不動你的畫面：',
+      intro: "捷徑只負責打開。這三種情況 Futari 會安靜略過：",
       items: [
-        '另一個視窗正開著（例如正在改某一筆）：捷徑會被忽略，改到一半的內容不會被動到。關掉視窗後再跑一次。',
-        '正在看過去的章節：過去章節是唯讀的，先切回目前的章節。',
-        '還沒登入：登入後會停在首頁，填好的內容不會留著，再執行一次捷徑就好。',
+        "另一個視窗開著（例如正在改某一筆）：內容不會被動到。關掉視窗再跑一次。",
+        "正在看過去的章節：過去章節是唯讀的，先切回目前的章節。",
+        "還沒登入：登入後會停在首頁，填好的內容不會留著，再跑一次捷徑。",
       ],
     },
     trouble: {
@@ -7660,19 +7748,19 @@ export const zhTW: Translations = {
       rows: [
         {
           symptom: '找不到「Futari 記一筆」動作',
-          cause: '將 iOS 更新到 17 或以上版本、Futari iOS App 更新到 1.9.0 或以上版本，並先打開 Futari 一次。',
+          cause: "把 iOS 更新到 17 以上、Futari iOS App 更新到 1.9.0 以上，再打開 Futari 一次。",
         },
         {
           symptom: '網址備用做法：跳出來了，但金額是空的',
-          cause: '金額不是整數。通常是少了「取整數」那一步，或帶了「元」「NT$」。',
+          cause: "金額不是整數。通常是少了「取整數」，或帶了「元」「NT$」。",
         },
         {
           symptom: '網址備用做法：描述空白或只有一半',
-          cause: '商家名稱沒有先經過「URL 編碼」。',
+          cause: "商家名稱沒有先做「URL 編碼」。",
         },
         {
           symptom: '網址備用做法：分類不是我網址裡寫的',
-          cause: '這個商家記過，會沿用上次的分類；第一次記的商家，id 拼錯或用了大寫就會用「飲食」。',
+          cause: "記過的商家用上次的分類。第一次記的商家，id 拼錯或用了大寫會用「飲食」。",
         },
       ],
     },

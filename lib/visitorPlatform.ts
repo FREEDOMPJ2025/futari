@@ -12,6 +12,13 @@
 
 export type VisitorPlatformTarget = 'dashboard' | 'sign_in' | 'app_store' | 'play_store'
 
+/** Browser platform for the hero store-badge row (#1930). */
+export type BadgePlatform = 'ios' | 'android' | 'other'
+
+/** `<html>` attribute holding the `BadgePlatform`, set pre-paint by the
+ *  landing script (`lib/playLaunch.ts`) and by `useMarkVisitorPlatform`. */
+export const VISITOR_PLATFORM_ATTR = 'data-visitor-platform'
+
 export interface ResolveVisitorPlatformInput {
   /** `navigator.userAgent`. */
   userAgent: string
@@ -37,6 +44,18 @@ export interface ResolveVisitorPlatformInput {
 // campaign once ≥5 distinct Apple accounts installed through it.
 export const APP_STORE_URL = 'https://apps.apple.com/app/id6779264784?pt=128976951&ct=landing&mt=8'
 
+/** #1930 — same link for the App Store badge in the hero, under its own ASC
+ *  campaign (`ct=landing-badge`) so the badge and the main CTA count apart. */
+export const APP_STORE_BADGE_URL = APP_STORE_URL.replace('ct=landing&', 'ct=landing-badge&')
+
+/** #1933 — same link under a page's own ASC campaign, MarsDawn-style
+ *  `ct=web-<page>` (`web-migrate-<source>`, `web-shortcuts`), so ASC's
+ *  宣傳活動 report shows which page sent the install. Same `replace` as the
+ *  badge URL above, so `pt` and `mt` stay the one set of constants. */
+export function appStoreUrlForCampaign(ct: string): string {
+  return APP_STORE_URL.replace('ct=landing&', `ct=${ct}&`)
+}
+
 // #1901 — Android 1.9.0 is live on Google Play (production track, Taiwan only,
 // since 2026-11-02). It replaces the #1648 closed-test join flow (Google Group
 // + Play opt-in page). This is the one URL every Android "download" link uses:
@@ -53,6 +72,20 @@ export const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=dev
  *  Since #1901 it is the "closed testing is over, the app is on Play" page,
  *  kept (not redirected) so links shared during the test still make sense. */
 export const ANDROID_BETA_PATH = '/android-beta'
+
+/**
+ * iPhone / iPad / iPod → ios, Android → android, everything else → other.
+ * iPadOS 13+ reports as Macintosh in the UA string; touch points disambiguate
+ * it from a real Mac (same heuristic as `lib/install-guide.ts#getPlatform`).
+ * The landing's pre-paint script (`lib/playLaunch.ts`) inlines the same rule;
+ * keep the two in step.
+ */
+export function classifyBrowserPlatform(userAgent: string, maxTouchPoints: number): BadgePlatform {
+  const ua = userAgent.toLowerCase()
+  if (/iphone|ipad|ipod/.test(ua) || (/macintosh/.test(ua) && maxTouchPoints > 1)) return 'ios'
+  if (/android/.test(ua)) return 'android'
+  return 'other'
+}
 
 /**
  * Which primary-CTA variant a visitor should see. Precedence:
@@ -75,13 +108,55 @@ export function resolveVisitorPlatform({
   if (hasSession) return 'dashboard'
   if (isCapacitor || isStandalone) return 'sign_in'
 
-  const ua = userAgent.toLowerCase()
-  // iPadOS 13+ reports as Macintosh in the UA string; touch points disambiguate
-  // it from a real Mac (same heuristic as `lib/install-guide.ts#getPlatform`).
-  const isIos = /iphone|ipad|ipod/.test(ua) || (/macintosh/.test(ua) && maxTouchPoints > 1)
-  if (isIos) return 'app_store'
-
-  if (/android/.test(ua)) return 'play_store'
-
+  const platform = classifyBrowserPlatform(userAgent, maxTouchPoints)
+  if (platform === 'ios') return 'app_store'
+  if (platform === 'android') return 'play_store'
   return 'sign_in'
+}
+
+/**
+ * App Store Connect campaign names (`ct`) used on the landing (#1555, #1906).
+ * - `landing`: the iPhone/iPad browser primary CTA.
+ * - `landing-desktop`: the desktop App Store badge and the "iPhone App" link
+ *   in the platform line, so ASC can tell desktop visitors apart from phones.
+ * - `landing-qr`: the desktop QR code, via the `/get` redirect.
+ * Failure looks like: ASC's 宣傳活動 report lumps desktop and QR installs into
+ * `landing` (or into 「網頁推薦」 if `ct` is dropped); nothing errors.
+ */
+export type AppStoreCampaign = 'landing' | 'landing-desktop' | 'landing-qr'
+
+/** `APP_STORE_URL` with its `ct` campaign swapped; every other param kept. */
+export function appStoreUrl(campaign: AppStoreCampaign): string {
+  const url = new URL(APP_STORE_URL)
+  url.searchParams.set('ct', campaign)
+  return url.toString()
+}
+
+/** Path of the desktop QR's redirect route (`app/get/route.ts`, #1906). */
+export const QR_REDIRECT_PATH = '/get'
+
+export type QrRedirectTarget = 'app_store' | 'play_store' | 'landing'
+
+/** PostHog distinct id for `/get`'s server-side `landing_cta_clicked`: one
+ *  shared bucket, since the scanning phone has no identity yet. */
+export const QR_SCAN_BUCKET_ID = 'anon:landing-qr'
+
+/**
+ * Where `/get` sends a phone that scanned the desktop QR (#1906). Server-side
+ * the User-Agent string is all there is, so unlike `resolveVisitorPlatform`
+ * there is no `maxTouchPoints` to tell iPadOS (which reports itself as
+ * "Macintosh") from a real Mac. Any Macintosh UA therefore goes to the App
+ * Store like iPhone/iPad: `/get` is only reached by scanning the desktop QR,
+ * a desktop Mac doesn't scan a QR, and an iPad on iPadOS's default "desktop
+ * website" Safari UA reports Macintosh. A real Mac that does land here just
+ * opens the App Store page, which is not a dead end.
+ * Failure looks like (if Macintosh fell back to `landing`): nothing errors;
+ * those iPads count under `landing` instead of `app_store` in PostHog and
+ * miss the `landing-qr` ASC campaign.
+ */
+export function resolveQrRedirect(userAgent: string): QrRedirectTarget {
+  const ua = userAgent.toLowerCase()
+  if (/iphone|ipad|ipod|macintosh/.test(ua)) return 'app_store'
+  if (/android/.test(ua)) return 'play_store'
+  return 'landing'
 }

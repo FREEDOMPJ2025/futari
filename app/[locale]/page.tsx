@@ -8,6 +8,7 @@ import { KofiWidget } from '@/components/KofiWidget'
 import { Landing } from './_landing/Landing'
 import { isPlayLaunchBannerActive } from '@/lib/playLaunch'
 import { APP_STORE_URL, PLAY_STORE_URL } from '@/lib/visitorPlatform'
+import { launchFilmJsonLd, showsLaunchFilm } from '@/lib/launchFilm'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://futari.southern-light.dev'
 
@@ -64,13 +65,14 @@ export default async function RootPage({ params }: { params: Params }) {
   // alternateName / description / featureList follow the active locale (#467).
 
   // FAQPage JSON-LD (#344, #611) — emitted per-locale so each rendered URL's
-  // rich-result language matches its visible content. Answers held to ~40–60 字
-  // to fit AI Overview's Answer Capsule extraction window.
+  // rich-result language matches its visible content. Built from t.landing.faq,
+  // the very list <Landing> renders as the visible FAQ (#1907), so question and
+  // answer text are the same strings; tests/landing-faq.test.tsx asserts it.
   const faqJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
     inLanguage: locale,
-    mainEntity: t.landing.jsonLdFaq.map(({ question, answer }) => ({
+    mainEntity: t.landing.faq.map(({ question, answer }) => ({
       '@type': 'Question',
       name: question,
       acceptedAnswer: { '@type': 'Answer', text: answer },
@@ -115,6 +117,13 @@ export default async function RootPage({ params }: { params: Params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
+      {/* #1910 — VideoObject for the launch film, only where the film renders. */}
+      {showsLaunchFilm(locale) && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(launchFilmJsonLd(APP_URL)) }}
+        />
+      )}
       <Landing
         t={t.landing}
         signInHref={signInHref}

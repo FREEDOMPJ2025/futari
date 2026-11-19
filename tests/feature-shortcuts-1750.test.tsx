@@ -51,7 +51,7 @@ describe.each(SUPPORTED_LOCALES)('%s', (locale) => {
       en: { category: 'Automation', wallet: 'Wallet', notify: 'Notify', runImmediately: 'Run Immediately', newBlank: 'New Blank Automation', action: 'Add Entry to Futari', fields: ['Amount', 'Note', 'Category'], input: 'Shortcut Input', type: 'Type', transaction: 'Transaction', amount: 'Amount', merchant: 'Merchant' },
       ja: { category: 'オートメーション', wallet: 'ウォレット', notify: '通知', runImmediately: 'すぐに実行', newBlank: '新規の空のオートメーション', action: 'Futari に記録する', fields: ['金額', 'メモ', 'カテゴリー'], input: 'ショートカットの入力', type: '種類', transaction: '取引', amount: '金額', merchant: '店舗' },
     }[locale]
-    for (const id of ['apple-pay', 'apple-pay-url']) {
+    for (const id of ['apple-pay']) {
       const stepOne = doc.querySelector(`#${id} ol > li`)!.textContent ?? ''
       for (const term of [ui.category, ui.wallet, ui.notify, ui.runImmediately, ui.newBlank]) {
         expect(stepOne, `${id}: ${term}`).toContain(term)
@@ -79,7 +79,7 @@ describe.each(SUPPORTED_LOCALES)('%s', (locale) => {
     expect(skipped.indexOf(ui.transaction)).toBeLessThan(skipped.indexOf(ui.amount, ui.input.length))
     expect(t.trouble.rows[0].symptom).toContain(ui.action)
     expect(doc.querySelectorAll('#apple-pay-url ol > li')).toHaveLength(5)
-    expect(doc.getElementById('apple-pay')!.nextElementSibling?.id).toBe('apple-pay-url')
+    expect(doc.querySelector('[aria-labelledby="reference-heading"] #apple-pay-url')).not.toBeNull()
     expect(doc.querySelector('#apple-pay-url pre')!.textContent).toBe(appUrl(t.vars.amount, t.vars.merchant))
     expect(doc.querySelectorAll('#line-pay pre')).toHaveLength(locale === 'zh-TW' ? 1 : 0)
     expect(doc.getElementById('answer')!.textContent).toContain(t.answer)

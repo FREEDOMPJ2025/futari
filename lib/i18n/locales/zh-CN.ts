@@ -74,7 +74,7 @@ export const zhCN: Translations = {
       heading: '开发日志',
       more: '更多日志',
     },
-    srTagline: ' · 两个人的家计簿｜伴侣／夫妻共享记账 PWA',
+    srTagline: ' · 两个人的家计簿｜伴侣／夫妻共享记账 App',
     srDescription:
       '专为伴侣、夫妻设计的双人共享账本。一起记录日常开销、自动分摊费用与 AA 制结算，掌握家庭预算、资产盘点、保险与爱车油耗记录。',
     aboutLabel: '关于 Futari',
@@ -98,7 +98,11 @@ export const zhCN: Translations = {
     playStoreCta: '在 Google Play 下载',
     playStoreCtaHint: '目前仅在台湾上架',
     playBadgeAlt: '去商店下载 Google Play',
+    downloadQrCaption: '用手机扫码下载',
+    downloadQrAlt: '扫码后打开 Futari 的下载页面',
     playTrademark: 'Google Play and the Google Play logo are trademarks of Google LLC.',
+    appStoreBadgeAlt: 'App Store 下载',
+    appStoreTrademark: 'App Store is a service mark of Apple Inc., registered in the U.S. and other countries.',
     launchBanner: {
       text: 'Futari 的 Android App 上架了！',
       link: '到 Google Play 下载',
@@ -161,6 +165,9 @@ export const zhCN: Translations = {
     footerTrust: '只开放给你们俩 · 数据只属于你们两个',
     featuresOutingLink: '出游分账：发一个链接，朋友不用下载 App',
     footerOutingLink: '出游分账',
+    featuresShortcutsLink: '快捷指令记账：Apple Pay 付完款，金额和商家先帮你填好',
+    footerUseCaseLink: '使用情境',
+    footerShortcutsLink: '快捷指令记账',
     jsonLdAppName: 'Futari · 双人记账',
     jsonLdAlternateNames: ['Futari 家计簿', '两个人的家计簿', 'ふたり 家計簿', "Futari · couple's ledger"],
     jsonLdAppDescription:
@@ -172,23 +179,41 @@ export const zhCN: Translations = {
       '保险方案（保护型／储蓄型）',
       '汽车与油耗记录',
       '定期收入',
-      '离线浏览 PWA',
+      '离线浏览最近看过的页面',
     ],
-    jsonLdFaq: [
+    stepsTitle: '三步，两个人一起记',
+    steps: [
+      { title: '建立账本', body: '用 Google 或 Apple 登录，给你们的账本取个名字。' },
+      { title: '把邀请发给对方', body: '把邀请链接发过去；对方就在旁边的话，让 TA 扫 QR 码。' },
+      { title: '对方加入', body: '对方打开链接、登录，就和你记同一本账。iPhone、Android 或网页版都可以。' },
+    ],
+    stepsNote: '也可以先自己记，之后再邀请。',
+    faqTitle: '常见问题',
+    faq: [
       {
-        question: 'Futari 是什么？',
+        question: '另一半也要下载吗？用 Android 可以吗？',
         answer:
-          'Futari 是专为夫妻、伴侣设计的双人共享记账 PWA，支持自动分摊、AA 结算、家庭资产盘点与爱车油耗记录。',
+          '不一定要下载。对方打开邀请链接、用 Google 或 Apple 登录就能加入，之后用 iPhone App、Android App 或网页版都可以。两个人用不同的手机，也能共用同一本账。',
       },
       {
-        question: '如何开始使用？',
+        question: '我们看得到彼此的哪些记录？',
         answer:
-          '用 Google 账号登录后建立两人账本，邀请伴侣加入即可一起记账。可加到手机主屏幕当 PWA 使用，完全免费。',
+          '记在共用账本里的每一笔，你们两个人都看得到。用 iPhone 快捷指令送进“待确认”的花费，在你确认之前只有你自己看得到。',
+      },
+      {
+        question: '要付费吗？',
+        answer:
+          '不用。记账、分摊、结算和邀请另一半都免费，也没有广告。',
       },
       {
         question: '数据安全吗？',
         answer:
-          '账本只开放给你和伴侣两人，连接以 HTTPS 加密。身份证号、车牌、住址等敏感字段会加密存储，记账内容不分享、不出售。',
+          '账本只对你们两人的账号开放，连接以 HTTPS 加密；孩子的本名、身份证号这类敏感字段，会另外加密才存进数据库。也可以随时在设置里删除账号。',
+      },
+      {
+        question: '不想用了，数据带得走吗？',
+        answer:
+          '可以。在设置里就能把支出、进账和结算导出成 CSV，离开账本之后也能导出。',
       },
     ],
     phoneMockBalanceCaption: 'YOU OWE T',
@@ -432,6 +457,8 @@ export const zhCN: Translations = {
     iSettled: '我还款',
     partnerSettled: '{name} 还款',
     outingSettled: '出游结算',
+    tripSettledRecord: '{name} 结算',
+    tripSettledRecordUnnamed: '旅行结算',
     youIncome: '你收入',
     partnerIncome: '{name} 收入',
     youPaid: '你付',
@@ -3174,7 +3201,7 @@ export const zhCN: Translations = {
           },
           {
             question: '另一半用 Android，也能一起用吗？',
-            answer: '可以。Futari 是跨平台的 PWA，iOS、Android、浏览器都能开，两个人用不同手机也能共用同一本账。',
+            answer: '可以。Futari 有 iPhone App、Android App 和网页版，两个人用不同手机也能共用同一本账。',
           },
         ],
       },
@@ -3271,14 +3298,14 @@ export const zhCN: Translations = {
 
   seo: {
     landing: {
-      title: 'Futari · 两个人，一本账｜情侣共享记账 PWA',
-      description: 'Futari 是为夫妻、情侣设计的共同账本，两个人一起记账、自动分摊花费、AA 结算，从日常开销到旅行、爱车与资产，轻松看见两个人的生活全貌。',
+      title: '情侣共享记账 App｜Futari · 两个人，一本账',
+      description: 'Futari 是为夫妻、情侣设计的共同记账 App，iPhone、Android 和网页版都能用。两个人一起记账、自动分摊花费、AA 结算，从日常开销到旅行、爱车与资产，看见两个人的生活全貌。',
       ogDescription: 'Futari 是为夫妻、情侣设计的共同账本——一起记账、自动分摊、AA 结算，看见两个人的生活全貌。',
     },
     signIn: {
       title: '登录 Futari · 两个人的双人记账',
-      description: '用 Google 账号登录后，会进入你们共用的账本——伴侣一起记下日常开销与爱车油耗，也照看保险与爱物的双人记账 PWA。',
-      ogDescription: '用 Google 一键登录，进入两个人的家计簿。',
+      description: '用 Google 或 Apple 登录后，会进入你们共用的账本——伴侣一起记下日常开销与爱车油耗，也照看保险与爱物。',
+      ogDescription: '用 Google 或 Apple 登录，进入两个人的家计簿。',
       invite: {
         title: '有人邀请你一起记账 · Futari',
         description: '有人邀请你加入一本两个人共用的账本。登录后就能加入。',
@@ -3931,60 +3958,73 @@ export const zhCN: Translations = {
   },
 
   featureShortcuts: {
+    referenceHeading: "其他做法与参考",
     heroKicker: '快捷指令记账',
     heroTitle: '付完款，让 iPhone 把「新增记录」打开',
-    heroSubtitle: '用 iPhone 的「快捷指令」，在付款后打开 Futari 的「新增记录」。金额、分类和描述先填好，你看过、需要就改，再按保存。',
+    heroSubtitle: "金额、分类和描述先填好，你看过再按保存。",
     breadcrumbLabel: '快捷指令记账',
     howToStepName: '步骤 {n}',
     answerQuestion: 'Apple Pay 付款后，怎么快速记到 Futari？',
-    answer: 'Futari 不连接任何付款账户，也不读取你的付款数据。做事的是 iPhone 的「快捷指令」：付款后它打开 Futari 的「新增记录」，把金额、分类和描述先填好，你确认后自己按保存，记录才会写进账本。这个做法只适用于 iPhone 的「快捷指令」App。',
+    answer: "用 iPhone 的「快捷指令」App，其他设备不适用。付款后它打开填好的「新增记录」，你按保存才会记下。Futari 不连接付款账户，也不读取付款数据。",
     vars: {
       amount: '金额',
       merchant: '商家',
     },
+    flow: {
+      stepsLabel: '三个步骤',
+      steps: ['付款完成', 'iPhone 打开「新增记录」，内容已填好', '你看过，再按保存'],
+      sampleMerchant: '街角咖啡',
+    },
     applePay: {
       heading: 'Apple Pay：刷完卡就跳出「新增记录」',
-      intro: '前提：iPhone 使用 iOS 17 或以上版本，已安装 Futari iOS App 1.9.0 或以上版本并登录。下面用「钱包」的自动化，每次用 Apple Pay 付款，就把 Futari 带到前台，打开填好的「新增记录」。你确认后按保存，记录才会写进账本。',
+      intro: "前提：iPhone 要 iOS 17 或以上，Futari iOS App 1.9.0 或以上并已登录。",
       steps: [
         {
+          legacy: {
+            summary: "iOS 26 及更早版本的做法",
+            body: "画面不同：进入「自动化」，点 ＋ 选「钱包」，在同一画面选「立即运行」，点「下一步」，再选「新建空白自动化」。新版的两个开关保持原样，付款后才会直接运行，不用先点通知。",
+          },
           title: '新建「钱包」自动化',
-          body: '打开「快捷指令」App，点 ＋ 新建快捷指令，再点「编辑」。在动作的分类选「自动化」→「钱包」，快捷指令最上面会出现「轻触〔任一卡片〕时」卡片。点「任一卡片」选要记的卡片；「类别」和「商家」保持「任一类别」「任一商家」即可。卡片里的「自动化」保持打开、「通知」保持关闭，付款后就会直接运行，不用先点通知。iOS 26 及更早版本的画面不同：进入「自动化」，点 ＋ 选「钱包」，在同一画面选「立即运行」，点「下一步」，再选「新建空白自动化」。',
+          body: "打开「快捷指令」App，点 ＋ 新建快捷指令，再点「编辑」。在动作的分类选「自动化」→「钱包」。在「轻触〔任一卡片〕时」卡片点「任一卡片」选要记的卡片，其他不用改。「自动化」保持打开、「通知」保持关闭。",
+          art: { kind: 'wallet', path: '自动化 → 钱包', heading: '轻触〔任一卡片〕时', option: '任一卡片', toggles: ['自动化', '通知'] },
         },
         {
           title: '添加「Futari 记一笔」动作',
-          body: '在同一画面下方的搜索栏搜索 Futari，添加「Futari 记一笔」。',
+          body: "在同一画面下方的搜索栏搜索 Futari，添加「Futari 记一笔」。",
+          art: { kind: 'action', search: 'Futari', action: 'Futari 记一笔' },
         },
         {
           title: '设置金额与备注，分类留空',
-          body: '点「金额」选「输入快捷指令的信息」，再点一下它，把「类型」改成「交易」，选「数量」。「备注」也选「输入快捷指令的信息」，「类型」改成「交易」，选「商家」。加入后，最上面会多一张接收输入的卡片，不用改。「分类」留空：记过的商家会沿用上次的分类，第一次记的商家先用「饮食」，保存前都可以改。动作会把金额取整数，备注不用 URL 编码。运行时会把 Futari 带到前台并打开填好的「新增记录」；你看过、需要就改，再按保存，不会自行保存记录。',
+          body: "点「金额」选「输入快捷指令的信息」，再点它，把「类型」改成「交易」，选「数量」。「备注」也选它，「类型」改成「交易」，选「商家」。「分类」留空，保存前都能改。最上面多出的接收输入的卡片不用改。",
+          art: { kind: 'fields', amount: '金额 → 输入快捷指令的信息 › 交易 › 数量', note: '备注 → 输入快捷指令的信息 › 交易 › 商家', category: '分类' },
         },
       ],
-      platformNote: '这个流程只适用于 iPhone 的「快捷指令」App。',
-      foreignNote: '外币提醒：用 Apple Pay 付外币时，快捷指令给的是外币金额，Futari 会把它当成账本主币种的金额带入。请在「新增记录」里改成实际的金额。',
+      foreignNote: "外币提醒：付外币时带入的是外币金额，Futari 会当成账本主币种。请在「新增记录」改成实际金额。",
+      artNote: '示意图，实际画面会因 iOS 版本而异。',
     },
     applePayUrl: {
       heading: '备用：还不能使用动作时，用网址打开',
-      intro: '上面的「Futari 记一笔」动作可用时，设置更简单。如果 Futari App 还没更新到 1.9.0（iPhone 同样要 iOS 17 或以上版本），可以先用下面的五步网址做法。',
+      intro: "Futari App 还没到 1.9.0 时（iPhone 同样要 iOS 17 或以上），用这五步。上面的动作会自己取整数，备注也不用 URL 编码；用网址时要自己做。",
       steps: [
         {
           title: '新建「钱包」自动化',
-          body: '打开「快捷指令」App，点 ＋ 新建快捷指令，再点「编辑」。在动作的分类选「自动化」→「钱包」，快捷指令最上面会出现「轻触〔任一卡片〕时」卡片。点「任一卡片」选要记的卡片；「类别」和「商家」保持「任一类别」「任一商家」即可。卡片里的「自动化」保持打开、「通知」保持关闭，付款后就会直接运行，不用先点通知。iOS 26 及更早版本的画面不同：进入「自动化」，点 ＋ 选「钱包」，在同一画面选「立即运行」，点「下一步」，再选「新建空白自动化」。',
+          body: "同上方第 1 步。",
         },
         {
           title: '把金额取整数（建议）',
-          body: '建议加上：加一个「取整数」动作，点「输入快捷指令的信息」，「类型」改成「交易」，选「数量」。如果金额带小数（例如 120.00），Futari 会让金额栏留空；先取整数比较保险。「120」「1,280」「１２０」可以，「120.00」「NT$120.00」「120元」会让金额栏留空。',
+          body: "建议：加「取整数」动作，点「输入快捷指令的信息」，「类型」改成「交易」，选「数量」。金额带小数（例如 120.00）时，Futari 会让金额栏留空。",
         },
         {
           title: '把商家名称做 URL 编码',
-          body: '加一个「URL 编码」动作，输入选「输入快捷指令的信息」，「类型」改成「交易」，选「商家」。中文和空格不先编码，网址会在中间断开，描述会留空或只剩一半。描述可有可无，不想带就跳过这步，并把网址里的 &note=… 整段去掉。',
+          body: "加「URL 编码」动作，输入选「输入快捷指令的信息」，「类型」改成「交易」，选「商家」。不编码时，中文和空格会让网址断开，描述留空或只剩一半。不想带描述就跳过，并去掉网址里的 &note=…。",
         },
         {
           title: '用「文本」拼出网址',
-          body: '加一个「文本」动作，粘贴下面的网址，把 [金额] 换成第 2 步的结果、[商家] 换成第 3 步的结果（没加第 2 步，就换成「输入快捷指令的信息」，「类型」先改成「交易」，再选「数量」）。分类不用写：记过的商家会沿用上次的分类，第一次记的商家先用「饮食」，保存前都可以改。',
+          body: "加「文本」动作，粘贴下面的网址，把 [金额] 换成第 2 步的结果、[商家] 换成第 3 步的结果（没做第 2 步，就换成「输入快捷指令的信息」，「类型」改成「交易」，选「数量」）。分类不用写。",
         },
         {
           title: '打开 URL',
-          body: '加一个「打开 URL」动作，输入选上一步的文本。之后每次用 Apple Pay 付款，Futari 会打开并跳出「新增记录」，确认后按保存。',
+          body: "加「打开 URL」动作，输入选上一步的文本。之后每次用 Apple Pay 付款都会跳出「新增记录」，确认后按保存。",
         },
       ],
       urlLabel: '网址（App）',
@@ -3997,12 +4037,12 @@ export const zhCN: Translations = {
     },
     web: {
       heading: '没有装 App：用网页网址',
-      body: '没有装 App、用浏览器或「添加到主屏幕」的人，把网址换成下面这条，「打开 URL」会在 Safari 打开。要先在 Safari 登录过 Futari。# 后面的内容只留在你的浏览器，不会发送到服务器。',
+      body: "没有装 App、用浏览器或「添加到主屏幕」时，把网址换成下面这条，「打开 URL」会在 Safari 打开。要先在 Safari 登录。# 后面的内容只留在浏览器，不会发送到服务器。",
       urlLabel: '网址（网页）',
     },
     params: {
       heading: '网址可以带哪些值',
-      intro: '三个参数都可以省略；某个值不合格时，只有那一格不带入，其他照样带入。',
+      intro: "三个参数都可以省略。某个值不合格时，只有那一格不带入。",
       cols: {
         param: '参数',
         rule: '规则',
@@ -4011,18 +4051,18 @@ export const zhCN: Translations = {
       rows: [
         {
           param: 'amount',
-          rule: '正整数，1 到 9,999,999。可以有千分位逗号（1,200），全角数字也可以。小数、负数、1e5 这类写法都不收。',
-          fallback: '金额留空，自己输入',
+          rule: "1 到 9,999,999 的正整数。可以有千分位逗号（1,200）或全角数字；小数、负数、1e5 这类写法都不收。",
+          fallback: "金额留空，自己输入",
         },
         {
           param: 'category',
-          rule: '下表其中一个 id，要全小写、完全一样。只有第一次记这个商家时会采用，记过的商家沿用上次的分类。',
-          fallback: '这个商家记过就沿用上次的分类，没记过用「饮食」',
+          rule: "下表的 id，全小写、完全一样。只在第一次记这个商家时采用。",
+          fallback: "记过的商家用上次的分类，没记过用「饮食」",
         },
         {
           param: 'note',
-          rule: '会变成「描述」，最多 100 个字。',
-          fallback: '描述留空，保存前要自己填',
+          rule: "变成「描述」，最多 100 个字。",
+          fallback: "描述留空，保存前自己填",
         },
       ],
       categoriesHeading: '分类 id',
@@ -4030,15 +4070,15 @@ export const zhCN: Translations = {
         id: 'id',
         name: '显示',
       },
-      fixedNote: '网址只能带这三个值。日期（今天）、谁付的（你）、分摊方式与币种，都照「新增记录」平常的默认，写在网址里也不会采用；也不会自动归到进行中的旅行，要归到旅行请在界面上自己选。',
+      fixedNote: "网址只能带这三个值。日期（今天）、谁付的（你）、分摊方式与币种按「新增记录」的默认，写了也不采用。也不会自动归到进行中的旅行，要归到旅行请在界面上选。",
     },
     whenNot: {
       heading: '什么时候不会跳出来',
-      intro: '快捷指令只负责打开。下面三种情况 Futari 会安静地略过，不动你的界面：',
+      intro: "快捷指令只负责打开。这三种情况 Futari 会安静略过：",
       items: [
-        '另一个窗口正开着（例如正在改某一笔）：快捷指令会被忽略，改到一半的内容不会被动到。关掉窗口后再运行一次。',
-        '正在看过去的章节：过去章节是只读的，先切回当前的章节。',
-        '还没登录：登录后会停在首页，填好的内容不会保留，再运行一次快捷指令就好。',
+        "另一个窗口开着（例如正在改某一笔）：内容不会被动到。关掉窗口再运行一次。",
+        "正在看过去的章节：过去章节是只读的，先切回当前的章节。",
+        "还没登录：登录后会停在首页，填好的内容不会保留，再运行一次。",
       ],
     },
     trouble: {
@@ -4050,19 +4090,19 @@ export const zhCN: Translations = {
       rows: [
         {
           symptom: '找不到「Futari 记一笔」动作',
-          cause: '将 iOS 更新到 17 或以上版本、Futari iOS App 更新到 1.9.0 或以上版本，并先打开 Futari 一次。',
+          cause: "把 iOS 更新到 17 或以上、Futari iOS App 更新到 1.9.0 或以上，再打开 Futari 一次。",
         },
         {
           symptom: '网址备用做法：跳出来了，但金额是空的',
-          cause: '金额不是整数。通常是少了「取整数」那一步，或带了「元」「NT$」。',
+          cause: "金额不是整数。通常是少了「取整数」，或带了「元」「NT$」。",
         },
         {
           symptom: '网址备用做法：描述留空或只有一半',
-          cause: '商家名称没有先经过「URL 编码」。',
+          cause: "商家名称没有先做「URL 编码」。",
         },
         {
           symptom: '网址备用做法：分类不是我网址里写的',
-          cause: '这个商家记过，会沿用上次的分类；第一次记的商家，id 拼错或用了大写就会用「饮食」。',
+          cause: "记过的商家用上次的分类。第一次记的商家，id 拼错或用了大写会用「饮食」。",
         },
       ],
     },

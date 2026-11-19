@@ -3,7 +3,7 @@
 > 家庭記帳工具，固定兩人（夫妻／伴侶）使用。
 > 舊名 Oikos：資料表、裝置上的 key 等少數地方刻意保留 oikos，原因見 [CLAUDE.md](CLAUDE.md) 開頭。
 
-Futari 是私密記帳 PWA：兩人分攤支出、愛物（車 / 房 / 子女 / 寵物 / 植物 / 保險 / 物品）、月度回顧。私人家庭工具，不是 SaaS——所有功能圍繞「這筆錢怎麼分、誰欠誰多少」。Mobile-first，Web + iOS + Android 三平台共用同一份 Next.js 部署（見下方 Tech Stack）。
+Futari 是私密記帳 App，有 iPhone、Android 和網頁版（網頁版在任何現代瀏覽器可用）：兩人分攤支出、愛物（車 / 房 / 子女 / 寵物 / 植物 / 保險 / 物品）、月度回顧。私人家庭工具，不是 SaaS——所有功能圍繞「這筆錢怎麼分、誰欠誰多少」。Mobile-first，Web + iOS + Android 三平台共用同一份 Next.js 部署（見下方 Tech Stack）。
 
 > 線上服務：<https://futari.southern-light.dev/>（登入怎麼用見該頁；不是本檔重點）
 > 完整變更紀錄見 [CHANGELOG.md](CHANGELOG.md)。
@@ -182,9 +182,9 @@ docs/superpowers/specs/    架構規格 + 設計決策
 
 | 版本 | 主題 |
 |---|---|
+| [v1.10.0](CHANGELOG.md#1100---2026-11-19) | 首頁桌機 App Store 與 Google Play 徽章、下載 QR code · 三步開始與常見問題 · 捷徑記帳入口與開頭動畫 · 對外文字拿掉「PWA」· 中文首頁上架短片 · 結算紀錄名稱跟著語系 |
 | [v1.9.2](CHANGELOG.md#192---2026-11-04) | Android App 上架 Google Play，網站下載入口與首頁公告 · 捷徑教學改教「Futari 記一筆」動作 · 服務條款與隱私權政策對齊現況 · repo 搬家、改名 Futari |
 | [v1.9.1](CHANGELOG.md#191---2026-10-31) | iPhone 用 Apple 註冊不再失敗 · 登入成功不閃錯誤頁、連不上時會說明 · 未登入頁捲動不壓到狀態列 · Node 26 |
-| [v1.9.0](CHANGELOG.md#190---2026-10-31) | Android 定期收支推播與系統分享面板 · iPhone 錢包自動化「Futari 記一筆」與商家記憶分類 · 記帳首頁收斂層級與對比達標 · 首頁新主視覺與範例小卡 |
 
 ---
 
