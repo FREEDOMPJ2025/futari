@@ -93,13 +93,22 @@ describe('ContinuityRow — 月回顧 cell', () => {
     expect(cell.querySelector('span.rounded-full')).toBeNull()
   })
 
-  it('en names the month instead of a number', () => {
+  it.each([
+    ['en', en, 'Monthly review: new review available, open the August review', 'Monthly review: open the August review'],
+    ['ja', ja, '月の振り返り：新しい振り返りあり、8月の振り返りを開く', '月の振り返り：8月の振り返りを開く'],
+  ] as const)('%s names the month before and after click', (locale, translations, unseenName, seenName) => {
     render(
-      <TranslationsProvider value={en} locale="en">
+      <TranslationsProvider value={translations} locale={locale}>
         <ContinuityRow review={{ kind: 'latest', month: aug }} hasActiveTrip />
       </TranslationsProvider>,
     )
-    expect(links()[0].getAttribute('aria-label')).toContain('August')
+    const [cell] = links()
+    expect(cell).toHaveAccessibleName(unseenName)
+
+    cell.addEventListener('click', (event) => event.preventDefault(), { once: true })
+    fireEvent.click(cell)
+
+    expect(cell).toHaveAccessibleName(seenName)
   })
 })
 
