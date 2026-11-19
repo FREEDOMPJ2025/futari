@@ -505,6 +505,7 @@ export type Translations = {
       reviewReturn: string
       reviewEmpty: string
       reviewAriaLatest: string
+      reviewAriaLatestNew: string
       reviewAriaIndex: string
       tripTitle: string
       tripEmpty: string
@@ -3997,6 +3998,7 @@ export const zhTW: Translations = {
       reviewReturn: '回到回顧',
       reviewEmpty: '記滿一個月後會在這裡',
       reviewAriaLatest: '月回顧：打開{month}的回顧',
+      reviewAriaLatestNew: '月回顧：有新的回顧，打開{month}的回顧',
       reviewAriaIndex: '月回顧：打開回顧列表',
       tripTitle: '旅行',
       tripEmpty: '開始一趟旅行帳',

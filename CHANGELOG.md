@@ -41,7 +41,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
-_Nothing unreleased yet._
+### 使用者可見變化
+
+- **月回顧還沒看過時，入口前加 accent 圓點（#1863）**
+  使用者：首頁的月回顧入口會用圓點提示有新回顧，點進去後圓點就會消失。
+  技術：沿用月回顧橫幅的關閉動作記錄已讀，並用本地狀態立即隱藏圓點及更新無障礙標籤。
 
 ## [1.10.0] - 2026-11-19
 

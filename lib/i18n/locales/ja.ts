@@ -360,6 +360,7 @@ export const ja: Translations = {
       reviewReturn: '振り返りに戻る',
       reviewEmpty: 'ひと月たつと届きます',
       reviewAriaLatest: '月の振り返り：{month}の振り返りを開く',
+      reviewAriaLatestNew: '月の振り返り：新しい振り返りがあります。{month}の振り返りを開く',
       reviewAriaIndex: '月の振り返り：一覧を開く',
       tripTitle: '旅行',
       tripEmpty: '旅行を記録する',

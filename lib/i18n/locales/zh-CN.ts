@@ -358,6 +358,7 @@ export const zhCN: Translations = {
       reviewReturn: '回到回顾',
       reviewEmpty: '记满一个月后会在这里',
       reviewAriaLatest: '月回顾：打开{month}的回顾',
+      reviewAriaLatestNew: '月回顾：有新的回顾，打开{month}的回顾',
       reviewAriaIndex: '月回顾：打开回顾列表',
       tripTitle: '旅行',
       tripEmpty: '开始一趟旅行账',

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
+import { dismissMonthlyReviewBanner } from '@/actions/monthlyReview'
 import { TranslationsProvider } from '@/lib/i18n/client'
 import { zhTW } from '@/lib/i18n/locales/zh-TW'
 import { en } from '@/lib/i18n/locales/en'
@@ -16,6 +17,10 @@ import { deriveReviewCell, type ReviewCellState } from '@/lib/reviewCell'
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ back: vi.fn(), push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
   usePathname: () => '/review',
+}))
+
+vi.mock('@/actions/monthlyReview', () => ({
+  dismissMonthlyReviewBanner: vi.fn().mockResolvedValue(undefined),
 }))
 
 const wrap = (ui: React.ReactElement) => render(<I18nWrapper>{ui}</I18nWrapper>)
@@ -47,14 +52,32 @@ describe('deriveReviewCell — the three states', () => {
 })
 
 describe('ContinuityRow — 月回顧 cell', () => {
-  it('A links straight to last month, with the month in the text and the aria-label', () => {
+  it('A links straight to last month, with an unseen dot and a new review label', () => {
     wrap(<ContinuityRow review={{ kind: 'latest', month: aug }} hasActiveTrip />)
     const [cell] = links()
     expect(cell.getAttribute('href')).toBe('/review/2026-08')
     expect(cell.textContent).toContain('月回顧')
     // #1851 — a one-line text button now: the month lives in the aria-label.
     expect(cell.textContent).not.toContain('看一看')
-    expect(cell.getAttribute('aria-label')).toBe('月回顧：打開8月的回顧')
+    expect(cell).toHaveAccessibleName('月回顧：有新的回顧，打開8月的回顧')
+    const dot = cell.querySelector('span.rounded-full')
+    expect(dot).toHaveAttribute('aria-hidden', 'true')
+    expect(dot).toHaveStyle({ width: '6px', height: '6px' })
+    expect(cell.firstElementChild).toBe(dot)
+  })
+
+  it('marks the review seen and immediately clears the dot and new review label on click', () => {
+    wrap(<ContinuityRow review={{ kind: 'latest', month: aug }} hasActiveTrip />)
+    const [cell] = links()
+
+    // jsdom cannot follow the link to another document.
+    cell.addEventListener('click', (event) => event.preventDefault(), { once: true })
+    fireEvent.click(cell)
+
+    expect(dismissMonthlyReviewBanner).toHaveBeenCalledWith({ year: 2026, month: 8 })
+    expect(cell.querySelector('span.rounded-full')).toBeNull()
+    expect(cell).toHaveAccessibleName('月回顧：打開8月的回顧')
+    expect(cell).toHaveAttribute('href', '/review/2026-08')
   })
 
   it.each<[ReviewCellState, string]>([
@@ -67,6 +90,7 @@ describe('ContinuityRow — 月回顧 cell', () => {
     expect(cell.textContent).toContain('月回顧')
     expect(cell.textContent).not.toContain(text)
     expect(cell.getAttribute('aria-label')).toBe('月回顧：打開回顧列表')
+    expect(cell.querySelector('span.rounded-full')).toBeNull()
   })
 
   it('en names the month instead of a number', () => {

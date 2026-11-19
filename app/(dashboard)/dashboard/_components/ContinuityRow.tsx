@@ -1,5 +1,7 @@
 'use client'
 
+import { startTransition, useState } from 'react'
+import { dismissMonthlyReviewBanner } from '@/actions/monthlyReview'
 import { useLocale, useTranslations } from '@/lib/i18n/client'
 import { formatYearMonth } from '@/lib/monthlyReview'
 import type { ReviewCellState } from '@/lib/reviewCell'
@@ -20,20 +22,39 @@ export function ContinuityRow({ review, hasActiveTrip }: { review: ReviewCellSta
   const t = useTranslations()
   const locale = useLocale()
   const c = t.dashboard.continuity
+  const [seenReviewHref, setSeenReviewHref] = useState<string | null>(null)
 
   let href = '/review'
   let ariaLabel = c.reviewAriaIndex
+  let showDot = false
   if (review.kind === 'latest') {
     // Intl names the month so each locale gets its own form ('8月' / 'August').
     const monthName = new Intl.DateTimeFormat(locale, { month: 'long' })
       .format(new Date(review.month.year, review.month.month - 1, 1))
     href = `/review/${formatYearMonth(review.month)}`
-    ariaLabel = c.reviewAriaLatest.replace('{month}', monthName)
+    showDot = seenReviewHref !== href
+    ariaLabel = (showDot ? c.reviewAriaLatestNew : c.reviewAriaLatest).replace('{month}', monthName)
+  }
+
+  function markReviewSeen() {
+    if (review.kind !== 'latest' || !showDot) return
+
+    setSeenReviewHref(href)
+    startTransition(() => {
+      void dismissMonthlyReviewBanner(review.month).catch(() => {})
+    })
   }
 
   return (
     <div className="px-5 flex gap-5">
-      <ContinuityCell href={href} title={c.reviewTitle} ariaLabel={ariaLabel} icon={<ReviewIcon />} />
+      <ContinuityCell
+        href={href}
+        title={c.reviewTitle}
+        ariaLabel={ariaLabel}
+        icon={<ReviewIcon />}
+        showDot={showDot}
+        onClick={markReviewSeen}
+      />
       {!hasActiveTrip && <TripEntryCell />}
     </div>
   )
