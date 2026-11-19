@@ -41,11 +41,19 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+_Nothing unreleased yet._
+
+## [1.10.0] - 2026-11-19
+
+主題：**官網說清楚「iPhone、Android 都有」**——桌機 App Store 入口、三步開始與常見問題、捷徑入口、拿掉 PWA 說法、上架短片、結算名稱多語。
+完整 diff：[v1.9.2...v1.10.0](https://github.com/FREEDOMPJ2025/futari/compare/v1.9.2...v1.10.0)
+
+### 使用者可見變化
+
 - **捷徑教學分成 Apple Pay 主線與參考（#1923）**
   使用者：四語文案精簡，其他做法可展開，錨點連入會自動打開。
   技術：原生 details 保留完整資訊，新增舊版步驟收合與 hash 展開元件。
 
-### 使用者可見變化
 
 - **對外文字拿掉「PWA」，改寫成「iPhone、Android 和網頁版」（#1909）**
   使用者：四語的首頁與登入頁標題、描述、og、結構化資料、搬遷頁 FAQ、`llms.txt`／`llms-full.txt` 不再把 Futari 叫做 PWA；中文標題把「伴侶共享記帳 App」放最前面；登入頁描述改寫成 Google 或 Apple 都能登入。
@@ -2195,7 +2203,8 @@ _本版無使用者可見變化（純後端分析事件接入）。_
 - **每頁 `generateMetadata` 接 OG image（#487）**：`public/og-image.png` 從 #282 ship 但未 wire 進 metadata，造成 prod HTML 缺 `og:image` / `twitter:image`；本版 4 個 public page 各加 `openGraph.images` + `twitter.images`，`alt` 用 `t.title` locale-aware，無需新增 i18n key。
 - **`settings.local.json` 列入 gitignore（#478）**：避免本地 hook / 權限設定外洩。
 
-[Unreleased]: https://github.com/FREEDOMPJ2025/futari/compare/v1.9.2...HEAD
+[Unreleased]: https://github.com/FREEDOMPJ2025/futari/compare/v1.10.0...HEAD
+[1.10.0]: https://github.com/FREEDOMPJ2025/futari/compare/v1.9.2...v1.10.0
 [1.9.2]: https://github.com/FREEDOMPJ2025/futari/compare/v1.9.1...v1.9.2
 [1.9.1]: https://github.com/FREEDOMPJ2025/futari/compare/v1.9.0...v1.9.1
 [1.9.0]: https://github.com/FREEDOMPJ2025/futari/compare/v1.8.0...v1.9.0
