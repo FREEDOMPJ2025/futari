@@ -165,6 +165,9 @@ export const zhCN: Translations = {
     footerTrust: '只开放给你们俩 · 数据只属于你们两个',
     featuresOutingLink: '出游分账：发一个链接，朋友不用下载 App',
     footerOutingLink: '出游分账',
+    featuresShortcutsLink: '快捷指令记账：Apple Pay 付完款，金额和商家先帮你填好',
+    footerUseCaseLink: '使用情境',
+    footerShortcutsLink: '快捷指令记账',
     jsonLdAppName: 'Futari · 双人记账',
     jsonLdAlternateNames: ['Futari 家计簿', '两个人的家计簿', 'ふたり 家計簿', "Futari · couple's ledger"],
     jsonLdAppDescription:

@@ -298,6 +298,12 @@ export type Translations = {
     featuresOutingLink: string
     /** #1724 — footer link to /features/outing. */
     footerOutingLink: string
+    /** #1908 — home-page line under the feature list to /features/shortcuts (iPhone browser and desktop only). */
+    featuresShortcutsLink: string
+    /** #1908 — footer link to /use-case; same label as the use-case hub's breadcrumbLabel. */
+    footerUseCaseLink: string
+    /** #1908 — footer link to /features/shortcuts; same label as featureShortcuts.breadcrumbLabel. */
+    footerShortcutsLink: string
     /** schema.org `name` for WebSite + SoftwareApplication JSON-LD (#467). */
     jsonLdAppName: string
     /** schema.org `alternateName` array for WebSite + SoftwareApplication (#467). */
@@ -3798,6 +3804,9 @@ export const zhTW: Translations = {
     footerTrust: '只開放給你們倆 · 資料只屬於你們兩個',
     featuresOutingLink: '出遊分帳：丟一個連結，朋友不用下載 App',
     footerOutingLink: '出遊分帳',
+    featuresShortcutsLink: '捷徑記帳：Apple Pay 付完款，金額和商家先幫你填好',
+    footerUseCaseLink: '使用情境',
+    footerShortcutsLink: '捷徑記帳',
     jsonLdAppName: 'Futari · 雙人記帳',
     jsonLdAlternateNames: ['Futari 家計簿', '情侶記帳 app', '夫妻記帳', '兩個人的家計簿', 'ふたり 家計簿', "Futari · couple's ledger"],
     jsonLdAppDescription:

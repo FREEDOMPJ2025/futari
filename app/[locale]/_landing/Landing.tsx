@@ -29,6 +29,7 @@ import { HIDDEN_IN_APP, landingPrePaintScript } from '@/lib/playLaunch'
 import { TrustSection } from './TrustSection'
 import { Phrase } from '../_components/Phrase'
 import { phraseHtml } from '@/lib/i18n/phrase'
+import { localizedHref } from '@/lib/i18n/path'
 import './landing-motion.css'
 
 type LandingStrings = Translations['landing']
@@ -435,6 +436,22 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
               <span aria-hidden="true">&nbsp;→</span>
             </FeatureOutingTextLink>
           </p>
+
+          {/* #1908 — the shortcuts tutorial's way in. iOS-only feature: hidden
+              for Android browsers and the Android shell (its WebView UA says
+              Android, so `data-visitor-platform=android` covers both). Not
+              `HIDDEN_IN_APP`: iPhone shell / PWA users can still use it. */}
+          <p className="m-0 mt-1 px-1 text-sm [html[data-visitor-platform=android]_&]:hidden">
+            <LandingCtaLink
+              href={localizedHref('/features/shortcuts', locale)}
+              ctaLocation="shortcuts_link"
+              target="shortcuts"
+              className="inline-flex items-center min-h-11 underline text-ink-2"
+            >
+              <Phrase body text={t.featuresShortcutsLink} />
+              <span aria-hidden="true">&nbsp;→</span>
+            </LandingCtaLink>
+          </p>
         </div>
       </section>
 
@@ -484,7 +501,9 @@ export function Landing({ t, signInHref, dashboardHref, locale, showLaunchBanner
           >
             <FeatureOutingTextLink href={featureOutingHref} source="landing_footer" className="inline-flex items-center min-h-11 underline whitespace-nowrap">{t.footerOutingLink}</FeatureOutingTextLink>
             <span aria-hidden="true" style={{ color: 'var(--hairline)' }}>·</span>
-            <Link href={migrateHrefs.hub} className="inline-flex items-center min-h-11 underline whitespace-nowrap">{t.migrateSection.seeAll}</Link>
+            <Link href={useCaseHrefs.hub} className="inline-flex items-center min-h-11 underline whitespace-nowrap">{t.footerUseCaseLink}</Link>
+            <span aria-hidden="true" style={{ color: 'var(--hairline)' }}>·</span>
+            <LandingCtaLink href={localizedHref('/features/shortcuts', locale)} ctaLocation="shortcuts_link" target="shortcuts" className="inline-flex items-center min-h-11 underline whitespace-nowrap">{t.footerShortcutsLink}</LandingCtaLink>
             <span aria-hidden="true" style={{ color: 'var(--hairline)' }}>·</span>
             <Link href={legalLinks.termsHref} className="inline-flex items-center min-h-11 underline whitespace-nowrap">{legalLinks.termsLabel}</Link>
             <span aria-hidden="true" style={{ color: 'var(--hairline)' }}>·</span>
