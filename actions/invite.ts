@@ -245,6 +245,10 @@ export const previewInvite = action(async (token: string): Promise<InvitePreview
   const viewerActiveGroup = await getActiveGroupForUser(user.id)
   const result = validateInviteAcceptance(invite ?? null, group ?? null, user.id, viewerActiveGroup)
   if (!result.ok) {
+    if (result.error === 'already_member') {
+      await captureServer(user.id, 'invite_link_reopened_by_member')
+      return { ok: false, error: result.error }
+    }
     // #1288 — makes dead links that people still open visible: a superseded
     // link reads `revoked`, one that ran out reads `expired`. The code only —
     // never the token, which is a live credential until it dies.

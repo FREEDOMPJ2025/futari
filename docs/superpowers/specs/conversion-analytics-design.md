@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-10-25
+last_updated: 2026-11-19
 status: shipped
 first_shipped_in: v1.2.0
 updates:
@@ -187,11 +187,12 @@ migrate 流程 → `app/[locale]/migrate/_components/MigrateTool.tsx` + `Migrate
 | `partner_joined` | member_b 接受、加入 group | server | `group_id`、`inviter_id` |
 | `invite_superseded` | 重新產生連結，取代了仍開著的舊連結（#1288） | server | `group_id`、`count` |
 | `invite_preview_failed` | 被邀請者打開的連結無法使用（#1288） | server | `code`（`revoked` / `expired` / `already_used`…） |
+| `invite_link_reopened_by_member` | 帳本成員（含邀請人）打開該帳本的邀請連結（#1928） | server | — |
 | `invite_revoked` | member_a 在設定讓仍有效的邀請連結失效（#1546）；沒有有效連結或對方已加入時不發 | server | `group_id`、`count` |
 
-`invite_superseded`、`invite_revoked` 與 `invite_preview_failed` 只帶上列屬性，**永遠不帶 token**——token 在失效前是一把能進帳本的鑰匙。
+`invite_superseded`、`invite_revoked`、`invite_preview_failed` 與 `invite_link_reopened_by_member` 只帶上列屬性，**永遠不帶 token**——token 在失效前是一把能進帳本的鑰匙。
 
-實作落地點：`invite_created` / `invite_superseded` / `invite_revoked` / `partner_joined` / `invite_preview_failed` → `actions/invite.ts`（`createInvite` / `revokeOpenInvites` / `acceptInvite` / `previewInvite`）；
+實作落地點：`invite_created` / `invite_superseded` / `invite_revoked` / `partner_joined` / `invite_preview_failed` / `invite_link_reopened_by_member` → `actions/invite.ts`（`createInvite` / `revokeOpenInvites` / `acceptInvite` / `previewInvite`）；
 `invite_link_opened` → `app/invite/[token]/InviteConfirm.tsx`；邀請頁匿名導向 sign-in
 夾帶 `from=invite` → `app/invite/[token]/page.tsx`。
 

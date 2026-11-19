@@ -41,7 +41,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
-_Nothing unreleased yet._
+### 使用者可見變化
+
+- **已加入的成員再點邀請連結，直接進帳本（#1928）**
+  使用者：另一半加入後（或邀請人）再點同一條連結，不再看到「無法加入帳本」，會直接進帳本；不是成員的人仍看到「邀請連結已被使用」。
+  技術：`validateInviteAcceptance` 在 `already_used` 之前先判成員；新增 server 事件 `invite_link_reopened_by_member`（不帶 token），已記入 conversion-analytics-design。
 
 ## [1.10.0] - 2026-11-19
 
