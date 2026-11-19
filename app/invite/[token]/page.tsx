@@ -80,6 +80,8 @@ export default async function InvitePage({ params }: Props) {
     )
   }
 
+  if (preview.error === 'already_member') redirect('/dashboard')
+
   const errorMap: Record<typeof preview.error, string> = {
     invalid_or_expired: t.invite.errors.invalidOrExpired,
     already_used: t.invite.errors.alreadyUsed,
@@ -87,7 +89,6 @@ export default async function InvitePage({ params }: Props) {
     expired: t.invite.errors.expired,
     group_not_found: t.invite.errors.groupNotFound,
     group_full: t.invite.errors.groupFull,
-    already_member: t.invite.errors.alreadyMember,
     already_in_duo: t.invite.errors.alreadyInDuo,
     inviter_not_member: t.invite.errors.inviterNotMember,
   }

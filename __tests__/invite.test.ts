@@ -37,9 +37,20 @@ describe('validateInviteAcceptance', () => {
     expect(result).toMatchObject({ ok: false, error: 'invalid_or_expired' })
   })
 
-  it('rejects already-accepted invite', () => {
+  it.each([
+    ['member A', 'user-a', 'user-b', 'already_member'],
+    ['member B', 'user-b', 'user-a', 'already_member'],
+    ['the inviter', 'user-a', 'user-a', 'already_member'],
+    ['a non-member', 'user-c', 'user-a', 'already_used'],
+  ])('classifies an accepted invite to a full group for %s', (_role, viewer, invitedBy, error) => {
+    const invite = { ...baseInvite, invitedBy, acceptedAt: new Date('2025-01-01') }
+    const group = { ...baseGroup, memberB: 'user-b' }
+    expect(validateInviteAcceptance(invite, group, viewer)).toEqual({ ok: false, error })
+  })
+
+  it('reports already_used for an accepted invite even when the group is missing', () => {
     const invite = { ...baseInvite, acceptedAt: new Date('2025-01-01') }
-    const result = validateInviteAcceptance(invite, baseGroup, 'user-b')
+    const result = validateInviteAcceptance(invite, null, 'user-a')
     expect(result).toMatchObject({ ok: false, error: 'already_used' })
   })
 
@@ -78,7 +89,7 @@ describe('validateInviteAcceptance', () => {
   it('rejects when user is already memberB', () => {
     const group = { ...baseGroup, memberB: 'user-b' }
     const result = validateInviteAcceptance(baseInvite, group, 'user-b')
-    expect(result).toMatchObject({ ok: false, error: 'group_full' })
+    expect(result).toMatchObject({ ok: false, error: 'already_member' })
   })
 
   it('blocks when the accepter is already in a DUO group elsewhere', () => {

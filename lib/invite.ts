@@ -80,6 +80,9 @@ export function validateInviteAcceptance(
   now: Date = new Date()
 ): AcceptResult {
   if (!invite) return { ok: false, error: 'invalid_or_expired' }
+  if (group && (group.memberA === userId || group.memberB === userId)) {
+    return { ok: false, error: 'already_member' }
+  }
   if (invite.acceptedAt) return { ok: false, error: 'already_used' }
   // #1288 — expired is reported before revoked. Minting a new link supersedes
   // (revokes) every earlier open invite, expired ones included, so an old link
@@ -89,7 +92,6 @@ export function validateInviteAcceptance(
   if (invite.revokedAt) return { ok: false, error: 'revoked' }
   if (!group) return { ok: false, error: 'group_not_found' }
   if (group.memberB !== null) return { ok: false, error: 'group_full' }
-  if (group.memberA === userId || group.memberB === userId) return { ok: false, error: 'already_member' }
   // #1031 defence in depth — the minter must STILL be a member of the group
   // they invited into. Without this the validator has no notion of who issued
   // the invite, so an invite minted (or forged) by a non-member is
