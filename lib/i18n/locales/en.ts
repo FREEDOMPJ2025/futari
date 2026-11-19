@@ -359,6 +359,7 @@ export const en: Translations = {
       reviewReturn: 'Past reviews',
       reviewEmpty: 'After your first month',
       reviewAriaLatest: 'Monthly review: open the {month} review',
+      reviewAriaLatestNew: 'Monthly review: new review available, open the {month} review',
       reviewAriaIndex: 'Monthly review: open all reviews',
       tripTitle: 'Trips',
       tripEmpty: 'Start a trip',

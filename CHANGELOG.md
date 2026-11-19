@@ -47,6 +47,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：另一半加入後（或邀請人）再點同一條連結，不再看到「無法加入帳本」，會直接進帳本；不是成員的人仍看到「邀請連結已被使用」。
   技術：`validateInviteAcceptance` 在 `already_used` 之前先判成員；新增 server 事件 `invite_link_reopened_by_member`（不帶 token），已記入 conversion-analytics-design。
 
+- **月回顧還沒看過時，入口前加 accent 圓點（#1863）**
+  使用者：首頁的月回顧入口會用圓點提示有新回顧，點進去後圓點就會消失。
+  技術：沿用月回顧橫幅的關閉動作記錄已讀，並用本地狀態立即隱藏圓點及更新無障礙標籤。
+
 ## [1.10.0] - 2026-11-19
 
 主題：**官網說清楚「iPhone、Android 都有」**——桌機 App Store 入口、三步開始與常見問題、捷徑入口、拿掉 PWA 說法、上架短片、結算名稱多語。

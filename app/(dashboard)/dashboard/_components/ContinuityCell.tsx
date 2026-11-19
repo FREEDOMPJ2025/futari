@@ -9,18 +9,28 @@ import type { ReactNode } from 'react'
  * down so the tap area is still 44px. The state the old card spelled out
  * (「8月的回顧 · 看一看」) lives on in the aria-label.
  */
-export function ContinuityCell({ href, title, ariaLabel, icon }: {
+export function ContinuityCell({ href, title, ariaLabel, icon, showDot, onClick }: {
   href: string
   title: string
   ariaLabel: string
   icon: ReactNode
+  showDot?: boolean
+  onClick?: () => void
 }) {
   return (
     <Link
       href={href}
       aria-label={ariaLabel}
+      onClick={onClick}
       className="relative h-9 inline-flex items-center gap-1.5 text-sm text-ink-2 no-underline before:absolute before:-inset-y-1 before:inset-x-0 before:content-['']"
     >
+      {showDot && (
+        <span
+          aria-hidden="true"
+          className="inline-block rounded-full shrink-0"
+          style={{ width: 6, height: 6, background: 'var(--accent)' }}
+        />
+      )}
       <span aria-hidden="true" className="inline-flex shrink-0">{icon}</span>
       <span className="whitespace-nowrap">{title}</span>
       <svg width="7" height="12" viewBox="0 0 7 12" fill="none" aria-hidden="true" className="shrink-0 text-ink-3">
