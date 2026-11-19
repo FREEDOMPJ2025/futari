@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-11-19
+last_updated: 2026-11-20
 ---
 
 # Specs — Index & Writing Guide
@@ -107,7 +107,7 @@ blocked_on: 外部依賴敘述                            # 只有 status=blocke
 - [domain-model](domain-model-design.md) — Entity 目錄與關係圖 / Balance 計算規則 / 分類色 token（自 `CLAUDE.md` 搬出，#1086）
 - [authorization](authorization-design.md) — 授權模型：查詢層不驗 membership、四層閘門（proxy / viewer / write context / payload 斷言）、「驗了新值沒驗被改的列」失效樣態（#1031 #1032）
 - [locale-currency](locale-currency-design.md) — 「保持簡單」：多語（4 語；public 頁 URL prefix + dashboard cookie 的混合模型）+ 初始幣別選擇（per-group base_currency），onboarding 一次性決策、locale ⊥ currency、日常無 picker
-- [minor-unit-amount](minor-unit-amount-design.md) — 提案（#1920）：金額改存「該幣別的最小單位整數」（TWD／JPY 0 位、USD／CNY 2 位小數），取代 #1399 (a)／#1582 的「一律整數元」；雙欄轉換（舊欄維持整數元）、歷史幣別來源與對帳不變量、新舊版並存、分帳尾差、分階段計畫、prod 唯讀查詢清單與要 Ray 決定的項目
+- [minor-unit-amount](minor-unit-amount-design.md) — 提案（#1920）：金額改存「該幣別的最小單位整數」（TWD／JPY 0 位、USD／CNY 2 位小數），取代 #1399 (a)／#1582 的「一律整數元」；雙欄轉換（舊欄維持整數元、由 DB trigger 在共存期保持兩欄同步）、歷史幣別來源與對帳不變量、新舊版並存（含逐路徑寫入矩陣）、分帳尾差、分階段計畫、prod 唯讀查詢清單與要 Ray 決定的項目
 - [offline-browsing](offline-browsing-design.md) — PWA / Service Worker / opt-in 離線瀏覽
 - [realtime](realtime-design.md) — Realtime 訂閱規則：INSERT prepend / UPDATE fade / balance cross-fade / reconnect / filter 靜默跳過
 - [conversion-analytics](conversion-analytics-design.md) — PostHog 轉換漏斗事件：入口頁（landing / migrate）→ 註冊 / 啟用追蹤 + 跨 OAuth 邊界歸因（維持 cookieless）
