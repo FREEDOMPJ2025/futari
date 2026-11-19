@@ -43,6 +43,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### 使用者可見變化
 
+- **已加入的成員再點邀請連結，直接進帳本（#1928）**
+  使用者：另一半加入後（或邀請人）再點同一條連結，不再看到「無法加入帳本」，會直接進帳本；不是成員的人仍看到「邀請連結已被使用」。
+  技術：`validateInviteAcceptance` 在 `already_used` 之前先判成員；新增 server 事件 `invite_link_reopened_by_member`（不帶 token），已記入 conversion-analytics-design。
+
 - **月回顧還沒看過時，入口前加 accent 圓點（#1863）**
   使用者：首頁的月回顧入口會用圓點提示有新回顧，點進去後圓點就會消失。
   技術：沿用月回顧橫幅的關閉動作記錄已讀，並用本地狀態立即隱藏圓點及更新無障礙標籤。
