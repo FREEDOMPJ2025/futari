@@ -1,0 +1,949 @@
+---
+last_updated: 2026-11-20
+status: planned
+related_specs: [domain-model, locale-currency, product, transactions, income, recurring, csv-import, csv-export, shortcut-pending, trip-multi-currency, group-outing, insurance, monthly-review, offline-browsing, realtime, observability, epoch-readonly]
+depends_on: [domain-model, locale-currency]
+related_issues: ["#1920", "#1399", "#1582", "#1482"]
+---
+
+# 金額存「該幣別的最小單位整數」
+
+> **狀態：設計草稿，部分已決定。** 方向是 Ray 定的（2026-11-19，見下面「決定」），這份只把方向落成設計，不重新討論方向。**Ray 2026-11-20 回「這建議」，已決定 D5、D4、D7、D9、D12、D13（§8 開頭）；D9 的回填時段仍待 Ray 指定。** §8 其餘項目（D2、D6、D1、D3、D8、D10、D11）尚未決定，每項都附建議與 Ray 沒回時的預設值。附錄 A 的 prod 唯讀查詢（Q1–Q8）先不查，進第 2 階段前再請 Ray 授權。
+>
+> **這份跟 INDEX 寫作原則的差異**：INDEX 說 spec 不寫 PR 拆分。這份是給 Ray 拍板用的決策檔，所以「分階段計畫」一節暫時放在這裡；Ray 決定後，那一節搬去 plan，本檔只留決定與理由。
+>
+> **版本**：第 4 版（2026-11-20），批次補文件：第 2 輪複驗（第 3 版）剩下的 4 個 P2 一次改完、不再複驗，並把 Ray 的決定寫進 §8（對照表在 §0 最上面）。第 3 版（2026-11-20）回應第 2 輪獨立複驗（REFUTED @`8d4c6e98`：P1×1、P2×9、P3×6，PR #1947 的複驗留言）。P1 與 P2 在本版改完；P3 六項不在本版修，記在 PR 的「後續」。第 2 版回應第 1 輪獨立審查（REFUTED @`03e9c924`）。兩輪的對照表在 §0。
+>
+> **行號**：repo 檔案以 `origin/main` `14dfe57`（2026-11-20）核對；`99e66d3..14dfe57` 只改了四個語系檔（各加 1～2 行）與無關的檔案；第 1、2 版引用的行號仍然成立，第 3 版新增的 `lib/i18n/locales/zh-TW.ts` 行號取自 `14dfe57`。Next.js 內部檔案以 `next@16.2.4`（`package.json:49` 鎖定）的 `node_modules/next/` 核對。
+
+## 名詞（全文一致）
+
+- **最小單位整數**：該幣別最小單位的整數。TWD／JPY 的 `1000` 是 1000 元；USD／CNY 的 `1000` 是 10.00。
+- **整數元**：現在的做法。不分幣別，存的是使用者打的整數（USD 的 `45` 是 $45）。
+- **小數位數（p）**：某幣別顯示與輸入時的小數位數（TWD 0、USD 2）。最小單位整數 ＝ 顯示值 × 10^p。
+- **兩位小數帳本**：base currency 的 p 是 2 的帳本（現在是 USD、CNY）。
+- **舊欄**：現有的金額欄（例如 `CashTransactions.amount`）。本設計保留它，語意永遠是「整數元」。
+- **新欄**：本設計新增的 `*_minor` 欄（例如 `amount_minor`，型別 `bigint`），語意是最小單位整數。
+- **舊 JS**：第 3 階段（§7）部署前就載入、還沒重整的前端程式（分頁、PWA、iOS／Android 殼的 WebView）。
+- **舊伺服器程式**：第 3 階段之前的 server 程式。**第 2 階段 migration 上線到第 3 階段部署之前，全部流量都是它**；第 3 階段部署之後，只有 Vercel Skew Protection 把舊頁面的請求導回舊部署、或 R2 退回舊程式時才會執行（§4.1、§3.8）。
+- **共存期**：第 2 階段 migration 上 prod 起，到第 5 階段刪舊欄止（D12 選 (b) 時就是一直）。兩欄同時存在、舊伺服器程式可能寫入，DB 要保證兩欄同步（§3.5、§4.5）。
+- **過期（stale）**：新欄與舊欄對不上：舊欄被舊程式改了，或帳本 base 改了，而新欄沒有跟著。§3.6 的 I2 檢查的就是這個。
+- **開放小數**：第 4 階段的開關。打開後，兩位小數帳本才能輸入、顯示小數。
+
+---
+
+## 0. 審查的回應
+
+### 第 3 版的複驗（REFUTED @`a7301550`：P1×0、P2×4、P3×8），第 4 版批次補文件
+
+這是最後一輪：Ray 決定剩下的 4 個 P2 由作者一次補完、**不再複驗**。P3×8 不在文件裡修，記在 PR #1947 內文的「後續」。以下只動文件，不動程式與資料；**沒有在任何 DB 上重現**，READ COMMITTED 重新評估等假設與附錄 B 的演練都還沒跑，所以每一項都只是「寫進設計與演練」。與複驗留言不同的做法在表裡標明。
+
+| 項目 | 這版怎麼改 | 位置 |
+|---|---|---|
+| **P2-a** 定期排程插卡可能抄到改幣別之前的新欄 | **已改於 §3.5**：排程與改 base 的排序規則——兩個定期規則的排程改成 DB 函式，逐本帳本先拿帳本列 `FOR KEY SHARE`、再用新語句抄規則；改 base 先鎖則排程讀到已重縮放的規則，排程先鎖則改 base 的 ③ 把卡一起重縮放；③ 的重縮放寫成單一 UPDATE 的相對式。待確認卡只有排程一個寫入者，所以保險放在排程函式，不放在 trigger。月度快照排程套同一條規則（**作者多加的，複驗沒提**） | §3.5「排程與改 base 的排序」、①③ 列、§3.7、§4.5 列 3、13、§5.5、附錄 B #24 |
+| **P2-b** 回填步驟 2 蓋掉剛寫好的關章快照 | **已改於 §3.5、§3.6**：回填只寫 NULL 的欄位——章節欄也一樣，只寫 `currency_source IS NULL` 的章節，`closed_snapshot`、`current`、`unknown` 一律不動；回填段落兩處的說法已統一；I8 新增 (d) 回填前後快照清單雜湊相同、(e) 第 2 階段 migration 之後結束的章節必須是 `closed_snapshot`，所以「被蓋掉」會被抓到，不只看仍標 `closed_snapshot` 的列 | §3.5 回填、§3.6 I8、§4.5 列 4、15、附錄 B #25 |
+| **P2-c** 放行演練 #14／#17 驗不到宣稱的行為 | **已改於附錄 B**：#14 兩個交易競逐同一列，兩個順序各自核對提交後的 base 與金額；#17 對照組同時改鎖模式與順序才會 40P01，另有兩個單項對照（單改一項不會死結）；正向組分別檢查「無 40P01」與「編輯是否完成」（V1 完成、V2 被拒）。要停在交易中間的演練，等待的一方用舊 build、持鎖的一方用 psql 照同一串語句 | §3.5 ②說明、附錄 B 開頭、#14、#17 |
+| **P2-d** 幣別驗算與回填同源，沒寫誰裁定、誰放行 | **已改於 §3.6**：證據衝突由 Ray（或 Ray 指定的人）裁定；階段切換由 Ray 或 Ray 指定的人在 PR 留「放行」留言；執行回填與驗算的人不得同時是放行者；停放行條件補了證據衝突未裁定、I8 (d)(e) 非 0、附錄 B #14／#17／#24／#25 未通過、沒有放行留言 | §3.6「誰裁定、誰放行」「放行規則」「停止條件」、§7 |
+| **Ray 的決定** | D5、D4、D7、D9、D12、D13 已決定，寫在 §8 開頭；附錄 A Q1–Q8 標「先不查」；§4.2、§5.3、§7、§8 中已決定項目的「要 Ray 決定」說法跟著改（§1 的 D6 等未決項不動） | §8、附錄 A、§7 |
+
+### 第 2 輪複驗（REFUTED @`8d4c6e98`：P1×1、P2×9、P3×6）
+
+P3 六項不在這版改，記在 PR 的「後續」。以下每項都重現過再改；與留言不同的地方一併寫出。**沒有「不採用」的項目。**
+
+| 項目 | 這版怎麼改 | 位置 |
+|---|---|---|
+| **P1-1** trigger 只管 INSERT；舊程式的 UPDATE 與改 base 讓新欄過期，最多差 100 倍 | **已改**：INSERT／UPDATE／改 base／關章節／GroupBalance 一組 trigger（UPDATE 逐組判斷、改 base 只從新欄重縮放、都不寫舊欄）；逐路徑矩陣列出 15 條寫入路徑與各自的保險；新增 I2（過期偵測）與 I9（trigger 在且啟用）。**比留言多找到**：愛物詳細四張表與保險（含只改幣別）、旅行預算、`fold_amount`、GroupBalance、關章節，都是就地更新 | §3.5、§4.5、§3.6、§3.7、附錄 B #14–#16、#23 |
+| **P2-1** trigger 沒分出遊三表 | **已改**：出遊三表與 `fold_amount` 的係數是 10^(p − 出遊舊位數)，p 取 `Outings.currency`（USD ×1、CNY ×100、其餘 ×1），不取帳本 base | §3.4、§3.5 ①、§3.6 I2、附錄 B #19 |
+| **P2-2** 寫入拿 `FOR SHARE` 與關章節死結 | **已改**：閘門改成帳本列 `FOR KEY SHARE`、而且是交易第一個鎖；寫出鎖模式為什麼衝突、為什麼不抄 `lockGroupShared`；附錄 B #17 含對照組。**與留言不同**：環只存在於先鎖章節列的路徑（編輯、刪除、旅行支出）；純新增現金帳不拿章節列，沒有環 | §3.5 閘門、附錄 B #17 |
+| **P2-3** pending delta 不在改動清單 | **已改**：balance 函式的兩個出口（balance 與 pending delta）同一個函式、同一單位；列出 balance 的所有讀取者，離開帳本的零檢查改讀 `balance_minor` | §3.7、§7 第 3 階段、附錄 B #22 |
+| **P2-4** 第 4 階段後舊 JS 靜默丟掉小數 | **已改**：第 3 階段的 JS 仍只送 `amount`、server 認得 `amountMinor`（第 4 階段才開始送）；編輯類 action 的「舊值保留」規則：舊欄與送來的 `amount` 相同就保留新欄，否則 `amount × 10^p`；已知的邊角寫在 §4.1 | §4.1、§4.3、§7 第 3、4 階段、附錄 B #21 |
+| **P2-5** `fold_amount` 證據會過期 | **已改**：fold 證據降為中可信度、不自動轉；第 2 階段之後才關的章節由關章節 trigger 寫 `closed_snapshot`（高）；`currency_source` 沒有「證據」類的值；裁定規則：快照優先 | §3.2、§2、§3.5 ④、§3.6、§8 D4、附錄 B #4、#13 |
+| **P2-6** I1–I7 與回填同源，抓不到過期 | **已改**：I2 改成「新欄沒有過期」，用權威 p（不看回填怎麼算）；I3 涵蓋所有章節與表；新增 I8（章節幣別）、I9；附錄 B #14–#23 要用第 3 階段之前的 build 實際寫入，不用新程式模擬 | §3.6、附錄 B |
+| **P2-7** D13 與 §3.5 矛盾 | **已改**：改 base 的重縮放規則固定（p 不變不動、變大 × 10^Δ、變小 ÷ 10^Δ），D13 只剩「變小且除不盡」這一種選項 | §3.5 ③、§8 D13 |
+| **P2-8** §1 的 `csv-import-design.md:117` 取代句與 §5.6 矛盾 | **已改**：§1 該列的取代句與 §5.6 一致（零位小數帳本沿用程式現況：四捨五入、不拒收）。**不改 `csv-import-design.md`**（不在 PR #1947 範圍），另開票（PR「後續」） | §1、§5.6 |
+| **P2-9** 旅行沒有進位單位的來源 | **已改**：旅行不需要自己的進位單位欄；單位在結束旅行當下決定，寫進每一筆摘要現金帳的 `split_round_unit`；`buildTripSummaries` 與 balance 函式共用一個以 u 為參數的 ceil 函式；旅行預算的 p 取 `budget_currency` | §5.3、§3.4、§7 第 3 階段、附錄 B #20 |
+
+### 第 1 輪審查（REFUTED @`03e9c924`）
+
+| 審查項目 | 這版怎麼改 | 位置 |
+|---|---|---|
+| P1 舊讀取放大 100 倍（Realtime 推新值給舊 JS） | 不再「就地 ×100」。改成**雙欄**：舊欄永遠是整數元，新欄是最小單位。舊 JS 只認得舊欄（Realtime payload 也是），所以讀不到最小單位；新 JS 只讀新欄。拿掉「帳本已切換」旗標（值的單位由欄名決定），所以也沒有「balance 先到、旗標後到」的混用。第 4 階段的「開放小數」開關只管輸入與顯示，不決定欄位單位 | §4 |
+| P1 轉換與回滾缺不變條件 | 欄位 × 階段的讀寫表；所有寫入共用同一個鎖（帳本列）並在交易內換算；回填只讀舊欄、只寫空的新欄，重跑不會重乘；舊欄保留到第 5 階段，在那之前回滾只要退程式；新欄用 `bigint`，加總先轉 `bigint` | §3.4–§3.8、§4.4 |
+| P1 歷史幣別未知不可推定 TWD | 撤回「推定 TWD」。逐範圍列幣別來源與可信度，只轉高可信度；不確定的列新欄留 NULL，畫面照今天的樣子顯示；附對帳不變量與停止條件 | §3.2、§3.3、§3.6 |
+| P2 尾差探針漏算加權偶數 | 撤回 `odd_split_rows`。改用與 `recalcGroupBalance` 同條件的帳本級比較（附錄 A Q4）。建議切換前的列沿用舊的進位單位，切換當下 balance 完全不變 | §5.3、附錄 A |
+| P2 CSV 重匯與各入口 | 逐入口寫單位與相容方式；捷徑待處理沒有帳本，改成「確認時依目的帳本轉一次」；CSV 一律是顯示單位；去重 hash 程式裡沒有實作 | §5.5–§5.7 |
+| 上線範圍：第 0 階段只濾句點會保留原錯 | 第 0 階段改成「整筆拒絕會產生小數的輸入、保留原值」，逐鍵、貼上、全形句點、IME 都算 | §7 |
+| 待決的優先順序 | D 系列重排並新增 D12、D13 | §8 |
+
+---
+
+## 1. 決定與取代
+
+**Ray 原話（2026-11-19）**：「不是這樣 資料庫存整數　但在顯示層 如果幣別是 twd 那就是整數　如果是 usd / 或其他有小數的幣別 就用兩位小數 例如 1000 當作 10.00」
+
+**理解**（Paula 記在 #1920 的「## 決定」留言，與原話分開）：DB 仍存整數，單位改成該幣別的最小單位。TWD／JPY：1000＝1000；USD／CNY：1000＝10.00，使用者可以輸入兩位小數。這取代 #1399 決定 (a) 與 #1582 的「一律整數元」。
+
+**為什麼要改**：外部回報（#1920 開頭）要輸入小數。現在主記帳的金額框把小數點吃掉：打 `12.5` 會變成 `125`（Dev B 在 #1920 的查證留言；原因在 `app/(dashboard)/_components/AmountInput.tsx:121` 的 `replace(/[^0-9]/g, '')`），等於多記 10 倍，而且沒有錯誤。
+
+### 被取代的句子
+
+下表是現在 repo 裡寫著「一律整數元」的地方。**這些句子在第 4 階段（開放小數）合併前都還是真的**（描述現況），所以這份提案不改它們；第 4 階段的 PR 要同時改。**例外是 `csv-import-design.md:117`**：它跟程式現況就不一致（見該列），本案不改它，另開票。
+
+| 出處 | 原句（節錄） | 取代成 |
+|---|---|---|
+| #1399 決定 (a)（2026-09-27 留言） | 「主帳本維持整數元，但依幣別顯示不同：資料與寫入路徑都不變，不需要 migration」 | 主帳本存最小單位整數；需要資料轉換（§3） |
+| #1582「要做的」 | 「帳本欄位（CashTransactions／TripExpenses／Settlements）一律存整數元」 | 一律存該幣別的最小單位整數 |
+| `docs/superpowers/specs/domain-model-design.md:21` | 「主帳本金額（交易、收入、結算、旅行）一律存「整數單位」，不分幣別（USD 存 $45 就是 `45`）；Outing 三張表……才用最小單位（USD 為分），只在 outing 結束 fold 成 Settlement 時換算成整數單位。」 | 主帳本與出遊都存最小單位整數；fold 不再換算單位 |
+| `docs/superpowers/specs/locale-currency-design.md:242` | 「（帳本金額一律整數單位、不顯示小數；USD 2 位小數只用在出遊，見 #1582）」 | 小數位數依幣別（§2 的表），帳本與出遊相同 |
+| `docs/superpowers/specs/product-design.md:76` | 「主帳本一律存整數單位（USD $45 = `45`，不存分）；只有 outing 表用最小單位……`currencyPrecision()` 只用於 outing」 | 同上；小數位數函式用在所有金額 |
+| `docs/superpowers/specs/csv-import-design.md:117` | 「拒收 `1.50`（主帳本一律存整數單位，USD 也不存分；匯入一律整數……）」 | 兩位小數帳本收 `1.50`（保留兩位）；零位小數帳本**沿用程式現況：四捨五入、不拒收**（`lib/csvImport/mapper.ts:78-89`；§5.6）。那句原文本來就跟程式不一致，**本案不改 `csv-import-design.md`**，另開票 |
+| `docs/superpowers/specs/group-outing-design.md:77` | 「主帳本是整數單位，兩者不同，只在 outing 結束 fold 成 Settlement 時由 `minorToWhole` 換算」 | 兩者相同；fold 直接寫入，不換算 |
+| `docs/superpowers/specs/trip-multi-currency-design.md:349` | 「主帳本與旅行金額一律整數單位：`convertWholeUnits`……outing 才用最小單位，fold 時走 `minorToWhole`」 | 換算改成「最小單位進、最小單位出」並考慮兩邊小數位數差（§5.8） |
+| `docs/superpowers/specs/insurance-design.md:56` | 「上列四個金額欄位（含 `annual_premium`）都是這個幣別的整數單位」 | 要 Ray 決定（§8 D6）；建議同樣改成最小單位 |
+| `lib/currency.ts:21-25`（`currencyPrecision` 的註解） | 「Main-ledger amounts are whole units for every currency (#1582)」 | 程式註解，跟著實作 PR 改 |
+| `lib/currency.ts:87-94`（`formatLedgerAmountParts` 的註解） | 「never divided by 100 and shown without decimals……(#1399 decision (a))」 | 同上 |
+
+**撤回的連帶**：#1582 留下的警告「Do not reintroduce a precision-aware converter on a ledger path」（`lib/currency.ts:120-124`）也一起失效。它擋的錯是「單位混用」，新設計要擋的是同一種錯。雙欄的好處是**欄名就帶著單位**：`amount` 一定是整數元、`amount_minor` 一定是最小單位，漏改的讀取點讀到 `amount` 只會少掉小數（每筆差一兩元以內），不會差 100 倍；真正會差 100 倍的只剩「讀 `amount_minor` 卻當整數元顯示」，這個要靠型別與測試擋（§5.4）。**這個好處的前提是兩欄同步**：新欄一旦過期（舊程式只改了舊欄、或改了 base 而新欄沒跟著），新 JS 讀到的就是錯的單位。同步靠 §3.5 的 trigger、§3.6 I2 的每日檢查、§4.5 的逐路徑矩陣，不是靠欄名。
+
+---
+
+## 2. 資料模型
+
+### 每個幣別的小數位數
+
+| 幣別 | 小數位數 | 現況 | 備註 |
+|---|---|---|---|
+| `twd` | 0 | 0 | Ray 原話：TWD 是整數。ISO 4217 寫 2，刻意不照 |
+| `jpy` | 0 | 0 | ISO 也是 0 |
+| `usd` | 2 | 帳本 0、出遊 2 | |
+| `cny` | 2 | 0（帳本與出遊都是） | 出遊的 CNY 也要轉換（§3） |
+
+**放哪裡**：`lib/currency.ts` 已經有 `currencyPrecision`（`lib/currency.ts:26`），現在只認 USD、只給出遊用。建議把它改成這張表的唯一來源，所有格式化、輸入解析、換算都從這裡取。不另開檔，因為主帳本幣別清單 `CURRENCIES` 也在同一檔（`lib/currency.ts:4`）。**DB 的 trigger 也要這張表**：用 SQL 函式 `currency_precision(code)`（第 2 階段的 migration 建立），測試把它與 `lib/currency.ts` 釘在一起，兩邊不一致測試就紅（§3.5）。所以「唯一來源」指程式裡的唯一來源；DB 這一份是被測試鎖住的複本。
+
+**日後加幣別**：在表裡加一列，同時決定小數位數。**一個幣別的小數位數一旦有資料就不能改**：改了等於整批資料差 10^n 倍，要再做一次 §3 的轉換。失效的樣子：有人把 TWD 改成 ISO 的 2 位，所有 TWD 帳本的 NT$1,000 瞬間顯示成 NT$10.00，沒有錯誤。所以表要附一行註解寫明「有資料後不可改」，並有測試把現有四個值釘住。
+
+**旅行的自由文字幣別**：`Trips.default_currency`／`budget_currency`、`TripExpenses.original_currency` 是自由文字（`lib/db/schema.ts:618-620`、`641`），可以是 VND、EUR 等。表裡沒有的代碼怎麼處理，要 Ray 決定（§8 D2）。
+
+### `lib/db/schema.ts` 的整數欄位
+
+`integer` 欄位共 68 個（含非金額）。下表逐一標記；「幣別來源」一欄說明這個金額是哪個幣別，**不是帳本幣別的特別標出**。`numeric` 的匯率與公升數一併列出，因為換算會用到。
+
+| 表 | 欄位（行號） | 金額？ | 幣別來源 |
+|---|---|---|---|
+| OikosGroups | `default_split_ratio_a`（66） | 否（百分比） | — |
+| GroupBalance | `balance`（153） | **是** | 帳本 base（目前章節） |
+| GroupBalance | `version`（154） | 否 | — |
+| CurrencyRates | `rate`（170，numeric 10,3） | 否（匯率） | 已棄用，只留給舊旅行 |
+| CashTransactions | `amount`（207） | **是** | 列所屬章節的 base |
+| CashTransactions | `split_ratio_a`（209） | 否（百分比） | — |
+| CashTransactions | `original_amount`（225） | **是** | **`original_currency`**（不是 base） |
+| CashTransactions | `rate_snapshot`（226，numeric 10,3） | 否（匯率） | — |
+| Settlements | `amount`（238） | **是** | 列所屬章節的 base |
+| CarDetails | `purchase_price`（252） | **是** | 隱含帳本 base（沒有幣別欄） |
+| CarDetails | `year`（256）、`initial_odometer`（259） | 否 | — |
+| FuelLogs | `liters`（265，numeric）、`odometer`（267） | 否 | — |
+| HouseDetails | `purchase_price`（282） | **是** | 隱含帳本 base |
+| ChildDetails | `height_cm`（294）、`weight_g`（295） | 否 | — |
+| PetDetails | `purchase_cost`（305） | **是** | 隱含帳本 base |
+| PetDetails | `weight_g`（306） | 否 | — |
+| PlantDetails | `cost`（316） | **是** | 隱含帳本 base |
+| PlantDetails | `water_every`（317） | 否 | — |
+| InsuranceDetails | `coverage_amount`（324） | **是**（未查證是否顯示為金額） | **保單 `currency`**（344） |
+| InsuranceDetails | `payment_date`（325）、`term_years`（335）、`reminder_days_before`（347） | 否 | — |
+| InsuranceDetails | `annual_premium`（332）、`sum_insured`（336）、`expected_maturity_amount`（338）、`account_value`（341） | **是** | **保單 `currency`**（344） |
+| InvoiceImportSnapshots | `imported_amount`（383） | **是** | 電子發票，一律 TWD（雲端發票仍 blocked） |
+| InvoiceImportRuns | 四個 `*_count`（415-418） | 否 | — |
+| IncomeTransactions | `amount`（444） | **是** | 列所屬章節的 base |
+| IncomeTransactions | `original_amount`（454） | **是** | **`original_currency`** |
+| IncomeTransactions | `rate_snapshot`（455，numeric） | 否 | — |
+| RecurringIncomeRules | `amount`（466） | **是** | 帳本 base（今天的排程與畫面都這樣解讀） |
+| RecurringIncomeRules | `interval_months`（470）、`day_of_month`（471） | 否 | — |
+| PendingIncomeOccurrences | `proposed_amount`（485） | **是** | 帳本 base |
+| RecurringExpenseRules | `amount`（496） | **是** | 帳本 base |
+| RecurringExpenseRules | `split_ratio_a`（498）、`interval_months`（502）、`day_of_month`（503） | 否 | — |
+| PendingExpenseOccurrences | `proposed_amount`（517） | **是** | 帳本 base |
+| PendingExpenseOccurrences | `proposed_split_ratio_a`（522） | 否 | — |
+| MonthlyReviewSnapshots | `year`（537）、`month`（538） | 否 | — |
+| MonthlyReviewSnapshots | `top_category_total`（543）、`largest_expense_amount`（546）、`recurring_total_income`（558）、`recurring_total_expense`（559） | **是**（凍結的彙總） | 該月所屬章節的 base |
+| MonthlyReviewSnapshots | `recurring_events`（557，jsonb，每個元素的 `amount`）、`asset_breakdown`（562，jsonb，每個元素的 `total`） | **是**（jsonb 裡的數字） | 同上；寫入點 `drizzle/0093_review_snapshot_chapter.sql:194-232` |
+| Trips | `budget_amount`（619） | **是** | **`budget_currency`**（自由文字） |
+| TripExpenses | `amount`（638） | **是** | 旅行所屬章節的 base |
+| TripExpenses | `original_amount`（642） | **是** | **`original_currency`**（自由文字） |
+| TripExpenses | `split_ratio`（645） | 否 | — |
+| Outings | `fold_amount`（676） | **是** | **出遊 `currency`**（666）；現在已是最小單位 |
+| OutingExpenses | `amount`（708） | **是** | 出遊 `currency`；USD 已是分，CNY 還是整數元 |
+| OutingExpenseShares | `share_amount`（722） | **是** | 同上 |
+| OutingSettlements | `amount`（731） | **是** | 同上 |
+| ImportBatches | 四個計數（747-750） | 否 | — |
+| ImportErrors | `row_number`（762） | 否 | — |
+| MonthlyReviewMessages | `year`（775）、`month`（776） | 否 | — |
+| ShortcutPendingExpenses | `amount`（835） | **是** | **沒有帳本也沒有幣別**：這張表只有 `user_id`（`lib/db/schema.ts:831-841`）；值是捷徑送來的顯示單位。**不轉**（§5.5） |
+
+另外未查證：`Assets.template_fields`（jsonb，`lib/db/schema.ts:192`）的 `number` 欄位可能被使用者當金額用（`TemplateAssetDetailClient.tsx:119` 直接 `toLocaleString`）。那是使用者自訂的純文字紀錄，不帶幣別，建議不轉換。
+
+### 要補的欄位：章節的幣別
+
+**現在沒有地方記「某一段章節當時的 base currency」**。`GroupEpochs`（`lib/db/schema.ts:92-110`）沒有幣別欄。CSV 匯出已經寫明這個缺口（`csv-export-design.md:106`：「舊章節的金額若是在另一個 base currency 下記的，檔案裡會標錯幣別」）。
+
+建議第 2 階段（§7）加兩欄：
+
+- `GroupEpochs.currency`：該章節的幣別。**關章節時由 DB trigger 凍結**（`ended_at` 由 NULL 變非 NULL 的當下，把帳本 base 寫進去；跟 `member_a_name` 同一種做法，§3.5 ④）；開放中章節的值由 trigger 跟著帳本 base（新章節 INSERT 時填、改 base 時同步，§3.5 ③④）。程式不寫這一欄。
+- `GroupEpochs.currency_source`：值只有三種：`closed_snapshot`（第 2 階段之後，由關章節 trigger 寫入）、`current`（開放中的章節）、`unknown`（第 2 階段之前就結束的章節，`currency` 是 NULL）。**沒有「證據」類的值**：fold 出來的結算、匯率量級都會過期（§3.2），只算中可信度、不自動轉；若 Ray 之後改選 D4 (b)，那個決定要同時新增一個值。
+
+既有章節怎麼填，見 §3.2。
+
+> 照 `lib/db/schema.ts:106-108` 的規矩：新欄的 migration 必須先上 prod，認得新欄的程式才能部署；否則 `db.select().from(groupEpochs)` 會因為欄位不存在讓整個 dashboard 報錯。反過來，**舊程式不受新欄影響**：Drizzle 只會列出它認得的欄位。§3、§4 的雙欄設計就是靠這一點讓舊程式繼續跑。
+
+---
+
+## 3. 既有資料轉換
+
+### 3.1 規模：未知
+
+本設計**沒有使用任何 prod 資料**。帳本數、列數、歷史幣別分布、balance 差額都是**未知**。#1582 在 2026-10-07 公開過一筆舊的級距（當時 USD 帳本是個位數），一個多月前的數字，只能當參考。
+
+需要 prod 唯讀查詢才答得出的問題、為什麼要查、答案會改變哪個決定、只回傳級距的 SQL，都整理在**附錄 A**，由 Paula 決定誰去查。
+
+### 3.2 每一列的幣別從哪裡來
+
+**先講一個可以證明的事實**：同一個章節裡，**未刪除**的現金、收入、結算列和進行中的出遊，一定是同一個幣別。
+
+- 改 base 的動作 `setBaseCurrency` 在同一個交易裡鎖帳本列（`actions/currency.ts:35-57`），只要目前章節有任何一筆未刪除的現金、收入、結算或進行中的出遊就擋下（`actions/currency.ts:48` → `lib/db/queries/epoch.ts:98-123`）。
+- 所以一筆列從建立到章節結束都還沒被刪，它活著的期間 base 不可能變。同一章節所有未刪除列都在同一段 base 下寫入。
+
+**這個證明不涵蓋的**（審查 P1-3 指出的漏洞，第 1 版的探針只看現金表）：
+
+- **已刪除的列**：檢查只數 `deleted_at IS NULL`（`lib/db/queries/epoch.ts:102,107,112,118`）。使用者把章節裡的帳全刪掉後可以改幣別，舊幣別的已刪除列留在同一章節。
+- **檢查沒數到的表**：旅行與旅行支出、定期規則、待確認卡、月度快照、愛物購入價、捷徑待處理。它們可能是在上一個 base 下建立的。
+- **已結束的章節**：知道「章節內未刪除列同幣別」，但不知道是哪個幣別——章節結束後 base 可以再改。第 2 階段之後才關的章節沒有這個問題：關章節 trigger 在關閉當下把 base 寫進 `GroupEpochs.currency`（§3.5 ④）；只有第 2 階段之前就結束的章節是未知。
+- **兩個方向都要查**：目前是 USD／CNY、過去是 TWD／JPY 的帳本；以及目前是 TWD／JPY、過去是 USD／CNY 的帳本。後者如果照目前 base 處理，過去的 $45 會一直被當 NT$45。
+
+**每個範圍的幣別來源與可信度**：
+
+| 範圍 | 幣別來源 | 可信度 | 第 2 階段怎麼處理 |
+|---|---|---|---|
+| 目前章節，現金／收入／結算／出遊的**未刪除列** | 帳本目前 base | **高**（上面的證明） | 轉 |
+| 原幣欄 `original_amount`（現金、收入） | 該列的 `original_currency` | **高**（幣別就寫在同一列） | 依該列幣別轉，不看章節 |
+| 出遊三表與 `fold_amount` | `Outings.currency` | **高**：建立出遊時從鎖住的帳本列抄 base（`actions/outing.ts:191`），fold 時幣別不同就擋（`actions/outing.ts:542`） | 依出遊幣別轉：USD 已是分，新欄等於舊欄；CNY × 100（§3.4） |
+| 保險金額欄 | 保單 `currency`（`lib/db/schema.ts:344`） | **高** | 依保單幣別轉（D6） |
+| 已結束章節，章節內有 fold 出來的結算（出遊 `epoch_id` 指向該章節、`fold_amount` 非 NULL） | 該出遊的 `currency` | **中**（審查 P2-5：第 2 版標「高」，**證據會過期**）：fold 當下出遊幣別等於 base（`actions/outing.ts:542`），但刪除結算只設 `deleted_at`、不清 `fold_amount`（`actions/settlement.ts:74-89`），而改 base 只數未刪除的列（`lib/db/queries/epoch.ts:98-123`）。所以「刪光帳（含 fold 結算）→ 改幣別 → 記新帳 → 關章節」之後，章節內現存的列是新 base，fold 證據仍指舊幣別。證據只證明「曾經」是那個幣別 | 不自動轉，列入 D4（附錄 B #4、#13 的反例） |
+| **第 2 階段之後才關的章節** | `GroupEpochs.currency`（`closed_snapshot`，關章節 trigger 在關閉當下寫入，§3.5 ④） | **高**：快照是關閉當下的 base，而章節內未刪除列都在同一個 base 下（上面的證明）；上面的反例也由快照蓋過出遊證據（§3.6 裁定規則） | 轉 |
+| 目前章節，定期規則、待確認卡、旅行與旅行支出、愛物購入價 | 帳本目前 base | **中**：可能在上一個 base 下建立，但**今天的畫面、排程與換算都已經當目前 base 用**（排程照抄 `r.amount`，`drizzle/0064_recurring_cron_taipei_date.sql:68,95`） | 照目前 base 轉。理由：轉換後使用者看到的數字和今天一樣；它們本來就以目前 base 繼續產生新紀錄，不轉會壞掉。**之後再改 base，由改 base trigger 重縮放這些列的新欄**（§3.5 ③），不需要再回填 |
+| 已結束章節，只有其他出遊（沒有 fold） | 出遊建立當下的 base | **中**：只證明章節內某個時間點的 base | 不自動轉，列入 D4 |
+| 已結束章節，有原幣列 | `rate_snapshot` 的量級（例：JPY→TWD 約 0.2、JPY→USD 約 0.007） | **中**：匯率是使用者自己填的，可能打錯 | 不自動轉，列入 D4 |
+| 已結束章節，沒有以上證據 | 無 | **未知** | 不轉 |
+| 任何章節的**已刪除列** | 無 | **未知** | 不轉（畫面本來就不顯示已刪除列；保留期滿由 pg_cron 物理刪除） |
+| 月度快照（四個純量欄＋兩個 jsonb） | 該月所屬章節的幣別 | 同該章節；**月份跨兩個章節時是未知** | 跟著章節；jsonb 每個元素加 `amountMinor`／`totalMinor` |
+| 捷徑待處理 | 無帳本、無幣別 | — | 不轉；它是顯示單位（§5.5） |
+
+可以用的外部證據，但**不拿來自動轉**：PostHog 的 `base_currency_changed` 帶 from／to（`actions/currency.ts:63-66`），但它是以使用者送出、不帶帳本 id，而且只在 production build 才送，不完整。只能拿來估「改幣別常不常見」（附錄 A Q7）。
+
+### 3.3 不確定時怎麼處理
+
+**原則：不確定就保留原值，畫面照今天的樣子顯示，不猜。**
+
+- 新欄留 NULL，章節的 `currency_source = unknown`。舊欄一個字都不動。
+- 讀取規則：新欄是 NULL 時，用舊欄的整數、不加小數、照今天的方式顯示（今天已結束章節都用帳本目前的幣別符號，`csv-export-design.md:106` 記的那個缺口）。**結果和今天一模一樣**，不會更好，也不會更壞。
+- 這些列都在已結束章節裡，章節是唯讀的（epoch-readonly），不會再被編輯，也不進目前章節的 balance（`lib/db/queries/balance.ts:96,109` 只算目前章節）。所以「未知」不會擴散到新資料。
+- **不擋目前章節開放小數**：目前章節的幣別是高可信度。未知只影響過去章節的顯示與匯出。
+- 中可信度的章節要不要轉、要不要問使用者，是 D4。問使用者需要新畫面與新文案，另開票。
+- 以後補到證據（例如 Ray 改選 D4 (b)），對那些 `unknown` 的章節另跑一次補轉：只改被 Ray 點名的章節，由 Ray 裁定（§3.6「誰裁定、誰放行」）；一般回填只寫 `currency_source IS NULL` 的章節，不會動 `unknown`，也不會碰已轉的列。
+
+### 3.4 要轉換的欄位（雙欄）
+
+**不改舊欄**。每個金額欄旁邊加一個 `bigint` 的新欄，由回填與之後的寫入填滿。為什麼雙欄、而不是就地 ×100，見 §4.2 的選項比較。
+
+| 表與欄 | 新欄 | 新欄的值 |
+|---|---|---|
+| CashTransactions／IncomeTransactions／Settlements／TripExpenses `amount` | `amount_minor` | 舊欄 × 10^p(列所屬章節幣別)；章節未知時 NULL |
+| CashTransactions／IncomeTransactions `original_amount` | `original_amount_minor` | 舊欄 × 10^p(`original_currency`) |
+| TripExpenses `original_amount`、Trips `budget_amount` | 同上命名 | 依 D2；表外代碼預設 p = 0 |
+| RecurringIncomeRules／RecurringExpenseRules `amount`、Pending*Occurrences `proposed_amount` | `amount_minor`／`proposed_amount_minor` | 舊欄 × 10^p(帳本目前 base) |
+| MonthlyReviewSnapshots 四個純量欄 | 各加 `_minor` | 舊欄 × 10^p(該月章節幣別)；未知時 NULL |
+| MonthlyReviewSnapshots jsonb | 每個元素加 `amountMinor`／`totalMinor` 鍵 | 同上 |
+| GroupBalance `balance` | `balance_minor` | **不是** ×100；由 §5.3 的規則從新欄重算。採 D7 建議時，回填當下必定等於 `balance × 10^p` |
+| OutingExpenses／OutingExpenseShares／OutingSettlements、Outings `fold_amount` | 各加 `_minor` | 舊欄 × 10^(p − 出遊舊位數)，**p 取 `Outings.currency`**，不取帳本 base（審查 P2-1）：USD ×1（舊欄已是分，新欄等於舊欄）、CNY ×100、TWD／JPY ×1。出遊舊位數是凍結的函式（USD 2、其他 0），不隨 `currency_precision()` 改 |
+| 愛物購入價、保險金額欄 | 各加 `_minor` | 依 D6 |
+| ShortcutPendingExpenses `amount` | **不加** | 顯示單位，見 §5.5 |
+
+另外加：
+
+- `CashTransactions.split_round_unit`（`smallint`）：分帳進位的單位，見 §5.3。值是「開放小數之前寫入的列＝10^p，之後＝1」：回填時，兩位小數帳本的列填 100、零位小數帳本填 1；第 3 階段的新程式照同一條規則寫。**值是 NULL 代表寫入者是舊伺服器程式（不認得這欄）：INSERT trigger 一律補 10^p，不看第 4 階段的開關有沒有開**（舊程式只會寫整數元，ceil 的單位本來就是 1 元；§3.5、§5.3）。
+- `GroupEpochs.currency`、`currency_source`（§2）：由關章節、開章節、改 base 的 trigger 維護（§3.5），程式不用寫。
+
+**p 的權威來源**（審查 P2-9；INSERT／UPDATE／改 base trigger、回填、I2 都用這張表，不各自推定）：
+
+| 欄位 | p 取自 | 舊欄的位數 q | 說明 |
+|---|---|---|---|
+| 現金、收入、結算的 `amount`；旅行支出的 `amount` | 該列所屬章節的幣別：目前章節＝帳本 base；已結束章節＝`GroupEpochs.currency`（`closed_snapshot`，未知則不轉） | 0 | §3.2 |
+| 現金、收入的 `original_amount`；旅行支出的 `original_amount` | 該列的 `original_currency` | 0 | 表外代碼的 p 依 D2 |
+| 定期規則、待確認卡、愛物購入價（車、房、寵物、植物）、月度快照 | 帳本目前 base（快照：該月所屬章節的幣別） | 0 | 隱含 base：改 base 時由 ③ 重縮放（§3.5） |
+| 保險金額欄 | 保單 `currency`（`lib/db/schema.ts:344`） | 0 | 改保單幣別走 ②(3) |
+| 出遊三表與 `fold_amount` | `Outings.currency`（OutingExpenseShares 經 `expense_id` → OutingExpenses → `outing_id` 取得；OutingExpenses、OutingSettlements 直接有 `outing_id`） | USD 2、其他 0 | 係數 10^(p − q) |
+| **旅行預算 `Trips.budget_amount`** | `Trips.budget_currency`（自由文字，表外代碼依 D2） | 0 | 改預算幣別走 ②(3)；改 base 不影響 |
+| 旅行摘要（結束旅行折成現金帳） | 寫進的章節＝目前章節，所以是帳本 base | 0 | 進位單位 u 在結束當下決定（§5.3） |
+| GroupBalance | 帳本目前 base | 0 | 由 DB 函式重算，不套 10^p |
+| 捷徑待處理 | — | — | 不轉（§5.5） |
+
+**新欄用 `bigint` 的原因**：最大單筆 `MAX_AMOUNT = 9_999_999`（`lib/validators.ts:22`）×100 還在 int4 內，但加總與中間值會溢位。現在的 balance SQL 先在 int4 裡乘再除：`CEIL(amount * (100 - split_ratio_a) / 100.0)::int`（`lib/db/queries/balance.ts:82,88`）；`amount` 是 999,999,900 分時乘 99 就超過 int4，整筆寫入失敗。月度快照的 `SUM(...)::integer`（`drizzle/0093_review_snapshot_chapter.sql:125,204-205,212`）與保險、愛物欄位（沒有上限，`lib/validators.ts:812-848` 只擋負數）也一樣。新欄、`balance_minor` 與所有加總都用 `bigint`；JS 端 `bigint` 在 2^53 以內可以安全當 `number`。
+
+### 3.5 寫入閘門、DB 同步 trigger 與回填
+
+**為什麼第 2 版「只在 INSERT 補新欄」不夠**（審查 P1-1）：共存期（§4.5）裡舊程式有好幾類寫入不是 INSERT，新欄會停在舊值，而新 JS 讀的就是新欄：
+
+- 舊程式編輯定期規則是直接 `UPDATE amount`（`actions/recurringExpense.ts:162-179`、`actions/recurringIncome.ts:139-153`）。USD 帳本的規則從 $5 改成 $8：舊欄 8、新欄仍是 500，新 JS 顯示 $5.00。
+- 舊程式改 base 只 `UPDATE OikosGroups.base_currency`（`actions/currency.ts:54`）；目前章節沒有未刪除的帳就放行（`actions/currency.ts:48`），定期規則、待確認卡、旅行支出、愛物購入價、月度快照完全不動。TWD → USD：規則的舊欄 500、新欄 500，新 JS 顯示 $5.00，正確是 50000（$500.00）；USD → TWD 反過來，新欄 50000 被當成 NT$50,000。**差到 100 倍。**
+- 愛物詳細（`actions/asset.ts:267,812,899,1161,1234,1388`）、保險只改幣別、旅行預算（`actions/trip.ts:268-275,321`）、出遊 `fold_amount`（`actions/outing.ts:556`）、GroupBalance（`lib/db/queries/balance.ts:70-115`）、關章節（`ended_at`：`actions/invite.ts:588,601`、`actions/membership.ts:492,628`）都是就地更新，逐路徑列在 §4.5。
+
+所以 DB 的保險是**一組** trigger（下面），不是單一個 INSERT trigger。
+
+#### 寫入閘門
+
+新程式的所有寫入：交易裡**第一個鎖**是帳本列（`OikosGroups`）的 `FOR KEY SHARE`，再在交易**裡面**讀 base 並換算，之後才拿章節列、旅行列等其他鎖。
+
+- **為什麼是 `FOR KEY SHARE`**：它只跟 `FOR UPDATE` 衝突。`setBaseCurrency` 與邀請類 action 用 `FOR UPDATE`（`actions/currency.ts:44`），所以「改 base」與「寫入」一定排成先後，不會交錯。現金、收入、結算的 FK 檢查本來就會對帳本列拿 `KEY SHARE`，閘門只是讓其他寫入（例如旅行支出）也拿同一種鎖、並排在最前面；它唯一會等的對象是持有 `FOR UPDATE` 的 `setBaseCurrency` 與邀請類 action，那正是要排序的對象。
+- **為什麼不能是 `FOR SHARE`、而且要第一個拿**（審查 P2-2）：`FOR SHARE` 與 `FOR NO KEY UPDATE` 衝突，而關章節（`lockForEpochClose`，`lib/db/queries/epoch.ts:634,644`）持有帳本列與章節列的 `FOR NO KEY UPDATE`。編輯、刪除、旅行支出這幾條路徑本來就先鎖章節列 `FOR SHARE`（`lib/db/queries/epoch.ts:875-880,926-935`）；它們若再拿帳本列 `FOR SHARE`：關章節持帳本列、等章節列，寫入持章節列、等帳本列，**死結（40P01）**。閘門拿 `FOR KEY SHARE` 並排在最前面：寫入不會因為關章節持有的帳本列而等，只會在章節列上排在關章節後面，沒有環。**純新增現金帳**（`actions/transaction.ts:122` 起的交易）不拿章節列，本來就沒有這個環；環只存在於先鎖章節列的路徑。
+- **不要照抄出遊的 `lockGroupShared`**（`actions/outing.ts:111-125`，`FOR SHARE`、順序是出遊列再帳本列）：出遊路徑沒有章節列的鎖，所以沒有環；把它的鎖模式抄到帳本寫入就會有。
+- 現在的現金新增在交易**外**就用 base 算好金額（`actions/transaction.ts:99-113`，交易從 122 行才開始；編輯路徑 260、277 同樣）。第 3 階段要把換算搬進交易、讓閘門成為第一個鎖。旅行支出同樣：現在先鎖旅行列再鎖章節列（`actions/tripExpense.ts:57-72`），換算（`:90-127`）雖然在交易內，用的 base 卻是交易外讀的（`:150`、`:186`）；閘門要排在旅行列之前，換算改用閘門之後讀到的 base。
+
+#### DB 的保險：一組 trigger
+
+全部在第 2 階段的同一個 migration 上線，**不晚於回填**：這個階段之後到第 3 階段部署前，全部流量都是舊伺服器程式（名詞、§4.5）。p 一律由 DB 函式 `currency_precision(code)` 給；測試把它與 `lib/currency.ts` 的表釘住，兩邊不一致測試就紅。出遊三表另用凍結的「舊出遊位數」函式（USD 2、其他 0）算係數。每個欄位的 p 取自哪裡，見 §3.4「p 的權威來源」。**trigger 只讀舊欄與新欄，從不寫舊欄。**
+
+| # | trigger | 時機 | 規則 |
+|---|---|---|---|
+| ① | INSERT，掛在每張有新欄的表 | `BEFORE INSERT` | 新欄是 NULL ⇒ 補 `舊欄 × 10^p`（出遊三表與 `fold_amount`：`舊欄 × 10^(p − 出遊舊位數)`，USD ×1、CNY ×100、其餘 ×1）。讀 base 時對帳本列拿 `FOR KEY SHARE`（跟閘門同一種鎖）。`CashTransactions.split_round_unit` 是 NULL ⇒ 補 10^p：NULL 代表寫入者是舊程式，**不看第 4 階段的開關**（§5.3）。每次補值 `RAISE LOG`（只含表名，不含 id 與金額）。**新欄非 NULL 一律不重算**，所以待確認卡與改 base 的對齊不靠這個 trigger，靠排程函式的排序（下面「排程與改 base 的排序」） |
+| ② | UPDATE，掛在每張有新欄的表 | `BEFORE UPDATE`；**每一組（舊欄，新欄）分開判斷**，依序：(1) 新欄被這個 UPDATE 改了 ⇒ 不動（寫入者認得新欄；回填與 ③ 自己的寫入也走這條）；(2) 否則舊欄被改成**不同的值** ⇒ 新欄 := 舊欄 × 10^p；(3) 否則該列自己的幣別欄被改了（保單 `currency`、`Trips.budget_currency`、`original_currency`）⇒ 新欄 := ROUND(新欄 × 10^(新 p − 舊 p))，維持「數字不變、換個幣別解讀」；(4) 其餘不動。新欄原本是 NULL 的（未知範圍）一律不動，守住 I3。(2)(3) 發生時 `RAISE LOG` | 不拿帳本鎖 |
+| ③ | 改 base | `BEFORE UPDATE OF base_currency ON "OikosGroups"`（新舊值不同才執行） | 見下 |
+| ④ | 關章節、開章節 | `BEFORE UPDATE OF ended_at ON "GroupEpochs"`；`BEFORE INSERT ON "GroupEpochs"` | `ended_at` 由 NULL 變非 NULL ⇒ `currency` := 該帳本當下的 base、`currency_source` := `closed_snapshot`；新章節 INSERT ⇒ `currency` := base、`currency_source` := `current`。關章節的交易已持有帳本列的 `FOR NO KEY UPDATE`（`lib/db/queries/epoch.ts:634`），`setBaseCurrency` 的 `FOR UPDATE` 會等，所以讀到的 base 就是章節結束當下的 |
+| ⑤ | GroupBalance | `BEFORE UPDATE ON "GroupBalance"` | `balance_minor` 沒有被這個 UPDATE 改 ⇒ 用 §3.7 的 DB 函式從新欄重算（舊程式的 `recalcGroupBalance` 只寫 `balance`，`lib/db/queries/balance.ts:70-115`）。冪等：新程式本來就呼叫同一個函式，重算結果相同 |
+
+**② 不拿帳本鎖**：它靠列鎖序列化，並依賴 READ COMMITTED 的重新評估：兩個交易更新同一列時，後到的等列鎖，取得後用最新版本的列跑 trigger，再讀已提交的 base。**這個行為尚未在 dev 驗證**。附錄 B #14 用兩個連線、**兩個順序**（改 base 先鎖、舊 UPDATE 先持列鎖）演練，各自核對提交後的 base 與金額；#17 驗關章節的鎖序。兩項沒過，不進第 2 階段（§3.6 停止條件）。
+
+**③ 改 base 怎麼重縮放**：Δ ＝ p(新 base) − p(舊 base)；對象是**目前章節、金額隱含帳本 base 的列**，並且同一個交易裡把開放中章節的 `GroupEpochs.currency` 改成新 base、`currency_source` 設成 `current`：
+
+| 對象 | 欄 |
+|---|---|
+| 定期收入／支出規則 | `amount_minor` |
+| 待確認卡 | `proposed_amount_minor`（排程先提交的卡，跟規則一起重縮放；排程之後才插的卡，讀的是已重縮放的規則：排序見「排程與改 base 的排序」） |
+| 目前章節旅行的旅行支出 | `amount_minor`（不含 `original_amount_minor`，那有自己的幣別） |
+| 愛物購入價（車、房、寵物、植物） | 各自的 `_minor` |
+| 目前章節的月度快照 | 四個純量 `_minor` 欄；jsonb 的 `amountMinor`／`totalMinor` |
+
+- p 不變 ⇒ 不動；p 變大 ⇒ 新欄 × 10^Δ；p 變小 ⇒ 新欄 ÷ 10^Δ。**每張表一個 UPDATE 語句、寫成相對式**（trigger 函式是 VOLATILE，每個語句各取快照；`SET 新欄 = 新欄 * 10^Δ`，p 變小時 `ROUND(新欄 / 10^Δ)`），不先讀出來再寫回：UPDATE 在等列鎖之後，READ COMMITTED 會對「最新版本」的列重新算這個式子（假設尚未在 dev 驗證，附錄 B #14）。**只從新欄算、不碰舊欄**：舊欄原本就「數字不變、換個幣別解讀」，所以 TWD → USD 之後新欄 = 舊欄 × 100，I2 仍成立。
+- 除不盡（只可能在第 4 階段之後、p 變小、列有小數）：trigger 四捨五入，保證不報錯、不卡住改 base。**新程式的 `setBaseCurrency` 先在同一個交易裡檢查，有除不盡的列就擋下**（`base_currency_locked`，D13 (a)；文案見「後續」），所以只有舊程式（R2）會走到四捨五入（§3.8）。
+- **不處理**：保單金額欄（有自己的幣別，改保單幣別走 ②(3)）、`Trips.budget_amount`（有自己的 `budget_currency`）、出遊三表與 `fold_amount`（出遊自己的幣別）、`original_amount`（有自己的 `original_currency`）、已刪除的列（沒有還原路徑：grep `deletedAt: null` 找不到把 `deleted_at` 設回 NULL 的程式，所以不進範圍也不進對帳）。
+
+#### 排程與改 base 的排序（P2-a）
+
+**問題**：定期規則的兩個排程（`generate-pending-income`、`generate-pending-expense`，每天 16:00 UTC）各是單一 `INSERT … SELECT`（`drizzle/0064_recurring_cron_taipei_date.sql:65-82`、`:90-111`），語句一開始就讀定規則的（舊欄，新欄）。若這時舊程式正在改 base：改 base 先對帳本列 `FOR UPDATE`（`actions/currency.ts:44`）、同一個交易裡改 base（`:54`），③ 重縮放規則與「已存在的」待確認卡，**看不到排程還沒提交的新卡**。排程插卡時的外鍵檢查要等改 base 提交，之後帶著提交前讀到的（舊欄 500，新欄 500）寫入；① 對非 NULL 的新欄不重算。結果：卡的新欄與已重縮放的規則差 10^Δ（TWD → USD 後卡顯示 $5.00、規則顯示 $500.00）。
+
+**規則**（誰先、誰重讀、卡怎麼對齊）：
+
+1. **待確認卡只有排程一個寫入者**：`actions`、`lib`、`app` grep 不到對兩張待確認表的 INSERT；`drizzle/` 只有 0016、0021、0063、0064 的排程本體。所以保險放在排程函式，不放在 trigger。
+2. 第 2 階段 migration 把兩個排程改成 PL/pgSQL 函式（**VOLATILE**，不是 STABLE，也不是單一 CTE 語句），`cron.schedule` 只呼叫它。函式內**逐本帳本、依帳本 id 由小到大**做兩件事：(i) 先單獨一個語句 `SELECT 1 FROM "OikosGroups" WHERE id = <g> FOR KEY SHARE`（與寫入閘門同一種鎖、同樣排第一）；(ii) 再用**新的語句**做 `INSERT … SELECT` 與推進 `next_occurrence_at`。READ COMMITTED 下每個語句各取各的快照，所以 (ii) 讀到的是拿到鎖**之後**已提交的規則。
+3. **順序一，改 base 先拿到 `FOR UPDATE`**：排程停在 (i)，等改 base 提交；之後 (ii) 重讀，讀到已重縮放的規則，卡的新欄與規則同單位。
+4. **順序二，排程先拿到 `FOR KEY SHARE`**：改 base 的 `FOR UPDATE` 等排程交易提交；提交後卡已經存在，改 base 的 ③ 把卡與規則一起重縮放（③ 的對象表本來就含待確認卡）。
+5. 兩個順序下，卡的新欄都與規則對齊。排程交易持有 `FOR KEY SHARE` 到函式結束，改 base 最多等一次排程的時間；`FOR KEY SHARE` 只與 `FOR UPDATE` 衝突，不影響其他寫入。依 id 由小到大逐本鎖，排程自己不會跟別的多帳本鎖者成環。
+6. **月度快照排程**（`monthly-review-snapshot`，§4.5 列 12）也是 DB 排程函式、新欄也靠帳本幣別，照同一條規則先鎖帳本列再開新語句。這一條是作者加的，複驗沒提；風險低（改 base 要求目前章節沒有未刪除的帳），但規則統一比逐個證明省事。
+7. **I2 是事後偵測，不是保險**：沒照這條規則寫的卡，新欄與舊欄在 p 已變之後對不上，I2 每天會抓到；演練 #24 的對照組會重現它。
+
+**限制**（trigger 補不了的）：
+
+1. **舊程式「編輯」小數列，小數掉了、沒有錯誤**：軟刪＋新增的編輯，新列的新欄是舊欄整數 × 10^p；就地更新時，只有舊欄被改成不同的值才會重算（舊欄原樣送回則新欄保留）。所以開放小數的前置條件是舊伺服器程式已經不可能被執行（§7 第 4 階段）；R2 是已知例外（§3.8）。
+2. **殘餘的死結**：舊程式的旅行支出編輯（軟刪舊列、再 INSERT）與改 base 交錯時，改 base 的 ③ 要更新旅行支出列、等舊程式的列鎖，舊程式的 INSERT trigger 要帳本列 `KEY SHARE`、等改 base 的 `FOR UPDATE`：互等，Postgres 會中止其中一邊（40P01），重試就成功，沒有資料不一致。新程式的閘門在最前面，不會有這個環。只會在第 2 階段到第 3 階段部署之間、或 Skew 的舊部署時遇到（附錄 B #18）。
+
+**追蹤**（第 4 階段的門檻用）：①、② 的補值都 `RAISE LOG`。第 3 階段部署之後，新程式兩欄都寫，不該再有補值；除了 Skew 與 R2，沒有舊伺服器程式在跑。第 4 階段的進入條件之一是「第 3 階段部署之後沒有新的補值紀錄」（§7）。Supabase 的 log 保留期**未查證**；若比觀察期短，第 2 階段實作時改成累加計數表（只有表名、日期、次數，不含使用者資料）。
+
+#### 回填
+
+第 2 階段，一個帳本一個交易：
+
+1. 鎖帳本列（`FOR UPDATE`），這段時間該帳本的寫入、關章節、改 base 都會等。先記下這一本 `currency_source = 'closed_snapshot'` 的章節清單雜湊與筆數（給步驟 4 比對，I8 (d)）。
+2. 寫 `GroupEpochs.currency`／`currency_source`，**只寫 `currency_source IS NULL` 的章節**（這是這一步唯一的條件）：開放中的章節 ＝ 帳本 base／`current`；已結束的章節 ＝ NULL／`unknown`（D4 (a)；第 2 階段之前結束的章節沒有可靠證據，fold 證據會過期，§3.2）。`closed_snapshot`、`current`、`unknown` 的章節一律不動：第 2 階段 migration 之後才關的章節，關章節 trigger（④）在回填之前就已經寫成 `closed_snapshot`，回填之後關的章節、以及整個回填重跑，都不會被這一步碰到。
+3. `UPDATE … SET amount_minor = amount * 10^p WHERE amount_minor IS NULL AND <範圍條件>`，範圍是 §3.2 表中「轉」的列（目前章節的未刪除列、自帶幣別的欄、隱含 base 的表）；同時寫 `split_round_unit`。
+4. 算 `balance_minor`，並在交易內驗證 §3.6 的 I2、I4、I8 (d)（`closed_snapshot` 的清單雜湊與筆數和步驟 1 相同）；不成立就 `RAISE`，只回滾這一本。
+5. 提交，換下一本。
+
+**為什麼不會重乘、不會蓋掉快照**：回填只讀舊欄、只寫 NULL 的欄位（金額的新欄是 NULL、章節的 `currency_source` 是 NULL）；舊欄不會被回填或任何 trigger 修改，重跑多少次結果都一樣，已經有值的欄位不會再被碰。回填之後新欄唯一會被乘除的時刻是 ③ 與 ②(3)，各自在「base 或幣別真的改了」的同一個交易裡執行一次。回填期間的新寫入由程式或 trigger 填好新欄，回填直接跳過。
+
+**時段**：**待 Ray 指定（D9）**。不論指定哪一段，都要避開 pg_cron 的 15:00–16:45 UTC 與每月 1 日（各排程見 §3.7）；這是技術限制，不是 Ray 的決定。
+
+### 3.6 對帳（遷移前後）
+
+對帳全部用聚合查詢，**只輸出 0／非 0 或真／假**，不看任何一筆使用者資料。
+
+| # | 不變量 | 怎麼查 | 期望 |
+|---|---|---|---|
+| I1 | 回填沒有改到舊欄 | 只適用**只新增、不就地改金額**的表（現金、收入、結算、旅行支出；編輯是軟刪＋新增）：回填開始時間 t0 之前建立的列，每張表 `md5(string_agg(id::text \|\| ':' \|\| amount::text, ',' ORDER BY id))` 回填前後相同。其他表（定期規則、愛物詳細、保險、旅行預算、`fold_amount`、GroupBalance）的舊欄本來就會被正常功能更新，I1 不適用，由 I2 看新舊有沒有同步 | 真 |
+| I2 | **新欄沒有過期**（兩欄同步） | 令 p ＝ 新欄的權威位數（§3.4「p 的權威來源」，依**該列的幣別來源**，不是一律套帳本 base）、q ＝ 舊欄的位數（主帳本各表 0；出遊三表與 `fold_amount` ＝ 出遊的舊位數：USD 2、其他 0）、s ＝ 10^(p−q)。對每個新欄非 NULL 的未刪除列（沒有 `deleted_at` 的表看全部列）：`舊欄 = CASE WHEN 新欄 = 0 THEN 0 ELSE GREATEST(1, ROUND(新欄 / s)) END`，數不符的列。第 4 階段之前新欄必是 s 的倍數，式子等於「新欄 = 舊欄 × s」；之後小數列的舊欄是「四捨五入、正數至少 1」，式子仍成立，**同一條式子貫穿所有階段** | 0 |
+| I3 | 該轉的都轉了、不該轉的沒轉（**所有章節、所有表**） | 章節與列的對應同附錄 A Q2（`group_id` ＋ `created_at` 落在章節區間；旅行、出遊用 `epoch_id`）。(a) **自帶幣別的欄**（`original_amount`、保單金額欄、旅行預算、出遊三表與 `fold_amount`）：未刪除列新欄 NULL 的筆數，不看章節；(b) **依章節幣別換算的欄**（現金、收入、結算、旅行支出的 `amount`）：目前章節與 `closed_snapshot` 章節的未刪除列新欄 NULL 的筆數，加上 `currency_source = 'unknown'` 章節裡新欄非 NULL 的筆數；(c) **隱含帳本 base 的表**（定期規則、待確認卡、愛物購入價、目前章節的月度快照）：新欄 NULL 的筆數 | 三者都 0 |
+| I4 | balance 沒有跳動（第 4 階段之前） | `count(*) WHERE balance_minor <> balance::bigint * 10^p`（採 D7 建議時，從回填到開放小數前一直成立；pending delta 的兩個版本同理。D7 已決定 (c)；若 Ray 之後改選 (a)，改看附錄 A Q4 的分布） | 0 |
+| I4' | 第 4 階段之後，兩個 balance 各自一致 | 用 §3.7 的函式分別以舊欄（舊規則）、新欄（新規則與 `split_round_unit`）重算，與存的 `balance`、`balance_minor` 比。兩者之間的差只報告級距（逐筆差一兩元以內、加總累積，§5.3），不算失敗 | 重算差 0 |
+| I5 | 月度快照 jsonb | 每個 jsonb 元素：已知章節 `amountMinor = amount × 10^p`，未知章節沒有 `amountMinor` | 0 筆不符 |
+| I6 | 沒有溢位、沒有超過 JS 安全整數 | `count(*) WHERE amount_minor > 9007199254740991`；CHECK 由 DB 自己擋 | 0 |
+| I7 | 回填可重跑 | 同一批再跑一次回填，更新列數 | 0 |
+| I8 | 章節幣別（含**快照有沒有被蓋掉**，審查 P2-b） | (a) 開放中的章節：`currency` ＝ 帳本 base、`currency_source = 'current'`；(b) `closed_snapshot` 的章節 `currency` 非 NULL；(c) **只報告**：`closed_snapshot` 的章節裡，出遊幣別與章節幣別不同的章節數（級距）；(d) **回填前後**：每一本帳在回填交易內，`closed_snapshot` 章節的 `md5(string_agg(id::text \|\| ':' \|\| currency, ',' ORDER BY id))` 與筆數，步驟 4 與步驟 1 相同；(e) **全量**：`ended_at >= t_m` 但 `currency_source <> 'closed_snapshot'` 的章節數，t_m ＝ 第 2 階段 migration 在 prod 套用完成的時間（執行者在套用當下留言記下，不等到放行；`ended_at` 是關章節交易內讀的時間，所以 `ended_at >= t_m` 的章節一定在 trigger ④ 上線之後才被 UPDATE） | (a)(b)(d)(e) 為 0；(c) 不判定 |
+| I9 | trigger 在、而且啟用 | §3.5 每一個 trigger（①② 在每張有新欄的表上各一個）：`pg_trigger` 裡有、`tgenabled = 'O'`；`currency_precision()` 對四個幣別回傳 §2 的表 | 缺少或停用的筆數 0 |
+
+**每日**：共存期內每天跑 I2、I4（第 4 階段後 I4'）、I9；其餘在回填、各階段前後、每次演練後跑。
+
+**裁定規則**（不一致時以誰為準）：
+
+- **章節幣別**：以 `closed_snapshot`（關章節 trigger 寫的）為準，**不用**出遊幣別、匯率量級推定（審查 P2-5：fold 證據會過期）。I8 (c) 的差異只報告，不改資料。
+- **I2 不成立**（新欄過期）：**不自動修**。先找是 §4.5 的哪條路徑漏了。共存期舊程式寫的是舊欄，舊欄是最新值，修好 trigger 後用舊欄重算新欄；第 4 階段之後的小數列，新欄才是最新值，只能重算舊欄。判斷不了是哪一種就停。
+- **I3 與 D4**：D4 已決定 (a)；若 Ray 之後改選 (b)／(c)，(b) 的「`unknown` 章節新欄必須 NULL」改成「只有被選中的章節可以非 NULL」，並要新增一個 `currency_source` 值（§2）。
+
+**誰裁定、誰放行**（P2-d）：回填與 I1–I9 用的是同一份證據與同一組 p，「驗算通過」不等於「可以放行」，要有一個不是寫回填的人來決定。
+
+- **裁定者**：證據衝突由 **Ray** 裁定。Ray 可以在留言裡指定一個人代為裁定（寫明名字與範圍）；沒有指定就是 Ray。「證據衝突」指：I2 或 I3 不成立；I8 (c) 報告出遊幣別與章節幣別不同；I8 (d)(e) 非 0；回填的結果與 dev 的獨立抽樣（附錄 B 的假資料、截圖比對）不一致；上面裁定規則寫「判斷不了就停」的任何情況。**執行者不自己裁定，也不自己改資料**，只回報 0／非 0 與級距。
+- **放行者**：階段切換（第 2 → 3、第 3 → 4；第 5 階段見 D12）由 **Ray 或 Ray 指定的人**放行。放行就是在 PR 或 issue 留一則「放行」留言，寫明階段、日期、I1–I9 每項是 0 還是非 0（只寫 0／非 0 與級距，不貼資料）、引用的 t_m（套用 migration 時記下的那則）、附錄 B 演練是否跑完。**沒有這則留言，不進下一階段。**
+- **分工**：Ray 指定的放行者或裁定者，不得是當次回填的執行者、也不得是寫當次驗算的人（寫回填的人與寫 I1–I9 的人是同一批，自己放行等於同源）。
+- **紀錄**：裁定與放行寫在同一則留言串，並寫明結論是「不改資料」「要修哪條路徑」或「停」。
+
+**放行規則**：
+
+- 進第 3 階段：回填後 I1–I9 全部成立（I2、I4、I9 當天重跑一次）**，且有放行留言**。
+- 進第 4 階段：觀察期（D9）內 I2、I4、I9 每天為 0，且 §3.5 的補值追蹤沒有新紀錄，**且有放行留言**。
+- 第 5 階段：D12（目前決定是不做）。
+
+**抽樣**：不在 prod 抽看使用者資料。抽樣做在 dev：用附錄 B 的假資料情境，對每個情境截圖比對回填前後的畫面（首頁 balance、紀錄、統計、月度回顧、CSV 匯出），差異只能出現在附錄 B 列為「預期改變」的地方。
+
+**停止條件**：
+
+- **停放行（P2-d）**，任何一項成立就不進下一階段，直到 Ray 或被指定的人裁定：有證據衝突還沒裁定；I8 (d) 或 (e) 非 0（快照被蓋掉就無法重算，那是關閉當下的 base，**不自己推定**，交 Ray 裁定怎麼補回）；附錄 B #14、#17、#24、#25 任何一項沒跑或沒過；沒有放行留言。
+- 單一帳本的 I2 或 I4 不成立：該帳本的交易 `RAISE` 回滾，其他帳本繼續；結束後回報失敗帳本數的級距。
+- 回填交易撞到死結（40P01）：只回滾這一本、重跑（I7 保證可重跑），不算失敗。
+- 任何一本失敗（40P01 以外）、或全量 I1–I9 有任何一項不符：**不進第 3 階段**。查原因、修回填、重跑。
+- 溢位（I6 不是 0）：停止，回頭檢查哪個欄位漏了 `bigint`。
+
+### 3.7 相依的 DB 物件
+
+| 物件 | 位置 | 影響 |
+|---|---|---|
+| `CHECK (amount > 0)` 等 | `drizzle/0012_income_transactions.sql:11`、`0016_recurring_income.sql:26,53`、`0021_recurring_expense.sql:21,49`、`0066_outing_tables.sql:59,73,82`；`ShortcutPendingExpenses_amount_positive`（`lib/db/schema.ts:841`） | 舊欄的 CHECK 保留。新程式寫舊欄時用「四捨五入、正數至少 1」，例如 $0.40 的舊欄寫 1，避免違反 CHECK。新欄加同樣的 `> 0` CHECK |
+| balance 計算 | `lib/db/queries/balance.ts:70-115` | 改成一個 DB 函式，同時算 `balance`（舊規則、舊欄）與 `balance_minor`（§5.3、新欄），中間值一律 `bigint`。GroupBalance trigger（§3.5）與新程式呼叫同一個函式 |
+| **待確認的差額（pending delta）** | `getGroupPendingBalanceDelta`（`lib/db/queries/balance.ts:149-179`）：用 `amount`、`split_type`、`split_ratio_a` 算待確認現金帳對 balance 的影響，沒有分攤單位 | 同一個 DB 函式的另一個出口：舊欄版（舊規則）與最小單位版（用 `split_round_unit`，§5.3）。**讀 balance 的人必須成對讀同一個單位的 balance 與 pending delta**，否則 `BalanceHero` 把 `balance_minor` 與舊欄的 delta 相加，差 100 倍（審查 P2-3） |
+| **balance 與 pending delta 的讀取者** | `app/(dashboard)/dashboard/page.tsx:144-145`（`getGroupBalance`、`getGroupPendingBalanceDelta`）；`BalanceHero.tsx:121-142`（Realtime 的 `balance-change` 與 `displayedRaw + pendingBalanceDelta`）；`actions/membership.ts:268`（離開帳本：`getGroupBalance(...) !== 0` 才放行）；`app/(dashboard)/settings/page.tsx:32`（`getGroupBalance`，傳給 `LeaveGroupFlow`） | 第 3 階段一起改讀最小單位（§7）：頁面讀 `balance_minor` 與最小單位版的 delta；Realtime payload 讀 `balance_minor`；**離開帳本的零檢查要讀 `balance_minor`**：舊欄是整數元，$0.50 的餘額舊欄是 0 或 1，零檢查會放行或誤擋；`LeaveGroupFlow` 顯示的金額也走格式化函式 |
+| `SUM(amount)::integer` | 月度快照函式（`drizzle/0093_review_snapshot_chapter.sql:125,204-205,212`） | 第 2 階段改成同時寫純量 `_minor` 欄與 jsonb 的 `amountMinor`／`totalMinor`，用 `bigint` |
+| 定期規則產生待確認 | `generate-pending-income`／`generate-pending-expense`，每天 16:00 UTC（`drizzle/0064_recurring_cron_taipei_date.sql:65,90`），把 `r.amount` 原樣抄進 `proposed_amount`（同檔 68 是收入、95 是支出） | 第 2 階段改成兩欄都抄，並照 §3.5「排程與改 base 的排序」：逐本帳本先單獨鎖帳本列（`FOR KEY SHARE`）、再用新的語句插卡。**必須在開放小數前完成**：不然有小數的規則產生的卡，新欄會被 trigger 從四捨五入後的舊欄補，掉小數 |
+| 其他排程 | `sweep-orphan-ledgers` 15:00 UTC（`0096...sql:660`）、`monthly-review-snapshot` 每月 1 日 16:05 UTC（`0096...sql:667`）、`notify-recurring-push` 16:10 UTC（`0100...sql:78`）、`process-account-deletions` 16:30 UTC（`0059...sql:9`）、`cleanup-shortcut-pending` 19:20 UTC（`0098...sql:111`）、`cleanup-soft-deleted` 週日 03:00 UTC（`0097...sql:54`） | 回填避開 15:00–16:45 UTC 與每月 1 日 |
+| Realtime | `RealtimeProvider.tsx:81-177` 訂閱的表 | 新欄會出現在 payload。舊 JS 的解析器用寬鬆物件、多的欄位直接丟掉（`lib/realtime/payload-schema.ts:13-15`），只讀舊欄（§4.1） |
+| 備份 | 每日備份約保留 60 天；**prod 是 Free plan，沒有 PITR**（`docs/superpowers/ops-runbook.md:122-123`） | 從備份還原最多掉一天的資料。所以回滾設計成「不用還原資料」（§3.8） |
+| generated column、金額 trigger | grep `drizzle/*.sql` 未找到跟金額有關的 generated column 或 trigger | 無既有的；本設計新增的 trigger 是第一批（INSERT、UPDATE、改 base、關章節、GroupBalance，§3.5）。**它們是共存期的唯一保險**（§4.5），所以 §3.6 I9 每天檢查它們存在且啟用；`DROP TRIGGER` 只有兩種時候可以做：第 5 階段（舊欄一起刪；D12 選 (b) 時這一階段不做，trigger 就一直留著），或第 2 階段回滾而第 3 階段還沒部署（新欄沒人讀） |
+
+### 3.8 回滾
+
+| 層級 | 做法 | 什麼時候可用 | 代價 |
+|---|---|---|---|
+| R1 關掉「開放小數」 | 關開關；輸入回到整數 | 第 4 階段之後隨時 | 無資料變動；已記的小數照樣顯示 |
+| R2 退回舊程式 | 部署第 3 階段之前的版本，它只讀寫舊欄 | **第 5 階段之前隨時**（舊欄一直同步） | 小數列在舊程式裡顯示成四捨五入的整數元；舊 balance 是舊規則算的，自身一致。新欄完整保留，重新部署新程式就回來。已知限制見下 |
+| R3 從每日備份還原 | 還原整個 DB | 只在新欄或舊欄被寫壞時 | 最多掉一天的資料（沒有 PITR） |
+
+**R2 的前後對帳**（退回前、再部署前、再部署後各跑一次，結果記下來）：
+
+- 退回前：I2、I4'、I9（§3.6）都為 0；**小數列的數量級距**（新欄不是 10^p 倍數的列數，各表分開，只看級距）。
+- 再部署前：同一組。I2 與 I9 為 0 才可以再部署；小數列的數量級距**只能比退回前少**（少掉的就是 R2 期間被舊程式編輯而掉了小數的列）。
+- 再部署後：同一組；小數列級距不得再變。
+- 差距超出預期、或 I2 不成立：停；不要自動修（§3.6 的裁定規則）。
+
+**R2 的已知限制**（舊程式寫入只認整數元）：
+
+- 舊程式 **INSERT** 的列，新欄由 INSERT trigger 補 10^p 倍（整數，正確）；小數本來就輸入不了。
+- 舊程式**就地更新**一個小數列（定期規則、愛物詳細）：只有「舊欄被改成不同的值」時，UPDATE trigger 才重算新欄、小數掉了；舊欄值不變時（例如表單原樣送回 13）新欄保留 1250。軟刪＋新增的編輯（現金、收入、結算、旅行支出）：新列的新欄是舊欄整數 × 10^p，小數一定掉了。
+- 舊程式 `setBaseCurrency`、小數位數變小、而有小數列：改 base trigger 無法保證整除，用四捨五入（§3.5）。
+- 以上都**沒有錯誤訊息**，所以才要有上面的前後對帳；R2 期間愈短愈好。
+
+**可逆回滾什麼時候停止**：第 5 階段刪掉舊欄之後，R2 就不存在，只剩 R3。D12 已決定 (b)：先不刪舊欄，第 5 階段目前不做；之後要做，先由 Ray 確認不再需要 R2。
+
+---
+
+## 4. 新舊版並存
+
+web、PWA、iOS／Android 殼都載入同一個 prod URL（`capacitor.config.ts:23,57-58`：`server.url` 預設是 prod）。所以**殼不用發新版**就會拿到新前端；但「已經載入的舊 JS」會繼續跑，殼在背景時可能很多天。
+
+### 4.1 舊 JS 從哪裡拿到金額
+
+| 管道 | 舊 JS 實際會怎樣（已查證） | 雙欄設計下的結果 |
+|---|---|---|
+| 頁面切換、`router.refresh()` | 回應的 build id 跟自己不同時，Next.js 直接整頁重新載入（`node_modules/next/dist/client/components/router-reducer/fetch-server-response.js:160-162`）。不需要設定 `deploymentId` | 重新載入後就是新 JS。安全 |
+| Realtime | 舊 JS 自己訂閱表的變更，收到 `GroupBalance` 就直接 dispatch `balance`（`RealtimeProvider.tsx:106-112`），**不經過 server，也不會觸發重新載入**。審查 P1-1 指的就是這條 | 舊 JS 只讀 `balance`（舊欄，整數元）。新欄在 payload 裡被解析器丟掉（`lib/realtime/payload-schema.ts:13-15,109-112`）。每筆差一兩元以內（小數被四捨五入）；`balance` 是加總，差額隨筆數累積（§5.3）；不會差 100 倍 |
+| Server Action | Next 文件（`node_modules/next/dist/docs/01-app/02-guides/data-security.md:276,281`）寫 action id「cached for a maximum of 14 days」，且「regenerated when a new build is initiated or when the build cache is invalidated」：**舊 id 不保證對不上新 server**（build cache 沒失效時 id 不變），14 天也只是上限。id 對不上時 client 丟 `UnrecognizedActionError`（`.../router-reducer/reducers/server-action-reducer.js:75-78`），寫入失敗、看得到錯誤；id 對得上時跑新 server 程式 | **設計不依賴那 14 天**（審查 P2-4）。`amountMinor` **只在第 4 階段才進 payload**：第 4 階段之前載入的所有 JS 都只送 `amount`（整數元）。新 server 的規則：(1) 新增類 action，只有 `amount` ⇒ 整數元 × 10^p；(2) 編輯類 action（軟刪＋新增，或就地更新），收到的 `amount` **等於庫裡那一列的舊欄** ⇒ 使用者沒改金額，沿用庫裡的新欄（含小數）；**不等於** ⇒ 整數元 × 10^p。舊 JS 在第 4 階段後編輯一筆 $12.50（它看到 13、送回 13）就不會把它存成 $13.00。已知的邊角：使用者在舊 JS 裡刻意把 13 改成 13（其實想把 $12.50 改成 $13），這個改動會被吃掉；舊 JS 看不到小數，這不是使用者能表達的意圖。回傳給 client 的資料，`amount` 也維持整數元 |
+| 舊伺服器程式（Vercel Skew Protection） | 若專案開了 Skew Protection，舊頁面的請求會被導回**舊部署**，跑舊伺服器程式。有沒有開、保留多久：**未知**（不在 repo 設定裡；附錄 A Q8）。另外，**第 2 階段 migration 上線到第 3 階段部署之前，所有請求本來就是舊伺服器程式** | 舊伺服器程式只寫舊欄，INSERT、UPDATE、改 base、關章節、GroupBalance 都由 §3.5 的 trigger 補齊新欄（逐路徑見 §4.5）。開放小數前要等它不可能再被執行（§7 第 4 階段） |
+| PWA 離線快取 | `/dashboard`、`/records`、`/assets` 的 HTML 用 NetworkFirst（3 秒逾時）存在 `dynamic-v1`（`app/sw.ts:68-84`）；新 SW 立刻接手（`app/sw.ts:53-54`） | 快取的 HTML 是舊程式用舊欄畫的，頁面本身一致，只是舊。上線後網路優先，會換新 |
+| iOS 捷徑、快速記帳 URL | 永遠送整數（`ios/App/App/QuickAddIntent.swift:60-62` 把 Double 四捨五入成 Int） | 對外介面維持顯示單位（§5.5） |
+
+### 4.2 選項
+
+| | A：就地 ×100＋帳本旗標＋Realtime 隔離 | **B：雙欄（建議）** | C：硬切（維護時段） |
+|---|---|---|---|
+| 做法 | 每本帳在一個交易裡把舊欄 ×100、標「已切換」。Realtime 改走新的 broadcast topic（例如 DB trigger 推到 `group:{id}:v2`），切換前把金額表移出 `postgres_changes` publication；舊 JS 收不到任何事件 | 舊欄維持整數元，新增 `*_minor`。舊 JS 讀舊欄、新 JS 讀新欄；DB trigger 保證兩欄同步 | 停機公告；關 Realtime；撤銷所有兩位小數帳本成員的登入；就地 ×100；開機 |
+| server 怎麼分辨 client | payload 欄位名（`amountMinor` vs `amount`）＋帳本旗標 | payload 欄位名；不需要「已切換」旗標（「開放小數」開關只管輸入與顯示） | 不需要（舊 client 全部被登出） |
+| Realtime | 要新建 broadcast 通道與授權（`realtime.messages` 的 RLS）；Supabase Free plan 是否支援 DB broadcast：**未查證** | 不用改；舊 JS 讀舊欄 | 停用期間沒有 Realtime |
+| 已開著的分頁 | 收不到事件，畫面停在舊值，直到切頁時整頁重載 | 照常運作，小數四捨五入 | 被登出；但 access token 到期前（預設約 1 小時，**未查證**本專案設定）仍可能收到事件 |
+| 新 JS 的混用風險 | 有：旗標與 balance 從不同管道到達時會混用（審查 P1-1），要在同一個 payload 帶單位 | 沒有：值的單位由欄名決定 | 沒有 |
+| 回滾 | ÷100 在有人輸入小數後就不可逆；之後只能從每日備份還原，**最多掉一天**（沒有 PITR） | 第 5 階段前退程式即可（§3.8 R2），不動資料 | 同 A |
+| 主要風險 | balance 規則變化與旗標競態；Realtime 改造是新東西；回滾代價高 | 欄位數加倍（約 30 個）、每個讀取點都要改成讀新欄、trigger（INSERT、UPDATE、改 base、關章節、GroupBalance，§3.5）是新的維運面；漏改的讀取點會顯示四捨五入的整數（每筆差一兩元以內） | 使用者被登出（殼裡的 Apple 登入要重來）、要停機、回滾同 A |
+| 成本 | 中 | 中偏大（多一倍欄位與寫入，但不用改 Realtime） | 小（程式）＋營運成本高 |
+
+**建議 B**。理由：它是唯一讓「舊 JS 讀到的值」在 DB 層就保證是整數元的做法，不靠時間差、不靠使用者重整；而且在第 5 階段之前回滾不用碰資料。代價是「兩欄同步」變成 DB 層要持續保證的事：靠 §3.5 的 trigger、§3.6 的 I2／I9 每日檢查與 §4.5 的逐路徑矩陣。**Ray 2026-11-20 已決定 B（D5，§8）**；A、C 留在表裡當放棄選項的紀錄。
+
+### 4.3 B 的時序
+
+時序、每階段的進入條件與退出條件放在 §7 的表，這裡只講順序的理由：
+
+1. **先加欄、後上程式**（第 2 → 3 階段）：認得新欄的程式不能比 migration 早（`lib/db/schema.ts:106-108`）。
+2. **先讓所有程式讀新欄、但仍只收整數**（第 3 階段）：使用者看不到任何變化，可以觀察一段時間。
+3. **最後才開放小數**（第 4 階段）：小數一進來，舊欄就只剩四捨五入值。所以開放前要確定舊伺服器程式不會再跑（Skew Protection 保留期已過、trigger 補值的痕跡為 0，§3.5）、定期規則的排程已經兩欄都抄、編輯類 action 的「舊值保留」規則（§4.1）已經上線。
+4. **刪舊欄是最後、而且可以不做**（第 5 階段）：刪了就失去 R2。
+
+**要不要強制舊頁面重整**：B 不需要。可以在第 3 階段順手加「server 回報的 build 和自己不同就整頁重整」（例如 `visibilitychange` 時檢查），讓第 5 階段之前舊 JS 消失得更快。這不是任何階段的前置條件。
+
+### 4.4 欄位 × 階段的讀寫表
+
+「金額欄」指 §3.4 表裡的所有欄，捷徑待處理除外。「舊程式」指第 3 階段之前的 server 程式（名詞）。
+
+| 階段 | 舊欄的值 | 新欄的值 | 誰寫舊欄 | 誰寫新欄 | 舊 JS 讀 | 新 JS 讀 |
+|---|---|---|---|---|---|---|
+| 第 2 階段後 | 整數元 | 已知範圍：舊欄 × 10^p；未知：NULL | 舊程式（這個階段之後到第 3 階段部署前，全部流量都是它） | 回填；trigger（INSERT、UPDATE、改 base、關章節、GroupBalance，§3.5） | 舊欄 | （還沒有） |
+| 第 3 階段後 | 整數元 | 同上 | 新程式（兩欄都寫，值相同）；舊程式（Skew、R2） | 新程式；trigger 補舊程式的所有寫入 | 舊欄 | 新欄（NULL 時用舊欄，§3.3）；顯示不帶小數 |
+| 第 4 階段後 | 新寫入：新欄四捨五入成整數元，正數至少 1 | 精確值 | 新程式 | 新程式 | 舊欄（每筆差一兩元以內；加總隨筆數累積） | 新欄；兩位小數帳本顯示兩位 |
+| 第 5 階段後 | 刪除 | 精確值 | — | 新程式 | 解析器缺 `amount` 欄，事件被丟掉（`payload-schema.ts` 的必填欄位），畫面停住直到重整 | 新欄 |
+
+`GroupBalance.balance` 在第 2～4 階段由同一個 DB 函式用舊規則從舊欄算；`balance_minor` 用 §5.3 的規則從新欄算。兩者各自一致。待確認卡的 pending delta（`lib/db/queries/balance.ts:149-179`）同理：舊欄版與最小單位版由同一個函式出，讀取者必須成對讀同一個單位（§3.7）。
+
+### 4.5 共存期的寫入路徑矩陣（審查 P1-1）
+
+**共存期**＝第 2 階段 migration 上 prod 起，到第 5 階段止（D12 選 (b) 不刪舊欄時就是一直）。這段期間誰在寫 DB：第 2 階段後到第 3 階段部署前，**全部流量都是舊程式**；第 3 階段部署後，只剩 Skew Protection 導回的舊部署與 R2 退回的版本（§4.1）。第 2 版只在 INSERT 補新欄，但舊程式有好幾類寫入不經過 INSERT，新欄會停在舊值：下表逐路徑列出舊程式寫哪一欄、新程式寫哪些欄、沒有 DB 保險時新欄會變成什麼、§3.5 哪個 trigger 補、怎麼偵測。**偵測一律先看 I2**（§3.6，過期偵測，共存期每天跑）。
+
+| # | 路徑 | 舊程式寫（位置） | 新程式寫 | 沒有 DB 保險時 | §3.5 的保險 | 偵測 |
+|---|---|---|---|---|---|---|
+| 1 | 現金、收入、結算的新增與編輯（編輯＝軟刪＋新增） | INSERT 舊欄；編輯另 `UPDATE deleted_at`（結算：`actions/settlement.ts:74-89`） | INSERT 兩欄 | 新列新欄 NULL | INSERT trigger（含 `split_round_unit` 為 NULL ⇒ 10^p） | I3、I2 |
+| 2 | 定期規則編輯 | 直接 `UPDATE amount`（`actions/recurringExpense.ts:162-179`、`actions/recurringIncome.ts:139-153`） | 兩欄 | 新欄停在舊值；規則與它產生的待確認卡兩欄分歧，確認後寫進帳（`actions/recurringExpense.ts:359`、`:444-459`） | UPDATE trigger 第 2 條 | I2 |
+| 3 | **改 base** | 只 `UPDATE OikosGroups.base_currency`（`actions/currency.ts:54`）；目前章節沒有未刪除的帳就放行（`:48` → `lib/db/queries/epoch.ts:98-123`），規則、待確認卡、旅行支出、愛物購入價、月度快照都不動 | 同一路徑，另在 `setBaseCurrency` 內做 D13 檢查 | 這些列的新欄還是舊 p：TWD → USD 後，規則舊欄 500、新欄仍 500（顯示 $5.00，應為 50000）；USD → TWD 反過來差 100 倍；`GroupEpochs.currency` 仍是舊幣別 | 改 base trigger（③）；與排程的先後靠 §3.5「排程與改 base 的排序」 | I2、I8（演練 #14、#24） |
+| 4 | 關章節 | 只設 `ended_at`（`actions/invite.ts:588,601`、`actions/membership.ts:492,628`；它們先呼叫 `lockForEpochClose`，`lib/db/queries/epoch.ts:621-650`） | 同 | 章節沒有幣別快照，之後改 base 就無從還原 | 關章節 trigger（④） | I3、I8（(d)(e) 抓快照被蓋掉） |
+| 5 | 愛物詳細更新（車、房、寵物、植物、保險） | `.update`／`onConflictDoUpdate` 舊欄（`actions/asset.ts:267`、`:812`、`:899`、`:1161`、`:1234`、`:1388`） | 兩欄 | 購入價、金額欄的新欄停在舊值 | UPDATE trigger 第 2 條 | I2 |
+| 6 | 保險只改幣別（金額數字不動） | 只改 `currency`（同上 `:1161`、`:1234`） | 兩欄 | 新欄仍以舊幣別的 p 解讀 | UPDATE trigger 第 3 條 | I2 |
+| 7 | 旅行預算 | `UPDATE budget_amount`／`budget_currency`（`actions/trip.ts:268-275`、`:321`） | 兩欄 | 同上 | UPDATE trigger 第 2、3 條 | I2 |
+| 8 | 旅行支出新增與編輯 | INSERT；編輯＝軟刪（`actions/tripExpense.ts:200`）＋新增（`:213`）；換算函式 `normalizeAmount`（`:90-127`）在交易內呼叫，但它用的 base 是交易外 `getViewerWriteContext()` 讀的（`:150`、`:186`） | 兩欄，閘門內換算 | 新列新欄 NULL | INSERT trigger | I3、I2 |
+| 9 | 結束旅行（折成現金帳） | INSERT 摘要列的舊欄，不寫 `split_round_unit`（`lib/trip/endTripInTx.ts:55-88`） | 兩欄＋`split_round_unit`（§5.3） | 新欄、進位單位 NULL | INSERT trigger | I3 |
+| 10 | 出遊三表與 `fold_amount` | INSERT 與 `UPDATE fold_amount`（`actions/outing.ts:556`），舊欄；USD 已是分、CNY 是整數元 | 兩欄 | 若 trigger 一律 × 10^p：USD 的 4500 分被乘成 450000（審查 P2-1） | 係數 10^(新 p − 出遊舊 p)，取 `Outings.currency` | I2（k 見 §3.6） |
+| 11 | GroupBalance | raw `UPDATE "GroupBalance" SET balance = …`，`::int`（`lib/db/queries/balance.ts:70-115`） | 一個 DB 函式兩欄都寫 | `balance_minor` 停在舊值 | GroupBalance trigger | I4 |
+| 12 | 月度快照（每月 1 日排程） | DB 函式 `SUM(...)::integer`（`drizzle/0093_review_snapshot_chapter.sql:125,204-205,212`） | 同一個 DB 函式改成兩欄 | 第 2 階段後新產生的快照新欄 NULL | **不靠 trigger**：這是 DB 排程函式，第 2 階段的 migration 就改成兩欄都寫，並照 §3.5「排程與改 base 的排序」先鎖帳本列再開新語句（作者加的，P2-a）；INSERT trigger 當第二道 | I3、I5 |
+| 13 | 定期規則產生待確認卡（**與改 base 交錯**，審查 P2-a） | DB 排程單一 `INSERT … SELECT`，把 `r.amount` 抄進 `proposed_amount`（`drizzle/0064_recurring_cron_taipei_date.sql:68,95`）；與改 base 交錯時，卡帶著提交前讀到的（舊欄，新欄），與已重縮放的規則差 10^Δ | 同一個 DB 函式改成兩欄都抄；**逐本帳本先鎖帳本列（`FOR KEY SHARE`）、再用新的語句插卡** | 新欄 NULL，或與規則的新欄差 10^Δ（INSERT trigger 只補 NULL，修不了後者） | **排序規則**（§3.5「排程與改 base 的排序」）：誰先拿到鎖，另一邊就等、等完重讀或被 ③ 一起重縮放；INSERT trigger 只當 NULL 的第二道 | I2（事後）、演練 #24（兩個順序） |
+| 14 | 其他寫進現金帳的入口 | 待確認卡確認（`actions/recurringExpense.ts:444-459`）、捷徑待處理確認（`actions/shortcutPending.ts:99-116`）、CSV 匯入（`actions/import.ts:231`、`:250`）、愛物購入時成對的現金帳（`actions/asset.ts:134`、`:1318`） | 兩欄 | 新列新欄 NULL | INSERT trigger | I3 |
+| 15 | 回填 | —（回填與 trigger 都不寫舊欄） | 只寫 NULL 的新欄；章節只寫 `currency_source IS NULL` 的，**不蓋 `closed_snapshot`**（審查 P2-b） | 若回填蓋掉剛由 ④ 寫好的快照，關章節當下的 base 就丟了 | 回填步驟 2 的條件；回填自己鎖帳本列 `FOR UPDATE`，期間關章節要等 | I1、I7、I8 (d)(e)、演練 #25 |
+
+**讀法**：同一類寫入者在不同階段是不同的程式：第 2 階段後到第 3 階段部署前是「現行程式」，之後是 Skew 與 R2。兩者的 DB 保險完全相同，所以演練（附錄 B #14–#25）只要用「第 3 階段之前的 build」實際寫一遍每一列。
+
+**不是 trigger 能補的**：(1) 舊程式「編輯」一筆小數列（軟刪＋新增）時，新列的新欄是舊欄整數 × 10^p，小數消失、不報錯（列 1、8）；這是第 4 階段要等舊程式不可能再被執行的原因（§7），R2 是已知例外（§3.8）。(2) DB 排程函式（列 12、13）不是「舊程式」，由 migration 一起改，所以新欄不會有 NULL 的落差；**但它與舊程式改 base 的先後，要靠函式自己的排序規則保證**（列 13、§3.5），不是 trigger，也不是「一起改了就沒事」。
+
+---
+
+## 5. 邏輯與邊界
+
+### 5.1 金額輸入（`AmountInput`）
+
+現況：`inputMode="numeric"`（`AmountInput.tsx:112`），送出前去掉所有非數字（121），顯示用 `parseInt(...).toLocaleString`（74）。各 sheet 再 `parseInt`：`AddSheet.tsx:394`、`IncomeSheet.tsx:194`、`SettlementSheet.tsx:70`、`RecurringRuleSheet.tsx:419`。
+
+設計：
+- 元件要知道幣別（或小數位數）。開放小數後，兩位小數帳本用 `inputMode="decimal"`，零位小數帳本維持 `numeric`。
+- **會產生小數的輸入，整筆拒絕、保留原值**（不是只把 `.` 濾掉——只濾句點，`12.5` 還是會變 `125`，就是 #1920 的原錯）。涵蓋：逐鍵輸入 `.`、貼上 `12.5`、全形句點 `．`、日文 IME 的 `。`。零位小數帳本永遠如此；兩位小數帳本在開放小數前也如此（第 0 階段）。若要顯示提示，需要新字串，屬於 needs-copy／UX，這份不寫字串。
+- 超過小數位數（例如 `12.345`）：要 Ray 決定（D3）。建議**不接受第三位**（打不進去），不要四捨五入，因為使用者看不到被改掉的那一位。
+- 要處理的輸入：全形數字與全形句點、IME 的 `。`、千分位逗號、開頭是 `.`（`.5`）、結尾是 `.`（`12.`）、空字串。全形數字的處理 `lib/quickAdd.ts` 已經有（`FULLWIDTH_DIGIT_RE`），可以共用。
+- 小數點符號：四個語系（`lib/i18n/locales/` 的 en、ja、zh-CN、zh-TW）都用 `.`，不處理 `,` 當小數點的語系。
+
+### 5.2 字串 → 最小單位整數
+
+**不得用浮點數**。`Math.round(12.35 * 100)` 在 JS 是 1235，但 `1.005 * 100` 是 100.49999…，結果會少一分。做法是字串拆整數與小數部分，小數補零到小數位數，再組成整數字串。
+
+現在已經有用浮點數的地方，第 3 階段要一起改：
+- 出遊支出：`ExpenseSheet.tsx:102`（`Number(amountRaw)`）、`117`（`Math.round(parsedAmount * 100)`）；`inputMode="decimal"`（181）。這就是 #1920 指的 `ExpenseSheet.tsx:178` 附近，USD 出遊現在就是這樣收小數、存分。
+- 出遊還款：`SettleSheet.tsx:33,39`。
+- CSV 匯入：`lib/csvImport/mapper.ts:78-89`（`Math.round(Math.abs(n))`，直接丟掉小數）、`lib/csvImport/ofxParser.ts:81`。
+
+伺服器驗證：`validateAmount`（`lib/validators.ts:29-36`）只檢查正整數，單位無感，可以保留；但上限要依小數位數放大（§5.4）。
+
+### 5.3 分帳、尾差與 balance
+
+**尾差歸誰（規則不變）**：付錢的人多拿那一個最小單位。平分 `ceil(金額 / 2)`、依比例 `ceil(金額 × 對方比例 / 100)`，都對「付款人應收」取 ceil（`lib/balance.ts:16-34`，註解「payer benefits from odd cents」）。改成最小單位後，規則一字不改，只是尾差從「1 元」變成「1 個最小單位」：
+
+| 小數位數 | 最小單位 | 尾差上限（每筆） | 例 |
+|---|---|---|---|
+| 0（TWD、JPY） | 1 元 | 1 元 | NT$45 平分：付款人應收 23。新舊算法相同（×1） |
+| 2（USD、CNY） | 1 分 | 1 分 | $45.00 平分：應收 2250 分（$22.50）；$10.01 平分：應收 501 分 |
+| 其他（目前沒有；例如 3 位的幣別） | 10^-p | 1 個最小單位 | 規則相同，不需要特例 |
+
+旅行支出用外幣記時，先換算成帳本 base 的最小單位再分帳（§5.8），所以分帳永遠在帳本幣別上做。出遊的平均分（`lib/outing/split.ts:17-22`）把餘數一個最小單位一個最小單位分給前面的人，規則不變；分攤結果存在 `OutingExpenseShares`，轉換時直接換單位，不重算。
+
+**跟舊算法差在哪**（審查 P2-4 的反例）：兩位小數帳本在整數元時代是「以 1 元為單位取 ceil」，轉成分之後若直接用新規則重算，結果不同：
+
+- $45 平分：舊 23 元 → 新 2250 分（$22.50），差 $0.50。
+- $10 依比例 33%：舊 `ceil(3.3)` = 4 元 → 新 330 分（$3.30），差 $0.70。**金額是偶數也會差**，所以第 1 版只數奇數金額的探針（`odd_split_rows`）會漏，已撤回。
+- 每筆最多差不到 1 元；一本帳的總差額是各筆差額的加減，可能相抵，也可能累積。
+
+**選項**（D7，**Ray 2026-11-20 已決定 (c)**，§8；(a)(b)(d) 留作放棄選項的紀錄）：
+
+- (a) 照新規則全部重算，差額照實顯示。最簡單。失效的樣子：兩人上週剛結清，開放小數那天首頁出現「你欠對方 $1.50」，沒有任何紀錄解釋它。差額分布要用附錄 A Q4 查。
+- (b) 每本帳寫一筆系統結算抵銷差額。帳一致，但多一筆使用者沒記過的紀錄，要新 UI 字串。
+- (c) **切換前的列沿用舊的進位單位（建議）**：`CashTransactions.split_round_unit` 記「這筆在哪個單位取 ceil」。開放小數之前寫入的列（回填的舊列，以及第 3 階段新寫的列）在兩位小數帳本填 100，其他填 1；開放小數之後的新列填 1。應收 ＝ `u × ceil(amount_minor × 比例 / (100 × u))`，u 是 `split_round_unit`。$45 平分的舊列：`100 × ceil(4500 / 200)` = 2300 分，和今天的 $23 一樣。
+  - **三個寫入者各填什麼**：回填＝10^p；新程式＝開放小數前 10^p、開放後 1；**`split_round_unit` 是 NULL 代表寫入者是舊程式（不認得這欄），INSERT trigger 一律補 10^p，不看第 4 階段的開關有沒有開**（舊程式只會寫整數元，ceil 單位本來就是 1 元）。
+  - 結果：從回填到第 4 階段前，每本帳的 `balance_minor` 必定等於 `balance × 100`（§3.6 I4 可以全量、每天驗證），使用者看到的 balance 一分不差。
+  - 第 4 階段之後編輯一筆舊列（＝刪除＋新增）時，新列用 u = 1，該筆的分攤會變成精確值。差額出現在那筆被編輯的紀錄上，有紀錄可以解釋。
+  - 顯示單筆分攤的地方（紀錄明細、`lib/tripSummary.ts:50,58,140`）要用同一個函式，不然單筆與總額對不起來。
+- (d) `GroupBalance` 直接 ×100、不重算。**不可行**：下一次寫入就全量重算（`domain-model-design.md:23`），差額照樣出現，只是延後、更難解釋。
+
+建議 (c)：唯一讓「已結清」維持結清、又不新增紀錄的做法；代價是一個欄位和 balance 函式裡的一個乘數。D7 已決定 (c)；(a) 與 Q4 只在 Ray 之後改選時才用。
+
+**旅行的進位單位（審查 P2-9）**：`TripExpenses` 只存金額與分帳設定（`split_type`、`split_ratio`），沒有分攤結果，也沒有進位單位；分攤只在結束旅行時算一次：`foldTripIntoLedger`（`lib/trip/endTripInTx.ts:55-88`）讀未刪除的旅行支出，用 `buildTripSummaries`（`aShareOf` 的 ceil 在 `lib/tripSummary.ts:41-60`，`bestRatioA` 暴力搜比例在 `:140`）折成幾筆摘要現金帳，寫進章節後重算 balance。所以**旅行不需要自己的進位單位欄**，單位在結束旅行當下決定：
+
+- 規則與「新寫一筆現金帳」完全相同（D7 (c)）：開放小數之前 u ＝ 10^p，之後 u ＝ 1。決定出來的 u 寫進每一筆摘要現金帳的 `split_round_unit`。
+- `buildTripSummaries`（含 `bestRatioA` 的 `Math.ceil`）與 balance 的 DB 函式**共用同一個以 u 為參數的 ceil 函式**；不然摘要列的分攤與 balance 對不起來。
+- 三種旅行都要有測試：第 3 階段結束的旅行（u ＝ 10^p，結果與今天相同）、第 4 階段後結束的旅行（u ＝ 1）、**跨過開關**的旅行（支出在開關前記、結束在開關後：u ＝ 1，因為單位看的是結束當下）。第三種的摘要列是新寫的列，本來就會帶進當下的規則；它與「照今天規則算」的差額出現在被結束的那趟旅行上，有紀錄可以解釋。
+- 舊伺服器程式結束旅行（第 3 階段部署後的 Skew 或 R2）：摘要列沒有 `split_round_unit`，由 INSERT trigger 補 10^p（上一段的 NULL 規則），結果與舊程式今天的算法一致。
+
+**結算快選**：`lib/settlement.ts:15-19` 的「整數」快選四捨五入到 100。要改成「100 個顯示單位」（兩位小數帳本是 10,000）；否則 USD 的「整數」快選變成 $1。
+
+**fold**：`actions/outing.ts:546` 的 `minorToWhole` 在開放小數後拿掉，出遊與帳本單位相同，直接寫入。第 3 階段仍照舊四捨五入到整數元（新欄＝舊欄 × 100），讓使用者在第 4 階段前看不到變化。
+
+### 5.4 格式化
+
+- `formatLedgerAmount*`（`lib/currency.ts:95-109`）改成讀新欄、依小數位數除以 10^n。第 3 階段一律不顯示小數；第 4 階段兩位小數帳本顯示固定兩位。`formatAmount*`（75-85，現在只給出遊）可以跟它合併。用到 `formatLedgerAmount*` 的檔案共 31 個，分類：首頁與 sheet（`app/(dashboard)/dashboard/_components/`，8）、愛物與保險（`assets/`，15）、紀錄與統計（`records/`，2）、旅行、定期、月度回顧、共用元件各 1、`lib/` 1、i18n 註解 1。
+- **型別擋單位混用**：新欄在 TypeScript 用獨立的 branded type（例如 `Minor`），格式化函式只收 `Minor`。讀到舊欄（`number`）卻丟給格式化函式會編譯失敗。
+- **繞過格式化函式的地方**（風險較高，因為不會跟著改）：直接 `toLocaleString` 的金額大約十幾處，例如 `MonthlyStatsBars.tsx:207`、`MonthlyStatsPieChart.tsx:203`、`PendingCard.tsx:143`、`CompactRow.tsx:29,180`、`SettlementForm.tsx:155`、`LeaveGroupFlow.tsx:578`、`StepConfirm.tsx:76`、保險的 `SavingsHero.tsx:13`、`MaturedAwaitingPrompt.tsx:47,65`、`InsuranceDetailClientLegacy.tsx:120`。失效的樣子：首頁對了，但統計圖的數字或待確認卡還是 4500。實作時要 grep `toLocaleString` 逐一處理，並加一個測試擋新的直接呼叫。
+- 錯誤訊息的上限：`AddSheet.tsx:376`、`IncomeSheet.tsx:198`、`lib/validators.ts:34` 把 `MAX_AMOUNT` 直接顯示。建議上限定義成「顯示單位」再乘 10^n，讓各幣別的上限數字相同。
+
+### 5.5 舊入口的單位與相容
+
+**原則：對外入口一律是顯示單位（元／$），在邊界只轉一次成最小單位。** 整數輸入在任何階段都是「整數元」，所以舊捷徑、舊 URL、舊 CSV 永遠是對的。
+
+| 入口 | 現況（已查證） | 設計 | 怎麼驗「不重乘」 |
+|---|---|---|---|
+| 快速記帳 URL（`#add=expense&amount=120`、`dev.southernlight.futari://add?amount=120`） | 只收正整數，單位是整數元（`lib/quickAdd.ts:41-52`）；只是預填 AddSheet，不寫入 | 預填到金額框的是**顯示字串** `120`，送出時由金額框解析成最小單位，只轉一次 | USD 帳本開 `amount=120`：框裡顯示 120，存 12000，顯示 $120.00 |
+| 捷徑 JSON（`app/api/shortcut/pending/route.ts`） | `parseQuickAddJson` 只收整數（`lib/quickAdd.ts:135-161`），寫進捷徑待處理 | 維持整數顯示單位（D10）。之後若要收 `"12.50"`，在同一個邊界加字串解析，與舊格式相容 | 送 `{"amount": 120}`，待處理卡顯示 120 |
+| 捷徑待處理 → 確認 | 表只有 `user_id`，**沒有帳本與幣別**（`lib/db/schema.ts:831-841`）；確認時用 `o.amount ?? card.amount`（`actions/shortcutPending.ts:99`）跑同一個驗證後寫入（116） | **表不轉、不加新欄**。確認時在交易內鎖目的帳本、讀 base，`× 10^p` 一次。開放小數前就存在的卡也一樣，因為它們本來就是顯示單位 | 同一張卡確認到 USD 帳本存 12000；確認到 TWD 帳本存 120 |
+| iOS App Intent | 把 Double 四捨五入成 Int 再組 URL（`QuickAddIntent.swift:40,60-62`） | 不改（改它要發 App 新版） | 同 URL |
+| 定期規則 → 待確認卡 | DB 排程照抄金額（`drizzle/0064_recurring_cron_taipei_date.sql:68,95`） | 第 2 階段改成兩欄都抄，與改 base 的先後照 §3.5「排程與改 base 的排序」（§3.7）；確認待確認卡時用新欄 | 有 $12.50 的規則（第 4 階段後）產生的卡，新欄是 1250 |
+| 出遊 fold | `minorToWhole` 四捨五入（`actions/outing.ts:546`） | 第 3 階段照舊，第 4 階段直接寫最小單位（§5.3） | USD 出遊淨額 1234 分，第 4 階段後結算存 1234 |
+| CSV | 見 §5.6 | 一律顯示單位 | 見 §5.6 |
+
+**第 5 階段也保留**：上面這些入口的「整數＝顯示單位」契約不隨第 5 階段移除。使用者存好的捷徑、教學頁（`app/[locale]/features/shortcuts/`）與 `docs/shortcuts/linepay-quick-add.md` 的範例都寫 `amount=120`。
+
+失效的樣子（若把入口改成最小單位）：iPhone 捷徑送 `{"amount": 120}`，USD 帳本的待確認卡顯示 $1.20。
+
+### 5.6 CSV 匯入與匯出
+
+**檔案裡的金額一律是顯示單位**，跟入口相同。所以舊匯出檔（`45`）和新匯出檔（`45.00`）在 USD 帳本都是 $45，不需要分辨檔案新舊。
+
+- **匯出**：`lib/csv/transactions.ts:142,144` 寫 `String(r.amount)`。改成依該列的幣別把新欄寫成顯示值（`12.50`），原幣欄依 `original_currency`。過去章節依 `GroupEpochs.currency`；章節幣別未知時，照今天的寫法輸出舊欄整數與目前的幣別（§3.3，和今天相同）。
+- **匯入（Futari 通用格式與手動對欄）**：現在的 parser 會四捨五入小數（`lib/csvImport/mapper.ts:78-89`），驗證器只收整數（`lib/csvImport/validator.ts:55-63`）。改成：兩位小數帳本以字串解析、保留最多兩位；零位小數帳本**沿用今天的行為**（四捨五入），**不拒收**。`csv-import-design.md:117` 寫「拒收 `1.50`」，但程式其實是四捨五入：**那句 spec 與程式本來就不一致，錯的是那句**。本案不改零位小數帳本的行為，也**不改 `csv-import-design.md`**（不在 PR #1947 的範圍），另開票修那句（見「後續」）。§1 表的取代句已與這裡一致。
+- **匯入（競品格式）**：零位小數帳本維持四捨五入（競品的 TWD 資料偶爾帶 `.00`，拒收會讓整份匯入失敗）；兩位小數帳本保留兩位。
+- **round-trip 的範圍**（審查要求定義）：Futari 匯出 → 同一個帳本匯入，**支出與收入的金額**原樣回來（兩位小數帳本到分）。不在範圍內、維持現狀：結算列（匯入只寫支出與收入，`actions/import.ts:227,246`）、原幣組合（匯入時丟掉，`actions/import.ts:217-224`）、混幣別章節（匯入一律寫進目前章節）。
+- **去重 hash**：`csv-import-design.md:202-212` 寫了用 `amount(integer)` 的 hash，但程式裡 grep 不到 hash 的計算或欄位，只有一個沒用到的錯誤類型 `'duplicate'`（`actions/import.ts:79`）。**目前沒有實作，所以沒有 45／4500 相容問題**。日後實作時用最小單位算 hash，並在 spec 註明。
+
+### 5.7 定期規則、待確認卡
+
+規則存的是金額（§2），排程把它原樣抄成待確認卡。第 2 階段排程改成兩欄都抄，並照 §3.5「排程與改 base 的排序」先鎖帳本列再插卡（§3.7）；`RecurringRuleSheet.tsx:419` 的 `parseInt` 換成 §5.2 的解析。
+
+### 5.8 匯率換算
+
+- 主帳本記外幣：`actions/transaction.ts:113,260`、旅行：`actions/tripExpense.ts:111,120`、預覽：`AddSheet.tsx:683`（經 `lib/trip-currency.ts:120-143`）。都用 `convertWholeUnits`（`lib/currency.ts:126`）。
+- 匯率的語意是「1 個顯示單位換多少顯示單位」（`lib/db/schema.ts:164`）。改成最小單位後，換算要乘上 10^(目標小數位數 − 來源小數位數)。例：USD 帳本記 ¥1000、匯率 0.0067 → 1000 × 0.0067 × 100 = 670 分。忘了這個係數就差 100 倍。
+- 第 3 階段換算結果仍取整數元（新欄＝整數元 × 100），第 4 階段才保留到分，理由同 fold。
+- 「正數至少為 1」的規則（`convertWholeUnits` 的契約）保留，單位變成 1 個最小單位。
+- **匯率精度**：`rate_snapshot` 是 `numeric(10,3)`（`lib/db/schema.ts:226,455`）。JPY→USD 0.0067 只能存成 0.007（差約 4%）。整數元時代被四捨五入蓋過，顯示到分之後看得出來。建議另開一項評估放寬精度（D8），不擋本案。
+
+### 5.9 其他檢查
+
+| 項目 | 結果 |
+|---|---|
+| 統計、月檢視 | 走 `formatLedgerAmount*`，加上 §5.4 列出的直接 `toLocaleString`。`DailyTrendChart` 的 `toFixed` 是座標，不是金額 |
+| 收入（`income-design.md`） | 該檔沒有寫金額單位（grep「整數」無結果）；程式路徑同支出（`IncomeSheet.tsx:194`、`lib/validators.ts:199`） |
+| 月度回顧 | 快照凍結金額（§2），四個純量欄與兩個 jsonb 都要有新欄或新鍵；回顧卡用 `CardShell.tsx` 的格式化 |
+| 推播 | `supabase/functions/send-recurring-push/` grep 不到金額，推播內文不含金額 |
+| email | grep 不到寄信的程式路徑 |
+| PostHog | `settlement_created` 帶 `amount_bucket`（`actions/settlement.ts:65`），門檻是原始整數。改成依顯示單位分級距，並在 `observability-design.md` 註明部署日前後不可比 |
+| Sentry | 捷徑 API 明定金額不外送（`route.ts:52`），`actions/shortcutPending.ts:22` 同；其他路徑未逐一查證 |
+
+---
+
+## 6. 方向的選項比較
+
+（§4.2 是「怎麼上線」的選項；這裡是「存什麼」的選項。）
+
+| 選項 | 內容 | 成本 | 風險 | 失效的樣子 |
+|---|---|---|---|---|
+| **① 最小單位整數（Ray 的決定）** | 本檔的設計 | 大：雙欄、回填、約 31＋十幾個顯示點、輸入解析、匯率換算、CSV | 回填範圍判斷錯誤；漏改的讀取點 | 讀新欄卻當整數元顯示，4500 分顯示成 $4,500 |
+| ② 維持整數元、放寬輸入 | 收小數，但四捨五入成整數元存 | 小 | 使用者打 $12.50 存成 $13，帳永遠對不上收據 | 不會報錯，只是每筆差幾毛，月底對不起來 |
+| ③ 改 `numeric` 欄位 | DB 存小數 | 最大：所有欄位型別、Drizzle 讀出來是字串、所有運算要改 decimal 函式庫 | JS 浮點誤差回到計算裡 | `0.1 + 0.2` 類型的一分錢誤差散在 balance |
+
+① 是 Ray 的決定；② 與 ③ 列在這裡只為說明為什麼不採用。
+
+---
+
+## 7. 分階段計畫
+
+每個 PR 都可以單獨合併。**第 0～3 階段上線後，使用者看不到任何變化**（第 0 階段除外：打 `.` 不再變成多 10 倍）。**第 4 階段是使用者第一次看到小數的時候。**
+
+| # | 範圍 | 進入條件 | 退出條件（做到才算完成） | 回滾 |
+|---|---|---|---|---|
+| 0 | `AmountInput`：會產生小數的輸入整筆拒絕、保留原值（逐鍵、貼上、全形句點、IME `。`），所有帳本 | 無 | 單元測試：每種輸入都保留原值；`1,200` 仍是 1200 | revert PR |
+| 1 | 小數位數表、字串→最小單位解析、最小單位格式化（不接到任何畫面或寫入路徑） | 無 | 單元測試：全形、`.5`、`12.`、`1.005`、上限、四個幣別的 p 被釘住 | revert PR |
+| 2 | migration：新欄（`bigint`）、`GroupEpochs.currency`／`currency_source`、`split_round_unit`、`currency_precision()` 函式（測試釘住）、**同步 trigger：INSERT、UPDATE、改 base、關章節、GroupBalance（§3.5）**、balance 與月度快照與排程改成兩欄都寫（兩個定期規則排程與月度快照排程照 §3.5「排程與改 base 的排序」：逐本帳本先鎖帳本列、再開新語句）；回填高可信度範圍（只寫 NULL 的欄位，不蓋 `closed_snapshot`）。**這個階段之後到第 3 階段部署前，全部流量都是舊伺服器程式**，所以 trigger 要在同一個 migration 上線，不能晚於回填 | 第 0、1 階段合併；**Ray 授權後**查附錄 A 的 Q1–Q3 並有答案（先不查，進本階段前再請 Ray 授權；D4 已決定 (a)，答案用來確認回填量與範圍，不會自動改 D4）；dev 用附錄 B 演練全過（含 #14–#25，其中 #14、#17、#24、#25 要停在交易中間）；**Ray 指定回填時段（D9，目前待 Ray 指定）** | §3.6 的 I1–I9 全部成立（含 I8 (d)(e)）；I2、I9 排進每日檢查；**放行留言**（§3.6「誰裁定、誰放行」） | 新欄與 trigger 留著無害（舊程式不讀新欄）；`DROP TRIGGER` 只在第 3 階段部署之前（部署之後新程式讀新欄，trigger 拿掉就會過期，§3.7） |
+| 3 | 程式改讀新欄、兩欄都寫；server 認得 `amountMinor`，但**沒有任何 JS 送它**（JS 仍只送整數元 `amount`），編輯類 action 套用 §4.1 的「舊值保留」規則；寫入閘門（交易內**第一個鎖**是帳本列 `FOR KEY SHARE`，再換算，§3.5）；**balance 的所有讀取者與 pending delta 一起改讀最小單位**（`dashboard/page.tsx:144-145`、`BalanceHero.tsx:121-142`、`actions/membership.ts:268`、`settings/page.tsx:32`／`LeaveGroupFlow`、`getGroupPendingBalanceDelta`，§3.7）；Realtime 解析器讀 `balance_minor`；結束旅行決定 `split_round_unit`（§5.3）；輸入與顯示仍是整數；`toLocaleString` 掃描測試；PostHog 級距 | 第 2 階段完成且 I1–I9 成立，**且有 Ray 或 Ray 指定的人的放行留言**（§3.6）；dev 驗證 Realtime payload 裡 `bigint` 是數字還是字串（**未查證**；解析器兩種都要收） | 觀察期（D9）內 Sentry 沒有單位相關錯誤；每日跑 I2、I4、I9 為 0 | 退回第 2 階段的程式（舊欄一直同步） |
+| 4 | 開放小數：兩位小數帳本的輸入、兩位顯示、fold 與換算保留到分、CSV 小數；**JS 開始送 `amountMinor`**；改 §1 表中的 spec 句子（`csv-import-design.md` 除外，另開票） | 第 3 階段部署後，超過 Vercel Skew Protection 的保留時間（未知，附錄 A Q8；若沒開則不用等）且滿 D9 的等待期；I2、I4、I9 為 0；**舊程式寫入的痕跡為 0**（§3.5 的 trigger 補值紀錄，第 3 階段部署之後沒有新的）；**有放行留言**（§3.6）；Ray 指定時間 | 一段期間內沒有回報；R1、R2 都演練過（R2 含 §3.8 的前後對帳） | R1 關開關；R2 退回第 3 階段之前的程式（§3.8） |
+| 5 | 收尾：停寫舊欄、刪舊欄與 trigger；**保留**入口的顯示單位契約（§5.5） | Ray 確認不再需要 R2（D12 已決定 (b) 先不刪，所以這一階段目前不做） | 回歸測試 | **不可逆**：只能從每日備份還原，最多掉一天 |
+
+規模：**大**（第 3 階段跨數十個檔；第 2 階段動 prod 資料）。
+
+里程碑建議：
+- **v1.10.1 放得進**（Ray 2026-11-20 已決定 D9）：第 0、1 階段。理由：不動資料、不改畫面上的金額、可以單獨回退；第 0 階段直接修掉 #1920 回報的「多記 10 倍」。
+- **v1.10.1 放不進**（同上）：第 2 階段起，第 2～4 階段之後的版本再做，第 5 階段見 D12（目前決定不做）。理由：v1.10.1 的主題是商店文案與殼發版（milestone 說明），且第 2 階段要先有附錄 A 的答案與 dev 演練、第 3 階段需要獨立驗證、第 4 階段需要等待期。第 2～4 階段的確切版號與第 3 階段觀察期（建議至少一週）等排進版本時再定；**回填時段待 Ray 指定**（D9），沒有指定之前不跑回填。
+
+---
+
+## 8. Ray 的決定與待決事項
+
+### 已決定（Ray 2026-11-20 回「這建議」）
+
+Ray 在 2026-11-20 對下面 6 項的建議回了「這建議」，日期 2026-11-20。選的是各項表格裡標「建議」的那一個。
+
+| # | Ray 的決定 | 依據 | 這份文件裡落在哪 |
+|---|---|---|---|
+| D5 | **B：雙欄＋同一組 trigger**。舊欄維持整數元，新增 `*_minor`；舊 JS 讀舊欄、新 JS 讀新欄；DB trigger 保證兩欄同步 | Ray 11/20 回「這建議」 | §4.2–§4.5、§3.5 |
+| D4 | **(a) 只轉高可信度**，其餘保留原值、畫面同今天；第 2 階段之後才關的章節由 trigger 凍結幣別，不受影響 | Ray 11/20 回「這建議」 | §3.2、§3.3；附錄 A Q2、Q3 不再決定 D4 |
+| D7 | **(c) 切換前的列沿用舊進位單位，包含旅行**（結束旅行當下決定單位） | Ray 11/20 回「這建議」 | §5.3 |
+| D9 | **第 0、1 階段進 v1.10.1；第 2～4 階段之後的版本再做**（建議的版本分組與第 3 階段觀察期至少一週一併採用，確切版號排版本時再定）。**回填時段：待 Ray 指定，沒有填** | Ray 11/20 回「這建議」；時段是 Ray 沒有指定的部分 | §3.5 回填「時段」、§7 |
+| D12 | **(b) 先不刪舊欄**，一直保留，隨時可以退程式 | Ray 11/20 回「這建議」 | §7 第 5 階段、§3.8 |
+| D13 | **(a) 擋下**：小數位數變小而目前章節有除不盡的列時，沿用 `base_currency_locked` 擋下改 base | Ray 11/20 回「這建議」 | §3.5 ③；文案要走 needs-copy（見「後續」，本份不寫字串、不開票） |
+
+**仍待 Ray**：D9 的回填時段。**附錄 A 的 Q1–Q8 先不查，進第 2 階段前再請 Ray 授權。**
+
+### 選項與理由
+
+下表是原本的選項與建議，已決定的 6 項保留當作**放棄選項的紀錄**；D2、D6、D1、D3、D8、D10、D11 **尚未決定**，「Ray 沒回時的預設」欄照舊。依審查建議的順序排。「技術門檻」欄是不論 Ray 怎麼選都必須先做到的事。
+
+| # | 問題 | 選項 | 建議 | Ray 沒回時的預設 | 技術門檻 |
+|---|---|---|---|---|---|
+| D5 | **（已決定 B）** 新舊版並存方案（§4.2） | A 就地 ×100＋Realtime 隔離／B 雙欄／C 硬切 | **B** | B | 舊 JS 讀不到最小單位（B 由欄名保證） |
+| D4 | **（已決定 (a)）** 幣別不確定的歷史資料（§3.2、§3.3） | (a) 只轉高可信度，其餘保留原值、畫面同今天 (b) 中可信度也轉（已結束章節的出遊 `fold_amount`、匯率量級都只算中，證據會過期） (c) 請使用者確認（要新畫面與文案） (d) 未知數不是 0 就延後整案 | **(a)**：不猜、不比今天差；之後有證據再補轉。第 2 階段之後才關的章節由 trigger 凍結幣別（高），不受這題影響 | (a) | 未知範圍的新欄必須是 NULL（I3） |
+| D7 | **（已決定 (c)）** 兩位小數帳本切換前的分帳尾差（§5.3） | (a) 照新規則重算 (b) 系統結算抵銷 (c) 切換前的列沿用舊進位單位（包含旅行：結束旅行當下決定單位，§5.3） | **(c)**：balance 一分不差，不加紀錄 | (c) | 選 (a) 前先看附錄 A Q4；選 (c) 時 `split_round_unit` 是 NULL ＝ 舊程式寫的，trigger 一律補 10^p（不看第 4 階段的開關） |
+| D9 | 里程碑、觀察期、回填時段（**已決定**，回填時段待 Ray 指定） | — | 0、1 進 v1.10.1；2、3 一個小版；4 再下一版。第 3 階段觀察期至少一週；回填避開 15:00–16:45 UTC 與每月 1 日 | 同建議，時段由 Ray 指定 | 第 4 階段前 Skew Protection 保留期已過 |
+| D12（新） | **（已決定 (b)）** 第 5 階段（刪舊欄）什麼時候做 | (a) 第 4 階段後一個版本週期 (b) 不刪，一直保留 | (b) 先不刪：舊欄只多一點儲存，換到的是隨時可以退程式 | (b) | 刪之前確認不再需要 R2 |
+| D13（新） | **（已決定 (a)）** 改幣別時，「小數位數變小（例如 USD → TWD）、而目前章節有新欄除不盡 10^Δ 的列」要怎麼辦（§3.5）。改 base 的重縮放規則本身不是選項：一律從新欄算，p 不變不動、p 變大 × 10^Δ、p 變小 ÷ 10^Δ。這題只管最後一種裡「除不盡」的列（定期規則、待確認卡、旅行支出、愛物購入價，第 4 階段之後才會出現） | (a) 擋下，沿用 `base_currency_locked`（文案見「後續」） (b) 不擋，四捨五入 ÷ 10^Δ，小數掉了 | (a)：四捨五入會掉小數，而且不會報錯 | (a) | p 不變或變大一律放行，不受 D13 影響 |
+| D2 | 旅行自由文字幣別（VND、EUR…）的小數位數 | (a) 不在表中的一律 0，舊資料不動 (b) 照 ISO 4217 建表並轉換舊資料 | (a)：先只處理主帳本四個幣別 | (a) | — |
+| D6 | 愛物與保險的金額欄要不要一起轉 | (a) 一起轉 (b) 維持整數元，用另一個格式化函式 | (a)：同一個格式化函式、同一條規則 | (a) | 用 `bigint`（保險、愛物沒有上限） |
+| D1 | 四個幣別的小數位數 | 照 §2 表／其他 | 照表 | 照表 | — |
+| D3 | 輸入超過小數位數（`12.345`、TWD 打 `.`） | (a) 打不進去 (b) 四捨五入 (c) 顯示錯誤 | (a)；若要提示文字，另開 needs-copy 並確認 UX | (a) | 第 0 階段的「整筆拒絕」不論選哪個都要做 |
+| D8 | 匯率精度 `numeric(10,3)` | 放寬／維持 | 另開票評估，不擋本案 | 維持，另開票 | — |
+| D10 | 快速記帳 URL／捷徑 API 的金額單位 | (a) 維持顯示單位 (b) 改最小單位 | (a)（§5.5） | (a) | — |
+| D11 | 以後加幣別的規則 | — | 加列時同時定小數位數；有資料後不可改 | 同建議 | — |
+
+---
+
+## 驗收（第 4 階段完成後）
+
+- USD 帳本輸入 `12.50`：`amount_minor` 存 1250、顯示 $12.50；`amount` 存 13。TWD 帳本打不進 `.`，`1000` 存 1000、顯示 NT$1,000。
+- 回填前記的 USD $45 顯示 $45.00（`amount_minor` 4500，`amount` 仍是 45）。
+- 回填當下，每本兩位小數帳本 `balance_minor = balance × 100`（採 D7 (c)）。
+- 舊 JS（第 3 階段前載入）收到 Realtime 的 balance 更新：顯示整數元；每筆差一兩元以內、加總隨筆數累積（§5.3），不會出現 100 倍。
+- 舊 JS 送 `{ amount: 45 }` 到 USD 帳本：存 4500。舊 JS 編輯一筆 $12.50 的列（送回 `amount: 13`）：新欄仍是 1250（§4.1）。
+- **共存期的每條寫入路徑**（§4.5 矩陣的每一列）用舊程式演練後，I2、I3、I9 為 0；舊程式改 base 後，定期規則、待確認卡、旅行支出、愛物購入價的新欄隨之重縮放，`GroupEpochs.currency` 等於新 base。
+- 舊的 USD 出遊（金額已是分）經回填或 trigger 後，新欄等於舊欄、沒有被乘 100。
+- 結束旅行：第 3 階段結束的結果與今天相同；第 4 階段後結束的旅行 u = 1（§5.3）。
+- `BalanceHero` 的 balance 與 pending delta 是同一單位；離開帳本的零檢查讀 `balance_minor`（§3.7）。
+- 新程式的寫入與關章節同時進行：兩個順序都沒有 40P01，且「編輯完成或被拒絕」符合預期（附錄 B #17，含對照組）。
+- 舊程式編輯與改 base 搶同一列、定期規則排程與改 base 交錯：兩個順序提交後新欄都等於「新 base 下的舊欄 × 10^p」，I2 為 0（附錄 B #14、#24，含對照組）。
+- 回填不蓋掉任何 `closed_snapshot` 章節，I8 (d)(e) 為 0（附錄 B #25，含對照組）。
+- 階段切換都有放行留言（§3.6「誰裁定、誰放行」）。
+- 捷徑送 `{"amount": 120}`，確認到 USD 帳本：存 12000、顯示 $120.00。
+- USD 帳本匯出 CSV 再匯入同一個帳本，支出與收入的金額原樣回來（到分）。
+- 幣別未知的過去章節，顯示與今天完全相同。
+- grep 不到繞過格式化函式直接 `toLocaleString` 的金額。
+
+## 不做的事
+
+- 不改 `numeric`。
+- 不支援以 `,` 當小數點的語系。
+- 不做本檔以外的幣別新增。
+- 推播、email 不含金額，不處理。
+- 不轉換捷徑待處理表（§5.5）。
+- 不猜幣別不確定的歷史資料（§3.3）。
+
+## 後續（不在本案）
+
+- 過去章節的幣別標示：未知章節今天用目前幣別的符號，是既有缺口（`csv-export-design.md:106`）。要不要改成標「幣別未確認」需要新文案，另開票。
+- 請使用者確認過去章節幣別的畫面（D4 (c)）。
+- 匯率精度（D8）。
+- 去重 hash 實作時用最小單位（§5.6）。
+- `csv-import-design.md:117` 的「拒收 `1.50`」與程式（四捨五入，`lib/csvImport/mapper.ts:78-89`）不一致，需要另開票修那句；本案不動那個檔（§1、§5.6）。
+- 改幣別被擋下時的 `base_currency_locked` 文案只講「已有紀錄」（四個語系，例如 `lib/i18n/locales/zh-TW.ts:7820`），對「有定期規則或旅行」不貼切；D13 已決定 (a)，所以文案之後要走 needs-copy（四個語系），本份不寫字串、也不開票。
+
+---
+
+## 附錄 A：需要 prod 唯讀查詢的問題
+
+**狀態（Ray 2026-11-20）：Q1–Q8 先不查，進第 2 階段前再請 Ray 授權。** 在那之前這一節只是問題清單，沒有任何一條跑過。
+
+**規則**：只 `SELECT`；只回傳級距或真／假，不輸出帳本 id、使用者、絕對金額；連線方式與誰去查由 Paula 決定，本檔不寫。下面的 SQL **沒有在任何 DB 上跑過**，欄位名以 `lib/db/schema.ts` 為準，執行前要先在 dev 跑一次確認語法。查不到某個組合時那一列不會出現，代表 0。
+
+| # | 要查什麼 | 為什麼 | 答案會怎麼改變設計 |
+|---|---|---|---|
+| Q1 | 兩位小數帳本有幾本（級距） | 決定整案的急迫性與第 2 階段的回填量 | 0 本：第 2～4 階段只為新帳本鋪路，可以延後；很多本：觀察期加長 |
+| Q2 | 有已結束章節、且章節內有任何金額列的帳本，依「目前的小數位數」分組 | P1-2 的範圍 | 兩組都是 0：D4 不用決定；不是 0：照 §3.3 處理，看 Q3 |
+| Q3 | 上述章節的證據種類分布，以及證據顯示的小數位數與目前是否不同 | 判斷有多少章節只有中可信度的證據可參考。**證據只是統計，不是轉換依據**（§3.2：`fold_amount` 會過期） | 「沒有證據」很多：D4 (c) 的價值變高；「證據與目前不同」不是 0：反方向的問題真的存在；`outing_fold` 很多：D4 (b) 的誘因變大，但 (b) 仍要 Ray 決定 |
+| Q4 | 兩位小數帳本若用新規則全部重算（D7 (a)），balance 差額的分布；目前已結清的帳本中有多少會出現差額 | D7 | 差額全是 0 或很小：(a) 也可以接受；有結清帳本會跳動：維持建議 (c) |
+| Q5 | 保險、愛物金額欄 ×100 後超過 int4 的筆數（0 或非 0） | 確認 `bigint` 是必要還是保險 | 不影響建議（仍用 `bigint`），只決定測試資料要不要涵蓋 |
+| Q6 | 兩位小數帳本有沒有定期規則、旅行支出、愛物購入價、USD／CNY 保單、CNY 出遊；旅行原幣代碼的種類 | D6、D2、D13 的範圍 | 某類是 0：該類可以晚一點做 |
+| Q7 | PostHog `base_currency_changed` 事件總數的級距（不分使用者） | 改幣別常不常見 | 很少：未知章節的問題小 |
+| Q8 | Vercel 專案的 Skew Protection 有沒有開、保留多久（看設定，不是 SQL） | 第 4 階段的等待時間 | 沒開：第 4 階段不用等這一項 |
+
+```sql
+-- 共用的級距寫法：CASE WHEN n = 0 THEN '0' WHEN n < 10 THEN '1-9' WHEN n < 100 THEN '10-99' ELSE '100+' END
+
+-- Q1：各小數位數的帳本數
+WITH c AS (
+  SELECT CASE WHEN base_currency IN ('usd','cny') THEN 'p2' ELSE 'p0' END AS cls, count(*) AS n
+    FROM "OikosGroups" GROUP BY 1
+)
+SELECT cls, CASE WHEN n = 0 THEN '0' WHEN n < 10 THEN '1-9' WHEN n < 100 THEN '10-99' ELSE '100+' END AS ledgers
+  FROM c;
+
+-- Q2 + Q3：已結束、且有金額列的章節，依目前小數位數 × 證據種類（含已刪除列）
+WITH closed AS (
+  SELECT e.id, e.group_id, e.started_at, e.ended_at,
+         CASE WHEN g.base_currency IN ('usd','cny') THEN 'p2' ELSE 'p0' END AS now_cls
+    FROM "GroupEpochs" e JOIN "OikosGroups" g ON g.id = e.group_id
+   WHERE e.ended_at IS NOT NULL
+), with_rows AS (
+  SELECT c.* FROM closed c
+   WHERE EXISTS (SELECT 1 FROM "CashTransactions" t   WHERE t.group_id = c.group_id AND t.created_at >= c.started_at AND t.created_at < c.ended_at)
+      OR EXISTS (SELECT 1 FROM "IncomeTransactions" t WHERE t.group_id = c.group_id AND t.created_at >= c.started_at AND t.created_at < c.ended_at)
+      OR EXISTS (SELECT 1 FROM "Settlements" t        WHERE t.group_id = c.group_id AND t.created_at >= c.started_at AND t.created_at < c.ended_at)
+      OR EXISTS (SELECT 1 FROM "Trips" tr   WHERE tr.epoch_id = c.id)
+      OR EXISTS (SELECT 1 FROM "Outings" o  WHERE o.epoch_id = c.id)
+), ev AS (
+  SELECT w.now_cls,
+         CASE
+           WHEN EXISTS (SELECT 1 FROM "Outings" o WHERE o.epoch_id = w.id AND o.fold_amount IS NOT NULL) THEN 'outing_fold'
+           WHEN EXISTS (SELECT 1 FROM "Outings" o WHERE o.epoch_id = w.id) THEN 'outing_other'
+           WHEN EXISTS (SELECT 1 FROM "CashTransactions" t WHERE t.group_id = w.group_id
+                          AND t.created_at >= w.started_at AND t.created_at < w.ended_at
+                          AND t.original_currency IS NOT NULL) THEN 'rate'
+           ELSE 'none'
+         END AS evidence,
+         (SELECT bool_or(o.currency IN ('usd','cny')) FROM "Outings" o WHERE o.epoch_id = w.id) AS outing_says_p2
+    FROM with_rows w
+)
+SELECT now_cls, evidence,
+       CASE WHEN outing_says_p2 IS NULL THEN 'n/a'
+            WHEN outing_says_p2 = (now_cls = 'p2') THEN 'same' ELSE 'differs' END AS outing_vs_now,
+       CASE WHEN count(*) < 10 THEN '1-9' WHEN count(*) < 100 THEN '10-99' ELSE '100+' END AS epochs
+  FROM ev GROUP BY 1, 2, 3;
+-- 未查證：fold_amount 是否只在真的 fold 出結算時才非 NULL（淨額為 0 時的行為）。
+-- 已查證：刪除結算只設 deleted_at、不清 fold_amount（actions/settlement.ts:74-89），所以 outing_fold 只代表「曾經 fold 過」，
+-- 不代表該章節現存的列是那個幣別（§3.2）。
+
+-- Q4：D7 (a) 的差額分布（與 lib/db/queries/balance.ts:70-115 同條件，改成以分計算）
+WITH g AS (
+  SELECT id, member_a, current_epoch_started_at FROM "OikosGroups"
+   WHERE base_currency IN ('usd','cny') AND member_b IS NOT NULL
+), cash AS (
+  SELECT t.group_id,
+         SUM(CASE WHEN t.paid_by = g.member_a THEN 1 ELSE -1 END *
+             CASE t.split_type
+               WHEN 'all_mine'   THEN 0
+               WHEN 'all_theirs' THEN t.amount::bigint * 100
+               WHEN 'half'       THEN CEIL(t.amount::bigint * 100 / 2.0)
+               WHEN 'weighted'   THEN CEIL(t.amount::bigint * 100
+                                      * (CASE WHEN t.paid_by = g.member_a THEN 100 - t.split_ratio_a ELSE t.split_ratio_a END) / 100.0)
+             END) AS new_minor
+    FROM "CashTransactions" t JOIN g ON g.id = t.group_id
+   WHERE t.deleted_at IS NULL AND t.status = 'settled' AND t.created_at >= g.current_epoch_started_at
+   GROUP BY t.group_id
+), st AS (
+  SELECT s.group_id, SUM(CASE WHEN s.paid_by = g.member_a THEN 1 ELSE -1 END * s.amount::bigint * 100) AS new_minor
+    FROM "Settlements" s JOIN g ON g.id = s.group_id
+   WHERE s.deleted_at IS NULL AND s.created_at >= g.current_epoch_started_at
+   GROUP BY s.group_id
+), d AS (
+  SELECT gb.balance::bigint * 100 AS old_minor,
+         COALESCE(c.new_minor, 0) + COALESCE(st.new_minor, 0) AS new_minor
+    FROM g JOIN "GroupBalance" gb ON gb.group_id = g.id
+    LEFT JOIN cash c ON c.group_id = g.id
+    LEFT JOIN st ON st.group_id = g.id
+)
+SELECT (old_minor = 0) AS settled_now,
+       CASE WHEN new_minor = old_minor THEN '0'
+            WHEN abs(new_minor - old_minor) <= 100  THEN '1-100 分'
+            WHEN abs(new_minor - old_minor) <= 1000 THEN '101-1000 分'
+            ELSE '1000 分以上' END AS diff,
+       CASE WHEN count(*) < 10 THEN '1-9' WHEN count(*) < 100 THEN '10-99' ELSE '100+' END AS ledgers
+  FROM d GROUP BY 1, 2;
+
+-- Q5：×100 後超過 int4（只回答 0 或非 0）
+SELECT 'insurance' AS what,
+       CASE WHEN count(*) = 0 THEN '0' ELSE '1+' END AS rows_over
+  FROM "InsuranceDetails" i
+ WHERE i.currency IN ('usd','cny')
+   AND greatest(coalesce(i.sum_insured,0), coalesce(i.coverage_amount,0), coalesce(i.annual_premium,0),
+                coalesce(i.expected_maturity_amount,0), coalesce(i.account_value,0))::bigint * 100 > 2147483647
+UNION ALL
+SELECT 'car_house_price', CASE WHEN count(*) = 0 THEN '0' ELSE '1+' END
+  FROM (SELECT purchase_price AS v FROM "CarDetails" UNION ALL SELECT purchase_price FROM "HouseDetails") x
+ WHERE x.v::bigint * 100 > 2147483647;
+
+-- Q6：兩位小數帳本的各類金額列有沒有（只回答 0 或非 0）；旅行原幣代碼種類
+SELECT 'recurring_expense' AS what, CASE WHEN count(*) = 0 THEN '0' ELSE '1+' END AS present
+  FROM "RecurringExpenseRules" r JOIN "OikosGroups" g ON g.id = r.group_id WHERE g.base_currency IN ('usd','cny')
+UNION ALL
+SELECT 'recurring_income', CASE WHEN count(*) = 0 THEN '0' ELSE '1+' END
+  FROM "RecurringIncomeRules" r JOIN "OikosGroups" g ON g.id = r.group_id WHERE g.base_currency IN ('usd','cny')
+UNION ALL
+SELECT 'trips', CASE WHEN count(*) = 0 THEN '0' ELSE '1+' END
+  FROM "Trips" tr JOIN "OikosGroups" g ON g.id = tr.group_id WHERE g.base_currency IN ('usd','cny')
+UNION ALL
+SELECT 'insurance_usd_cny', CASE WHEN count(*) = 0 THEN '0' ELSE '1+' END
+  FROM "InsuranceDetails" i WHERE i.currency IN ('usd','cny')
+UNION ALL
+SELECT 'cny_outings', CASE WHEN count(*) = 0 THEN '0' ELSE '1+' END
+  FROM "Outings" o WHERE o.currency = 'cny';
+
+SELECT upper(te.original_currency) AS code,
+       CASE WHEN count(*) < 10 THEN '1-9' WHEN count(*) < 100 THEN '10-99' ELSE '100+' END AS rows
+  FROM "TripExpenses" te WHERE te.original_currency IS NOT NULL GROUP BY 1;
+```
+
+## 附錄 B：dev 演練的假資料情境
+
+第 2 階段的回填與第 3、4 階段的程式，先在 dev 用假資料跑完以下情境，§3.6 的 I1–I9 全部成立、畫面截圖只在「預期改變」的地方不同，才進 prod。#14–#25 要用**舊程式**（第 3 階段之前的 build）實際寫入：新舊 build 各起一份、連同一個 dev DB，不是用新程式模擬。
+
+**要停在交易中間的演練（#14、#17、#24）**：app 的 action 沒辦法停在交易中間，所以「等待的一方」用舊 build 實際送出，「持鎖的一方」用 psql 照**同一串語句**手動執行並不提交，等「等待的一方」確實卡住（`pg_stat_activity` 看到 `wait_event_type = 'Lock'`）才讓持鎖的一方提交。結果只看提交之後的值與錯誤碼。順序不是靠睡眠湊的，是靠「看到卡住」確定的。
+
+| # | 情境 | 預期 |
+|---|---|---|
+| 1 | TWD 帳本、只有目前章節 | 新欄＝舊欄；畫面不變 |
+| 2 | USD 帳本、只有目前章節，含平分 $45 與依比例 33% 的 $10 | 新欄 ×100；`balance_minor = balance × 100`（D7 (c)）；畫面不變（第 3 階段）／顯示兩位（第 4 階段，預期改變） |
+| 3 | 目前 USD、過去章節 TWD，章節內只有收入與結算 | 過去章節未知，新欄 NULL，畫面同今天 |
+| 4 | 目前 TWD、過去章節 USD（第 2 階段之前結束），章節內有 fold 出來的 USD 出遊結算 | 過去章節 `unknown`、新欄 NULL，畫面同今天：fold 證據只算中可信度（§3.2），D4 (a) 不轉；D4 (b) 才會轉 |
+| 5 | 目前章節有已刪除的舊幣別列（刪光後改幣別） | 已刪除列新欄 NULL；畫面不變 |
+| 6 | USD 帳本有定期規則與待確認卡，回填當天 16:00 UTC 排程照常跑 | 卡的兩欄一致；I2 成立 |
+| 7 | 回填中途同一帳本有寫入 | 寫入等鎖；新列由程式或 trigger 填新欄；I7 成立；回填撞到 40P01 時只回滾那一本、重跑成功 |
+| 8 | 舊伺服器程式（第 2 階段前的 build）寫入一筆現金帳 | trigger 補新欄＝舊欄 × 10^p、`split_round_unit` ＝ 10^p |
+| 9 | 舊 JS 開著，另一邊記一筆 $12.50（第 4 階段） | 舊 JS 的 balance 顯示整數元；每筆差一兩元以內、加總隨筆數累積；沒有 100 倍 |
+| 10 | 月度快照跨章節的月份 | 未知章節的 jsonb 沒有 `amountMinor` |
+| 11 | 保險 USD 保單金額接近上限 | 新欄 `bigint` 不溢位；I6 成立 |
+| 12 | R2：第 4 階段後退回舊程式，編輯一筆整數列、一筆小數列，再部署回新程式；退回前、後、再部署前各跑一次 I2 | 整數列正確；小數列小數掉了（已知限制，§3.8）；每次 I2 的結果與 §3.8 的 R2 對帳一致 |
+| 13 | 第 2 階段**之後**才關的章節；另一份是「刪光帳（含 fold 結算）→ 改幣別 → 記新帳 → 關章節」（P2-5 的反例） | 兩份都由關章節 trigger 寫 `closed_snapshot` ＋關章節當下的 base；後者的出遊幣別與章節幣別不同，I8 報告差異，裁定以快照為準（§3.6） |
+| 14 | **舊程式編輯與改 base 搶同一列（兩個順序都跑，審查 P2-c）**。起點：TWD 帳本，一條定期規則（舊欄 500、新欄 500），第 2 階段後、第 3 階段前（全部流量都是舊伺服器程式）。連線 A ＝ 舊程式編輯規則（`UPDATE amount` 500 → 800）；連線 B ＝ 舊程式改 base TWD → USD。**順序一（改 base 先拿到列鎖）**：B 做完 ③ 的 UPDATE、不提交；A 送出 UPDATE，等在規則列的列鎖上；提交 B。**順序二（舊 UPDATE 先拿到列鎖）**：A 的 UPDATE 已經跑過 ②、不提交；B 改 base，③ 等在規則列的列鎖上；提交 A | 兩個順序提交後都是：base ＝ `usd`；`amount` ＝ 800、`amount_minor` ＝ 80000；開放中章節的 `currency` ＝ `usd`；I2、I9 為 0；沒有 40P01。**失敗的樣子**：`amount_minor` ＝ 800（② 用舊 base 算）或 50000（③ 對過期版本重縮放、蓋掉編輯）＝ READ COMMITTED 重新評估的假設不成立，**不進第 2 階段**（§3.6 停止條件）。同一組兩個順序，再用「愛物購入價」（舊欄 500 → 800）跑一次。另跑一個沒有搶的基本版：USD 帳本，規則舊欄 500 → 800，新欄 80000，待確認卡兩欄一致 |
+| 15 | 舊程式改 base，p 變大：TWD → USD，帳本有定期規則、待確認卡、目前章節的旅行支出、愛物購入價 | 這些列的新欄 ×100、舊欄不動；`GroupEpochs.currency` ＝ usd；保單與旅行預算（有自己的幣別欄）不動；I2 為 0 |
+| 16 | 舊程式改 base，p 變小：USD → TWD。三種：規則金額整除（$12.00）／不整除（$12.50，R2 情境）／有新程式的 `setBaseCurrency` 擋下 | 整除：新欄 ÷ 100、舊欄不動。不整除：新程式被 D13 擋下（`base_currency_locked`）；舊程式（R2）由 trigger 四捨五入，小數掉了，列入 §3.8 的已知限制 |
+| 17 | 死結演練（P2-2；審查 P2-c 重寫）。連線 A ＝ 關章節：帳本列 `FOR NO KEY UPDATE`，再章節列 `FOR NO KEY UPDATE`（`lockForEpochClose`，`lib/db/queries/epoch.ts:621-654`）。連線 B ＝ 新程式編輯一筆現金帳：帳本列 `FOR KEY SHARE`，再章節列 `FOR SHARE`（`lockOpenEpochForWrite`，`:926-935`）。**正向組 V1（B 先持有閘門與章節列）**：B 持有兩把鎖、不提交；A 送出，帳本列拿得到（`KEY SHARE` 與 `NO KEY UPDATE` 不衝突），等在章節列；提交 B。**正向組 V2（A 先持有兩把）**：A 持有兩把、不提交；B 送出，帳本列拿得到，等在章節列；提交 A。**對照組**：**鎖的種類與順序一起改**：B 改成先章節列 `FOR SHARE`、再帳本列 `FOR SHARE`，照 V1 的交錯跑。另跑兩個單一變因的對照：只改鎖的種類（B 先帳本列 `FOR SHARE`、再章節列）、只改順序（B 先章節列、再帳本列 `FOR KEY SHARE`） | **兩項分開記**：「有沒有 40P01」與「編輯有沒有完成」。V1：沒有 40P01；B 的編輯完成；A 在 B 提交後關章節。V2：沒有 40P01；B 的編輯**被拒絕**（`lockOpenEpochForWrite` 回 `null`，編輯 action 以清楚的錯誤失敗），舊列沒被改。**對照組：出現 40P01**（A 等章節列、B 等帳本列，成環），證明這個演練抓得到這個環。**兩個單一變因的對照：不會 40P01**（`FOR KEY SHARE` 與 `NO KEY UPDATE` 不衝突；鎖序相同就不成環），所以只改其中一項不能當對照 |
+| 18 | 舊程式在途的旅行支出編輯，同時另一連線改 base（§3.5 的殘餘風險） | 其中一邊 40P01、可重試、重試後成功；沒有資料不一致；新程式因閘門在最前面，換成新程式重跑時不會出現 |
+| 19 | 出遊三表與 `fold_amount`：一個 USD 出遊（金額已是分）、一個 CNY 出遊（整數元），分別用回填、舊程式 INSERT／UPDATE 寫入 | USD：新欄＝舊欄（不被乘 100）；CNY：新欄＝舊欄 × 100；`fold_amount` 同；I2 用 `Outings.currency` 驗算為 0（P2-1） |
+| 20 | 結束旅行：第 3 階段結束、第 4 階段後結束、記帳在開關前但結束在開關後 | 摘要列的 `split_round_unit` 依序為 10^p、1、1；摘要列的分攤與 balance 函式一致；第一種的結果與今天相同（P2-9） |
+| 21 | 舊 JS（第 3 階段前載入）在第 4 階段後編輯一筆 $12.50（送回 `amount: 13`），以及改成別的整數 | 前者新欄仍是 1250；後者新欄 ＝ 整數 × 100（P2-4） |
+| 22 | 兩位小數帳本有待確認卡，首頁切到「含待確認」 | `BalanceHero` 的 balance 與 pending delta 都是最小單位；離開帳本的零檢查讀 `balance_minor`（P2-3） |
+| 23 | 舊程式 `recalcGroupBalance`（只寫 `balance`）寫入後 | GroupBalance trigger 重算 `balance_minor`；I4 為 0 |
+| 24 | **排程與舊程式改 base 交錯（兩個順序都跑，審查 P2-a）**。起點：TWD 帳本，規則（舊欄 500、新欄 500）已到期。排程函式用 psql 呼叫（第 2 階段 migration 改好的版本）；改 base 用舊 build 的 `setBaseCurrency`（`actions/currency.ts:35-57`）。**順序一**：psql B `BEGIN`、帳本列 `FOR UPDATE`、改 base 為 USD（③ 重縮放規則），不提交；呼叫排程函式，卡在 (i) 的 `FOR KEY SHARE`；提交 B。**順序二**：psql 在 `BEGIN` 裡執行排程函式、不提交；舊 build 送出改 base，卡在 `FOR UPDATE`；提交排程。收入、支出兩個排程各跑一次 | 兩個順序都是：base ＝ `usd`；規則（500、50000）；新產生的卡（500、50000）；I2 為 0；沒有 40P01。**對照組**：順序一用舊的單一 `INSERT … SELECT`（`drizzle/0064_recurring_cron_taipei_date.sql:65-82`、`:90-111`）重跑，卡是（500、500），I2 不為 0，證明沒有排序規則就會出這個錯 |
+| 25 | **回填不蓋關章節快照（審查 P2-b）**。(a) 第 2 階段 migration 套用後、回填還沒輪到這一本帳之前，關一個章節；(b) 回填之後關一個章節，再把整個回填重跑一次（I7）；(c) 回填跑到一半（持有帳本列 `FOR UPDATE`）時送出關章節請求。另跑一份：目前章節是空的，先改 base 再關章節 | 三種都是：被關的章節仍是 `closed_snapshot`，`currency` ＝ 關閉當下的 base；I8 (d)(e) 為 0；第 2 階段之前結束的章節仍是 `unknown`、`currency` 為 NULL；(c) 的關章節等回填提交後才進行，寫成 `closed_snapshot`。**對照組**：把回填步驟 2 的 `WHERE currency_source IS NULL` 拿掉重跑，已結束章節被蓋成 `unknown`，I8 (d) 或 (e) 不為 0，證明偵測抓得到「被蓋掉」 |
