@@ -55,6 +55,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：首頁的月回顧入口會用圓點提示有新回顧，點進去後圓點就會消失。
   技術：沿用月回顧橫幅的關閉動作記錄已讀，並用本地狀態立即隱藏圓點及更新無障礙標籤。
 
+### 技術變更
+
+- **iOS 1.10.0 商店文案更新腳本（#1900、#1903、#1937）**
+  使用者：無（商店頁文案要等 Ray 同意後才套用）。
+  技術：`scripts/og/asc-ios-1-10-0-metadata.mjs` 預設 dry-run；`--apply` 只改 copyright、四語 description 與 whatsNew。
+
 ## [1.10.0] - 2026-11-19
 
 主題：**官網說清楚「iPhone、Android 都有」**——桌機 App Store 入口、三步開始與常見問題、捷徑入口、拿掉 PWA 說法、上架短片、結算名稱多語。

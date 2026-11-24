@@ -1,0 +1,6 @@
+• The "Log with Shortcuts" guide in Settings is updated: it shows how to add "Add Entry to Futari" to a Wallet automation, so each Apple Pay payment opens New entry filled in and you check it before saving (requires iOS 17 or later)
+• The shortcuts guide now opens with a short animated walkthrough and keeps one Apple Pay route on the page; other ways are folded into "Other ways and reference"
+• Signing in with Apple for the first time now works even when Apple doesn't share your name or email; you can change your display name in Settings
+• Smoother Apple sign-in: no more occasional error page flashing after you sign in, and if the sign-in server can't be reached, you're asked to wait a moment and try again
+• Fixed: on pages you see before signing in, text no longer scrolls under the status bar
+• Fixed: when you end a trip, the settlement entry is now named in the language of the person who ended it, instead of always in Chinese

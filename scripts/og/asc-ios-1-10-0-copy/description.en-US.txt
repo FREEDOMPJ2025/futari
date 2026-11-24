@@ -1,0 +1,44 @@
+Futari is a shared ledger for two people.
+
+It isn't a budgeting app, and it doesn't grade your spending. The two of you note down everyday spending together, so who paid and how it splits is always clear. Look back a while later, and what you see is the life you've shared.
+
+Record together, see together
+・One ledger for both of you. Each of you adds entries, and you see the other's right away.
+・Choose how each entry splits: half and half, by ratio, all mine or all theirs.
+・See the balance at a glance. Who owes whom is worked out for you, and settling up is one step.
+・Start on your own and invite your partner later.
+
+Everyday money
+・Record expenses and income. Set up recurring ones, like rent or subscriptions, once.
+・When a recurring entry is due, the app lets you know, and it's added once you confirm it.
+・Trips: give a trip its own ledger, record in local currencies and convert at the rates you set.
+・Outings with friends: create an outing and share the link with the group. Friends open it in a browser and pick their name to add what they paid. No download or sign-up, up to 20 people. At the end, Futari shows who should pay whom, and the part between you two goes back into your main ledger.
+
+iPhone Shortcuts
+・Add the "Add Entry to Futari" action to a Wallet automation. After you pay with Apple Pay, the amount and merchant are filled in, and the entry opens for you to confirm.
+・The same store gets the category you picked last time.
+・You can also use a shortcut to send a purchase for you to confirm first. Only you can see it until you add it.
+
+Look back together
+・Monthly reviews: each month, last month's income and spending are gathered in one place, and you can leave a note for next month.
+・Category breakdowns and chapter history show where the money went and how the days went by.
+
+More than money
+・Aibutsu, the things you care for: home, car, kids, pets, plants. Keep them in the same ledger, with related expenses filed under each one automatically.
+・Log fuel for your car.
+・Insurance: protection and savings policies on separate tabs, with the insured, beneficiaries and renewal dates on one page.
+
+Moving from another app
+・Import an export file from another budgeting app, or a CSV. Files are read on your device, and the original file isn't uploaded.
+
+Peace of mind
+・Only your two accounts can open the ledger.
+・Connections are encrypted with HTTPS. Sensitive fields, such as a child's legal name or ID number, are encrypted again before they're stored.
+・Delete your account anytime in Settings.
+
+Free, with no ads. Works on iPhone, iPad, Android and the web, so you can share one ledger even on different phones.
+Available in English, Japanese, Traditional Chinese and Simplified Chinese.
+
+Two people, one ledger.
+
+Made by Kind of Lab

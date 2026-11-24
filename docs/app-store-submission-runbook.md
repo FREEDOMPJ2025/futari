@@ -446,6 +446,14 @@ GET /v1/appScreenshotSets/{id}/appScreenshots?fields[appScreenshots]=fileName,as
 > 2026-06 用手機拍的 `IMG_88xx.PNG`（1242×2688，6.5" 格），**不是** `docs/store-assets/`
 > 那組設計過的 1290×2796。「素材產出」不等於「已上傳」。動手前先用 API 或 Console 看實況。
 
+### I.1 iOS 1.10.0 文案腳本（#1900）
+
+`scripts/og/asc-ios-1-10-0-metadata.mjs` 寫 1.10.0 的 copyright 與四語 description／whatsNew，文案在 `scripts/og/asc-ios-1-10-0-copy/`，不要改。
+
+- `node scripts/og/asc-ios-1-10-0-metadata.mjs --self-check`：離線驗字數與 sha256。
+- `node scripts/og/asc-ios-1-10-0-metadata.mjs`：dry-run，只 GET，印現值→新值與將送出的 PATCH（需掛載 Futari Secrets）。
+- `--apply` 會寫入 ASC，要 Ray 同意才跑；版本不是 `PREPARE_FOR_SUBMISSION`、缺語系時會拒絕（exit 3）。
+
 ---
 
 ## J. 讓殼載非 prod 的 web（`CAP_SERVER_URL`）
