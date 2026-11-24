@@ -37,6 +37,7 @@ vi.mock('@capacitor-community/apple-sign-in', () => ({ SignInWithApple: { author
 import GlobalError from '@/app/global-error'
 import { SignInActions } from '@/app/[locale]/sign-in/SignInActions'
 import { isCancelledFetchError, isNavigatingAway, markNavigatingAway } from '@/lib/observability/navigatingAway'
+import { markAutoReload } from '@/lib/observability/autoReload'
 
 const FLAG = '__futariNavigatingAway'
 const g = globalThis as Record<string, unknown>
@@ -52,6 +53,7 @@ beforeEach(() => {
   signInWithIdToken.mockReset()
   authorize.mockReset()
   delete g[FLAG]
+  window.sessionStorage.clear()
   vi.spyOn(console, 'error').mockImplementation(() => {})
 })
 
@@ -108,7 +110,8 @@ describe('global-error while navigating away (#1768)', () => {
     expect(container.querySelector('h1')).not.toBeNull()
   })
 
-  it('reports a cancelled fetch when nobody is navigating away', async () => {
+  it('reports a cancelled fetch when nobody is navigating away and a reload already happened (#1948 guard)', async () => {
+    markAutoReload()
     const { container } = render(<GlobalError error={new TypeError('Load failed')} reset={() => {}} />)
     await waitFor(() => expect(capture).toHaveBeenCalledTimes(1))
     expect(container.querySelector('h1')).not.toBeNull()

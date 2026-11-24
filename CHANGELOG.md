@@ -47,6 +47,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   使用者：另一半加入後（或邀請人）再點同一條連結，不再看到「無法加入帳本」，會直接進帳本；不是成員的人仍看到「邀請連結已被使用」。
   技術：`validateInviteAcceptance` 在 `already_used` 之前先判成員；新增 server 事件 `invite_link_reopened_by_member`（不帶 token），已記入 conversion-analytics-design。
 
+- **從背景切回 App 時，連線中斷不再卡在錯誤頁（#1948）**
+  使用者：iOS App 回到前景那一刻網路剛好中斷時，會自動重新載入一次，不再停在「出了點問題」；網路還沒恢復就照舊顯示錯誤頁。
+  技術：`global-error` 遇到被取消的 fetch（`TypeError: Load failed`）且頁面沒在離開時，先空白 1 秒，探測 `/favicon.ico` 成功才 `reload()`，60 秒內最多一次（`lib/observability/autoReload.ts`）；仍照常回報 Sentry，多帶 `op=auto-reload`。
+
 - **月回顧還沒看過時，入口前加 accent 圓點（#1863）**
   使用者：首頁的月回顧入口會用圓點提示有新回顧，點進去後圓點就會消失。
   技術：沿用月回顧橫幅的關閉動作記錄已讀，並用本地狀態立即隱藏圓點及更新無障礙標籤。
