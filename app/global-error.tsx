@@ -6,6 +6,7 @@ import { globalErrorCopy, pickGlobalErrorLocale } from '@/lib/i18n/globalErrorCo
 import { reportClientError } from '@/lib/observability/reportClientError'
 import { sanitizeAnalyticsUrl } from '@/lib/analytics/urlSanitizer'
 import { isCancelledFetchError, isNavigatingAway } from '@/lib/observability/navigatingAway'
+import { canAutoReload, markAutoReload, networkReachable } from '@/lib/observability/autoReload'
 import './globals.css'
 // 根 layout 被整個取代，Fraunces 的 @font-face 與 `.font-fraunces`（定義 --font-fraunces）
 // 也要自己帶；少了它 `font-serif` 會靜默退回內文字體，不會報錯。
@@ -13,6 +14,8 @@ import './fonts/fraunces.css'
 
 /** How long a "navigating away" error page stays blank before it gives up and shows itself (#1768). */
 const LEAVING_GRACE_MS = 4000
+/** Network settle time before the #1948 probe + reload (iOS shell returning from the background). */
+const RECOVER_DELAY_MS = 1000
 
 export default function GlobalError({
   error,
@@ -43,8 +46,44 @@ export default function GlobalError({
     return () => clearTimeout(timer)
   }, [leaving])
 
+  // #1948 — the same cancelled fetch with nobody navigating away: an RSC stream
+  // that died mid-flight (iOS shell back from the background). Reset cannot
+  // recover it, a reload can, so stay blank, wait for the network to settle and
+  // reload once. If the network is still down, or a reload already happened in
+  // the last minute, fall through to the normal page. See lib/observability/autoReload.ts.
+  const [recovering, setRecovering] = useState(
+    () => !leaving && isCancelledFetchError(error) && canAutoReload(),
+  )
+
   useEffect(() => {
-    if (leaving) return
+    if (!recovering) return
+    let cancelled = false
+    const timer = setTimeout(() => {
+      void networkReachable().then((ok) => {
+        if (cancelled) return
+        if (!ok || !canAutoReload()) {
+          setRecovering(false)
+          return
+        }
+        // Still reported (op tag): the Sentry count must not hide that this path ran.
+        reportClientError(error, {
+          area: 'global-error',
+          route: sanitizeAnalyticsUrl(window.location.pathname) || undefined,
+          digest: error.digest,
+          op: 'auto-reload',
+        })
+        markAutoReload()
+        window.location.reload()
+      })
+    }, RECOVER_DELAY_MS)
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [recovering, error])
+
+  useEffect(() => {
+    if (leaving || recovering) return
     // reportClientError loads Sentry through a dynamic import (#1520): Next
     // lists this entry in every page's HTML, so a static Sentry import here put
     // the whole SDK back in the public pages' first load. The module is the same
@@ -62,11 +101,11 @@ export default function GlobalError({
       digest: error.digest,
     })
     setLocale(pickGlobalErrorLocale())
-  }, [error, leaving])
+  }, [error, leaving, recovering])
 
   const t = globalErrorCopy[locale]
 
-  if (leaving) {
+  if (leaving || recovering) {
     return (
       <html lang={locale} className="font-fraunces" suppressHydrationWarning>
         <body className="min-h-dvh bg-bg" />
