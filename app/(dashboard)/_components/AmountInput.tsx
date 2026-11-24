@@ -25,6 +25,24 @@ function caretForDigitCount(formatted: string, target: number): number {
   return formatted.length
 }
 
+/** Characters that would introduce a decimal fraction: ASCII `.`, fullwidth
+ *  `．`, ideographic `。` (JP IME) and halfwidth ideographic `｡`. */
+const DECIMAL_POINT_RE = /[.．。｡]/
+
+/**
+ * Turn the raw text of the input into the digit-only value, or `null` when the
+ * edit must be rejected and the previous value kept. Any decimal point (typed,
+ * pasted, fullwidth, IME) rejects the whole edit: dropping only the `.` would
+ * turn `12.5` into `125` (10x, #1920). Thousand separators are still stripped.
+ */
+export function parseAmountInput(raw: string, maxDigits: number): string | null {
+  if (DECIMAL_POINT_RE.test(raw)) return null
+  return raw
+    .replace(/[^0-9]/g, '')
+    .slice(0, maxDigits)
+    .replace(/^0+(\d)/, '$1')
+}
+
 interface AmountInputProps {
   /** Digit-only string ('', '0' to '9999999'). The component never sees
    *  commas — callers holding `number` state convert at the boundary. */
@@ -117,10 +135,8 @@ export function AmountInput({
           const raw = e.target.value
           const caret = e.target.selectionStart ?? raw.length
           const digitsBeforeCaret = countDigits(raw, caret)
-          const next = raw
-            .replace(/[^0-9]/g, '')
-            .slice(0, maxDigits)
-            .replace(/^0+(\d)/, '$1')
+          const next = parseAmountInput(raw, maxDigits)
+          if (next === null) return // decimal input: keep the previous value
           // Clamp to the surviving digit count (handles truncation / leading-zero strip).
           caretDigitsRef.current = Math.min(digitsBeforeCaret, next.length)
           onChange(next)
