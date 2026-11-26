@@ -1612,10 +1612,12 @@ export const en: Translations = {
     copied: 'Link copied',
   },
 
-  /** Settings row for Android-shell testers (#1648). Removed with #1553. */
-  testerFeedback: {
-    title: 'Send us feedback',
-    hint: 'Leave feedback on Google Play that only we can see',
+  appFeedback: {
+    feedbackTitle: 'Send feedback and wishes',
+    rateAppStore: 'Rate on the App Store',
+    ratePlay: 'Rate on Google Play',
+    copy: 'Copy',
+    noMailHint: 'No mail app is set up. Copy this address, then send the message yourself.',
   },
 
   currencyPage: {
