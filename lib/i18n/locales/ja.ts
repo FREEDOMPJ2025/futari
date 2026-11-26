@@ -1612,10 +1612,12 @@ export const ja: Translations = {
     copied: 'リンクをコピーしました',
   },
 
-  /** Settings row for Android-shell testers (#1648). Removed with #1553. */
-  testerFeedback: {
-    title: 'フィードバックを送る',
-    hint: 'Play ストアで、私たちだけに届くフィードバックを残せます',
+  appFeedback: {
+    feedbackTitle: 'フィードバックと願いを送る',
+    rateAppStore: 'App Store で評価',
+    ratePlay: 'Google Play で評価',
+    copy: 'コピー',
+    noMailHint: 'メールアプリが設定されていません。このアドレスをコピーして、自分で送信してください。',
   },
 
   currencyPage: {

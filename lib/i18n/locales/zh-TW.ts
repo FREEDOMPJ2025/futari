@@ -2122,11 +2122,13 @@ export type Translations = {
     copied: string
   }
 
-  /** Settings row for Android-shell testers (#1648): opens the Play listing,
-   *  where Play's private feedback lives. Temporary, removed with #1553. */
-  testerFeedback: {
-    title: string
-    hint: string
+  /** Feedback and rating rows for native shells (#1956). */
+  appFeedback: {
+    feedbackTitle: string
+    rateAppStore: string
+    ratePlay: string
+    copy: string
+    noMailHint: string
   }
 
   /** /settings/currency page — base currency only since v0.17.4 (#410).
@@ -5245,9 +5247,12 @@ export const zhTW: Translations = {
     copied: '連結已複製',
   },
 
-  testerFeedback: {
-    title: '給我們回饋',
-    hint: '在 Play 商店留下只有我們看得到的回饋',
+  appFeedback: {
+    feedbackTitle: '意見回饋與許願',
+    rateAppStore: '到 App Store 評分',
+    ratePlay: '到 Google Play 評分',
+    copy: '複製',
+    noMailHint: '尚未設定郵件 App。請複製這個地址，再自行寄出。',
   },
 
   currencyPage: {

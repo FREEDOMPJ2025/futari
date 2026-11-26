@@ -1607,10 +1607,12 @@ export const zhCN: Translations = {
     copied: '链接已复制',
   },
 
-  /** Settings row for Android-shell testers (#1648). Removed with #1553. */
-  testerFeedback: {
-    title: '给我们反馈',
-    hint: '在 Play 商店留下只有我们看得到的反馈',
+  appFeedback: {
+    feedbackTitle: '意见反馈与许愿',
+    rateAppStore: '到 App Store 评分',
+    ratePlay: '到 Google Play 评分',
+    copy: '复制',
+    noMailHint: '尚未设置邮件 App。请复制这个地址，再自行寄出。',
   },
 
   currencyPage: {

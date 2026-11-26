@@ -5,7 +5,7 @@ import { OfflineBrowsingToggle } from './OfflineBrowsingToggle'
 import { QuickAccessRow } from './QuickAccessRow'
 import { InstallGuideRow } from './InstallGuideRow'
 import { SupportRow } from './SupportRow'
-import { TesterFeedbackRow } from './TesterFeedbackRow'
+import { AppFeedbackRows } from './AppFeedbackRows'
 import { AndroidTesterInviteRow } from './AndroidTesterInviteRow'
 import { ShortcutsGuideRow } from './ShortcutsGuideRow'
 import { LogoutButton } from './LogoutButton'
@@ -63,14 +63,14 @@ export async function SettingsContent({
         partner={partner ? { displayName: partner.displayName, avatarUrl: partner.avatarUrl } : null}
       />
 
-      {/* 應用 — install + offline + support link (device/app-level prefs) */}
+      {/* 應用 — install, offline, support, feedback and rating */}
       <Section title={t.settings.sectionApp}>
         <InstallGuideRow />
         <div className="mt-3">
           <OfflineBrowsingToggle />
         </div>
         <SupportRow />
-        <TesterFeedbackRow />
+        <AppFeedbackRows appVersion={appVersion} locale={currentLocale} />
         <AndroidTesterInviteRow />
       </Section>
 
